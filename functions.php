@@ -51,12 +51,12 @@ function aws_sbg_enqueue_scripts() {
 	);
 
 	// Enqueue Tailwind CSS v4 via CDN with fallback
-	wp_enqueue_style(
-		'tailwind-css',
+	wp_enqueue_script(
+		'tailwind-css-script',
 		'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.0.0',
 		array(),
 		'4.0.0',
-		'all'
+		false
 	);
 
 	// Alpine.js (must load before Tailwind config script)
@@ -71,10 +71,10 @@ function aws_sbg_enqueue_scripts() {
 	);
 
 	// Initialize Tailwind with theme configuration
-	wp_add_inline_script( 'alpinejs', aws_sbg_get_tailwind_config(), 'after' );
+	wp_add_inline_script( 'tailwind-css-script', aws_sbg_get_tailwind_config(), 'before' );
 
 	// Add custom CSS reset and utilities
-	wp_add_inline_style( 'tailwind-css', aws_sbg_get_custom_styles() );
+	wp_add_inline_style( 'aws-sbg-theme-style', aws_sbg_get_custom_styles() );
 }
 add_action( 'wp_enqueue_scripts', 'aws_sbg_enqueue_scripts', 5 );
 
