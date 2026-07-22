@@ -105,40 +105,12 @@ function aws_sbg_enqueue_scripts() {
 add_action( 'wp_enqueue_scripts', 'aws_sbg_enqueue_scripts' );
 
 /**
- * Get theme color value
- * 
- * @param string $color_key The color key (e.g., 'brand', 'supporting-green')
- * @return string The hex color code
- */
-function aws_sbg_get_color( $color_key = 'brand' ) {
-	$config = include get_template_directory() . '/config-theme.php';
-	
-	// Handle nested color keys (e.g., 'semantic-success')
-	if ( strpos( $color_key, '-' ) !== false ) {
-		$parts = explode( '-', $color_key, 2 );
-		if ( isset( $config['colors'][ $parts[0] ][ $parts[1] ] ) ) {
-			return $config['colors'][ $parts[0] ][ $parts[1] ];
-		}
-	}
-	
-	return isset( $config['colors'][ $color_key ] ) ? $config['colors'][ $color_key ] : '#ad5cff';
-}
-
-/**
- * Get theme font family
- * 
- * @param string $type The font type (e.g., 'heading', 'body', 'mono')
- * @return string The font family
- */
-function aws_sbg_get_font( $type = 'body' ) {
-	$config = include get_template_directory() . '/config-theme.php';
-	return isset( $config['typography']['fonts'][ $type ] ) ? $config['typography']['fonts'][ $type ] : $config['typography']['fonts']['body'];
-}
-
-/**
  * ============================================================================
  * 3. REGISTER CUSTOM POST TYPES
  * ============================================================================
+ * 
+ * Note: Color and font helper functions are in helpers-colors.php and
+ * helpers-fonts.php respectively (loaded via require_once above)
  */
 
 function aws_sbg_register_post_types() {
