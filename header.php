@@ -8,61 +8,48 @@
 <body <?php body_class( 'bg-dark-bg text-white' ); ?>>
 	<?php wp_body_open(); ?>
 
+	<!-- Announcement Topbar -->
+	<div class="bg-[#ad5cff] text-white text-center py-2.5 px-4 text-xs md:text-sm font-extrabold tracking-wide uppercase flex items-center justify-center gap-2">
+		<span class="relative flex h-2.5 w-2.5">
+		  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+		  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
+		</span>
+		Registration for AirCert is now Live!
+	</div>
+
 	<!-- Navigation Header -->
-	<header class="sticky top-0 z-50 bg-gradient-to-r from-[#0a0a0a] via-[#1a0a2e] to-[#0a0a0a] border-b border-brand/20 shadow-2xl backdrop-blur-sm">
+	<header class="sticky top-0 z-50 bg-[#0a0a0a]/90 border-b border-white/10 shadow-none md:shadow-2xl backdrop-blur-md">
 		<nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{ 
 			mobileMenuOpen: false,
 			toggleMobileMenu() {
 				this.mobileMenuOpen = !this.mobileMenuOpen;
 			}
 		}">
-			<div class="flex justify-between items-center h-20">
-				<!-- Logo with Brand -->
-				<div class="flex-shrink-0 group">
-					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-flex items-center space-x-3 hover:opacity-90 transition-opacity duration-300">
-						<!-- Logo Icon -->
-						<div class="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-brand to-supporting-green rounded-lg shadow-lg group-hover:shadow-brand/50 transition-all">
-							<svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-							</svg>
-						</div>
-						<!-- Text Logo -->
-						<div class="hidden sm:block">
-							<div class="text-xl font-bold bg-gradient-to-r from-brand to-supporting-green bg-clip-text text-transparent">AWS SBG</div>
-							<div class="text-xs text-supporting-green/80 font-medium">Student Builder</div>
-						</div>
-					</a>
-				</div>
+			<div class="flex justify-between items-center h-20 gap-2 md:gap-4">
+				
+				<!-- Left: Menu (Desktop) & Hamburger (Mobile) -->
+				<div class="flex-none md:flex-1 flex justify-start items-center">
+					<!-- Desktop Navigation Menu -->
+					<div class="hidden lg:flex items-center space-x-1 xl:space-x-2">
+						<?php
+						$menu_items = array(
+							array( 'title' => 'HOME', 'url' => home_url( '/' ) ),
+							array( 'title' => 'CONTACT US', 'url' => home_url( '/contact/' ) ),
+						);
 
-				<!-- Desktop Navigation Menu -->
-				<div class="hidden md:flex items-center space-x-2 lg:space-x-4">
-					<?php
-					$menu_items = array(
-						array( 'title' => 'Home', 'url' => home_url( '/' ), 'icon' => '🏠' ),
-						array( 'title' => 'AirCert BootCamp', 'url' => home_url( '/aircert/' ), 'icon' => '🎓' ),
-						array( 'title' => 'Contact', 'url' => home_url( '/contact/' ), 'icon' => '✉️' ),
-					);
-
-					foreach ( $menu_items as $item ) {
-						$is_current = ( $_SERVER['REQUEST_URI'] === $item['url'] || ( isset( $_GET['page_id'] ) && get_permalink( $_GET['page_id'] ) === $item['url'] ) );
-						$current_class = $is_current ? 'text-brand font-semibold border-b-2 border-brand shadow-lg shadow-brand/20' : 'text-gray-300 hover:text-brand';
-						echo '<a href="' . esc_url( $item['url'] ) . '" class="px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 ' . esc_attr( $current_class ) . ' hover:bg-brand/10 hover:shadow-brand/20 hover:shadow-sm">' . esc_html( $item['title'] ) . '</a>';
-					}
-					?>
-				</div>
-
-				<!-- CTA and Mobile Menu Toggle -->
-				<div class="flex items-center space-x-4">
-					<!-- CTA Button (Desktop) -->
-					<a href="<?php echo esc_url( home_url( '/aircert/' ) ); ?>" class="hidden lg:inline-flex px-6 py-2.5 bg-gradient-to-r from-brand to-supporting-green text-white font-semibold rounded-lg shadow-lg shadow-brand/30 hover:shadow-xl hover:shadow-brand/40 transition-all duration-300 hover:scale-105">
-						<?php esc_html_e( 'Register Now', 'aws-sbg-theme' ); ?>
-					</a>
+						foreach ( $menu_items as $item ) {
+							$is_current = ( $_SERVER['REQUEST_URI'] === $item['url'] || ( isset( $_GET['page_id'] ) && get_permalink( $_GET['page_id'] ) === $item['url'] ) );
+							$current_class = $is_current ? 'text-white font-semibold bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5';
+							echo '<a href="' . esc_url( $item['url'] ) . '" class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ' . esc_attr( $current_class ) . '">' . esc_html( $item['title'] ) . '</a>';
+						}
+						?>
+					</div>
 
 					<!-- Mobile Menu Toggle Button -->
 					<button 
 						@click="toggleMobileMenu()" 
 						:aria-expanded="mobileMenuOpen"
-						class="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-brand hover:bg-brand/10 focus:outline-none focus:ring-2 focus:ring-brand transition-all"
+						class="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-white hover:bg-white/10 focus:outline-none transition-all"
 						aria-label="<?php esc_attr_e( 'Toggle navigation menu', 'aws-sbg-theme' ); ?>"
 					>
 						<svg 
@@ -85,6 +72,20 @@
 						</svg>
 					</button>
 				</div>
+
+				<!-- Center: Logo -->
+				<div class="flex-1 md:flex-shrink-0 flex justify-center items-center min-w-0">
+					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-flex items-center justify-center hover:opacity-90 transition-opacity duration-300">
+						<img src="https://awscloudclubau.com/wp-content/uploads/2026/07/AWS-SBG-AIR-UNIVERSITY-LOGO-2-scaled.png" alt="AWS SBG Air University" class="h-9 sm:h-10 md:h-12 w-auto max-w-full object-contain">
+					</a>
+				</div>
+
+				<!-- Right: CTA -->
+				<div class="flex-none md:flex-1 flex justify-end items-center">
+					<a href="https://www.meetup.com/aws-cloud-club-at-air-univ-islamabad/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 md:px-6 md:py-2.5 bg-white text-black font-bold rounded-lg hover:bg-gray-200 transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5 transform duration-300 text-[12px] sm:text-sm md:text-base whitespace-nowrap">
+						Join<span class="hidden sm:inline"> Community</span>
+					</a>
+				</div>
 			</div>
 
 			<!-- Mobile Navigation Menu -->
@@ -96,19 +97,16 @@
 				x-transition:leave="transition ease-in duration-150"
 				x-transition:leave-start="opacity-100 translate-y-0"
 				x-transition:leave-end="opacity-0 -translate-y-2"
-				class="md:hidden bg-gradient-to-b from-[#1a0a2e] to-[#0a0a0a] border-t border-brand/20 py-4 px-2"
+				class="lg:hidden bg-[#0a0a0a] border-t border-white/10 py-4 px-2"
 			>
 				<div class="space-y-2">
 					<?php
 					foreach ( $menu_items as $item ) {
 						$is_current = ( $_SERVER['REQUEST_URI'] === $item['url'] );
-						$current_class = $is_current ? 'bg-brand/20 text-brand border-l-2 border-brand' : 'text-gray-300 hover:text-brand hover:bg-brand/10';
+						$current_class = $is_current ? 'bg-white/10 text-white border-l-2 border-white' : 'text-gray-400 hover:text-white hover:bg-white/5';
 						echo '<a href="' . esc_url( $item['url'] ) . '" class="block px-4 py-3 rounded-lg text-base font-medium transition-all duration-300 ' . esc_attr( $current_class ) . '" @click="mobileMenuOpen = false">' . esc_html( $item['title'] ) . '</a>';
 					}
 					?>
-					<a href="<?php echo esc_url( home_url( '/aircert/' ) ); ?>" class="block px-4 py-3 mt-4 bg-gradient-to-r from-brand to-supporting-green text-white font-semibold rounded-lg text-center transition-all hover:shadow-lg hover:shadow-brand/30" @click="mobileMenuOpen = false">
-						<?php esc_html_e( 'Register Now', 'aws-sbg-theme' ); ?>
-					</a>
 				</div>
 			</div>
 		</nav>

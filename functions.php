@@ -15,6 +15,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once get_template_directory() . '/helpers-colors.php';
 require_once get_template_directory() . '/helpers-fonts.php';
 
+// Load universal event registration system & dashboard
+require_once get_template_directory() . '/feature-event-registration.php';
+require_once get_template_directory() . '/admin-dashboard.php';
+
 /**
  * ============================================================================
  * 1. THEME SETUP & SUPPORT
@@ -50,12 +54,12 @@ function aws_sbg_enqueue_scripts() {
 		'all'
 	);
 
-	// Enqueue Tailwind CSS v4 via CDN with fallback
+	// Enqueue Tailwind CSS v3 via CDN
 	wp_enqueue_script(
 		'tailwind-css-script',
-		'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.0.0',
+		'https://cdn.tailwindcss.com?plugins=typography',
 		array(),
-		'4.0.0',
+		'3.4.16',
 		false
 	);
 
@@ -105,25 +109,24 @@ function aws_sbg_get_tailwind_config() {
 	
 	// Return Tailwind configuration script
 	return "
-		if (typeof tailwind !== 'undefined') {
-			tailwind.config = {
-				theme: {
-					extend: {
-						colors: {$colors_json},
-						boxShadow: {
-							'glow': '0 0 20px rgba(173, 92, 255, 0.4)',
-							'glow-soft': '0 0 15px rgba(173, 92, 255, 0.2)',
-							'glow-success': '0 0 20px rgba(0, 239, 136, 0.3)',
-							'card-subtle': '0 4px 15px rgba(0, 0, 0, 0.3)'
-						},
-						fontFamily: {
-							'sans': ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-							'mono': ['Fira Code', 'Courier New', 'monospace']
-						}
+		window.tailwind = window.tailwind || {};
+		window.tailwind.config = {
+			theme: {
+				extend: {
+					colors: {$colors_json},
+					boxShadow: {
+						'glow': '0 0 20px rgba(173, 92, 255, 0.4)',
+						'glow-soft': '0 0 15px rgba(173, 92, 255, 0.2)',
+						'glow-success': '0 0 20px rgba(0, 239, 136, 0.3)',
+						'card-subtle': '0 4px 15px rgba(0, 0, 0, 0.3)'
+					},
+					fontFamily: {
+						'sans': ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+						'mono': ['Fira Code', 'Courier New', 'monospace']
 					}
 				}
-			};
-		}
+			}
+		};
 	";
 }
 
@@ -206,34 +209,38 @@ function aws_sbg_get_custom_styles() {
 
 function aws_sbg_register_post_types() {
 	// Register RSVP Post Type
-	if ( function_exists( 'acf_register_post_type' ) ) {
-		acf_register_post_type( array(
-			'post_type' => 'rsvp',
-			'description' => 'Event Registration Submissions',
-			'public' => false,
-			'show_in_ui' => true,
-			'show_in_rest' => false,
-			'supports' => array( 'title' ),
-			'menu_position' => 20,
-			'menu_icon' => 'dashicons-clipboard',
-			'has_archive' => false,
-			'can_export' => true,
-		) );
+	register_post_type( 'rsvp', array(
+		'labels' => array(
+			'name' => 'RSVPs',
+			'singular_name' => 'RSVP',
+		),
+		'description' => 'Event Registration Submissions',
+		'public' => false,
+		'show_ui' => true,
+		'show_in_rest' => false,
+		'supports' => array( 'title', 'custom-fields' ),
+		'menu_position' => 20,
+		'menu_icon' => 'dashicons-clipboard',
+		'has_archive' => false,
+		'can_export' => true,
+	) );
 
-		// Register Contact Submission Post Type
-		acf_register_post_type( array(
-			'post_type' => 'contact_submission',
-			'description' => 'Contact Form Submissions',
-			'public' => false,
-			'show_in_ui' => true,
-			'show_in_rest' => false,
-			'supports' => array( 'title' ),
-			'menu_position' => 21,
-			'menu_icon' => 'dashicons-email',
-			'has_archive' => false,
-			'can_export' => true,
-		) );
-	}
+	// Register Contact Submission Post Type
+	register_post_type( 'contact_submission', array(
+		'labels' => array(
+			'name' => 'Contacts',
+			'singular_name' => 'Contact',
+		),
+		'description' => 'Contact Form Submissions',
+		'public' => false,
+		'show_ui' => true,
+		'show_in_rest' => false,
+		'supports' => array( 'title', 'custom-fields' ),
+		'menu_position' => 21,
+		'menu_icon' => 'dashicons-email',
+		'has_archive' => false,
+		'can_export' => true,
+	) );
 }
 add_action( 'init', 'aws_sbg_register_post_types' );
 
