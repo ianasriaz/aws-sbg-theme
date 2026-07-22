@@ -151,12 +151,16 @@ function aws_sbg_get_custom_styles() {
 		
 		/* Smooth transitions */
 		* {
-			@apply transition-colors duration-300;
+			transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
 		}
 		
 		/* Link styling */
 		a {
 			color: var(--brand-color);
+		}
+		
+		a:hover {
+			color: var(--green-color);
 		}
 		
 		/* Scrollbar styling */
