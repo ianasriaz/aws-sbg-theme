@@ -41,68 +41,155 @@ add_action( 'after_setup_theme', 'aws_sbg_theme_setup' );
  */
 
 function aws_sbg_enqueue_scripts() {
-	// Enqueue Tailwind CSS v4 via CDN
+	// Enqueue theme stylesheet (style.css)
+	wp_enqueue_style(
+		'aws-sbg-theme-style',
+		get_stylesheet_uri(),
+		array(),
+		wp_get_theme()->get( 'Version' ),
+		'all'
+	);
+
+	// Enqueue Tailwind CSS v4 via CDN with fallback
 	wp_enqueue_style(
 		'tailwind-css',
-		'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4',
+		'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.0.0',
 		array(),
-		null
+		'4.0.0',
+		'all'
 	);
 
-	// Enqueue Alpine.js v3 via CDN
+	// Alpine.js (must load before Tailwind config script)
 	wp_enqueue_script(
-		'alpine-js',
+		'alpinejs',
 		'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js',
 		array(),
-		'3.x.x',
-		true
+		'3.14.1',
+		array(
+			'strategy' => 'defer',
+		)
 	);
 
-	// Load master theme config
-	$config = include get_template_directory() . '/config-theme.php';
+	// Initialize Tailwind with theme configuration
+	wp_add_inline_script( 'alpinejs', aws_sbg_get_tailwind_config(), 'after' );
 
-	// Build Tailwind config from master config
-	$tailwind_colors = $config['colors'];
+	// Add custom CSS reset and utilities
+	wp_add_inline_style( 'tailwind-css', aws_sbg_get_custom_styles() );
+}
+add_action( 'wp_enqueue_scripts', 'aws_sbg_enqueue_scripts', 5 );
+
+/**
+ * Generate Tailwind configuration from master config
+ * 
+ * @return string JavaScript configuration
+ */
+function aws_sbg_get_tailwind_config() {
+	$config = include get_template_directory() . '/config-theme.php';
 	
-	// Convert to JavaScript object notation
-	$colors_js = '';
-	foreach ( $tailwind_colors as $name => $value ) {
+	// Build colors object
+	$colors_js = array();
+	foreach ( $config['colors'] as $name => $value ) {
 		if ( is_array( $value ) ) {
-			$colors_js .= "'" . esc_attr( $name ) . "': {\n";
 			foreach ( $value as $sub_name => $sub_value ) {
-				if ( is_array( $sub_value ) ) {
-					// Skip nested arrays like 'semantic' > 'success'
-					continue;
+				if ( ! is_array( $sub_value ) ) {
+					$colors_js[ "{$name}-{$sub_name}" ] = $sub_value;
 				}
-				$colors_js .= "'" . esc_attr( $sub_name ) . "': '" . esc_attr( $sub_value ) . "',\n";
 			}
-			$colors_js .= "},\n";
 		} else {
-			$colors_js .= "'" . esc_attr( $name ) . "': '" . esc_attr( $value ) . "',\n";
+			$colors_js[ $name ] = $value;
 		}
 	}
 
-	// Inline Tailwind config with colors from master config
-	$tailwind_config = "
-		tailwind.config = {
-			theme: {
-				extend: {
-					colors: {
-						" . $colors_js . "
-					},
-					boxShadow: {
-						'glow': '0 0 20px rgba(173, 92, 255, 0.4)',
-						'glow-soft': '0 0 15px rgba(173, 92, 255, 0.2)',
-						'glow-success': '0 0 20px rgba(0, 239, 136, 0.3)',
-						'card-subtle': '0 4px 15px rgba(0, 0, 0, 0.3)'
+	// Build colors JSON
+	$colors_json = json_encode( $colors_js, JSON_FORCE_OBJECT );
+	
+	// Return Tailwind configuration script
+	return "
+		if (typeof tailwind !== 'undefined') {
+			tailwind.config = {
+				theme: {
+					extend: {
+						colors: {$colors_json},
+						boxShadow: {
+							'glow': '0 0 20px rgba(173, 92, 255, 0.4)',
+							'glow-soft': '0 0 15px rgba(173, 92, 255, 0.2)',
+							'glow-success': '0 0 20px rgba(0, 239, 136, 0.3)',
+							'card-subtle': '0 4px 15px rgba(0, 0, 0, 0.3)'
+						},
+						fontFamily: {
+							'sans': ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+							'mono': ['Fira Code', 'Courier New', 'monospace']
+						}
 					}
 				}
-			}
-		};
+			};
+		}
 	";
-	wp_add_inline_script( 'alpine-js', $tailwind_config );
 }
-add_action( 'wp_enqueue_scripts', 'aws_sbg_enqueue_scripts' );
+
+/**
+ * Get custom CSS for theme
+ * 
+ * @return string CSS rules
+ */
+function aws_sbg_get_custom_styles() {
+	return "
+		:root {
+			--brand-color: #ad5cff;
+			--green-color: #00ef88;
+			--orange-color: #ffa000;
+		}
+		
+		html {
+			scroll-behavior: smooth;
+		}
+		
+		body {
+			background-color: #0a0a0a;
+			color: #ffffff;
+		}
+		
+		/* Smooth transitions */
+		* {
+			@apply transition-colors duration-300;
+		}
+		
+		/* Link styling */
+		a {
+			color: var(--brand-color);
+		}
+		
+		/* Scrollbar styling */
+		::-webkit-scrollbar {
+			width: 8px;
+			height: 8px;
+		}
+		
+		::-webkit-scrollbar-track {
+			background: #1a1a1a;
+		}
+		
+		::-webkit-scrollbar-thumb {
+			background: #ad5cff;
+			border-radius: 4px;
+		}
+		
+		::-webkit-scrollbar-thumb:hover {
+			background: #00ef88;
+		}
+		
+		/* Button defaults */
+		button, [role=\"button\"] {
+			cursor: pointer;
+		}
+		
+		/* Focus styles for accessibility */
+		*:focus-visible {
+			outline: 2px solid var(--brand-color);
+			outline-offset: 2px;
+		}
+	";
+}
 
 /**
  * ============================================================================
@@ -405,7 +492,42 @@ function aws_sbg_send_contact_notification( $name, $email, $subject, $message ) 
 
 /**
  * ============================================================================
- * 7. UTILITY FUNCTIONS
+ * 7. DEBUG & DIAGNOSTICS
+ * ============================================================================
+ */
+
+/**
+ * Display theme debug information (only for admins, temporary)
+ * Add to template temporarily: <?php aws_sbg_debug_info(); ?>
+ */
+function aws_sbg_debug_info() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return;
+	}
+
+	$debug = array(
+		'Theme Active' => wp_get_theme()->get( 'Name' ),
+		'Theme Version' => wp_get_theme()->get( 'Version' ),
+		'WordPress Version' => get_bloginfo( 'version' ),
+		'PHP Version' => phpversion(),
+		'Tailwind CDN' => '✓ Enqueued',
+		'Alpine.js CDN' => '✓ Enqueued',
+		'Config File' => file_exists( get_template_directory() . '/config-theme.php' ) ? '✓ Found' : '✗ Missing',
+		'Helpers Colors' => file_exists( get_template_directory() . '/helpers-colors.php' ) ? '✓ Found' : '✗ Missing',
+		'Helpers Fonts' => file_exists( get_template_directory() . '/helpers-fonts.php' ) ? '✓ Found' : '✗ Missing',
+	);
+
+	echo '<!-- AWS SBG Theme Debug Info -->';
+	echo '<pre style="background: #000; color: #0f0; padding: 15px; margin: 20px; font-size: 12px; border: 1px solid #333; overflow-x: auto;">';
+	foreach ( $debug as $key => $value ) {
+		echo $key . ': ' . $value . "\n";
+	}
+	echo '</pre>';
+}
+
+/**
+ * ============================================================================
+ * 8. UTILITY FUNCTIONS
  * ============================================================================
  */
 
