@@ -63,15 +63,13 @@ function aws_sbg_enqueue_scripts() {
 		false
 	);
 
-	// Alpine.js (must load before Tailwind config script)
+	// Alpine.js
 	wp_enqueue_script(
 		'alpinejs',
 		'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js',
 		array(),
 		'3.14.1',
-		array(
-			'strategy' => 'defer',
-		)
+		false // Load in head, defer added via filter below
 	);
 
 	// Initialize Tailwind with theme configuration
@@ -548,3 +546,14 @@ function aws_sbg_debug_info() {
 function aws_sbg_is_mobile_menu_open() {
 	return false;
 }
+
+/**
+ * Add defer attribute to Alpine.js
+ */
+add_filter( 'script_loader_tag', function ( $tag, $handle ) {
+    if ( 'alpinejs' !== $handle ) {
+        return $tag;
+    }
+    return str_replace( ' src', ' defer src', $tag );
+}, 10, 2 );
+

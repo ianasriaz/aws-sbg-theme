@@ -53,8 +53,8 @@
 						aria-label="<?php esc_attr_e( 'Toggle navigation menu', 'aws-sbg-theme' ); ?>"
 					>
 						<svg 
-							:class="{ 'hidden': mobileMenuOpen, 'block': !mobileMenuOpen }" 
-							class="h-6 w-6" 
+							x-show="!mobileMenuOpen" 
+							class="h-6 w-6 block" 
 							fill="none" 
 							stroke="currentColor" 
 							viewBox="0 0 24 24"
@@ -62,8 +62,9 @@
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
 						</svg>
 						<svg 
-							:class="{ 'block': mobileMenuOpen, 'hidden': !mobileMenuOpen }" 
-							class="h-6 w-6" 
+							x-show="mobileMenuOpen"
+							style="display: none;"
+							class="h-6 w-6 hidden" 
 							fill="none" 
 							stroke="currentColor" 
 							viewBox="0 0 24 24"
@@ -91,6 +92,7 @@
 			<!-- Mobile Navigation Menu -->
 			<div 
 				x-show="mobileMenuOpen" 
+				style="display: none;"
 				x-transition:enter="transition ease-out duration-200"
 				x-transition:enter-start="opacity-0 -translate-y-2"
 				x-transition:enter-end="opacity-100 translate-y-0"

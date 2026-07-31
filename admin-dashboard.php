@@ -92,6 +92,57 @@ function aws_sbg_render_admin_dashboard() {
 				}
 			}
 		</script>
+		<style>
+			@media print {
+				/* Hide WP Admin elements completely */
+				#adminmenumain, #wpadminbar, #adminmenuwrap, #wpfooter, .update-nag, .notice { display: none !important; }
+				html, body, #wpcontent, #wpwrap { background: #fff !important; color: #000 !important; margin: 0 !important; padding: 0 !important; margin-left: 0 !important; }
+				
+				/* Hide dashboard widgets / interactive elements */
+				.flex.justify-between.items-center.mb-10, .grid.grid-cols-1, form { display: none !important; }
+				
+				/* Strip dark theme from main containers */
+				.wrap, .mt-8, .bg-dark, .bg-card, table, tbody, tr, th, td {
+					background: transparent !important;
+					border: none !important;
+					box-shadow: none !important;
+					color: #000 !important;
+					min-height: auto !important;
+					margin: 0 !important;
+					padding: 0 !important;
+				}
+				
+				/* Clean up table for printing */
+				.overflow-hidden { overflow: visible !important; }
+				table { width: 100% !important; border-collapse: collapse !important; margin-top: 20px !important; }
+				th, td { border: 1px solid #ccc !important; padding: 12px 10px !important; text-align: left !important; font-size: 13px !important; white-space: normal !important; }
+				th { background: #f8f9fa !important; font-weight: bold !important; text-transform: uppercase !important; font-size: 12px !important; }
+				
+				/* Hide unnecessary columns to keep export clean */
+				th:nth-child(6), td:nth-child(6),
+				th:nth-child(7), td:nth-child(7),
+				th:nth-child(8), td:nth-child(8),
+				th:nth-child(9), td:nth-child(9) {
+					display: none !important;
+				}
+				
+				/* Format text & badges */
+				span, a { color: #000 !important; border: none !important; background: transparent !important; text-decoration: none !important; padding: 0 !important; font-weight: normal !important; }
+				.font-bold { font-weight: bold !important; }
+				
+				/* Add a title just for the print page */
+				table {
+					caption-side: top;
+				}
+				table caption {
+					font-size: 20px !important;
+					font-weight: bold !important;
+					margin-bottom: 20px !important;
+					text-align: left !important;
+					color: #000 !important;
+				}
+			}
+		</style>
 
 		<div class="mt-8 bg-dark min-h-screen rounded-xl overflow-hidden shadow-2xl p-8 border border-white/10 text-white font-sans">
 			
