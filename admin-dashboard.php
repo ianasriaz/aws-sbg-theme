@@ -241,8 +241,16 @@ function aws_sbg_render_admin_dashboard() {
 								$whatsapp = get_post_meta( get_the_ID(), 'whatsapp_number', true );
 								$uni = get_post_meta( get_the_ID(), 'university_organization', true );
 								$ticket = get_post_meta( get_the_ID(), 'ticket_tier', true );
-								$ticket_label = ( $ticket === 'pro' ) ? 'PRO' : 'FREE';
-								$ticket_class = ( $ticket === 'pro' ) ? 'bg-orange-500/20 text-orange-400 border-orange-500/30' : 'bg-supporting-green/20 text-supporting-green border-supporting-green/30';
+								if ( $ticket === 'super' ) {
+									$ticket_label = 'SUPER';
+									$ticket_class = 'bg-brand/20 text-brand border-brand/30';
+								} elseif ( $ticket === 'pro' ) {
+									$ticket_label = 'PRO';
+									$ticket_class = 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+								} else {
+									$ticket_label = 'FREE';
+									$ticket_class = 'bg-supporting-green/20 text-supporting-green border-supporting-green/30';
+								}
 								
 								$payment_proof_id = get_post_meta( get_the_ID(), 'payment_screenshot', true );
 								$payment_proof_url = $payment_proof_id ? wp_get_attachment_url( $payment_proof_id ) : false;
@@ -284,7 +292,7 @@ function aws_sbg_render_admin_dashboard() {
 										</span>
 									</td>
 									<td class="px-6 py-4 text-center">
-										<?php if ( $ticket === 'pro' ) : ?>
+										<?php if ( in_array( $ticket, ['pro', 'super'] ) ) : ?>
 											<?php if ( $payment_proof_url ) : ?>
 												<a href="<?php echo esc_url( $payment_proof_url ); ?>" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#ad5cff]/10 text-[#ad5cff] hover:bg-[#ad5cff]/20 rounded-lg text-xs font-semibold transition-colors border border-[#ad5cff]/20">
 													<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>

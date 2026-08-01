@@ -95,8 +95,9 @@ function aws_sbg_event_acf_fields() {
 				'name' => 'ticket_tier',
 				'type' => 'radio',
 				'choices' => array(
-					'free' => 'FREE (Online Sessions Only)',
-					'pro'  => 'PRO (Sessions + Mock Exam + Voucher + Closing Ceremony)',
+					'free'  => 'FREE (Online Sessions Only)',
+					'pro'   => 'PRO (Sessions + Mock Exam + Voucher + Closing Ceremony)',
+					'super' => 'SUPER (VIP Community Supporter)',
 				),
 				'required' => 1,
 			),
@@ -317,6 +318,7 @@ function aws_sbg_event_form_shortcode( $atts ) {
 						  }, 800);
 					  }
 				  }"
+				  x-init="$watch('isSuperSupporter', value => { if(value) document.getElementById('payment-section').scrollIntoView({ behavior: 'smooth', block: 'center' }); })"
 				  @submit="handleFormSubmit($event)"
 				  @invalid.capture="formError = true; setTimeout(() => formError = false, 500)"
 				  :class="formError ? 'animate-shake' : ''">
@@ -433,7 +435,7 @@ function aws_sbg_event_form_shortcode( $atts ) {
 					</div>
 				</div>
 			<!-- Payment Block -->
-			<div class="mt-6 pt-6 border-t border-slate-100">
+			<div id="payment-section" class="mt-6 pt-6 border-t border-slate-100">
 				
 				<div class="space-y-6">
 					<!-- Payment Instructions -->
@@ -518,50 +520,82 @@ function aws_sbg_event_form_shortcode( $atts ) {
 				<input type="hidden" name="ticket_tier" :value="isSuperSupporter ? 'super' : 'pro'">
 
 				<!-- Standalone VIP Accordion Block -->
-				<div class="mt-5 border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50">
-					<button type="button" @click="showSuperDetails = !showSuperDetails" class="w-full flex items-center justify-between p-4 focus:outline-none hover:bg-slate-100/60 transition-colors">
-						<div class="flex items-center gap-2.5">
-							<svg class="w-4 h-4 text-[#ad5cff]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M2.5 19h19v2h-19v-2z"></path>
-								<path stroke-linecap="round" stroke-linejoin="round" d="M4 17l-1-11 5 3 4-6 4 6 5-3-1 11h-16z"></path>
-							</svg>
-							<span class="text-xs font-bold text-slate-800 tracking-wide uppercase">BECOME OUR SUPER COMMUNITY SUPPORTER</span>
+				<div class="mt-5 border-2 rounded-2xl overflow-hidden transition-all duration-300"
+					 :class="isSuperSupporter ? 'border-[#ad5cff]/50 bg-[#ad5cff]/[0.02] shadow-[0_4px_20px_-4px_rgba(173,92,255,0.15)]' : 'border-slate-200 bg-slate-50/50 shadow-sm'">
+					
+					<button type="button" @click="showSuperDetails = !showSuperDetails" class="w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 focus:outline-none hover:bg-[#ad5cff]/5 transition-colors gap-3">
+						<div class="flex items-center gap-3 text-left w-full sm:w-auto">
+							<div class="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-[#ad5cff] to-[#7000ff] shadow-sm shrink-0">
+								<svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+								</svg>
+							</div>
+							<span class="text-[13px] sm:text-sm font-extrabold text-slate-800 tracking-wide uppercase leading-tight">BECOME A SUPER COMMUNITY SUPPORTER</span>
 						</div>
-						<div class="flex items-center gap-1.5 text-xs font-semibold text-[#ad5cff] shrink-0">
-							<span x-text="showSuperDetails ? 'Close' : 'View'"></span>
-							<svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showSuperDetails ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+						<div class="self-start sm:self-auto flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-[#ad5cff] shrink-0 bg-[#ad5cff]/10 border border-[#ad5cff]/20 px-3 py-1.5 rounded-full transition-all ml-11 sm:ml-0">
+							<span x-text="showSuperDetails ? 'Close' : 'View VIP Tier'"></span>
+							<svg class="w-3.5 h-3.5 transform transition-transform duration-200" :class="showSuperDetails ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
 						</div>
 					</button>
 
-					<div x-show="showSuperDetails" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
-						<div class="p-4 pt-1">
-							<div class="bg-slate-900 rounded-xl p-5 text-white shadow-md relative">
-								<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-4">
+					<div x-show="showSuperDetails" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+						<div class="p-4 pt-0">
+							<div class="relative overflow-hidden rounded-xl border border-[#ad5cff]/30 bg-gradient-to-br from-[#ad5cff]/[0.05] via-white to-[#7000ff]/[0.08] p-6 shadow-sm">
+								<!-- Decorative Glass Blurs -->
+								<div class="absolute -top-12 -right-12 w-48 h-48 bg-gradient-to-br from-[#ad5cff]/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+								<div class="absolute -bottom-12 -left-12 w-48 h-48 bg-gradient-to-tr from-[#7000ff]/15 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+
+								<div class="relative z-10 flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5 border-b border-[#ad5cff]/10 pb-5">
 									<div>
-										<h4 class="text-base font-bold text-white">Super Community Supporter</h4>
-										<p class="text-slate-400 text-xs mt-0.5">Support the initiative and gain VIP recognition.</p>
+										<h4 class="text-lg font-extrabold text-slate-900 tracking-tight">Support the community. Enjoy exclusive recognition</h4>
+										<p class="text-slate-600 text-[13px] mt-1.5 leading-relaxed font-medium">Help us grow the community and receive special recognition as one of our valued super community supporters.</p>
 									</div>
 									<div class="text-left sm:text-right shrink-0">
-										<span class="block text-xl font-bold text-[#ad5cff]">Rs. 1,999</span>
+										<span class="block text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#ad5cff] to-[#7000ff] drop-shadow-sm">Rs. 1,999</span>
 									</div>
 								</div>
 
-								<div class="space-y-2 text-xs font-medium text-slate-300 mb-6">
-									<span class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Includes ALL Complete Bootcamp Benefits</span>
-									<span class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Special Mention on Social Media</span>
-									<span class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Customized Physical VIP Event Card</span>
-									<span class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Name Mention on Event Standee</span>
-									<span class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg> Dedicated VIP Swag Kit</span>
+								<div class="relative z-10 space-y-3 text-[13px] font-semibold text-slate-700 mb-7">
+									<div class="flex items-start gap-2.5">
+										<div class="w-5 h-5 rounded-full bg-[#00ef88]/20 flex items-center justify-center shrink-0 mt-0.5">
+											<svg class="w-3 h-3 text-[#00ef88]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+										</div>
+										<span>Includes All AIRCERT Certification Day Benefits</span>
+									</div>
+									<div class="flex items-start gap-2.5">
+										<div class="w-5 h-5 rounded-full bg-[#00ef88]/20 flex items-center justify-center shrink-0 mt-0.5">
+											<svg class="w-3 h-3 text-[#00ef88]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+										</div>
+										<span>Exclusive Social Media Recognition</span>
+									</div>
+									<div class="flex items-start gap-2.5">
+										<div class="w-5 h-5 rounded-full bg-[#00ef88]/20 flex items-center justify-center shrink-0 mt-0.5">
+											<svg class="w-3 h-3 text-[#00ef88]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+										</div>
+										<span>Personalized VIP Event Pass</span>
+									</div>
+									<div class="flex items-start gap-2.5">
+										<div class="w-5 h-5 rounded-full bg-[#00ef88]/20 flex items-center justify-center shrink-0 mt-0.5">
+											<svg class="w-3 h-3 text-[#00ef88]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+										</div>
+										<span>Name Featured on Event Standee</span>
+									</div>
+									<div class="flex items-start gap-2.5">
+										<div class="w-5 h-5 rounded-full bg-[#00ef88]/20 flex items-center justify-center shrink-0 mt-0.5">
+											<svg class="w-3 h-3 text-[#00ef88]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+										</div>
+										<span>Exclusive AWS VIP Swag Kit</span>
+									</div>
 								</div>
 
-								<label class="relative flex items-center justify-between p-3.5 rounded-lg border cursor-pointer transition-all"
-									   :class="isSuperSupporter ? 'border-[#ad5cff] bg-[#ad5cff]/10' : 'border-slate-800 bg-slate-800/80 hover:bg-slate-800'">
-									<div class="flex items-center gap-3">
-										<div class="w-4 h-4 rounded-full border flex items-center justify-center shrink-0"
-											 :class="isSuperSupporter ? 'border-[#ad5cff] bg-[#ad5cff]' : 'border-slate-500'">
-											<svg class="w-2.5 h-2.5 text-white transition-opacity" :class="isSuperSupporter ? 'opacity-100' : 'opacity-0'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+								<label class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all duration-200"
+									   :class="isSuperSupporter ? 'border-[#ad5cff] bg-white shadow-[0_2px_15px_-3px_rgba(173,92,255,0.2)]' : 'border-slate-200/80 bg-white/60 hover:bg-white hover:border-[#ad5cff]/30'">
+									<div class="flex items-start sm:items-center gap-3.5">
+										<div class="w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors duration-200 mt-0.5 sm:mt-0"
+											 :class="isSuperSupporter ? 'border-[#ad5cff] bg-[#ad5cff]' : 'border-slate-300'">
+											<svg class="w-3 h-3 text-white transition-transform duration-200" :class="isSuperSupporter ? 'scale-100 opacity-100' : 'scale-50 opacity-0'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
 										</div>
-										<span class="font-semibold text-xs text-slate-200">Yes, I want to become a Super Supporter!</span>
+										<span class="font-bold text-sm sm:text-[15px] leading-snug" :class="isSuperSupporter ? 'text-slate-900' : 'text-slate-600'">Yes, I want to become a Super Supporter!</span>
 									</div>
 									<input type="checkbox" class="sr-only" x-model="isSuperSupporter">
 								</label>
