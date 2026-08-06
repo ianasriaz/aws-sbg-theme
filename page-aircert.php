@@ -118,9 +118,9 @@ get_header();
 					<a href="#track1" class="btn-primary px-8 py-4 rounded-xl font-semibold transition-all duration-300 w-full sm:w-auto text-center">
 						Explore Preparation Round
 					</a>
-					<a href="#track2" class="btn-secondary px-8 py-4 rounded-xl font-semibold transition-all duration-300 w-full sm:w-auto text-center">
-						Register for Certification Round
-					</a>
+					<span class="btn-secondary px-8 py-4 rounded-xl font-semibold opacity-60 cursor-not-allowed w-full sm:w-auto text-center">
+						Registrations Temporarily Closed
+					</span>
 				</div>
 			</div>
 
@@ -440,10 +440,10 @@ get_header();
 
 			<!-- Registration CTA -->
 			<div class="text-center mt-4">
-				<a href="https://awscloudclubau.com/aircert-registration" target="_blank" class="inline-flex items-center justify-center gap-3 bg-[#00ef88] hover:bg-[#00d67a] text-black px-10 py-5 rounded-full font-black uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(0,239,136,0.3)] hover:shadow-[0_0_40px_rgba(0,239,136,0.5)] hover:-translate-y-1">
-					<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-					Register for Certification Day
-				</a>
+				<span class="inline-flex items-center justify-center gap-3 bg-gray-700 text-amber-300 px-10 py-5 rounded-full font-black uppercase tracking-widest cursor-not-allowed opacity-80 shadow-none">
+					<svg class="w-6 h-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+					Registrations Temporarily Closed
+				</span>
 			</div>
 		</div>
 	</section>

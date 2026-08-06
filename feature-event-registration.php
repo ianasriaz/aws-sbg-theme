@@ -176,11 +176,24 @@ function aws_sbg_event_form_shortcode( $atts ) {
 		<div class="bg-white md:rounded-2xl px-6 py-8 md:p-10 shadow-sm border border-slate-200/80">
 
 			<!-- Heading -->
-			<div class="text-center mb-12">
+			<div class="text-center mb-8">
 				<h3 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight uppercase">
 					REGISTER FOR <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#ad5cff] to-[#7000ff]">CERTIFICATION DAY</span>
 				</h3>
-				<p class="text-slate-500 text-sm mt-1.5">Takes less than 2 minutes. Secure your spot below.</p>
+				<p class="text-slate-500 text-sm mt-1.5">Registrations are temporarily closed. We may reopen if space becomes available.</p>
+			</div>
+
+			<!-- Registrations Closed Notice -->
+			<div class="mb-8 p-5 bg-amber-50 border-2 border-amber-500/30 rounded-2xl flex items-center gap-4 text-amber-900 shadow-sm">
+				<div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center shrink-0 text-amber-600">
+					<svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+					</svg>
+				</div>
+				<div>
+					<h4 class="text-base font-extrabold uppercase tracking-wide text-amber-900">Registrations Temporarily Closed</h4>
+					<p class="text-xs text-amber-800 mt-0.5 leading-relaxed">Thank you for your overwhelming interest! Registrations for AWS Certification Day are currently temporarily closed due to high demand. We will reopen registrations if additional space becomes available.</p>
+				</div>
 			</div>
 
 			<?php if ( isset( $_GET['status'] ) && $_GET['status'] === 'success' ) : 
@@ -337,29 +350,29 @@ function aws_sbg_event_form_shortcode( $atts ) {
 						<!-- Full Name -->
 						<div>
 							<label for="reg_name" class="block text-xs font-semibold text-slate-700 mb-1.5">Full Name <span class="text-red-500">*</span></label>
-							<input type="text" id="reg_name" name="full_name" required x-model="fullName"
-								class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#ad5cff] focus:ring-2 focus:ring-[#ad5cff]/15 transition-all">
+							<input type="text" id="reg_name" name="full_name" required x-model="fullName" disabled
+								class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-500 cursor-not-allowed">
 						</div>
 
 						<!-- Email -->
 						<div>
 							<label for="reg_email" class="block text-xs font-semibold text-slate-700 mb-1.5">Email Address <span class="text-red-500">*</span></label>
-							<input type="email" id="reg_email" name="email" required
-								class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#ad5cff] focus:ring-2 focus:ring-[#ad5cff]/15 transition-all">
+							<input type="email" id="reg_email" name="email" required disabled
+								class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-500 cursor-not-allowed">
 						</div>
 
 						<!-- WhatsApp -->
 						<div>
 							<label for="reg_whatsapp" class="block text-xs font-semibold text-slate-700 mb-1.5">WhatsApp Number <span class="text-red-500">*</span></label>
-							<input type="tel" id="reg_whatsapp" name="whatsapp_number" required
-								class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#ad5cff] focus:ring-2 focus:ring-[#ad5cff]/15 transition-all">
+							<input type="tel" id="reg_whatsapp" name="whatsapp_number" required disabled
+								class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-500 cursor-not-allowed">
 						</div>
 
 						<!-- University / Organization -->
 						<div>
 							<label for="reg_uni" class="block text-xs font-semibold text-slate-700 mb-1.5">University / Organization <span class="text-red-500">*</span></label>
-							<input type="text" id="reg_uni" name="university_organization" required
-								class="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:bg-white focus:border-[#ad5cff] focus:ring-2 focus:ring-[#ad5cff]/15 transition-all">
+							<input type="text" id="reg_uni" name="university_organization" required disabled
+								class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-500 cursor-not-allowed">
 						</div>
 					</div>
 				</div>
@@ -416,7 +429,7 @@ function aws_sbg_event_form_shortcode( $atts ) {
 										<div class="bg-amber-50/80 border border-amber-200/60 rounded-lg p-2.5 flex gap-2 items-start">
 											<svg class="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
 											<p class="text-[11px] text-slate-600 leading-relaxed font-medium">
-												<strong class="text-amber-800">Can't attend in-person?</strong> Complete registration and reach out to us at <a href="tel:+923492449953" class="font-bold underline hover:text-amber-800">+92 349 2449953</a> to request an online mock exam to remain eligible for the official AWS Exam Voucher.
+												<strong class="text-amber-800">Can't attend in-person?</strong> Reach out to us at <a href="tel:+923492449953" class="font-bold underline hover:text-amber-800">+92 349 2449953</a> for queries.
 											</p>
 										</div>
 									</div>
@@ -425,9 +438,9 @@ function aws_sbg_event_form_shortcode( $atts ) {
 									<div class="flex flex-col items-start sm:items-end gap-1.5">
 										<div class="flex items-baseline gap-1.5">
 											<span class="text-xs font-semibold text-slate-400 line-through">Rs. 799</span>
-											<span class="text-xl font-extrabold text-[#ad5cff]">Rs. 499</span>
+											<span class="text-xl font-extrabold text-[#ad5cff]">Rs. 0</span>
 										</div>
-										<span class="text-[9px] font-bold text-[#ad5cff] bg-[#ad5cff]/10 border border-[#ad5cff]/20 px-2 py-1 rounded uppercase tracking-wider inline-block">Earlybird</span>
+										<span class="text-[9px] font-bold text-[#ad5cff] bg-[#ad5cff]/10 border border-[#ad5cff]/20 px-2 py-1 rounded uppercase tracking-wider inline-block">Free / Closed</span>
 									</div>
 								</div>
 							</div>
@@ -442,7 +455,7 @@ function aws_sbg_event_form_shortcode( $atts ) {
 					<div>
 						<div class="flex items-center gap-3 mb-4">
 							<span class="flex items-center justify-center w-6 h-6 rounded bg-[#ad5cff] text-white text-xs font-extrabold shadow-sm">3</span>
-							<h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Copy Payment Details</h4>
+							<h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Payment Details</h4>
 						</div>
 					
 						<div class="bg-slate-50/80 rounded-xl border border-slate-200 divide-y divide-slate-200/60 overflow-hidden text-xs">
@@ -476,7 +489,7 @@ function aws_sbg_event_form_shortcode( $atts ) {
 							</div>
 							<div class="flex justify-between items-center px-4 py-3 bg-[#ad5cff]/5">
 								<span class="font-medium text-slate-700">Amount to Send</span>
-								<span class="text-sm font-bold text-[#ad5cff]" x-text="isSuperSupporter ? 'Rs. 1,999' : 'Rs. 499'">Rs. 499</span>
+								<span class="text-sm font-bold text-[#ad5cff]">Rs. 0</span>
 							</div>
 						</div>
 					</div>
@@ -485,17 +498,17 @@ function aws_sbg_event_form_shortcode( $atts ) {
 					<div>
 						<div class="flex items-center gap-3 mb-4">
 							<span class="flex items-center justify-center w-6 h-6 rounded bg-[#ad5cff] text-white text-xs font-extrabold shadow-sm">4</span>
-							<h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center">Upload Payment Screenshot <span class="text-red-500 ml-1.5 text-lg leading-none">*</span></h4>
+							<h4 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center">Upload Payment Screenshot</h4>
 						</div>
 						
 						<label for="payment_screenshot" class="sr-only">Upload Payment Receipt</label>
-						<input type="file" id="payment_screenshot" name="payment_screenshot" accept="image/*" required
-							@change="handleImageUpload" :disabled="isCompressing"
-							class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800 transition-all border border-slate-200 rounded-xl bg-slate-50/50 cursor-pointer focus:outline-none focus:border-[#ad5cff]">
+						<input type="file" id="payment_screenshot" name="payment_screenshot" accept="image/*" disabled
+							class="block w-full text-xs text-slate-400 border border-slate-200 rounded-xl bg-slate-100 cursor-not-allowed">
 						
-						<p x-show="!isCompressing && !compressedSize" class="mt-1.5 text-xs text-slate-400">
-							Upload transaction receipt screenshot (max 2MB).
+						<p class="mt-1.5 text-xs text-slate-400">
+							Registrations are closed. Image upload disabled.
 						</p>
+					</div>
 						
 						<p x-show="isCompressing" style="display: none;" class="mt-1.5 text-xs text-amber-600 flex items-center gap-1.5 font-medium animate-pulse">
 							Compressing image in browser...
@@ -551,7 +564,7 @@ function aws_sbg_event_form_shortcode( $atts ) {
 										<p class="text-slate-600 text-[13px] mt-1.5 leading-relaxed font-medium">Help us grow the community and receive special recognition as one of our valued super community supporters.</p>
 									</div>
 									<div class="text-left sm:text-right shrink-0">
-										<span class="block text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#ad5cff] to-[#7000ff] drop-shadow-sm">Rs. 1,999</span>
+										<span class="block text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-[#ad5cff] to-[#7000ff] drop-shadow-sm">Rs. 0</span>
 									</div>
 								</div>
 
@@ -588,16 +601,13 @@ function aws_sbg_event_form_shortcode( $atts ) {
 									</div>
 								</div>
 
-								<label class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all duration-200"
-									   :class="isSuperSupporter ? 'border-[#ad5cff] bg-white shadow-[0_2px_15px_-3px_rgba(173,92,255,0.2)]' : 'border-slate-200/80 bg-white/60 hover:bg-white hover:border-[#ad5cff]/30'">
+								<label class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border-2 cursor-not-allowed opacity-60 transition-all duration-200 border-slate-200 bg-slate-50">
 									<div class="flex items-start sm:items-center gap-3.5">
-										<div class="w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors duration-200 mt-0.5 sm:mt-0"
-											 :class="isSuperSupporter ? 'border-[#ad5cff] bg-[#ad5cff]' : 'border-slate-300'">
-											<svg class="w-3 h-3 text-white transition-transform duration-200" :class="isSuperSupporter ? 'scale-100 opacity-100' : 'scale-50 opacity-0'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+										<div class="w-5 h-5 rounded border-2 border-slate-300 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
 										</div>
-										<span class="font-bold text-sm sm:text-[15px] leading-snug" :class="isSuperSupporter ? 'text-slate-900' : 'text-slate-600'">Yes, I want to become a Super Supporter!</span>
+										<span class="font-bold text-sm sm:text-[15px] leading-snug text-slate-500">Super Supporter Tier (Closed)</span>
 									</div>
-									<input type="checkbox" class="sr-only" x-model="isSuperSupporter">
+									<input type="checkbox" class="sr-only" disabled x-model="isSuperSupporter">
 								</label>
 							</div>
 						</div>
@@ -606,16 +616,10 @@ function aws_sbg_event_form_shortcode( $atts ) {
 
 				<!-- Submit Button -->
 				<div class="pt-4">
-					<button type="submit" 
-							:disabled="isSubmitting"
-							class="w-full px-6 py-3.5 bg-[#ad5cff] hover:bg-[#9b42f5] active:bg-[#8b32e5] text-white font-semibold text-sm rounded-xl transition-all duration-200 shadow-sm flex items-center justify-center gap-2 disabled:opacity-75">
-						
-						<span x-show="!isSubmitting" x-text="isSuperSupporter ? 'Confirm - Super Supporter' : 'Confirm - Full Access'">Confirm Registration</span>
-						
-						<span x-show="isSubmitting" style="display: none;" class="flex items-center gap-2">
-							<svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-							<span x-text="submitStatus === 'verifying' ? 'Verifying Details...' : (submitStatus === 'confirming' ? 'Confirming Spot...' : 'Processing...')"></span>
-						</span>
+					<button type="button" 
+							disabled
+							class="w-full px-6 py-3.5 bg-slate-400 text-white font-bold text-sm rounded-xl cursor-not-allowed shadow-none flex items-center justify-center gap-2">
+						Registrations Temporarily Closed
 					</button>
 					<p class="mt-4 text-center text-[10px] font-medium text-slate-400">
 						Made with <span class="inline-block animate-pulse text-red-500">❤️</span> by Anas. Hosted on AWS
@@ -633,6 +637,8 @@ add_shortcode( 'aws_event_form', 'aws_sbg_event_form_shortcode' );
  * 4. Form Processing Handler
  */
 function aws_sbg_handle_event_registration() {
+	wp_die( 'Registrations for this event are temporarily closed due to high demand. We will reopen registrations if additional space becomes available.', 'Registrations Temporarily Closed', array( 'response' => 403 ) );
+
 	if ( ! isset( $_POST['aws_event_registration_nonce'] ) || ! wp_verify_nonce( $_POST['aws_event_registration_nonce'], 'aws_event_registration_action' ) ) {
 		wp_die( 'Security check failed.' );
 	}

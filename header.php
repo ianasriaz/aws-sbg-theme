@@ -8,14 +8,6 @@
 <body <?php body_class( 'bg-dark-bg text-white' ); ?>>
 	<?php wp_body_open(); ?>
 
-	<!-- Announcement Topbar -->
-	<div class="bg-[#ad5cff] text-white text-center py-2.5 px-4 text-xs md:text-sm font-extrabold tracking-wide uppercase flex items-center justify-center gap-2">
-		<span class="relative flex h-2.5 w-2.5">
-		  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-		  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
-		</span>
-		Registration for AirCert is now Live!
-	</div>
 
 	<!-- Navigation Header -->
 	<header class="sticky top-0 z-50 bg-[#0a0a0a]/90 border-b border-white/10 shadow-none md:shadow-2xl backdrop-blur-md">
