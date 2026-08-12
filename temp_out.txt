@@ -1,0 +1,10 @@
+391: <th class="py-3.5 px-4">Attendee Name</th>
+392: <th class="py-3.5 px-4">Phone #</th>
+393: <th class="py-3.5 px-4">Email</th>
+394: <th class="py-3.5 px-4">Tier / Pass</th>
+395: <th class="py-3.5 px-4 text-center">Payment Screenshot</th>
+396: <th class="py-3.5 px-4 text-center">Check-In</th>
+397: </tr>
+398: </thead>
+399: <tbody class="divide-y divide-slate-100">
+400: <?php if ( ! $registrations->have_posts() ) : ?>

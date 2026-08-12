@@ -10,7 +10,7 @@
 				<div class="space-y-4">
 					<div class="mb-6">
 						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-block hover:opacity-90 transition-opacity duration-300">
-							<img src="https://awscloudclubau.com/wp-content/uploads/2026/07/AWS-SBG-AIR-UNIVERSITY-LOGO-2-scaled.png" alt="AWS SBG Air University" class="h-10 sm:h-12 w-auto max-w-full object-contain">
+							<img src="<?php echo esc_url( content_url( '/uploads/2026/07/AWS-SBG-AIR-UNIVERSITY-LOGO-2-scaled.png' ) ); ?>" alt="AWS SBG Air University" class="h-10 sm:h-12 w-auto max-w-full object-contain">
 						</a>
 					</div>
 					<p class="text-gray-400 text-sm leading-relaxed">
@@ -96,13 +96,9 @@
 			<div class="border-t border-brand/20 pt-10 mt-10 pb-6">
 				<div class="flex flex-col lg:flex-row items-center justify-between gap-8">
 					
-					<!-- Left: Copyright & Made with Love -->
+					<!-- Left: Copyright -->
 					<div class="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-sm text-gray-400">
 						<span>&copy; <?php echo gmdate('Y'); ?> AWS Student Builder Group</span>
-						<span class="hidden sm:inline text-gray-700">|</span>
-						<span class="flex items-center gap-1.5 hover:text-white transition-colors cursor-default">
-							Made with <span class="text-red-500 animate-pulse">❤️</span> by Anas
-						</span>
 					</div>
 
 					<!-- Right: Tech Stack -->

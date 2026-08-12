@@ -19,6 +19,70 @@ require_once get_template_directory() . '/helpers-fonts.php';
 require_once get_template_directory() . '/feature-event-registration.php';
 require_once get_template_directory() . '/admin-dashboard.php';
 
+// Load AWS Foundational Certification Mock Exam Feature
+require_once get_template_directory() . '/feature-mock-exam.php';
+
+// Load AWS Event & Self-Service Certificate Management System
+require_once get_template_directory() . '/feature-events.php';
+
+/**
+ * Auto-create Mock Exam & Certificate pages if missing
+ */
+function aws_sbg_auto_create_exam_page() {
+	if ( ! is_admin() ) return;
+	
+	// 1. Exam Portal Page
+	$page_slug = 'exam-portal';
+	$page_check = get_page_by_path( $page_slug );
+	if ( ! isset( $page_check->ID ) ) {
+		$page_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'AWS Exam Portal',
+			'post_content' => '<!-- AWS Exam Portal -->',
+			'post_status'  => 'publish',
+			'post_name'    => $page_slug,
+		) );
+		if ( $page_id && ! is_wp_error( $page_id ) ) {
+			update_post_meta( $page_id, '_wp_page_template', 'page-exam-portal.php' );
+		}
+	}
+
+	// 2. Self-Service Event Certificate Generator Page
+	$cert_slug = 'claim-certificate';
+	$cert_check = get_page_by_path( $cert_slug );
+	if ( ! isset( $cert_check->ID ) ) {
+		$cert_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'Claim Event Certificate',
+			'post_content' => '<!-- Claim Event Certificate -->',
+			'post_status'  => 'publish',
+			'post_name'    => $cert_slug,
+		) );
+		if ( $cert_id && ! is_wp_error( $cert_id ) ) {
+			update_post_meta( $cert_id, '_wp_page_template', 'page-certificate-generator.php' );
+		}
+	}
+
+	// 3. Dedicated Events Portal Page
+	$events_slug = 'events';
+	$events_check = get_page_by_path( $events_slug );
+	if ( ! isset( $events_check->ID ) ) {
+		$events_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'Activities & Events',
+			'post_content' => '<!-- AWS Activities & Events Portal -->',
+			'post_status'  => 'publish',
+			'post_name'    => $events_slug,
+		) );
+		if ( $events_id && ! is_wp_error( $events_id ) ) {
+			update_post_meta( $events_id, '_wp_page_template', 'page-events.php' );
+		}
+	}
+	flush_rewrite_rules();
+}
+add_action( 'admin_init', 'aws_sbg_auto_create_exam_page' );
+
+
 /**
  * ============================================================================
  * 1. THEME SETUP & SUPPORT
@@ -215,6 +279,7 @@ function aws_sbg_register_post_types() {
 		'description' => 'Event Registration Submissions',
 		'public' => false,
 		'show_ui' => true,
+		'show_in_menu' => 'aws-sbg-suite',
 		'show_in_rest' => false,
 		'supports' => array( 'title', 'custom-fields' ),
 		'menu_position' => 20,
@@ -232,6 +297,7 @@ function aws_sbg_register_post_types() {
 		'description' => 'Contact Form Submissions',
 		'public' => false,
 		'show_ui' => true,
+		'show_in_menu' => 'aws-sbg-suite',
 		'show_in_rest' => false,
 		'supports' => array( 'title', 'custom-fields' ),
 		'menu_position' => 21,

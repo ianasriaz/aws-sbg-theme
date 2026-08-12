@@ -1,6 +1,7 @@
 <?php
 /**
- * AWS SBG Admin Dashboard for Event Registrations
+ * AWS SBG Admin Control Center & Dashboard Suite
+ * Centralized Management for Registrations, Events, Certificates, Referrals, and Mock Exams.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -8,23 +9,286 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Register Admin Menu Page
+ * 1. UNIFIED ADMIN MENU SUITE REGISTRATION
  */
 function aws_sbg_register_admin_dashboard() {
+	// Parent Suite Menu
 	add_menu_page(
-		'AWS SBG Dashboard',
-		'AWS Dashboard',
+		'AWS SBG Suite',
+		'AWS SBG Suite',
 		'manage_options',
-		'aws-sbg-dashboard',
-		'aws_sbg_render_admin_dashboard',
+		'aws-sbg-suite',
+		'aws_sbg_render_overview_dashboard',
 		'dashicons-cloud',
 		2
 	);
+
+	// Submenu 1: Command Center Overview
+	add_submenu_page(
+		'aws-sbg-suite',
+		'Command Center Overview',
+		'📊 Overview',
+		'manage_options',
+		'aws-sbg-suite',
+		'aws_sbg_render_overview_dashboard'
+	);
+
+	// Submenu 2: Event Registrations
+	add_submenu_page(
+		'aws-sbg-suite',
+		'Event Registrations',
+		'🎫 Registrations',
+		'manage_options',
+		'aws-sbg-registrations',
+		'aws_sbg_render_admin_dashboard'
+	);
+
+	// Submenu 3: Events & Certificates Setup
+	add_submenu_page(
+		'aws-sbg-suite',
+		'Events & Certificate Setup',
+		'📜 Events & Cert Setup',
+		'manage_options',
+		'aws-sbg-events',
+		'aws_sbg_render_events_admin_page'
+	);
+
+	// Submenu 4: Certified Roster & Referrals
+	add_submenu_page(
+		'aws-sbg-suite',
+		'Certified Roster & Referrals',
+		'👥 Certified Roster & Referrals',
+		'manage_options',
+		'aws-sbg-members',
+		'aws_sbg_render_members_admin_page'
+	);
+
+	// Submenu 5: Mock Exam Portal Manager
+	add_submenu_page(
+		'aws-sbg-suite',
+		'Mock Exam Manager',
+		'📝 Mock Exams',
+		'manage_options',
+		'aws-mock-exam',
+		'aws_sbg_render_exam_admin_page'
+	);
 }
-add_action( 'admin_menu', 'aws_sbg_register_admin_dashboard' );
+add_action( 'admin_menu', 'aws_sbg_register_admin_dashboard', 9 );
 
 /**
- * Render the Admin Dashboard
+ * 2. REUSABLE TOP NAVIGATION TAB BAR
+ */
+function aws_sbg_render_admin_nav_tabs( $active_tab = 'overview' ) {
+	$tabs = array(
+		'overview'      => array( 'title' => '📊 Overview', 'url' => admin_url( 'admin.php?page=aws-sbg-suite' ) ),
+		'registrations' => array( 'title' => '🎫 Registrations', 'url' => admin_url( 'admin.php?page=aws-sbg-registrations' ) ),
+		'events'        => array( 'title' => '📜 Events & Cert Setup', 'url' => admin_url( 'admin.php?page=aws-sbg-events' ) ),
+		'members'       => array( 'title' => '👥 Certified Roster', 'url' => admin_url( 'admin.php?page=aws-sbg-members' ) ),
+		'mock_exam'     => array( 'title' => '📝 Mock Exams', 'url' => admin_url( 'admin.php?page=aws-mock-exam' ) ),
+	);
+	?>
+	<div style="background:#ffffff; border-bottom:1px solid #e2e8f0; margin:-10px -20px 25px -20px; padding:15px 25px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 4px rgba(0,0,0,0.02); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+		<div style="display:flex; align-items:center; gap:12px;">
+			<div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #ad5cff, #7000ff); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px; box-shadow:0 4px 10px rgba(173,92,255,0.3);">☁️</div>
+			<div>
+				<h2 style="margin:0; font-size:18px; font-weight:800; color:#0f172a; line-height:1.2;">AWS SBG Control Center</h2>
+				<span style="font-size:11px; color:#64748b; font-weight:600;">Air University Community Platform • Unified Suite</span>
+			</div>
+		</div>
+		<div style="display:flex; items-center; gap:6px; background:#f8fafc; padding:4px; border-radius:12px; border:1px solid #e2e8f0;">
+			<?php foreach ( $tabs as $key => $tab ) : ?>
+				<a href="<?php echo esc_url( $tab['url'] ); ?>" style="padding:8px 14px; border-radius:8px; font-size:12px; font-weight:700; text-decoration:none; transition:all 0.15s ease; <?php echo ( $active_tab === $key ) ? 'background:#ffffff; color:#ad5cff; box-shadow:0 2px 4px rgba(0,0,0,0.06); border:1px solid #e2e8f0;' : 'color:#64748b;'; ?>">
+					<?php echo esc_html( $tab['title'] ); ?>
+				</a>
+			<?php endforeach; ?>
+		</div>
+	</div>
+	<?php
+}
+
+/**
+ * 3. MAIN COMMAND CENTER OVERVIEW DASHBOARD
+ */
+function aws_sbg_render_overview_dashboard() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized access.' );
+	}
+
+	global $wpdb;
+	$table_certs  = $wpdb->prefix . 'aws_sbg_event_issued_certs';
+	$table_events = $wpdb->prefix . 'aws_sbg_events';
+
+	// Count Metrics
+	$total_registrations = wp_count_posts( 'aws_event_reg' )->publish;
+	$total_certs         = $wpdb->get_var( "SELECT COUNT(*) FROM $table_certs" );
+	$total_referrals     = $wpdb->get_var( "SELECT COUNT(*) FROM $table_certs WHERE is_new_builder = 1" );
+	$total_events        = $wpdb->get_var( "SELECT COUNT(*) FROM $table_events WHERE status = 'active'" );
+
+	// Fetch recent registrations
+	$recent_regs = get_posts( array(
+		'post_type'      => 'aws_event_reg',
+		'posts_per_page' => 5,
+		'post_status'    => 'publish',
+	) );
+
+	// Fetch recent certs
+	$recent_certs = $wpdb->get_results( "SELECT c.*, e.title as event_title FROM $table_certs c LEFT JOIN $table_events e ON c.event_id = e.id ORDER BY c.id DESC LIMIT 5" );
+
+	aws_sbg_render_admin_nav_tabs( 'overview' );
+	?>
+	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; max-width:1200px;">
+		
+		<!-- WELCOME BANNER -->
+		<div style="background:linear-gradient(135deg, #0f172a, #1e293b); color:#ffffff; padding:25px; border-radius:16px; margin-bottom:25px; box-shadow:0 10px 25px rgba(0,0,0,0.1); position:relative; overflow:hidden;">
+			<div style="position:absolute; right:-20px; top:-20px; width:200px; height:200px; background:rgba(173,92,255,0.15); border-radius:100px; blur:40px; pointer-events:none;"></div>
+			<span style="background:rgba(173,92,255,0.2); color:#ad5cff; border:1px solid rgba(173,92,255,0.4); font-size:10px; font-weight:800; text-transform:uppercase; padding:4px 10px; border-radius:20px;">AWS SBG Command Center</span>
+			<h1 style="margin:10px 0 6px 0; font-size:24px; font-weight:900; color:#ffffff;">Welcome back, Administrator 👋</h1>
+			<p style="margin:0; font-size:13px; color:#94a3b8; max-width:600px;">Manage active workshop registrations, issue verified certificates, track community referral signups, and monitor exam performance from a single dashboard.</p>
+		</div>
+
+		<!-- GLOBAL KPI METRIC CARDS -->
+		<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:18px; margin-bottom:25px;">
+			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
+				<div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#64748b;">Event Registrations</div>
+				<div style="font-size:32px; font-weight:900; color:#0f172a; margin-top:4px;"><?php echo intval( $total_registrations ); ?></div>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-registrations' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none; margin-top:8px; display:inline-block;">Manage Registrations ➔</a>
+			</div>
+			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
+				<div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#64748b;">Certificates Issued</div>
+				<div style="font-size:32px; font-weight:900; color:#ad5cff; margin-top:4px;"><?php echo intval( $total_certs ); ?></div>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-members' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none; margin-top:8px; display:inline-block;">View Certified Roster ➔</a>
+			</div>
+			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
+				<div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#64748b;">Referral Signups 🌟</div>
+				<div style="font-size:32px; font-weight:900; color:#10b981; margin-top:4px;"><?php echo intval( $total_referrals ); ?></div>
+				<span style="font-size:11px; color:#059669; font-weight:700; margin-top:8px; display:inline-block;">Community Supporters</span>
+			</div>
+			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
+				<div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#64748b;">Active Workshops</div>
+				<div style="font-size:32px; font-weight:900; color:#0284c7; margin-top:4px;"><?php echo intval( $total_events ); ?></div>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-events' ) ); ?>" style="font-size:11px; color:#0284c7; font-weight:700; text-decoration:none; margin-top:8px; display:inline-block;">Manage Setup ➔</a>
+			</div>
+		</div>
+
+		<!-- QUICK MANAGEMENT ACTIONS -->
+		<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom:30px;">
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-registrations' ) ); ?>" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:15px; text-decoration:none; color:#0f172a; transition:all 0.15s ease; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+				<div style="font-size:20px; mb-2">🎫</div>
+				<div style="font-weight:800; font-size:13px;">Registrations Hub</div>
+				<div style="font-size:11px; color:#64748b; margin-top:2px;">Filter attendees &amp; payments</div>
+			</a>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-events' ) ); ?>" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:15px; text-decoration:none; color:#0f172a; transition:all 0.15s ease; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+				<div style="font-size:20px; mb-2">📜</div>
+				<div style="font-weight:800; font-size:13px;">Active Events &amp; Certs</div>
+				<div style="font-size:11px; color:#64748b; margin-top:2px;">Configure survey &amp; referral links</div>
+			</a>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-members' ) ); ?>" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:15px; text-decoration:none; color:#0f172a; transition:all 0.15s ease; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+				<div style="font-size:20px; mb-2">👥</div>
+				<div style="font-weight:800; font-size:13px;">Certified Roster</div>
+				<div style="font-size:11px; color:#64748b; margin-top:2px;">Track screenshots &amp; referral badges</div>
+			</a>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-mock-exam' ) ); ?>" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:15px; text-decoration:none; color:#0f172a; transition:all 0.15s ease; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+				<div style="font-size:20px; mb-2">📝</div>
+				<div style="font-weight:800; font-size:13px;">Mock Exam Manager</div>
+				<div style="font-size:11px; color:#64748b; margin-top:2px;">Question banks &amp; student scores</div>
+			</a>
+		</div>
+
+		<!-- RECENT ACTIVITY GRID -->
+		<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+			
+			<!-- RECENT REGISTRATIONS -->
+			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+				<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+					<h3 style="margin:0; font-size:14px; font-weight:800; color:#0f172a;">Recent Event Registrations</h3>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-registrations' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none;">View All ➔</a>
+				</div>
+				<?php if ( empty( $recent_regs ) ) : ?>
+					<div style="font-size:12px; color:#64748b;">No recent registrations found.</div>
+				<?php else : ?>
+					<div style="display:flex; flex-direction:column; gap:10px;">
+						<?php foreach ( $recent_regs as $reg ) : ?>
+							<?php
+							$email     = get_post_meta( $reg->ID, 'email', true );
+							$reg_no    = get_post_meta( $reg->ID, 'registration_id', true );
+							$supporter = get_post_meta( $reg->ID, 'is_supporter', true ) === '1';
+							?>
+							<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#f8fafc; border-radius:10px; font-size:12px;">
+								<div>
+									<strong style="color:#0f172a; display:block;"><?php echo esc_html( get_the_title( $reg->ID ) ); ?></strong>
+									<span style="color:#64748b; font-family:monospace; font-size:11px;"><?php echo esc_html( $email ); ?></span>
+								</div>
+								<div style="text-align:right;">
+									<span style="background:#e2e8f0; color:#334155; font-weight:800; padding:2px 8px; border-radius:12px; font-size:10px;">#<?php echo esc_html( $reg_no ); ?></span>
+									<?php if ( $supporter ) : ?>
+										<span style="background:#fef3c7; color:#d97706; font-weight:800; padding:2px 6px; border-radius:12px; font-size:10px; margin-left:4px;">⭐ SUPPORTER</span>
+									<?php endif; ?>
+								</div>
+							</div>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+			</div>
+
+			<!-- RECENT CERTIFICATES ISSUED -->
+			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
+				<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+					<h3 style="margin:0; font-size:14px; font-weight:800; color:#0f172a;">Recent Issued Certificates</h3>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-members' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none;">View Roster ➔</a>
+				</div>
+				<?php if ( empty( $recent_certs ) ) : ?>
+					<div style="font-size:12px; color:#64748b;">No certificates issued yet.</div>
+				<?php else : ?>
+					<div style="display:flex; flex-direction:column; gap:10px;">
+						<?php foreach ( $recent_certs as $cert ) : ?>
+							<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#f8fafc; border-radius:10px; font-size:12px;">
+								<div>
+									<strong style="color:#0f172a; display:block;"><?php echo esc_html( $cert->participant_name ); ?></strong>
+									<span style="color:#64748b; font-size:11px;"><?php echo esc_html( $cert->event_title ? $cert->event_title : 'Workshop' ); ?></span>
+								</div>
+								<div style="text-align:right;">
+									<?php if ( ! empty( $cert->is_new_builder ) ) : ?>
+										<span style="background:#f3e8ff; color:#7e22ce; font-weight:800; padding:2px 8px; border-radius:12px; font-size:10px;">🌟 SUPPORTER</span>
+									<?php else : ?>
+										<span style="background:#f1f5f9; color:#64748b; font-weight:700; padding:2px 8px; border-radius:12px; font-size:10px;">⚡ EXISTING</span>
+									<?php endif; ?>
+								</div>
+							</div>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+			</div>
+
+		</div>
+
+	</div>
+	<?php
+}
+
+/**
+ * 4. AJAX PERK CLAIM TOGGLE HANDLER
+ */
+function aws_sbg_handle_perk_toggle() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Unauthorized' );
+	}
+
+	$reg_id = isset( $_POST['reg_id'] ) ? intval( $_POST['reg_id'] ) : 0;
+	$key    = isset( $_POST['perk_key'] ) ? sanitize_key( $_POST['perk_key'] ) : '';
+
+	if ( $reg_id && in_array( $key, array( 'attended', 'lunch_claimed', 'swag_claimed', 'custom_perk_claimed' ) ) ) {
+		$current = get_post_meta( $reg_id, $key, true );
+		$new_val = ( $current === 'yes' ) ? 'no' : 'yes';
+		update_post_meta( $reg_id, $key, $new_val );
+		wp_send_json_success( array( 'new_val' => $new_val ) );
+	}
+
+	wp_send_json_error( 'Invalid Request' );
+}
+add_action( 'wp_ajax_aws_sbg_toggle_perk', 'aws_sbg_handle_perk_toggle' );
+
+/**
+ * 5. RENDER THE EVENT REGISTRATION ADMIN DASHBOARD
  */
 function aws_sbg_render_admin_dashboard() {
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -33,31 +297,31 @@ function aws_sbg_render_admin_dashboard() {
 
 	// Fetch registrations
 	$paged = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
-	$args = array(
-		'post_type' => 'aws_event_reg',
+	$args  = array(
+		'post_type'      => 'aws_event_reg',
 		'posts_per_page' => 50,
-		'paged' => $paged,
-		'post_status' => 'publish',
+		'paged'          => $paged,
+		'post_status'    => 'publish',
 	);
-	
+
 	$meta_query = array( 'relation' => 'AND' );
 
 	// Handle event filtering
 	$selected_event = isset( $_GET['filter_event'] ) ? intval( $_GET['filter_event'] ) : 0;
 	if ( $selected_event ) {
 		$meta_query[] = array(
-			'key' => 'event_id',
-			'value' => $selected_event,
+			'key'     => 'event_id',
+			'value'   => $selected_event,
 			'compare' => '=',
 		);
 	}
 
-	// Handle search by Registration ID
+	// Handle search by Registration ID or Email
 	$search_reg = isset( $_GET['search_reg'] ) ? sanitize_text_field( $_GET['search_reg'] ) : '';
 	if ( $search_reg ) {
 		$meta_query[] = array(
-			'key' => 'registration_id',
-			'value' => $search_reg,
+			'key'     => 'registration_id',
+			'value'   => $search_reg,
 			'compare' => 'LIKE',
 		);
 	}
@@ -70,276 +334,187 @@ function aws_sbg_render_admin_dashboard() {
 
 	// Fetch all events for the filter dropdown
 	$events = get_posts( array(
-		'post_type' => 'aws_event',
+		'post_type'      => 'aws_event',
 		'posts_per_page' => -1,
-		'post_status' => 'publish',
+		'post_status'    => 'publish',
 	) );
+
+	aws_sbg_render_admin_nav_tabs( 'registrations' );
 	?>
-	<div class="wrap">
-		<!-- Load Tailwind CSS just for this dashboard to override WP admin styles -->
-		<script src="https://cdn.tailwindcss.com"></script>
-		<script>
-			tailwind.config = {
-				theme: {
-					extend: {
-						colors: {
-							brand: '#ad5cff',
-							'supporting-green': '#00ef88',
-							dark: '#0a0a0a',
-							card: '#151515',
-						}
-					}
-				}
-			}
-		</script>
+	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; max-width:1200px;">
+		<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 		<style>
 			@media print {
-				/* Hide WP Admin elements completely */
 				#adminmenumain, #wpadminbar, #adminmenuwrap, #wpfooter, .update-nag, .notice { display: none !important; }
 				html, body, #wpcontent, #wpwrap { background: #fff !important; color: #000 !important; margin: 0 !important; padding: 0 !important; margin-left: 0 !important; }
-				
-				/* Hide dashboard widgets / interactive elements */
 				.flex.justify-between.items-center.mb-10, .grid.grid-cols-1, form { display: none !important; }
-				
-				/* Strip dark theme from main containers */
-				.wrap, .mt-8, .bg-dark, .bg-card, table, tbody, tr, th, td {
-					background: transparent !important;
-					border: none !important;
-					box-shadow: none !important;
-					color: #000 !important;
-					min-height: auto !important;
-					margin: 0 !important;
-					padding: 0 !important;
-				}
-				
-				/* Clean up table for printing */
-				.overflow-hidden { overflow: visible !important; }
-				table { width: 100% !important; border-collapse: collapse !important; margin-top: 20px !important; }
-				th, td { border: 1px solid #ccc !important; padding: 12px 10px !important; text-align: left !important; font-size: 13px !important; white-space: normal !important; }
-				th { background: #f8f9fa !important; font-weight: bold !important; text-transform: uppercase !important; font-size: 12px !important; }
-				
-				/* Hide unnecessary columns to keep export clean */
-				th:nth-child(6), td:nth-child(6),
-				th:nth-child(7), td:nth-child(7),
-				th:nth-child(8), td:nth-child(8),
-				th:nth-child(9), td:nth-child(9) {
-					display: none !important;
-				}
-				
-				/* Format text & badges */
-				span, a { color: #000 !important; border: none !important; background: transparent !important; text-decoration: none !important; padding: 0 !important; font-weight: normal !important; }
-				.font-bold { font-weight: bold !important; }
-				
-				/* Add a title just for the print page */
-				table {
-					caption-side: top;
-				}
-				table caption {
-					font-size: 20px !important;
-					font-weight: bold !important;
-					margin-bottom: 20px !important;
-					text-align: left !important;
-					color: #000 !important;
-				}
+				.no-print { display: none !important; }
+				.print-only { display: block !important; }
 			}
 		</style>
 
-		<div class="mt-8 bg-dark min-h-screen rounded-xl overflow-hidden shadow-2xl p-8 border border-white/10 text-white font-sans">
-			
-			<!-- Dashboard Header -->
-			<div class="flex justify-between items-center mb-10">
-				<div>
-					<h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand to-supporting-green mb-2">AWS SBG Event Dashboard</h1>
-					<p class="text-gray-400">Manage all your event registrations and community data in one place.</p>
-				</div>
-				<div>
-					<button type="button" onclick="if(!document.fullscreenElement){document.documentElement.requestFullscreen();}else{document.exitFullscreen();}" class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-colors border border-white/20 shadow-lg inline-flex items-center gap-2 mr-3">
-						<span class="dashicons dashicons-editor-expand before:mt-1"></span> Full Screen
-					</button>
-					<a href="#" class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-colors border border-white/20 shadow-lg inline-flex items-center gap-2" onclick="window.print()">
-						<span class="dashicons dashicons-media-spreadsheet before:mt-1"></span> Export Data
-					</a>
-				</div>
+		<!-- HEADER & SEARCH BAR -->
+		<div class="flex justify-between items-center mb-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+			<div>
+				<h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+					<span>🎫 Event Registrations</span>
+				</h1>
+				<p class="text-slate-500 text-xs mt-1 font-medium">Verify attendee registrations, ticket tiers, payment proofs, and perk redemptions.</p>
 			</div>
 
-			<!-- Metrics Cards -->
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-				<div class="bg-card rounded-xl p-6 border border-brand/20 shadow-[0_0_15px_rgba(173,92,255,0.1)] relative overflow-hidden group">
-					<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-						<span class="dashicons dashicons-groups text-8xl text-brand"></span>
-					</div>
-					<h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider mb-2">Total Registrations</h3>
-					<div class="text-5xl font-bold text-white"><?php echo esc_html( $registrations->found_posts ); ?></div>
-				</div>
-				
-				<div class="bg-card rounded-xl p-6 border border-supporting-green/20 shadow-[0_0_15px_rgba(0,239,136,0.1)] relative overflow-hidden group">
-					<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-						<span class="dashicons dashicons-calendar-alt text-8xl text-supporting-green"></span>
-					</div>
-					<h3 class="text-gray-400 text-sm font-medium uppercase tracking-wider mb-2">Active Events</h3>
-					<div class="text-5xl font-bold text-white"><?php echo count($events); ?></div>
-				</div>
-			</div>
-
-			<!-- Filters -->
-			<div class="bg-card rounded-xl p-6 border border-white/10 mb-8">
-				<form method="GET" action="" class="flex flex-col md:flex-row items-center justify-between gap-6">
-					<input type="hidden" name="page" value="aws-sbg-dashboard">
+			<div class="flex items-center gap-3">
+				<form method="GET" class="flex items-center gap-2">
+					<input type="hidden" name="page" value="aws-sbg-registrations">
 					
-					<!-- Search -->
-					<div class="flex items-center gap-3 w-full md:w-auto">
-						<div class="relative w-full md:w-80">
-							<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-								<svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-							</div>
-							<input type="text" name="search_reg" value="<?php echo esc_attr( $search_reg ); ?>" placeholder="Search by Reg # (e.g. 1001)" class="!bg-[#151515] !border-white/20 !text-white text-sm rounded-lg focus:!ring-brand focus:!border-brand block w-full !pl-10 !py-2.5 transition-colors placeholder:text-gray-500 shadow-inner">
-						</div>
-						<button type="submit" class="px-5 py-2.5 bg-brand text-white text-sm font-semibold rounded-lg hover:bg-[#923deb] transition-colors shadow-lg">Search</button>
-						<?php if ( $search_reg ) : ?>
-							<a href="?page=aws-sbg-dashboard" class="px-4 py-2.5 bg-white/10 text-white text-sm font-semibold rounded-lg hover:bg-white/20 transition-colors">Clear</a>
-						<?php endif; ?>
-					</div>
+					<select name="filter_event" onchange="this.form.submit()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none">
+						<option value="">-- All Events --</option>
+						<?php foreach ( $events as $ev ) : ?>
+							<option value="<?php echo $ev->ID; ?>" <?php selected( $selected_event, $ev->ID ); ?>>
+								<?php echo esc_html( $ev->post_title ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
 
-					<!-- Event Filter -->
-					<div class="flex items-center gap-3 w-full md:w-auto">
-						<span class="font-medium text-gray-300 whitespace-nowrap">Filter Event:</span>
-						<select name="filter_event" onchange="this.form.submit()" class="bg-black/50 border border-white/20 text-white text-sm rounded-lg focus:ring-brand focus:border-brand block w-full md:w-64 p-2.5 cursor-pointer hover:border-brand/50 transition-colors">
-							<option value="0">All Events</option>
-							<?php foreach ( $events as $event ) : ?>
-								<option value="<?php echo esc_attr( $event->ID ); ?>" <?php selected( $selected_event, $event->ID ); ?>>
-									<?php echo esc_html( $event->post_title ); ?>
-								</option>
-							<?php endforeach; ?>
-						</select>
-					</div>
+					<input type="text" name="search_reg" value="<?php echo esc_attr( $search_reg ); ?>" placeholder="Reg # (e.g. 1004)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none w-36">
+					
+					<button type="submit" class="bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-xs hover:bg-slate-800 transition-all">Search</button>
 				</form>
 			</div>
+		</div>
 
-			<!-- Data Table -->
-			<div class="bg-card rounded-xl border border-white/10 overflow-hidden">
-				<table class="w-full text-sm text-left text-gray-400">
-					<thead class="text-xs text-gray-300 uppercase bg-white/5 border-b border-white/10">
+		<!-- REGISTRATIONS TABLE -->
+		<div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+			<table class="w-full text-left text-xs border-collapse">
+				<thead>
+					<tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider">
+						<th class="py-3.5 px-4">Reg #</th>
+						<th class="py-3.5 px-4">Attendee Name</th>
+						<th class="py-3.5 px-4">Phone #</th>
+						<th class="py-3.5 px-4">Email</th>
+						<th class="py-3.5 px-4">Tier / Pass</th>
+						<th class="py-3.5 px-4 text-center">Payment Screenshot</th>
+						<th class="py-3.5 px-4">University / Org</th>
+					</tr>
+				</thead>
+				<tbody class="divide-y divide-slate-100">
+					<?php if ( ! $registrations->have_posts() ) : ?>
 						<tr>
-							<th scope="col" class="px-6 py-4 font-semibold">Reg #</th>
-							<th scope="col" class="px-6 py-4 font-semibold">Attendee Name</th>
-							<th scope="col" class="px-6 py-4 font-semibold">Event</th>
-							<th scope="col" class="px-6 py-4 font-semibold">Email</th>
-							<th scope="col" class="px-6 py-4 font-semibold">WhatsApp</th>
-							<th scope="col" class="px-6 py-4 font-semibold">University/Org</th>
-							<th scope="col" class="px-6 py-4 font-semibold">Ticket</th>
-							<th scope="col" class="px-6 py-4 font-semibold text-center">Payment Proof</th>
-							<th scope="col" class="px-6 py-4 font-semibold">Registered Date</th>
+							<td colspan="7" class="py-8 text-center text-slate-500 font-medium">No registrations found matching your criteria.</td>
 						</tr>
-					</thead>
-					<tbody>
-						<?php if ( $registrations->have_posts() ) : ?>
-							<?php while ( $registrations->have_posts() ) : $registrations->the_post(); 
-								$reg_id_meta = get_post_meta( get_the_ID(), 'registration_id', true );
-								$reg_event_id = get_post_meta( get_the_ID(), 'event_id', true );
-								$reg_event_title = $reg_event_id ? get_the_title( $reg_event_id ) : 'N/A';
-								$email = get_post_meta( get_the_ID(), 'email', true );
-								$whatsapp = get_post_meta( get_the_ID(), 'whatsapp_number', true );
-								$uni = get_post_meta( get_the_ID(), 'university_organization', true );
-								$ticket = get_post_meta( get_the_ID(), 'ticket_tier', true );
-								if ( $ticket === 'super' ) {
-									$ticket_label = 'SUPER';
-									$ticket_class = 'bg-brand/20 text-brand border-brand/30';
-								} elseif ( $ticket === 'pro' ) {
-									$ticket_label = 'PRO';
-									$ticket_class = 'bg-orange-500/20 text-orange-400 border-orange-500/30';
-								} else {
-									$ticket_label = 'FREE';
-									$ticket_class = 'bg-supporting-green/20 text-supporting-green border-supporting-green/30';
-								}
-								
-								$payment_proof_id = get_post_meta( get_the_ID(), 'payment_screenshot', true );
-								$payment_proof_url = $payment_proof_id ? wp_get_attachment_url( $payment_proof_id ) : false;
+					<?php else : ?>
+						<?php while ( $registrations->have_posts() ) : $registrations->the_post(); ?>
+							<?php
+							$reg_id        = get_the_ID();
+							$reg_num       = get_post_meta( $reg_id, 'registration_id', true );
+							$reg_display   = $reg_num ? '#' . ltrim( $reg_num, '#' ) : '#' . $reg_id;
 
-								// Extract full name from post title (Format: Name (RegID) - Event)
-								$raw_title = get_the_title();
-								$full_name = $raw_title;
-								if ( $reg_event_title && $reg_event_title !== 'N/A' ) {
-									// Strip the " - Event Title" from the end
-									$full_name = preg_replace('/( - | – )' . preg_quote($reg_event_title, '/') . '$/', '', $full_name);
-								}
-								// Strip the " (1001)" from the end
-								$full_name = preg_replace('/ \([0-9]+\)$/', '', $full_name);
+							// Strip #1047 - and Supporter tags to keep name clean
+							$raw_title     = get_the_title();
+							$clean_name    = preg_replace( '/^#\d+\s*-\s*/', '', $raw_title );
+							$clean_name    = trim( str_replace( array( '⭐ Super Supporter', 'Super Supporter', '⭐' ), '', $clean_name ) );
+
+							$email         = get_post_meta( $reg_id, 'email', true );
+							$phone         = get_post_meta( $reg_id, 'whatsapp_number', true );
+							if ( empty( $phone ) ) {
+								$phone = get_post_meta( $reg_id, 'phone_number', true ) ?: get_post_meta( $reg_id, 'phone', true );
+							}
+							$event_id      = get_post_meta( $reg_id, 'event_id', true );
+							$event_type    = get_post_meta( $event_id, 'aws_event_type', true );
+							$ticket_tier   = get_post_meta( $reg_id, 'ticket_tier', true );
+							$is_supporter  = get_post_meta( $reg_id, 'is_supporter', true ) === '1' || $ticket_tier === 'supporter';
+							$payment_txn   = get_post_meta( $reg_id, 'payment_txn_id', true );
+							$attended      = get_post_meta( $reg_id, 'attended', true ) === 'yes';
+
+							// Extract Payment Screenshot URL
+							$payment_meta = get_post_meta( $reg_id, 'payment_screenshot', true );
+							if ( empty( $payment_meta ) ) {
+								$payment_meta = get_post_meta( $reg_id, 'payment_proof_url', true ) ?: get_post_meta( $reg_id, 'payment_proof', true );
+							}
+
+							$proof_url = '';
+							if ( is_numeric( $payment_meta ) && intval( $payment_meta ) > 0 ) {
+								$proof_url = wp_get_attachment_url( intval( $payment_meta ) );
+							} elseif ( filter_var( $payment_meta, FILTER_VALIDATE_URL ) ) {
+								$proof_url = $payment_meta;
+							}
 							?>
-								<tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-									<td class="px-6 py-4 font-bold text-brand whitespace-nowrap">
-										#<?php echo esc_html( $reg_id_meta ? $reg_id_meta : 'N/A' ); ?>
-									</td>
-									<td class="px-6 py-4 font-medium text-white whitespace-nowrap">
-										<?php echo esc_html( $full_name ); ?>
-									</td>
-									<td class="px-6 py-4">
-										<span class="px-3 py-1 text-xs font-medium bg-brand/20 text-brand rounded-full border border-brand/30">
-											<?php echo esc_html( $reg_event_title ); ?>
-										</span>
-									</td>
-									<td class="px-6 py-4">
-										<a href="mailto:<?php echo esc_attr( $email ); ?>" class="hover:text-brand transition-colors"><?php echo esc_html( $email ); ?></a>
-									</td>
-									<td class="px-6 py-4">
-										<?php echo esc_html( $whatsapp ); ?>
-									</td>
-									<td class="px-6 py-4">
-										<?php echo esc_html( $uni ); ?>
-									</td>
-									<td class="px-6 py-4">
-										<span class="px-2 py-1 text-xs font-bold uppercase tracking-wider rounded border <?php echo esc_attr( $ticket_class ); ?>">
-											<?php echo esc_html( $ticket_label ); ?>
-										</span>
-									</td>
-									<td class="px-6 py-4 text-center">
-										<?php if ( in_array( $ticket, ['pro', 'super'] ) ) : ?>
-											<?php if ( $payment_proof_url ) : ?>
-												<a href="<?php echo esc_url( $payment_proof_url ); ?>" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#ad5cff]/10 text-[#ad5cff] hover:bg-[#ad5cff]/20 rounded-lg text-xs font-semibold transition-colors border border-[#ad5cff]/20">
-													<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-													View Receipt
-												</a>
-											<?php else : ?>
-												<span class="text-xs text-red-400 font-medium bg-red-400/10 px-2 py-1 rounded border border-red-400/20">Missing</span>
-											<?php endif; ?>
-										<?php else : ?>
-											<span class="text-xs text-gray-600 font-medium">-</span>
-										<?php endif; ?>
-									</td>
-									<td class="px-6 py-4 text-gray-500">
-										<?php echo get_the_date( 'M j, Y g:i a' ); ?>
-									</td>
-								</tr>
-							<?php endwhile; wp_reset_postdata(); ?>
-						<?php else : ?>
-							<tr>
-								<td colspan="9" class="px-6 py-8 text-center text-gray-500">
-									No registrations found.
+							<tr class="hover:bg-slate-50/80 transition-colors">
+								<td class="py-3.5 px-4 font-mono font-bold text-slate-900"><?php echo esc_html( $reg_display ); ?></td>
+								<td class="py-3.5 px-4 font-bold text-slate-900"><?php echo esc_html( $clean_name ); ?></td>
+								<td class="py-3.5 px-4 font-mono text-slate-600">
+									<?php if ( ! empty( $phone ) ) : ?>
+										<span class="font-bold text-slate-800"><?php echo esc_html( $phone ); ?></span>
+									<?php else : ?>
+										<span class="text-slate-400">N/A</span>
+									<?php endif; ?>
+								</td>
+								<td class="py-3.5 px-4 font-mono text-slate-500"><?php echo esc_html( $email ); ?></td>
+								<td class="py-3.5 px-4">
+									<?php if ( $is_supporter ) : ?>
+										<span class="bg-amber-100 text-amber-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">⭐ SUPPORTER</span>
+									<?php elseif ( $ticket_tier === 'earlybird' ) : ?>
+										<span class="bg-purple-100 text-purple-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">PAID (EARLY)</span>
+									<?php elseif ( $ticket_tier === 'regular' || $event_type === 'paid' || $event_type === 'paid_single' || $event_type === 'paid_tiered' || ! empty( $payment_txn ) ) : ?>
+										<span class="bg-purple-100 text-purple-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">PAID</span>
+									<?php else : ?>
+										<span class="bg-emerald-100 text-emerald-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">FREE</span>
+									<?php endif; ?>
+								</td>
+								<td class="py-3.5 px-4 text-center">
+									<?php if ( ! empty( $proof_url ) ) : ?>
+										<a href="<?php echo esc_url( $proof_url ); ?>" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-extrabold bg-[#f3e8ff] text-[#7e22ce] hover:bg-[#e9d5ff] transition-all border border-[#ad5cff]/30 shadow-xs">
+											<span>🖼 View Receipt</span>
+										</a>
+									<?php else : ?>
+										<span class="text-slate-400 font-semibold text-[11px]">No Screenshot</span>
+									<?php endif; ?>
+								</td>
+								<td class="py-3.5 px-4">
+									<span class="text-[12px] font-semibold text-slate-700">
+										<?php 
+										$university = get_post_meta( $reg_id, 'university_organization', true );
+										echo esc_html( $university ? $university : '-' ); 
+										?>
+									</span>
 								</td>
 							</tr>
-						<?php endif; ?>
-					</tbody>
-				</table>
-				
-				<!-- Pagination Controls -->
-				<?php
-				$total_pages = $registrations->max_num_pages;
-				if ( $total_pages > 1 ) :
-				?>
-					<div class="px-6 py-4 border-t border-white/10 flex justify-between items-center bg-white/5">
-						<span class="text-sm text-gray-400 font-medium">Page <?php echo esc_html( $paged ); ?> of <?php echo esc_html( $total_pages ); ?></span>
-						<div class="flex gap-2">
-							<?php if ( $paged > 1 ) : ?>
-								<a href="<?php echo esc_url( add_query_arg( 'paged', $paged - 1 ) ); ?>" class="px-4 py-2 bg-white/10 text-white text-sm font-semibold rounded-lg hover:bg-white/20 transition-colors border border-white/10 shadow-sm">Previous</a>
-							<?php endif; ?>
-							<?php if ( $paged < $total_pages ) : ?>
-								<a href="<?php echo esc_url( add_query_arg( 'paged', $paged + 1 ) ); ?>" class="px-4 py-2 bg-white/10 text-white text-sm font-semibold rounded-lg hover:bg-white/20 transition-colors border border-white/10 shadow-sm">Next</a>
-							<?php endif; ?>
-						</div>
-					</div>
-				<?php endif; ?>
-			</div>
-
+						<?php endwhile; wp_reset_postdata(); ?>
+					<?php endif; ?>
+				</tbody>
+			</table>
 		</div>
+
+		<!-- PAGINATION -->
+		<?php if ( $registrations->max_num_pages > 1 ) : ?>
+			<div class="mt-6 flex justify-center">
+				<?php
+				echo paginate_links( array(
+					'base'      => add_query_arg( 'paged', '%#%' ),
+					'format'    => '',
+					'current'   => $paged,
+					'total'     => $registrations->max_num_pages,
+					'prev_text' => '« Prev',
+					'next_text' => 'Next »',
+				) );
+				?>
+			</div>
+		<?php endif; ?>
+
+		<script>
+		function togglePerk(regId, key) {
+			jQuery.post(ajaxurl, {
+				action: 'aws_sbg_toggle_perk',
+				reg_id: regId,
+				perk_key: key
+			}, function(response) {
+				if (response.success) {
+					location.reload();
+				} else {
+					alert(response.data || 'Failed to update perk status');
+				}
+			});
+		}
+		</script>
 	</div>
 	<?php
 }

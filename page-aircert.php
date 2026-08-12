@@ -131,10 +131,10 @@ get_header();
 				
 				<!-- Floating Images -->
 				<div class="absolute top-0 md:top-8 left-0 w-[70%] z-20 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#111] animate-float">
-					<img src="https://awscloudclubau.com/wp-content/uploads/2026/07/Event-Participant-Card.png" alt="ID Card" class="w-full h-auto object-cover">
+					<img src="<?php echo esc_url( content_url( '/uploads/2026/07/Event-Participant-Card.png' ) ); ?>" alt="ID Card" class="w-full h-auto object-cover">
 				</div>
 				<div class="absolute bottom-0 md:bottom-8 right-0 w-[70%] z-10 rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-[#111] animate-float" style="animation-delay: 2s;">
-					<img src="https://awscloudclubau.com/wp-content/uploads/2026/07/xlarge_100591191-e858d8acf63ec3f822e959d6b1c38268.png" alt="Swags" class="w-full h-auto object-cover opacity-90">
+					<img src="<?php echo esc_url( content_url( '/uploads/2026/07/xlarge_100591191-e858d8acf63ec3f822e959d6b1c38268.png' ) ); ?>" alt="Swags" class="w-full h-auto object-cover opacity-90">
 				</div>
 			</div>
 
@@ -194,7 +194,7 @@ get_header();
 					
 					<!-- Column 1: Speaker -->
 					<div class="w-full md:w-[25%] relative bg-gray-900 shrink-0 h-[250px] md:h-auto">
-						<img src="https://awscloudclubau.com/wp-content/uploads/2026/07/Dr.-Frank.webp" alt="Dr. Frank Spiess" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100 object-top md:object-center">
+						<img src="<?php echo esc_url( content_url( '/uploads/2026/07/Dr.-Frank.webp' ) ); ?>" alt="Dr. Frank Spiess" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100 object-top md:object-center">
 						<div class="absolute top-4 left-4 bg-black/40 backdrop-blur-md border border-white/10 text-white text-[10px] md:text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 z-10">
 							<span class="w-1.5 h-1.5 rounded-full bg-[#00ef88] animate-pulse"></span>
 							Virtual
@@ -203,7 +203,7 @@ get_header();
 						<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-0"></div>
 						<div class="absolute bottom-5 left-6 z-10 flex flex-col gap-1">
 							<span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Works At</span>
-							<img src="https://awscloudclubau.com/wp-content/uploads/2026/07/pngwing.com_.png" alt="Amazon Web Services" class="h-6 w-auto object-contain brightness-0 invert opacity-90">
+							<img src="<?php echo esc_url( content_url( '/uploads/2026/07/pngwing.com_.png' ) ); ?>" alt="Amazon Web Services" class="h-6 w-auto object-contain brightness-0 invert opacity-90">
 						</div>
 					</div>
 
@@ -261,7 +261,7 @@ get_header();
 					
 					<!-- Column 1: Speaker -->
 					<div class="w-full md:w-[25%] relative bg-gray-900 shrink-0 h-[250px] md:h-auto">
-						<img src="https://awscloudclubau.com/wp-content/uploads/2026/07/Awais-Kamran.webp" alt="Awais Kamran" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100 object-top md:object-center">
+						<img src="<?php echo esc_url( content_url( '/uploads/2026/07/Awais-Kamran.webp' ) ); ?>" alt="Awais Kamran" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100 object-top md:object-center">
 						<div class="absolute top-4 left-4 bg-black/40 backdrop-blur-md border border-white/10 text-white text-[10px] md:text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 z-10">
 							<span class="w-1.5 h-1.5 rounded-full bg-[#00ef88] animate-pulse"></span>
 							Virtual
@@ -269,7 +269,7 @@ get_header();
 						<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-0"></div>
 						<div class="absolute bottom-5 left-6 z-10 flex flex-col gap-1">
 							<span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Works At</span>
-							<img src="https://awscloudclubau.com/wp-content/uploads/2026/07/KodeKloud-Logo.png" alt="KodeKloud" class="h-8 w-auto object-contain brightness-0 invert opacity-90">
+							<img src="<?php echo esc_url( content_url( '/uploads/2026/07/KodeKloud-Logo.png' ) ); ?>" alt="KodeKloud" class="h-8 w-auto object-contain brightness-0 invert opacity-90">
 						</div>
 					</div>
 
@@ -326,7 +326,7 @@ get_header();
 					
 					<!-- Column 1: Speaker -->
 					<div class="w-full md:w-[25%] relative bg-gray-900 shrink-0 h-[250px] md:h-auto">
-						<img src="https://awscloudclubau.com/wp-content/uploads/2026/07/Anwaar-Hussain.webp" alt="Anwaar Hussain" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100 object-top md:object-center">
+						<img src="<?php echo esc_url( content_url( '/uploads/2026/07/Anwaar-Hussain.webp' ) ); ?>" alt="Anwaar Hussain" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100 object-top md:object-center">
 						<div class="absolute top-4 left-4 bg-black/40 backdrop-blur-md border border-white/10 text-white text-[10px] md:text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 z-10">
 							<span class="w-1.5 h-1.5 rounded-full bg-[#00ef88] animate-pulse"></span>
 							Virtual
@@ -334,7 +334,7 @@ get_header();
 						<div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-0"></div>
 						<div class="absolute bottom-5 left-6 z-10 flex flex-col gap-1">
 							<span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Works At</span>
-							<img src="https://awscloudclubau.com/wp-content/uploads/2026/07/pngwing.com_.png" alt="Amazon Web Services" class="h-6 w-auto object-contain brightness-0 invert opacity-90">
+							<img src="<?php echo esc_url( content_url( '/uploads/2026/07/pngwing.com_.png' ) ); ?>" alt="Amazon Web Services" class="h-6 w-auto object-contain brightness-0 invert opacity-90">
 						</div>
 					</div>
 

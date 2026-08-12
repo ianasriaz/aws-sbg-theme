@@ -26,6 +26,7 @@
 						<?php
 						$menu_items = array(
 							array( 'title' => 'HOME', 'url' => home_url( '/' ) ),
+							array( 'title' => 'EVENTS', 'url' => home_url( '/events/' ) ),
 							array( 'title' => 'CONTACT US', 'url' => home_url( '/contact/' ) ),
 						);
 
@@ -69,7 +70,7 @@
 				<!-- Center: Logo -->
 				<div class="flex-1 md:flex-shrink-0 flex justify-center items-center min-w-0">
 					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-flex items-center justify-center hover:opacity-90 transition-opacity duration-300">
-						<img src="https://awscloudclubau.com/wp-content/uploads/2026/07/AWS-SBG-AIR-UNIVERSITY-LOGO-2-scaled.png" alt="AWS SBG Air University" class="h-9 sm:h-10 md:h-12 w-auto max-w-full object-contain">
+						<img src="<?php echo esc_url( content_url( '/uploads/2026/07/AWS-SBG-AIR-UNIVERSITY-LOGO-2-scaled.png' ) ); ?>" alt="AWS SBG Air University" class="h-9 sm:h-10 md:h-12 w-auto max-w-full object-contain">
 					</a>
 				</div>
 
