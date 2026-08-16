@@ -426,8 +426,8 @@ function awsCertPortal() {
 				const img = new Image();
 				img.crossOrigin = 'anonymous';
 				img.onload = () => resolve(img);
-				img.onerror = () => resolve(null);
-				img.src = '<?php echo esc_url( get_template_directory_uri() . '/Certificate Template/Certificate.png' ); ?>';
+				const templatePath = '<?php echo esc_url( get_template_directory_uri() . '/Certificate Template/General Certificate Template.png' ); ?>';
+				img.src = templatePath + '?v=<?php echo time(); ?>';
 			});
 
 			const canvas = document.createElement('canvas');

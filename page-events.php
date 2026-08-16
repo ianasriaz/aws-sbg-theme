@@ -76,7 +76,16 @@ $events_query = new WP_Query( array(
 					// Timer Metadata
 					$enable_timer        = (bool) get_post_meta( $event_id, 'aws_event_enable_timer', true );
 					$timer_end           = get_post_meta( $event_id, 'aws_event_timer_end', true );
-					$timer_end_timestamp = ( $enable_timer && ! empty( $timer_end ) ) ? strtotime( $timer_end ) * 1000 : 0;
+					$timer_end_timestamp = 0;
+					if ( $enable_timer && ! empty( $timer_end ) ) {
+						try {
+							$timer_end_clean = str_replace( ' ', 'T', trim( $timer_end ) );
+							$dt = new DateTime( $timer_end_clean, wp_timezone() );
+							$timer_end_timestamp = $dt->getTimestamp() * 1000;
+						} catch ( Exception $e ) {
+							$timer_end_timestamp = strtotime( $timer_end ) * 1000;
+						}
+					}
 				?>
 					<div class="bg-[#120a22]/90 border border-[#ad5cff]/30 rounded-3xl p-6 shadow-2xl backdrop-blur-xl flex flex-col justify-between hover:border-[#ad5cff]/70 transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden">
 						
@@ -98,12 +107,24 @@ $events_query = new WP_Query( array(
 							</h3>
 
 							<!-- Mini Countdown Badge -->
-							<?php if ( $enable_timer && $timer_end_timestamp > 0 ) : ?>
+							<?php if ( $enable_timer && ( $timer_end_timestamp > 0 || ! empty( $timer_end ) ) ) : ?>
 								<div class="mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#ad5cff]/15 border border-[#ad5cff]/40 text-[11px] font-bold text-[#ad5cff]"
-								     x-data="{ distance: <?php echo floatval($timer_end_timestamp); ?> - new Date().getTime(), days: 0, hours: 0, mins: 0, secs: 0 }"
+								     x-data="{ 
+								        timerEndStr: '<?php echo esc_js( $timer_end ); ?>',
+								        endTime: <?php echo floatval( $timer_end_timestamp ); ?>,
+								        distance: 0, days: 0, hours: 0, mins: 0, secs: 0 
+								     }"
 								     x-init="
+								        if (timerEndStr) {
+								            let cleanStr = timerEndStr.trim().replace(' ', 'T');
+								            if (cleanStr.length === 16) cleanStr += ':00';
+								            let parsedDate = new Date(cleanStr);
+								            if (parsedDate && !isNaN(parsedDate.getTime())) {
+								                endTime = parsedDate.getTime();
+								            }
+								        }
 								        const update = () => {
-								            distance = <?php echo floatval($timer_end_timestamp); ?> - new Date().getTime();
+								            distance = endTime - new Date().getTime();
 								            if (distance > 0) {
 								                days = Math.floor(distance / (1000 * 60 * 60 * 24));
 								                hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -114,13 +135,15 @@ $events_query = new WP_Query( array(
 								        update();
 								        setInterval(update, 1000);
 								     ">
+
 									<span>⏱️</span>
 									<template x-if="distance > 0">
 										<span>Ends in: <strong x-text="`${days}d ${hours}h ${mins}m ${secs}s`" class="text-[#ad5cff]"></strong></span>
 									</template>
 									<template x-if="distance <= 0">
-										<span class="text-[#ad5cff]">Deadline Passed</span>
+										<span class="text-rose-400 font-extrabold flex items-center gap-1">🛑 Registrations Closed</span>
 									</template>
+
 								</div>
 							<?php endif; ?>
 

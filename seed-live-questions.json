@@ -1,0 +1,2802 @@
+[
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which AWS cloud architectural benefit allows a company to automatically acquire compute resources as traffic increases and release them when traffic drops?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Elasticity"
+      },
+      {
+        "key": "B",
+        "text": "Agility"
+      },
+      {
+        "key": "C",
+        "text": "High Availability"
+      },
+      {
+        "key": "D",
+        "text": "Fault Tolerance"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Elasticity is the ability of an AWS architecture to automatically scale resources up or down to meet fluctuating demand, minimizing unnecessary costs.",
+    "doc_link": "https://docs.aws.amazon.com/whitepapers/latest/architecting-for-the-cloud/scalability.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "How does moving workloads from an on-premises data center to the AWS Cloud impact a company's financial model?",
+    "options": [
+      {
+        "key": "A",
+        "text": "It replaces variable operational expenses (OpEx) with upfront capital expenses (CapEx)."
+      },
+      {
+        "key": "B",
+        "text": "It trades upfront capital expenses (CapEx) for low variable operational expenses (OpEx)."
+      },
+      {
+        "key": "C",
+        "text": "It eliminates both operational and capital expenses entirely."
+      },
+      {
+        "key": "D",
+        "text": "It requires multi-year long-term financial commitments for all computing services."
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "In cloud computing, organizations trade upfront capital expenses (purchasing servers, hardware, and physical data center space) for pay-as-you-go operational expenses.",
+    "doc_link": "https://aws.amazon.com/what-is-cloud-computing/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which pillar of the AWS Well-Architected Framework focuses on running workloads efficiently, continuously monitoring operations, and improving supporting processes?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Reliability"
+      },
+      {
+        "key": "B",
+        "text": "Performance Efficiency"
+      },
+      {
+        "key": "C",
+        "text": "Operational Excellence"
+      },
+      {
+        "key": "D",
+        "text": "Sustainability"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "The Operational Excellence pillar focuses on running and monitoring systems to deliver business value and continually improving processes and procedures.",
+    "doc_link": "https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar/welcome.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which pillar of the AWS Well-Architected Framework emphasizes recovering automatically from infrastructure failures and dynamically acquiring compute capacity to meet demand?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Security"
+      },
+      {
+        "key": "B",
+        "text": "Cost Optimization"
+      },
+      {
+        "key": "C",
+        "text": "Operational Excellence"
+      },
+      {
+        "key": "D",
+        "text": "Reliability"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "The Reliability pillar encompasses the ability of a workload to perform its intended function correctly and consistently, including recovering from failures.",
+    "doc_link": "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which cloud deployment model enables a company to run sensitive legacy workloads in a private data center while utilizing AWS for scalable public web applications?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Hybrid Cloud deployment"
+      },
+      {
+        "key": "B",
+        "text": "All-in Cloud deployment"
+      },
+      {
+        "key": "C",
+        "text": "Community Cloud deployment"
+      },
+      {
+        "key": "D",
+        "text": "Multi-Tenant On-Premises deployment"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "A hybrid cloud deployment connects on-premises infrastructure with cloud resources, allowing seamless integration between private data centers and AWS.",
+    "doc_link": "https://aws.amazon.com/hybrid/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which AWS benefit allows customers to deploy applications to end users around the globe with single-digit millisecond latency?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Dedicated Host Reservations"
+      },
+      {
+        "key": "B",
+        "text": "Global Footprint & Edge Locations"
+      },
+      {
+        "key": "C",
+        "text": "Decoupled Serverless Microservices"
+      },
+      {
+        "key": "D",
+        "text": "Consolidated Billing Aggregation"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "AWS Global Infrastructure, comprising geographic Regions, Availability Zones, and Edge Locations, allows rapid deployment worldwide with minimal latency.",
+    "doc_link": "https://aws.amazon.com/about-aws/global-infrastructure/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "What is the primary advantage of the 'Pay-as-you-go' pricing model in AWS?",
+    "options": [
+      {
+        "key": "A",
+        "text": "You pay fixed monthly rates regardless of resource usage."
+      },
+      {
+        "key": "B",
+        "text": "All AWS services are completely free for the first 3 years of usage."
+      },
+      {
+        "key": "C",
+        "text": "You only pay for the individual services and compute capacity you actively consume without long-term contracts."
+      },
+      {
+        "key": "D",
+        "text": "You must pay an upfront deposit before provisioning any cloud servers."
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "AWS pay-as-you-go pricing allows customers to easily adapt to changing business needs without overcommitting budgets or requiring upfront investments.",
+    "doc_link": "https://aws.amazon.com/pricing/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "A startup wants to quickly innovate, deploy software updates multiple times a day, and reduce time to market. Which cloud computing advantage directly supports this goal?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Centralized Physical Hardware Maintenance"
+      },
+      {
+        "key": "B",
+        "text": "Fixed Capacity Provisioning"
+      },
+      {
+        "key": "C",
+        "text": "Manual Disaster Recovery"
+      },
+      {
+        "key": "D",
+        "text": "Increased Agility & Speed"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Cloud agility allows development teams to spin up resources in minutes rather than weeks, accelerating experimentation and deployment cycles.",
+    "doc_link": "https://aws.amazon.com/what-is-cloud-computing/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which migration strategy (from the 7 Rs of migration) involves moving an application to AWS without making any changes to its core code or architecture ('lift and shift')?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Rehost"
+      },
+      {
+        "key": "B",
+        "text": "Refactor / Re-architect"
+      },
+      {
+        "key": "C",
+        "text": "Repurchase"
+      },
+      {
+        "key": "D",
+        "text": "Retire"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Rehosting (also known as 'lift and shift') involves migrating applications and databases to the cloud without modifying the application code.",
+    "doc_link": "https://docs.aws.amazon.com/prescriptive-guidance/latest/migration-strategies/rehost.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "What cloud benefit is achieved when hundreds of thousands of AWS customers aggregate their usage, leading to lower pay-as-you-go prices from AWS?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Disaster Recovery Isolation"
+      },
+      {
+        "key": "B",
+        "text": "Massive Economies of Scale"
+      },
+      {
+        "key": "C",
+        "text": "Guaranteed Zero-Latency Network"
+      },
+      {
+        "key": "D",
+        "text": "Single-Tenant Data Sovereignty"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "By aggregating usage across many customers, AWS achieves massive economies of scale, passing the savings on to customers as regular price reductions.",
+    "doc_link": "https://aws.amazon.com/what-is-cloud-computing/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which pillar of the AWS Well-Architected Framework evaluates environmental impacts and focuses on minimizing resource consumption over time?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Cost Optimization"
+      },
+      {
+        "key": "B",
+        "text": "Performance Efficiency"
+      },
+      {
+        "key": "C",
+        "text": "Sustainability"
+      },
+      {
+        "key": "D",
+        "text": "Security"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "The Sustainability pillar focuses on environmental impacts, especially energy consumption and efficiency, across cloud workloads.",
+    "doc_link": "https://docs.aws.amazon.com/wellarchitected/latest/sustainability-pillar/sustainability-pillar.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "What does 'High Availability' mean in the context of cloud infrastructure design?",
+    "options": [
+      {
+        "key": "A",
+        "text": "A billing plan that provides unlimited storage for free."
+      },
+      {
+        "key": "B",
+        "text": "A system that only runs during standard office hours."
+      },
+      {
+        "key": "C",
+        "text": "An infrastructure that operates from a single data center to reduce network hops."
+      },
+      {
+        "key": "D",
+        "text": "A system designed to operate continuously without failure for long periods, often across multiple Availability Zones."
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "High Availability ensures a system remains accessible and operational even if individual components or data centers experience outages.",
+    "doc_link": "https://docs.aws.amazon.com/whitepapers/latest/real-time-communication-on-aws/high-availability-and-scalability.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which perspective of the AWS Cloud Adoption Framework (AWS CAF) focuses on organizational structure, skill development, and cultural evolution during cloud transformation?",
+    "options": [
+      {
+        "key": "A",
+        "text": "People Perspective"
+      },
+      {
+        "key": "B",
+        "text": "Platform Perspective"
+      },
+      {
+        "key": "C",
+        "text": "Operations Perspective"
+      },
+      {
+        "key": "D",
+        "text": "Governance Perspective"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "The People Perspective of the AWS CAF bridges business and technology teams to evaluate roles, organizational readiness, and skill development.",
+    "doc_link": "https://aws.amazon.com/professional-services/CAF/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "A company wants to stop guessing their infrastructure capacity needs for a seasonal e-commerce sale. How does AWS solve this challenge?",
+    "options": [
+      {
+        "key": "A",
+        "text": "By requiring customers to buy physical servers 6 months in advance."
+      },
+      {
+        "key": "B",
+        "text": "By providing automatic elasticity so capacity expands during sales and shrinks afterward."
+      },
+      {
+        "key": "C",
+        "text": "By locking all server instance sizes for a minimum of 1 year."
+      },
+      {
+        "key": "D",
+        "text": "By shutting down the website when user limits are reached."
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Cloud elasticity eliminates capacity guesswork by automatically provisioning server capacity to match real-time demand and tearing down idle capacity.",
+    "doc_link": "https://aws.amazon.com/what-is-cloud-computing/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which migration strategy involves replacing an existing on-premises software system with a cloud-native Software-as-a-Service (SaaS) platform (such as Salesforce or Workday)?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Rehost"
+      },
+      {
+        "key": "B",
+        "text": "Replatform"
+      },
+      {
+        "key": "C",
+        "text": "Repurchase"
+      },
+      {
+        "key": "D",
+        "text": "Refactor"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "Repurchasing (often called 'drop and shop') is moving to a different product, typically a SaaS application offered by a third-party vendor.",
+    "doc_link": "https://docs.aws.amazon.com/prescriptive-guidance/latest/migration-strategies/repurchase.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which pillar of the AWS Well-Architected Framework focuses on structured permission management, data confidentiality, and automated vulnerability detection?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Operational Excellence"
+      },
+      {
+        "key": "B",
+        "text": "Reliability"
+      },
+      {
+        "key": "C",
+        "text": "Cost Optimization"
+      },
+      {
+        "key": "D",
+        "text": "Security"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "The Security pillar focuses on protecting information, systems, and assets while delivering business value through risk assessments and mitigation strategies.",
+    "doc_link": "https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/welcome.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "What is the primary benefit of decoupling application components using asynchronous messaging services in AWS?",
+    "options": [
+      {
+        "key": "A",
+        "text": "It isolates components so that the failure of one service does not crash the entire application."
+      },
+      {
+        "key": "B",
+        "text": "It reduces the total number of IAM users required."
+      },
+      {
+        "key": "C",
+        "text": "It forces all components to share a single CPU core."
+      },
+      {
+        "key": "D",
+        "text": "It guarantees that compute instances never need security updates."
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Decoupled architectures (e.g. using Amazon SQS or SNS) prevent cascading failures and allow components to scale and process tasks independently.",
+    "doc_link": "https://docs.aws.amazon.com/whitepapers/latest/architecting-for-the-cloud/loose-coupling.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which of the following describes a key architectural design principle for building scalable and reliable cloud systems on AWS?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Deploy all mission-critical resources into a single server in one data center."
+      },
+      {
+        "key": "B",
+        "text": "Design for failure by distributing workloads across multiple Availability Zones."
+      },
+      {
+        "key": "C",
+        "text": "Tightly couple web and database layers to reduce network traffic."
+      },
+      {
+        "key": "D",
+        "text": "Rely strictly on manual server provisioning during traffic spikes."
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Designing for failure and implementing Multi-AZ redundancy ensures that system operations continue smoothly even if a single component or data center fails.",
+    "doc_link": "https://docs.aws.amazon.com/whitepapers/latest/architecting-for-the-cloud/design-for-failure.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which AWS Cloud Adoption Framework (AWS CAF) perspective focuses on cloud governance, business risk management, and service portfolio management?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Security Perspective"
+      },
+      {
+        "key": "B",
+        "text": "Platform Perspective"
+      },
+      {
+        "key": "C",
+        "text": "Governance Perspective"
+      },
+      {
+        "key": "D",
+        "text": "Business Perspective"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "The Governance Perspective focuses on aligning cloud initiatives with business goals while managing cloud risk, program management, and regulatory compliance.",
+    "doc_link": "https://aws.amazon.com/professional-services/CAF/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "What is the term for the time required to restore a system and resume normal business operations after an unexpected outage (Disaster Recovery)?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Recovery Point Objective (RPO)"
+      },
+      {
+        "key": "B",
+        "text": "Elasticity Time Threshold (ETT)"
+      },
+      {
+        "key": "C",
+        "text": "Mean Time to Provision (MTTP)"
+      },
+      {
+        "key": "D",
+        "text": "Recovery Time Objective (RTO)"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Recovery Time Objective (RTO) is the maximum acceptable length of time that a system can be offline after a disaster before resuming business operations.",
+    "doc_link": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/recovery-objectives.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "What is the term for the maximum acceptable amount of data loss measured in time (e.g., losing up to 15 minutes of transactional data) during a disaster?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Recovery Point Objective (RPO)"
+      },
+      {
+        "key": "B",
+        "text": "Recovery Time Objective (RTO)"
+      },
+      {
+        "key": "C",
+        "text": "Service Level Agreement (SLA)"
+      },
+      {
+        "key": "D",
+        "text": "Elastic Load Threshold (ELT)"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Recovery Point Objective (RPO) is the maximum acceptable amount of data loss measured in time between the last valid backup and the disaster.",
+    "doc_link": "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/recovery-objectives.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which cloud migration strategy involves redesigning an application from a monolithic codebase into a microservices architecture to fully exploit cloud-native features?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Rehost"
+      },
+      {
+        "key": "B",
+        "text": "Refactor / Re-architect"
+      },
+      {
+        "key": "C",
+        "text": "Replatform"
+      },
+      {
+        "key": "D",
+        "text": "Retain"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Refactoring / Re-architecting involves redesigning and rewriting parts of the application to take advantage of cloud-native features like serverless and microservices.",
+    "doc_link": "https://docs.aws.amazon.com/prescriptive-guidance/latest/migration-strategies/refactor.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which pillar of the AWS Well-Architected Framework focuses on selecting the most appropriate resource types, monitoring performance metrics, and evolving architectures as technologies improve?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Operational Excellence"
+      },
+      {
+        "key": "B",
+        "text": "Cost Optimization"
+      },
+      {
+        "key": "C",
+        "text": "Performance Efficiency"
+      },
+      {
+        "key": "D",
+        "text": "Reliability"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "The Performance Efficiency pillar focuses on using computing resources efficiently to meet system requirements and maintaining that efficiency as demand changes.",
+    "doc_link": "https://docs.aws.amazon.com/wellarchitected/latest/performance-efficiency-pillar/welcome.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which pillar of the AWS Well-Architected Framework emphasizes eliminating unneeded resources, analyzing spend over time, and adopting matching pricing models?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Operational Excellence"
+      },
+      {
+        "key": "B",
+        "text": "Reliability"
+      },
+      {
+        "key": "C",
+        "text": "Sustainability"
+      },
+      {
+        "key": "D",
+        "text": "Cost Optimization"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "The Cost Optimization pillar focuses on avoiding unnecessary expenses, understanding spending over time, and choosing the most cost-effective resources.",
+    "doc_link": "https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "According to the AWS Shared Responsibility Model, which of the following is a customer responsibility when running an Amazon EC2 instance?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Patching the guest operating system and application software"
+      },
+      {
+        "key": "B",
+        "text": "Decommissioning defective hard disk drives"
+      },
+      {
+        "key": "C",
+        "text": "Physical security of the server hardware"
+      },
+      {
+        "key": "D",
+        "text": "Securing the hypervisor virtualization software"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS is responsible for security OF the cloud (physical data centers, hardware, hypervisors), while the customer is responsible for security IN the cloud (OS patches, firewall configuration, IAM, application code).",
+    "doc_link": "https://aws.amazon.com/compliance/shared-responsibility-model/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which AWS service is used to create and manage users, groups, roles, and fine-grained access policies to AWS services?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS CloudTrail"
+      },
+      {
+        "key": "B",
+        "text": "AWS Identity and Access Management (IAM)"
+      },
+      {
+        "key": "C",
+        "text": "AWS Shield"
+      },
+      {
+        "key": "D",
+        "text": "Amazon GuardDuty"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "AWS IAM enables you to securely control access to AWS services and resources for your users and applications.",
+    "doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "What is the recommended security best practice regarding the AWS account root user?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Share the root user password with all developers in the team."
+      },
+      {
+        "key": "B",
+        "text": "Use the root user for everyday administrative tasks."
+      },
+      {
+        "key": "C",
+        "text": "Lock away the root user credentials and enable Multi-Factor Authentication (MFA)."
+      },
+      {
+        "key": "D",
+        "text": "Disable MFA on the root user to avoid lockout."
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "AWS strongly recommends securing root user credentials, enabling Multi-Factor Authentication (MFA), and using IAM users or roles for daily tasks.",
+    "doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#lock-away-credentials"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which IAM identity should be assigned to an application running on an Amazon EC2 instance to grant it temporary permissions to access an Amazon S3 bucket?",
+    "options": [
+      {
+        "key": "A",
+        "text": "IAM User"
+      },
+      {
+        "key": "B",
+        "text": "Root User"
+      },
+      {
+        "key": "C",
+        "text": "IAM Group"
+      },
+      {
+        "key": "D",
+        "text": "IAM Role"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "IAM Roles allow applications running on AWS compute resources (like EC2 or Lambda) to obtain temporary security credentials securely without hardcoding access keys.",
+    "doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "A security team needs to protect a public web application against common web exploits such as SQL Injection and Cross-Site Scripting (XSS). Which service should they use?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS WAF (Web Application Firewall)"
+      },
+      {
+        "key": "B",
+        "text": "AWS Shield Standard"
+      },
+      {
+        "key": "C",
+        "text": "Amazon GuardDuty"
+      },
+      {
+        "key": "D",
+        "text": "AWS Secrets Manager"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS WAF helps protect web applications and APIs against common web exploits and bots that may affect availability or compromise security.",
+    "doc_link": "https://aws.amazon.com/waf/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which managed AWS service provides automatic protection against Distributed Denial of Service (DDoS) attacks for all AWS customers at no additional charge?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Shield Advanced"
+      },
+      {
+        "key": "B",
+        "text": "AWS Shield Standard"
+      },
+      {
+        "key": "C",
+        "text": "AWS Network Firewall"
+      },
+      {
+        "key": "D",
+        "text": "Amazon Inspector"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "AWS Shield Standard defends all AWS customers against common layer 3 and 4 DDoS attacks automatically at no additional cost.",
+    "doc_link": "https://aws.amazon.com/shield/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which service acts as an intelligent threat detection system that continuously monitors AWS CloudTrail event logs, VPC Flow Logs, and DNS logs using Machine Learning?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon Macie"
+      },
+      {
+        "key": "B",
+        "text": "AWS CloudFormation"
+      },
+      {
+        "key": "C",
+        "text": "Amazon GuardDuty"
+      },
+      {
+        "key": "D",
+        "text": "Amazon Inspector"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "Amazon GuardDuty is a security monitoring service that uses machine learning and threat intelligence to identify unauthorized behavior and suspicious activity.",
+    "doc_link": "https://aws.amazon.com/guardduty/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "A company needs on-demand access to AWS security compliance reports (such as SOC 1/2/3 and PCI DSS) and agreements for auditing purposes. Where can they find these documents?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Trusted Advisor"
+      },
+      {
+        "key": "B",
+        "text": "Amazon CloudWatch"
+      },
+      {
+        "key": "C",
+        "text": "AWS Security Hub"
+      },
+      {
+        "key": "D",
+        "text": "AWS Artifact"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "AWS Artifact is a self-service portal providing on-demand access to AWS compliance reports, certifications, and security agreements.",
+    "doc_link": "https://aws.amazon.com/artifact/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which AWS service allows you to create and control cryptographic keys used to encrypt data stored across Amazon S3, EBS, RDS, and DynamoDB?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Key Management Service (AWS KMS)"
+      },
+      {
+        "key": "B",
+        "text": "AWS Secrets Manager"
+      },
+      {
+        "key": "C",
+        "text": "AWS Certificate Manager (ACM)"
+      },
+      {
+        "key": "D",
+        "text": "AWS Systems Manager"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS KMS makes it easy to create and manage cryptographic keys and control their use across a wide range of AWS services and applications.",
+    "doc_link": "https://aws.amazon.com/kms/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which AWS service records API calls made across your AWS account, providing an audit trail of user actions, AWS Management Console logins, and service requests?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon CloudWatch"
+      },
+      {
+        "key": "B",
+        "text": "AWS CloudTrail"
+      },
+      {
+        "key": "C",
+        "text": "AWS Config"
+      },
+      {
+        "key": "D",
+        "text": "AWS Trusted Advisor"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "AWS CloudTrail tracks user activity and API usage across AWS accounts for operational auditing, compliance, and governance.",
+    "doc_link": "https://aws.amazon.com/cloudtrail/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "What is the primary function of AWS Secrets Manager?",
+    "options": [
+      {
+        "key": "A",
+        "text": "To track changes in AWS resource configurations over time."
+      },
+      {
+        "key": "B",
+        "text": "To prevent DDoS attacks on public web servers."
+      },
+      {
+        "key": "C",
+        "text": "To securely store, automatically rotate, and manage access to database credentials, API keys, and passwords."
+      },
+      {
+        "key": "D",
+        "text": "To provision virtual private cloud networks."
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "AWS Secrets Manager helps you rotate, manage, and retrieve database credentials, API keys, and other secrets throughout their lifecycle.",
+    "doc_link": "https://aws.amazon.com/secrets-manager/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "An enterprise wants to enforce central security boundaries across multiple AWS member accounts so that no account can disable CloudTrail. Which feature should they use?",
+    "options": [
+      {
+        "key": "A",
+        "text": "IAM Password Policies"
+      },
+      {
+        "key": "B",
+        "text": "Cost Allocation Tags"
+      },
+      {
+        "key": "C",
+        "text": "VPC Security Groups"
+      },
+      {
+        "key": "D",
+        "text": "Service Control Policies (SCPs) in AWS Organizations"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Service Control Policies (SCPs) in AWS Organizations define maximum permissions and enforce guardrails across member accounts, even overriding account root users.",
+    "doc_link": "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which security principle states that users and systems should only be granted the minimum permissions necessary to perform their assigned job duties?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Principle of Least Privilege"
+      },
+      {
+        "key": "B",
+        "text": "Principle of High Availability"
+      },
+      {
+        "key": "C",
+        "text": "Principle of Loose Coupling"
+      },
+      {
+        "key": "D",
+        "text": "Principle of Elastic Scalability"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "The Principle of Least Privilege dictates granting only the specific permissions needed to perform a task, minimizing security exposure.",
+    "doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#grant-least-privilege"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which AWS service uses pattern matching and machine learning to automatically discover, classify, and protect sensitive data (such as Personally Identifiable Information - PII) in Amazon S3?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon Inspector"
+      },
+      {
+        "key": "B",
+        "text": "Amazon Macie"
+      },
+      {
+        "key": "C",
+        "text": "AWS KMS"
+      },
+      {
+        "key": "D",
+        "text": "AWS Shield"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Amazon Macie is a data security service that uses machine learning and pattern matching to discover and protect sensitive data in Amazon S3 buckets.",
+    "doc_link": "https://aws.amazon.com/macie/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which AWS service performs automated security assessments and vulnerability scanning on Amazon EC2 instances, container images, and AWS Lambda functions?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Trusted Advisor"
+      },
+      {
+        "key": "B",
+        "text": "AWS WAF"
+      },
+      {
+        "key": "C",
+        "text": "Amazon Inspector"
+      },
+      {
+        "key": "D",
+        "text": "AWS Artifact"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "Amazon Inspector is an automated vulnerability management service that scans workloads for software vulnerabilities and unintended network exposure.",
+    "doc_link": "https://aws.amazon.com/inspector/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "According to the AWS Shared Responsibility Model, which component is AWS solely responsible for securing in a managed database service like Amazon RDS?",
+    "options": [
+      {
+        "key": "A",
+        "text": "The network firewall rules in the customer's Security Groups."
+      },
+      {
+        "key": "B",
+        "text": "The customer's database schema and table structure."
+      },
+      {
+        "key": "C",
+        "text": "The database user accounts and application passwords."
+      },
+      {
+        "key": "D",
+        "text": "The physical hardware, power, OS installation, and database engine maintenance."
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "In managed services like Amazon RDS, AWS manages the underlying hardware, operating system installation, OS patches, and database engine updates.",
+    "doc_link": "https://aws.amazon.com/compliance/shared-responsibility-model/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "What is the primary purpose of Multi-Factor Authentication (MFA) in AWS IAM?",
+    "options": [
+      {
+        "key": "A",
+        "text": "It requires users to provide two or more distinct authentication factors before gaining account access."
+      },
+      {
+        "key": "B",
+        "text": "It automatically creates backup copies of S3 objects across regions."
+      },
+      {
+        "key": "C",
+        "text": "It distributes incoming HTTP requests across multiple EC2 instances."
+      },
+      {
+        "key": "D",
+        "text": "It converts on-demand compute instances into reserved instances."
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "MFA adds an extra layer of security by requiring a second authentication factor (such as an authenticator app code or hardware token) in addition to a password.",
+    "doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which AWS tool provides a downloadable CSV report listing all IAM users in an AWS account and the status of their credentials (including passwords, access keys, and MFA)?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS CloudTrail Insights"
+      },
+      {
+        "key": "B",
+        "text": "IAM Credential Report"
+      },
+      {
+        "key": "C",
+        "text": "AWS Cost and Usage Report"
+      },
+      {
+        "key": "D",
+        "text": "AWS Trusted Advisor"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "The IAM credential report lists all users in your account and the status of their various credentials, including passwords, access keys, and MFA devices.",
+    "doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_getting-report.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "What type of firewall operates at the subnet level in an Amazon VPC and evaluates traffic using stateless allow and deny rules?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS WAF"
+      },
+      {
+        "key": "B",
+        "text": "Security Group"
+      },
+      {
+        "key": "C",
+        "text": "Network Access Control List (Network ACL)"
+      },
+      {
+        "key": "D",
+        "text": "AWS Shield"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "Network ACLs act as a subnet-level firewall that inspects inbound and outbound traffic statelessly, supporting explicit allow and deny rules.",
+    "doc_link": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "What type of virtual firewall operates at the EC2 instance level and is stateful (meaning return traffic is automatically allowed regardless of inbound rules)?",
+    "options": [
+      {
+        "key": "A",
+        "text": "NAT Gateway"
+      },
+      {
+        "key": "B",
+        "text": "Network ACL"
+      },
+      {
+        "key": "C",
+        "text": "Internet Gateway"
+      },
+      {
+        "key": "D",
+        "text": "Security Group"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Security Groups act as virtual stateful firewalls for EC2 instances, controlling incoming and outgoing traffic. Because they are stateful, return traffic is automatically allowed.",
+    "doc_link": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which AWS service provisions, manages, and deploys public and private SSL/TLS certificates for use with Elastic Load Balancers and CloudFront distributions?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Certificate Manager (ACM)"
+      },
+      {
+        "key": "B",
+        "text": "AWS KMS"
+      },
+      {
+        "key": "C",
+        "text": "AWS CloudHSM"
+      },
+      {
+        "key": "D",
+        "text": "AWS IAM"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS Certificate Manager (ACM) handles the complexity of creating, storing, and renewing SSL/TLS X.509 certificates for AWS services.",
+    "doc_link": "https://aws.amazon.com/certificate-manager/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which compliance framework or standard is verified and available for customer audit review in AWS Artifact?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Customer application source code repositories"
+      },
+      {
+        "key": "B",
+        "text": "PCI-DSS and SOC 2 compliance reports"
+      },
+      {
+        "key": "C",
+        "text": "On-premises electrical wiring diagrams"
+      },
+      {
+        "key": "D",
+        "text": "Third-party personal tax returns"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "AWS Artifact provides access to AWS compliance reports including SOC, PCI-DSS, ISO, and FedRAMP certifications.",
+    "doc_link": "https://aws.amazon.com/artifact/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which AWS security service provides a comprehensive view of your security state across AWS accounts and checks adherence to security standards (such as CIS AWS Foundations)?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Systems Manager"
+      },
+      {
+        "key": "B",
+        "text": "AWS CloudTrail"
+      },
+      {
+        "key": "C",
+        "text": "AWS Security Hub"
+      },
+      {
+        "key": "D",
+        "text": "Amazon CloudFront"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "AWS Security Hub aggregates, organizes, and prioritizes security findings from multiple AWS services and checks posture against industry security standards.",
+    "doc_link": "https://aws.amazon.com/security-hub/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "A developer needs to access AWS services programmatically using the AWS Command Line Interface (AWS CLI). What credentials must be created in IAM for this user?",
+    "options": [
+      {
+        "key": "A",
+        "text": "VPC Peering Connection Key"
+      },
+      {
+        "key": "B",
+        "text": "Console Password and Username"
+      },
+      {
+        "key": "C",
+        "text": "SSL/TLS Server Certificate"
+      },
+      {
+        "key": "D",
+        "text": "Access Key ID and Secret Access Key"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Access keys (an Access Key ID and Secret Access Key) are used to sign programmatic requests to the AWS CLI, SDKs, or direct REST API calls.",
+    "doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which of the following encryption options protects data stored on Amazon S3 disks while at rest without requiring client-side encryption libraries?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Server-Side Encryption (SSE-S3 or SSE-KMS)"
+      },
+      {
+        "key": "B",
+        "text": "Transport Layer Security (TLS)"
+      },
+      {
+        "key": "C",
+        "text": "HTTPS Port 443 Forwarding"
+      },
+      {
+        "key": "D",
+        "text": "Virtual Private Gateway Peering"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Server-Side Encryption (SSE-S3, SSE-KMS, or SSE-C) encrypts S3 object data at rest on physical disks upon upload and decrypts it when accessed.",
+    "doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/serv-side-encryption.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Under the AWS Shared Responsibility Model, which security task is the customer responsible for when storing data in Amazon S3?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Maintaining the physical storage drives in the AWS facility."
+      },
+      {
+        "key": "B",
+        "text": "Configuring S3 bucket access policies and enabling encryption at rest."
+      },
+      {
+        "key": "C",
+        "text": "Replacing broken network switches inside AWS server racks."
+      },
+      {
+        "key": "D",
+        "text": "Securing data center biometric entry doors."
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Customers are responsible for managing access permissions (bucket policies, ACLs, IAM) and enabling encryption for their data stored in S3.",
+    "doc_link": "https://aws.amazon.com/compliance/shared-responsibility-model/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which AWS service helps protect your applications against Layer 7 application-level distributed denial of service (DDoS) attacks when combined with AWS Shield Advanced?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon S3 Transfer Acceleration"
+      },
+      {
+        "key": "B",
+        "text": "Amazon Route 53"
+      },
+      {
+        "key": "C",
+        "text": "AWS WAF"
+      },
+      {
+        "key": "D",
+        "text": "AWS Storage Gateway"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "AWS WAF provides application-layer (Layer 7) filtering and rules to block HTTP flood attacks and malicious traffic patterns.",
+    "doc_link": "https://aws.amazon.com/waf/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "What is the recommended method to grant permissions to a group of developers who all require identical read-only access to Amazon S3?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Assign each developer administrative full-access permissions to avoid permission errors."
+      },
+      {
+        "key": "B",
+        "text": "Share the root account login with all developers."
+      },
+      {
+        "key": "C",
+        "text": "Create separate bucket policies with individual passwords for each developer."
+      },
+      {
+        "key": "D",
+        "text": "Create an IAM Group, attach the AmazonS3ReadOnlyAccess policy to it, and add the developers to the group."
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Using IAM User Groups to apply policies across multiple users simplifies access management and aligns with the principle of least privilege.",
+    "doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_groups.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which AWS feature enables you to control inbound and outbound traffic for individual Amazon EC2 instances?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Security Groups"
+      },
+      {
+        "key": "B",
+        "text": "Internet Gateways"
+      },
+      {
+        "key": "C",
+        "text": "Route Tables"
+      },
+      {
+        "key": "D",
+        "text": "NAT Gateways"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Security Groups act as virtual firewalls at the instance level to control inbound and outbound traffic.",
+    "doc_link": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_SecurityGroups.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "What is an IAM Policy in AWS?",
+    "options": [
+      {
+        "key": "A",
+        "text": "A physical hardware token used for multi-factor authentication."
+      },
+      {
+        "key": "B",
+        "text": "A JSON document that explicitly defines the actions allowed or denied on specific AWS resources."
+      },
+      {
+        "key": "C",
+        "text": "A monthly contract outlining AWS pricing discounts."
+      },
+      {
+        "key": "D",
+        "text": "A network cable connecting an on-premises data center to AWS."
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "An IAM policy is an authorization document formatted in JSON that specifies permissions (Effect, Action, Resource, Condition) for AWS identities.",
+    "doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which of the following describes an AWS Availability Zone (AZ)?",
+    "options": [
+      {
+        "key": "A",
+        "text": "A single physical hard drive inside an EC2 server rack."
+      },
+      {
+        "key": "B",
+        "text": "A collection of AWS geographic Regions connected across different continents."
+      },
+      {
+        "key": "C",
+        "text": "One or more discrete physical data centers with redundant power, networking, and connectivity within an AWS Region."
+      },
+      {
+        "key": "D",
+        "text": "A content delivery caching server located near end users."
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "An Availability Zone consists of one or more physical data centers isolated from failures in other AZs within the same geographic Region.",
+    "doc_link": "https://aws.amazon.com/about-aws/global-infrastructure/regions_az/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which Amazon EC2 purchasing option offers up to a 90% discount on compute costs and is ideal for fault-tolerant, interruptible batch processing workloads?",
+    "options": [
+      {
+        "key": "A",
+        "text": "On-Demand Instances"
+      },
+      {
+        "key": "B",
+        "text": "Reserved Instances"
+      },
+      {
+        "key": "C",
+        "text": "Dedicated Hosts"
+      },
+      {
+        "key": "D",
+        "text": "Spot Instances"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Amazon EC2 Spot Instances let you take advantage of unused EC2 capacity in the AWS cloud at steep discounts (up to 90%), suitable for stateless, fault-tolerant workloads.",
+    "doc_link": "https://aws.amazon.com/ec2/spot/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS compute service is serverless, allowing you to run backend code in response to events without provisioning or managing any virtual servers?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Lambda"
+      },
+      {
+        "key": "B",
+        "text": "Amazon EC2"
+      },
+      {
+        "key": "C",
+        "text": "AWS Elastic Beanstalk"
+      },
+      {
+        "key": "D",
+        "text": "Amazon Lightsail"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS Lambda runs code on a high-availability compute infrastructure without server management, automatically scaling in response to incoming events.",
+    "doc_link": "https://aws.amazon.com/lambda/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "A company requires a cost-effective long-term archival solution for compliance documents that are rarely accessed and can tolerate a retrieval time of 12 hours. Which Amazon S3 storage class is best?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon S3 Standard"
+      },
+      {
+        "key": "B",
+        "text": "Amazon S3 Glacier Deep Archive"
+      },
+      {
+        "key": "C",
+        "text": "Amazon S3 Standard-Infrequent Access"
+      },
+      {
+        "key": "D",
+        "text": "Amazon S3 One Zone-IA"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Amazon S3 Glacier Deep Archive is S3's lowest-cost storage class, designed for long-term data retention (7-10+ years) with standard retrieval times within 12 hours.",
+    "doc_link": "https://aws.amazon.com/s3/storage-classes/glacier/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which storage class automatically moves objects between frequent and infrequent access tiers based on changing access patterns with no operational overhead or retrieval fees?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon S3 Glacier Flexible Retrieval"
+      },
+      {
+        "key": "B",
+        "text": "Amazon S3 Standard"
+      },
+      {
+        "key": "C",
+        "text": "Amazon S3 Intelligent-Tiering"
+      },
+      {
+        "key": "D",
+        "text": "Amazon S3 Express One Zone"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "Amazon S3 Intelligent-Tiering automatically optimizes storage costs by moving data to the most cost-effective access tier based on usage patterns without performance impact.",
+    "doc_link": "https://aws.amazon.com/s3/storage-classes/intelligent-tiering/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS block storage service provides persistent, high-performance block-level storage volumes for use with Amazon EC2 instances?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon Elastic File System (Amazon EFS)"
+      },
+      {
+        "key": "B",
+        "text": "Amazon Simple Storage Service (Amazon S3)"
+      },
+      {
+        "key": "C",
+        "text": "AWS Storage Gateway"
+      },
+      {
+        "key": "D",
+        "text": "Amazon Elastic Block Store (Amazon EBS)"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Amazon EBS provides block-level storage volumes for EC2 instances, behaving like formatted physical hard drives.",
+    "doc_link": "https://aws.amazon.com/ebs/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which managed file storage service allows multiple Amazon EC2 instances across different Availability Zones to concurrently read and write to the same shared file system using NFS?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon Elastic File System (Amazon EFS)"
+      },
+      {
+        "key": "B",
+        "text": "Amazon EBS"
+      },
+      {
+        "key": "C",
+        "text": "Amazon S3 Glacier"
+      },
+      {
+        "key": "D",
+        "text": "AWS Snowball"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Amazon EFS provides a simple, scalable, fully managed shared elastic file system that can be accessed concurrently by thousands of EC2 instances via NFS.",
+    "doc_link": "https://aws.amazon.com/efs/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS service is a managed relational database service supporting PostgreSQL, MySQL, MariaDB, Oracle, and Microsoft SQL Server?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon DynamoDB"
+      },
+      {
+        "key": "B",
+        "text": "Amazon RDS"
+      },
+      {
+        "key": "C",
+        "text": "Amazon Redshift"
+      },
+      {
+        "key": "D",
+        "text": "Amazon ElastiCache"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Amazon RDS (Relational Database Service) makes it easy to set up, operate, and scale relational databases in the cloud with automated backups and patching.",
+    "doc_link": "https://aws.amazon.com/rds/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which fully managed serverless NoSQL database service delivers single-digit millisecond latency at any scale?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon Redshift"
+      },
+      {
+        "key": "B",
+        "text": "Amazon RDS"
+      },
+      {
+        "key": "C",
+        "text": "Amazon DynamoDB"
+      },
+      {
+        "key": "D",
+        "text": "Amazon Aurora"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "Amazon DynamoDB is a fully managed, serverless, key-value NoSQL database designed for high-performance applications requiring sub-10ms response times.",
+    "doc_link": "https://aws.amazon.com/dynamodb/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS Content Delivery Network (CDN) service speeds up distribution of static and dynamic web content (like HTML, CSS, images, and videos) by caching it at global Edge Locations?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Global Accelerator"
+      },
+      {
+        "key": "B",
+        "text": "Amazon Route 53"
+      },
+      {
+        "key": "C",
+        "text": "AWS Direct Connect"
+      },
+      {
+        "key": "D",
+        "text": "Amazon CloudFront"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Amazon CloudFront is a fast CDN service that securely delivers data, videos, applications, and APIs to customers globally with low latency at edge points of presence.",
+    "doc_link": "https://aws.amazon.com/cloudfront/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS service provides a highly available and scalable Domain Name System (DNS) web service to route end users to internet applications?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon Route 53"
+      },
+      {
+        "key": "B",
+        "text": "Amazon CloudFront"
+      },
+      {
+        "key": "C",
+        "text": "Amazon VPC"
+      },
+      {
+        "key": "D",
+        "text": "AWS Direct Connect"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Amazon Route 53 is a cloud DNS web service designed to give developers and businesses a reliable and cost-effective way to route end users to internet applications.",
+    "doc_link": "https://aws.amazon.com/route53/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "What is an Amazon Virtual Private Cloud (Amazon VPC)?",
+    "options": [
+      {
+        "key": "A",
+        "text": "A dedicated physical server housed in an AWS office."
+      },
+      {
+        "key": "B",
+        "text": "A logically isolated virtual network dedicated to your AWS account where you define IP ranges, subnets, and routing."
+      },
+      {
+        "key": "C",
+        "text": "An external third-party internet service provider."
+      },
+      {
+        "key": "D",
+        "text": "A software package used for compressing video files."
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Amazon VPC lets you provision a logically isolated section of the AWS Cloud where you can launch AWS resources in a virtual network that you define.",
+    "doc_link": "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which VPC component enables instances in a private subnet to initiate outbound connections to the internet (for software updates) while preventing inbound connections from the internet?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Virtual Private Gateway"
+      },
+      {
+        "key": "B",
+        "text": "Internet Gateway"
+      },
+      {
+        "key": "C",
+        "text": "NAT Gateway"
+      },
+      {
+        "key": "D",
+        "text": "Customer Gateway"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "A NAT (Network Address Translation) gateway enables instances in a private subnet to connect to external services while blocking unsolicited incoming traffic.",
+    "doc_link": "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS monitoring service collects operational metrics and logs, displays custom dashboards, and triggers automated alarms when CPU utilization exceeds a set threshold?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Trusted Advisor"
+      },
+      {
+        "key": "B",
+        "text": "AWS CloudTrail"
+      },
+      {
+        "key": "C",
+        "text": "AWS Config"
+      },
+      {
+        "key": "D",
+        "text": "Amazon CloudWatch"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Amazon CloudWatch monitors resource performance metrics, application logs, and triggers automated alerts or auto-scaling actions when thresholds are reached.",
+    "doc_link": "https://aws.amazon.com/cloudwatch/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS service allows you to model, provision, and version your entire cloud infrastructure using declarative JSON or YAML templates (Infrastructure as Code - IaC)?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS CloudFormation"
+      },
+      {
+        "key": "B",
+        "text": "AWS Elastic Beanstalk"
+      },
+      {
+        "key": "C",
+        "text": "AWS Systems Manager"
+      },
+      {
+        "key": "D",
+        "text": "AWS Config"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS CloudFormation gives you an easy way to model a collection of related AWS and third-party resources, provision them quickly and consistently across accounts.",
+    "doc_link": "https://aws.amazon.com/cloudformation/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "A developer wants to deploy a web application written in Node.js or Python without needing to configure underlying servers, networks, or load balancers manually. Which PaaS service should they use?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon EC2 Spot Fleet"
+      },
+      {
+        "key": "B",
+        "text": "AWS Elastic Beanstalk"
+      },
+      {
+        "key": "C",
+        "text": "AWS CloudTrail"
+      },
+      {
+        "key": "D",
+        "text": "AWS Direct Connect"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "AWS Elastic Beanstalk is an easy-to-use service for deploying and scaling web applications and services developed with Java, .NET, PHP, Node.js, Python, Ruby, and Go.",
+    "doc_link": "https://aws.amazon.com/elasticbeanstalk/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS service provides an online advisory tool that inspects your AWS environment and provides real-time guidance across Cost Optimization, Security, Fault Tolerance, Performance, and Service Limits?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon CloudWatch"
+      },
+      {
+        "key": "B",
+        "text": "AWS Inspector"
+      },
+      {
+        "key": "C",
+        "text": "AWS Trusted Advisor"
+      },
+      {
+        "key": "D",
+        "text": "AWS Artifact"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "AWS Trusted Advisor analyzes your AWS environment across 5 key pillars (cost, performance, security, fault tolerance, and quotas) and provides actionable recommendations.",
+    "doc_link": "https://aws.amazon.com/premiumsupport/technology/trusted-advisor/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which dedicated physical device family is designed to migrate petabytes of data into and out of AWS securely when internet bandwidth is limited?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon Kinesis Data Firehose"
+      },
+      {
+        "key": "B",
+        "text": "AWS Storage Gateway"
+      },
+      {
+        "key": "C",
+        "text": "Amazon Route 53"
+      },
+      {
+        "key": "D",
+        "text": "AWS Snow Family (Snowball / Snowcone)"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "The AWS Snow Family consists of physical edge devices (Snowcone, Snowball Edge, Snowmobile) shipped directly to customer facilities for offline data migration.",
+    "doc_link": "https://aws.amazon.com/snow/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS service enables in-memory data caching (using Redis or Memcached) to significantly improve the read performance of database-intensive applications?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon ElastiCache"
+      },
+      {
+        "key": "B",
+        "text": "Amazon Redshift"
+      },
+      {
+        "key": "C",
+        "text": "Amazon S3 Standard"
+      },
+      {
+        "key": "D",
+        "text": "Amazon EBS"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Amazon ElastiCache is a fully managed in-memory cache service supporting Redis and Memcached, delivering sub-millisecond responses for read-heavy workloads.",
+    "doc_link": "https://aws.amazon.com/elasticache/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS service is a petabyte-scale cloud data warehouse designed for fast complex SQL queries and business intelligence analytics?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon RDS"
+      },
+      {
+        "key": "B",
+        "text": "Amazon Redshift"
+      },
+      {
+        "key": "C",
+        "text": "Amazon DynamoDB"
+      },
+      {
+        "key": "D",
+        "text": "Amazon OpenSearch Service"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Amazon Redshift is a fast, fully managed cloud data warehouse that makes it simple and cost-effective to analyze all your data using standard SQL and existing BI tools.",
+    "doc_link": "https://aws.amazon.com/redshift/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS service provides a dedicated, private physical network connection from an on-premises data center directly to AWS, bypassing the public internet?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon Route 53"
+      },
+      {
+        "key": "B",
+        "text": "AWS Site-to-Site VPN"
+      },
+      {
+        "key": "C",
+        "text": "AWS Direct Connect"
+      },
+      {
+        "key": "D",
+        "text": "AWS CloudFront"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "AWS Direct Connect links your internal network to an AWS Direct Connect location over a standard Ethernet fiber-optic cable, establishing private network connectivity.",
+    "doc_link": "https://aws.amazon.com/directconnect/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "What is the primary function of an Elastic Load Balancer (ELB) in AWS?",
+    "options": [
+      {
+        "key": "A",
+        "text": "To calculate monthly AWS billing estimates."
+      },
+      {
+        "key": "B",
+        "text": "To compress files before storing them in S3 buckets."
+      },
+      {
+        "key": "C",
+        "text": "To generate programmatic IAM secret access keys."
+      },
+      {
+        "key": "D",
+        "text": "To automatically distribute incoming application traffic across multiple targets, such as Amazon EC2 instances and containers."
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Elastic Load Balancing (ELB) automatically distributes incoming application traffic across multiple targets (such as EC2 instances, containers, and IP addresses).",
+    "doc_link": "https://aws.amazon.com/elasticloadbalancing/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS service allows you to track configuration changes, evaluate compliance against internal rules, and maintain an inventory of all AWS resources over time?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Config"
+      },
+      {
+        "key": "B",
+        "text": "AWS CloudTrail"
+      },
+      {
+        "key": "C",
+        "text": "Amazon CloudWatch"
+      },
+      {
+        "key": "D",
+        "text": "AWS Artifact"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS Config enables you to assess, audit, and evaluate the configurations of your AWS resources and check compliance against desired configuration baselines.",
+    "doc_link": "https://aws.amazon.com/config/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which fully managed asynchronous message queuing service helps decouple and scale microservices, distributed systems, and serverless applications?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon Simple Notification Service (Amazon SNS)"
+      },
+      {
+        "key": "B",
+        "text": "Amazon Simple Queue Service (Amazon SQS)"
+      },
+      {
+        "key": "C",
+        "text": "AWS Step Functions"
+      },
+      {
+        "key": "D",
+        "text": "Amazon Kinesis"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Amazon SQS is a fully managed message queuing service that enables you to decouple and scale microservices and distributed systems.",
+    "doc_link": "https://aws.amazon.com/sqs/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which fully managed pub/sub messaging service enables applications to send push notifications, emails, SMS messages, or trigger Lambda functions simultaneously?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon SES"
+      },
+      {
+        "key": "B",
+        "text": "Amazon SQS"
+      },
+      {
+        "key": "C",
+        "text": "Amazon Simple Notification Service (Amazon SNS)"
+      },
+      {
+        "key": "D",
+        "text": "Amazon CloudWatch Logs"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "Amazon SNS is a fully managed messaging service for both application-to-application (A2A) and application-to-person (A2P) communication.",
+    "doc_link": "https://aws.amazon.com/sns/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "A business has a mission-critical relational database on Amazon RDS that requires automatic failover with zero downtime in the event of an infrastructure outage. What feature should they enable?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon EBS Snapshots"
+      },
+      {
+        "key": "B",
+        "text": "Amazon RDS Read Replicas"
+      },
+      {
+        "key": "C",
+        "text": "Amazon S3 Cross-Region Replication"
+      },
+      {
+        "key": "D",
+        "text": "Amazon RDS Multi-AZ Deployment"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Amazon RDS Multi-AZ deployments provide enhanced availability and durability for database instances by synchronously replicating data to a standby instance in another AZ.",
+    "doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "What is the primary benefit of creating Amazon RDS Read Replicas?",
+    "options": [
+      {
+        "key": "A",
+        "text": "To offload read-heavy database traffic from the primary database instance and enhance read throughput."
+      },
+      {
+        "key": "B",
+        "text": "To automatically execute synchronous failover during data center outages."
+      },
+      {
+        "key": "C",
+        "text": "To encrypt EBS volumes at rest."
+      },
+      {
+        "key": "D",
+        "text": "To convert relational tables into NoSQL document formats."
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Amazon RDS Read Replicas provide enhanced performance and durability for database instances by allowing you to elastically scale out beyond the capacity constraints of a single DB for read-heavy workloads.",
+    "doc_link": "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS compute engine allows you to run Docker containers on Amazon ECS or Amazon EKS without having to manage or provision the underlying EC2 host servers?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Amazon EC2 On-Demand"
+      },
+      {
+        "key": "B",
+        "text": "AWS Fargate"
+      },
+      {
+        "key": "C",
+        "text": "AWS Lambda"
+      },
+      {
+        "key": "D",
+        "text": "AWS Batch"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "AWS Fargate is a serverless, pay-as-you-go compute engine that lets you run containers without managing servers or clusters of Amazon EC2 instances.",
+    "doc_link": "https://aws.amazon.com/fargate/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "What is an Amazon Machine Image (AMI)?",
+    "options": [
+      {
+        "key": "A",
+        "text": "A database query language used in DynamoDB."
+      },
+      {
+        "key": "B",
+        "text": "A physical picture taken of an AWS data center server rack."
+      },
+      {
+        "key": "C",
+        "text": "A pre-configured template containing the operating system, application server, and software packages required to launch an EC2 instance."
+      },
+      {
+        "key": "D",
+        "text": "A billing report detailing hourly compute charges."
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "An AMI provides the information required to launch an instance, including an operating system, software packages, and volume permissions.",
+    "doc_link": "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS hybrid service brings native AWS infrastructure, services, APIs, and tools directly to virtually any customer on-premises data center or co-location space?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Storage Gateway"
+      },
+      {
+        "key": "B",
+        "text": "AWS Direct Connect"
+      },
+      {
+        "key": "C",
+        "text": "Amazon CloudFront"
+      },
+      {
+        "key": "D",
+        "text": "AWS Outposts"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "AWS Outposts extends AWS infrastructure, AWS services, APIs, and tools to virtually any datacenter, co-location space, or on-premises facility for a truly consistent hybrid experience.",
+    "doc_link": "https://aws.amazon.com/outposts/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS service coordinates multiple distributed microservices and AWS Lambda functions into visual, multi-step workflows with error handling and retry logic?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Step Functions"
+      },
+      {
+        "key": "B",
+        "text": "Amazon SQS"
+      },
+      {
+        "key": "C",
+        "text": "Amazon SNS"
+      },
+      {
+        "key": "D",
+        "text": "AWS CloudFormation"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS Step Functions is a visual workflow service that helps developers use AWS services to build distributed applications, automate processes, and orchestrate microservices.",
+    "doc_link": "https://aws.amazon.com/step-functions/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which routing policy in Amazon Route 53 routes internet users to the AWS Region that provides the lowest network latency for their geographic location?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Simple Routing"
+      },
+      {
+        "key": "B",
+        "text": "Latency-based Routing"
+      },
+      {
+        "key": "C",
+        "text": "Weighted Routing"
+      },
+      {
+        "key": "D",
+        "text": "Failover Routing"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Latency-based routing directs user DNS queries to the AWS Region that gives the fastest response time based on network latency measurements.",
+    "doc_link": "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "What is the primary function of an Internet Gateway (IGW) in an Amazon VPC?",
+    "options": [
+      {
+        "key": "A",
+        "text": "To automatically back up MySQL databases to S3."
+      },
+      {
+        "key": "B",
+        "text": "To encrypt EBS storage volumes at rest."
+      },
+      {
+        "key": "C",
+        "text": "To enable two-way communication between instances in public subnets and the public internet."
+      },
+      {
+        "key": "D",
+        "text": "To generate IAM credential reports."
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "An Internet Gateway is a horizontally scaled, redundant VPC component that allows communication between your VPC and the internet.",
+    "doc_link": "https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which Amazon S3 feature protects critical objects from being accidentally deleted or overwritten by preserving historical copies of an object every time it is modified?",
+    "options": [
+      {
+        "key": "A",
+        "text": "S3 Multipart Upload"
+      },
+      {
+        "key": "B",
+        "text": "S3 Transfer Acceleration"
+      },
+      {
+        "key": "C",
+        "text": "S3 Storage Lens"
+      },
+      {
+        "key": "D",
+        "text": "S3 Versioning"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "S3 Versioning keeps multiple variants of an object in the same bucket, allowing you to easily recover from accidental actions and application failures.",
+    "doc_link": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "Which free AWS tool allows you to visualize, understand, and manage your AWS costs and usage over time, including forecasting future spend for the next 12 months?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Cost Explorer"
+      },
+      {
+        "key": "B",
+        "text": "AWS Pricing Calculator"
+      },
+      {
+        "key": "C",
+        "text": "AWS Artifact"
+      },
+      {
+        "key": "D",
+        "text": "AWS Marketplace"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS Cost Explorer has an easy-to-use interface that lets you visualize, understand, and manage your AWS costs and usage over time, and forecast future costs.",
+    "doc_link": "https://aws.amazon.com/aws-cost-management/aws-cost-explorer/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "Which tool should a solutions architect use to estimate the monthly cost of an AWS architecture before creating or deploying any actual resources?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Cost Explorer"
+      },
+      {
+        "key": "B",
+        "text": "AWS Pricing Calculator"
+      },
+      {
+        "key": "C",
+        "text": "AWS Budgets"
+      },
+      {
+        "key": "D",
+        "text": "AWS CloudTrail"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "The AWS Pricing Calculator is a web-based planning tool that allows you to create cost estimates for proposed architectural solutions before building.",
+    "doc_link": "https://calculator.aws/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "Which AWS service allows you to set custom spending limits and receive email or SNS notifications when your actual or forecasted costs exceed your defined budget?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Pricing Calculator"
+      },
+      {
+        "key": "B",
+        "text": "AWS Cost Explorer"
+      },
+      {
+        "key": "C",
+        "text": "AWS Budgets"
+      },
+      {
+        "key": "D",
+        "text": "AWS Trusted Advisor"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "AWS Budgets lets you set custom budgets that alert you when your costs or usage exceed (or are forecasted to exceed) your budgeted amount.",
+    "doc_link": "https://aws.amazon.com/aws-cost-management/aws-budgets/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "What is the primary financial benefit of using Consolidated Billing in AWS Organizations?",
+    "options": [
+      {
+        "key": "A",
+        "text": "It removes the need for IAM users across accounts."
+      },
+      {
+        "key": "B",
+        "text": "All EC2 instances across all accounts become 100% free."
+      },
+      {
+        "key": "C",
+        "text": "It automatically encrypts all S3 buckets in all member accounts."
+      },
+      {
+        "key": "D",
+        "text": "You receive a single consolidated bill and can combine usage across accounts to qualify for volume pricing tier discounts."
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Consolidated Billing combines usage across all member accounts into a single bill, allowing aggregated volume tiers for services like S3 and EC2.",
+    "doc_link": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/consolidated-billing.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "Which AWS Support Plan is the minimum tier that provides 24/7 access to Cloud Support Engineers via phone, chat, and email, with a 1-hour response SLA for production system down issues?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Business Support"
+      },
+      {
+        "key": "B",
+        "text": "AWS Developer Support"
+      },
+      {
+        "key": "C",
+        "text": "AWS Basic Support"
+      },
+      {
+        "key": "D",
+        "text": "AWS Enterprise On-Ramp"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS Business Support provides 24/7 phone/chat/email access to engineers, 1-hour response times for production outages, and full AWS Trusted Advisor checks.",
+    "doc_link": "https://aws.amazon.com/premiumsupport/plans/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "Which AWS Support Plan provides a dedicated Technical Account Manager (TAM), consultative architectural reviews, and a 15-minute response time SLA for business-critical system outages?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Business Support"
+      },
+      {
+        "key": "B",
+        "text": "AWS Enterprise Support"
+      },
+      {
+        "key": "C",
+        "text": "AWS Developer Support"
+      },
+      {
+        "key": "D",
+        "text": "AWS Basic Support"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "AWS Enterprise Support includes a designated Technical Account Manager (TAM), 15-minute response SLA for critical outages, and Infrastructure Event Management.",
+    "doc_link": "https://aws.amazon.com/premiumsupport/plans/enterprise/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "What metadata labels can customers attach to AWS resources (such as EC2 instances and S3 buckets) to categorize, allocate, and track costs by department, project, or environment?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Network Access Control Lists"
+      },
+      {
+        "key": "B",
+        "text": "IAM Security Credentials"
+      },
+      {
+        "key": "C",
+        "text": "Cost Allocation Tags"
+      },
+      {
+        "key": "D",
+        "text": "EBS Snapshots"
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "Cost allocation tags are key-value pairs assigned to resources that organize and track your costs in AWS Cost Explorer and detailed billing reports.",
+    "doc_link": "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/cost-alloc-tags.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "Which type of offer in the AWS Free Tier remains free for all AWS customers indefinitely (even beyond the first 12 months after account sign-up)?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Enterprise Support trial"
+      },
+      {
+        "key": "B",
+        "text": "12 Months Free tier"
+      },
+      {
+        "key": "C",
+        "text": "Short-Term Trials"
+      },
+      {
+        "key": "D",
+        "text": "Always Free offers (such as AWS Lambda 1M free requests/month)"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Always Free tier products (like AWS Lambda, Amazon DynamoDB 25 GB, and Amazon SNS) do not expire at the end of the 12-month AWS Free Tier term.",
+    "doc_link": "https://aws.amazon.com/free/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "Which digital catalog allows customers to find, test, buy, and instantly deploy thousands of third-party software listings (like firewalls, databases, and monitoring tools) that run on AWS?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Marketplace"
+      },
+      {
+        "key": "B",
+        "text": "AWS Artifact"
+      },
+      {
+        "key": "C",
+        "text": "AWS QuickSight"
+      },
+      {
+        "key": "D",
+        "text": "AWS Control Tower"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS Marketplace is a curated digital catalog that customers can use to find, buy, deploy, and manage third-party software, data, and services.",
+    "doc_link": "https://aws.amazon.com/mp/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "Which flexible pricing model offers significant savings (up to 72%) over On-Demand pricing in exchange for a commitment to a consistent amount of compute usage (measured in $/hour) for a 1- or 3-year term?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Spot Instances"
+      },
+      {
+        "key": "B",
+        "text": "Savings Plans"
+      },
+      {
+        "key": "C",
+        "text": "On-Demand Instances"
+      },
+      {
+        "key": "D",
+        "text": "Dedicated Hosts"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "Savings Plans is a flexible pricing model offering lower prices compared to On-Demand pricing, in exchange for a specific hourly spend commitment over a 1 or 3 year period.",
+    "doc_link": "https://aws.amazon.com/savingsplans/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "What level of access to AWS Trusted Advisor checks is included with the free AWS Basic Support Plan?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Zero access to any Trusted Advisor checks."
+      },
+      {
+        "key": "B",
+        "text": "Full access to all checks across all 5 categories."
+      },
+      {
+        "key": "C",
+        "text": "Core security checks and service quota limit checks only."
+      },
+      {
+        "key": "D",
+        "text": "Weekly 1-on-1 phone consultations with a Technical Account Manager."
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "Basic and Developer support plans include access to 7 core Trusted Advisor security and service quota checks. Business and Enterprise plans unlock all checks.",
+    "doc_link": "https://aws.amazon.com/premiumsupport/technology/trusted-advisor/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "Which AWS program helps customers plan, manage, and prepare for high-traffic business events (such as Black Friday sales or major product launches) with architectural reviews and real-time support?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Snowball"
+      },
+      {
+        "key": "B",
+        "text": "AWS Cost Explorer"
+      },
+      {
+        "key": "C",
+        "text": "AWS Shield Standard"
+      },
+      {
+        "key": "D",
+        "text": "Infrastructure Event Management (IEM)"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "AWS Infrastructure Event Management (IEM) provides architectural and operational guidance during planned events, included in Enterprise Support and available for purchase in Business Support.",
+    "doc_link": "https://aws.amazon.com/premiumsupport/plans/enterprise/iem/"
+  }
+]

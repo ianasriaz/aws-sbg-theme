@@ -288,11 +288,101 @@ function aws_sbg_handle_perk_toggle() {
 add_action( 'wp_ajax_aws_sbg_toggle_perk', 'aws_sbg_handle_perk_toggle' );
 
 /**
+ * Handle Real-Time Member Type Toggle (Paying vs General)
+ */
+function aws_sbg_handle_member_type_toggle() {
+	check_ajax_referer( 'aws_sbg_admin_nonce', 'nonce' );
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_send_json_error( 'Unauthorized' );
+	}
+
+	$reg_id = isset( $_POST['reg_id'] ) ? intval( $_POST['reg_id'] ) : 0;
+	if ( $reg_id ) {
+		$current = get_post_meta( $reg_id, 'member_type', true );
+		if ( empty( $current ) ) {
+			$tier = get_post_meta( $reg_id, 'ticket_tier', true );
+			$current = ( $tier === 'free' ) ? 'general' : 'paying';
+		}
+		$new_val = ( $current === 'paying' ) ? 'general' : 'paying';
+		update_post_meta( $reg_id, 'member_type', $new_val );
+
+		// Real-time synchronization across access codes and exam attempts
+		global $wpdb;
+		$email = get_post_meta( $reg_id, 'email', true );
+		if ( ! empty( $email ) ) {
+			$table_codes    = $wpdb->prefix . 'aws_access_codes';
+			$table_attempts = $wpdb->prefix . 'aws_exam_attempts';
+			@$wpdb->update( $table_codes, array( 'member_type' => $new_val ), array( 'member_email' => $email ) );
+			@$wpdb->update( $table_attempts, array( 'member_type' => $new_val ), array( 'member_email' => $email ) );
+		}
+
+		wp_send_json_success( array( 'new_val' => $new_val ) );
+	}
+
+	wp_send_json_error( 'Invalid Request' );
+}
+add_action( 'wp_ajax_aws_sbg_toggle_member_type', 'aws_sbg_handle_member_type_toggle' );
+
+/**
  * 5. RENDER THE EVENT REGISTRATION ADMIN DASHBOARD
  */
 function aws_sbg_render_admin_dashboard() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( 'Unauthorized access.' );
+	}
+
+	// Handle Manual Registration Submission
+	$message = '';
+	if ( isset( $_POST['action'] ) && $_POST['action'] === 'manual_admin_event_registration' && check_admin_referer( 'aws_manual_reg_action', 'aws_manual_reg_nonce' ) ) {
+		$m_name         = sanitize_text_field( $_POST['manual_name'] );
+		$m_email        = sanitize_email( $_POST['manual_email'] );
+		$m_phone        = sanitize_text_field( $_POST['manual_phone'] );
+		$m_uni          = sanitize_text_field( $_POST['manual_university'] );
+		$m_event_id     = intval( $_POST['manual_event_id'] );
+		$m_tier         = sanitize_text_field( $_POST['manual_tier'] );
+		$m_member_type  = sanitize_text_field( $_POST['manual_member_type'] ?? 'paying' );
+		$m_tshirt       = sanitize_text_field( $_POST['manual_tshirt'] );
+		$m_experience   = sanitize_text_field( $_POST['manual_experience'] );
+		$m_is_supporter = ( $m_tier === 'supporter' ) ? 'yes' : 'no';
+
+		if ( empty( $m_name ) || empty( $m_email ) || empty( $m_phone ) || empty( $m_uni ) || empty( $m_event_id ) ) {
+			$message = '⚠️ Please fill in all required fields (Name, Email, Phone, University, and Event).';
+		} else {
+			$reg_number = function_exists( 'aws_sbg_generate_next_registration_number' ) ? aws_sbg_generate_next_registration_number() : '#' . ( wp_count_posts( 'aws_event_reg' )->publish + 1001 );
+			$title_suffix = ( $m_is_supporter === 'yes' ) ? ' ⭐ Super Supporter' : '';
+
+			$post_id = wp_insert_post( array(
+				'post_type'   => 'aws_event_reg',
+				'post_title'  => $reg_number . ' - ' . $m_name . $title_suffix,
+				'post_status' => 'publish',
+			) );
+
+			if ( ! is_wp_error( $post_id ) && $post_id ) {
+				update_post_meta( $post_id, 'registration_id', $reg_number );
+				update_post_meta( $post_id, 'event_id', $m_event_id );
+				update_post_meta( $post_id, 'email', $m_email );
+				update_post_meta( $post_id, 'whatsapp_number', $m_phone );
+				update_post_meta( $post_id, 'phone_number', $m_phone );
+				update_post_meta( $post_id, 'university_organization', $m_uni );
+				update_post_meta( $post_id, 'ticket_tier', $m_tier );
+				update_post_meta( $post_id, 'member_type', $m_member_type );
+				update_post_meta( $post_id, 'is_supporter', $m_is_supporter );
+				update_post_meta( $post_id, 'tshirt_size', $m_tshirt );
+				update_post_meta( $post_id, 'experience_level', $m_experience );
+				update_post_meta( $post_id, 'attended', 'no' );
+				update_post_meta( $post_id, 'lunch_claimed', 'no' );
+				update_post_meta( $post_id, 'swag_claimed', 'no' );
+				update_post_meta( $post_id, 'custom_perk_claimed', 'no' );
+				update_post_meta( $post_id, 'manual_admin_entry', 'yes' );
+
+				$event_obj = get_post( $m_event_id );
+				$event_title = $event_obj ? $event_obj->post_title : 'Event #' . $m_event_id;
+
+				$message = "✅ Successfully registered {$m_name} ({$m_email}) for {$event_title} with Registration {$reg_number}!";
+			} else {
+				$message = '⚠️ Error creating manual registration.';
+			}
+		}
 	}
 
 	// Fetch registrations
@@ -314,6 +404,31 @@ function aws_sbg_render_admin_dashboard() {
 			'value'   => $selected_event,
 			'compare' => '=',
 		);
+	}
+
+	// Handle Category (Paying vs General) Filtering
+	$selected_member_type = isset( $_GET['filter_member_type'] ) ? sanitize_text_field( $_GET['filter_member_type'] ) : '';
+	if ( $selected_member_type ) {
+		if ( $selected_member_type === 'paying' ) {
+			$meta_query[] = array(
+				'relation' => 'OR',
+				array(
+					'key'     => 'member_type',
+					'value'   => 'paying',
+					'compare' => '=',
+				),
+				array(
+					'key'     => 'member_type',
+					'compare' => 'NOT EXISTS',
+				),
+			);
+		} else {
+			$meta_query[] = array(
+				'key'     => 'member_type',
+				'value'   => 'general',
+				'compare' => '=',
+			);
+		}
 	}
 
 	// Handle search by Registration ID or Email
@@ -353,17 +468,27 @@ function aws_sbg_render_admin_dashboard() {
 			}
 		</style>
 
-		<!-- HEADER & SEARCH BAR -->
-		<div class="flex justify-between items-center mb-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+		<?php if ( $message ) : ?>
+			<div class="mb-6 p-4 rounded-2xl <?php echo strpos($message, '✅') !== false ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-amber-50 border border-amber-200 text-amber-900'; ?> font-bold text-xs">
+				<?php echo esc_html( $message ); ?>
+			</div>
+		<?php endif; ?>
+
+		<!-- HEADER & ACTION BAR -->
+		<div class="flex flex-wrap justify-between items-center gap-4 mb-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
 			<div>
 				<h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
 					<span>🎫 Event Registrations</span>
 				</h1>
-				<p class="text-slate-500 text-xs mt-1 font-medium">Verify attendee registrations, ticket tiers, payment proofs, and perk redemptions.</p>
+				<p class="text-slate-500 text-xs mt-1 font-medium">Verify attendee registrations, ticket tiers, payment proofs, and assign Leaderboard Eligibility (Paying vs General).</p>
 			</div>
 
-			<div class="flex items-center gap-3">
-				<form method="GET" class="flex items-center gap-2">
+			<div class="flex items-center gap-2.5 flex-wrap">
+				<button type="button" onclick="document.getElementById('manual-reg-card').classList.toggle('hidden');" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
+					➕ Manually Register Attendee
+				</button>
+
+				<form method="GET" class="flex items-center gap-2 flex-wrap">
 					<input type="hidden" name="page" value="aws-sbg-registrations">
 					
 					<select name="filter_event" onchange="this.form.submit()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none">
@@ -375,11 +500,120 @@ function aws_sbg_render_admin_dashboard() {
 						<?php endforeach; ?>
 					</select>
 
+					<select name="filter_member_type" onchange="this.form.submit()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none">
+						<option value="">-- All Categories --</option>
+						<option value="paying" <?php selected( $selected_member_type, 'paying' ); ?>>💳 Paying (Prize Eligible)</option>
+						<option value="general" <?php selected( $selected_member_type, 'general' ); ?>>🎟️ General (Aid / Pro)</option>
+					</select>
+
 					<input type="text" name="search_reg" value="<?php echo esc_attr( $search_reg ); ?>" placeholder="Reg # (e.g. 1004)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none w-36">
 					
 					<button type="submit" class="bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-xs hover:bg-slate-800 transition-all">Search</button>
 				</form>
 			</div>
+		</div>
+
+		<!-- COLLAPSIBLE MANUAL REGISTRATION FORM CARD -->
+		<div id="manual-reg-card" class="<?php echo ( $message && strpos($message, '⚠️') !== false ) ? '' : 'hidden'; ?> mb-6 bg-slate-900 text-white p-6 rounded-2xl border border-slate-800 shadow-xl transition-all">
+			<div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+				<div>
+					<h3 class="text-base font-extrabold text-white flex items-center gap-2">
+						<span>➕ Manual Attendee Registration</span>
+						<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">Offline / Closed Events</span>
+					</h3>
+					<p class="text-slate-400 text-xs mt-0.5">Register a participant manually for any event (including closed/ended events) to grant them an official Registration ID.</p>
+				</div>
+				<button type="button" onclick="document.getElementById('manual-reg-card').classList.add('hidden');" class="text-slate-400 hover:text-white text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700">
+					✕ Close
+				</button>
+			</div>
+
+			<form method="POST" class="space-y-4">
+				<?php wp_nonce_field( 'aws_manual_reg_action', 'aws_manual_reg_nonce' ); ?>
+				<input type="hidden" name="action" value="manual_admin_event_registration">
+
+				<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+					<!-- Event Target -->
+					<div>
+						<label class="block text-xs font-bold text-slate-300 mb-1">Target Event <span class="text-purple-400">*</span></label>
+						<select name="manual_event_id" required class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-purple-500">
+							<option value="">-- Select Event --</option>
+							<?php foreach ( $events as $ev ) : ?>
+								<option value="<?php echo $ev->ID; ?>">
+									<?php echo esc_html( $ev->post_title ); ?> (ID: #<?php echo $ev->ID; ?>)
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+
+					<!-- Full Name -->
+					<div>
+						<label class="block text-xs font-bold text-slate-300 mb-1">Full Name <span class="text-purple-400">*</span></label>
+						<input type="text" name="manual_name" required placeholder="e.g. Muhammad Ali" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-purple-500">
+					</div>
+
+					<!-- Email Address -->
+					<div>
+						<label class="block text-xs font-bold text-slate-300 mb-1">Email Address <span class="text-purple-400">*</span></label>
+						<input type="email" name="manual_email" required placeholder="e.g. candidate@university.edu" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-purple-500">
+					</div>
+				</div>
+
+				<div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
+					<!-- Phone / WhatsApp -->
+					<div>
+						<label class="block text-xs font-bold text-slate-300 mb-1">WhatsApp / Phone # <span class="text-purple-400">*</span></label>
+						<input type="text" name="manual_phone" required placeholder="e.g. 0300-1234567" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-purple-500">
+					</div>
+
+					<!-- University / Organization -->
+					<div>
+						<label class="block text-xs font-bold text-slate-300 mb-1">University / Org <span class="text-purple-400">*</span></label>
+						<input type="text" name="manual_university" required placeholder="e.g. Air University" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-purple-500">
+					</div>
+
+					<!-- Pass Tier -->
+					<div>
+						<label class="block text-xs font-bold text-slate-300 mb-1">Ticket Tier / Pass</label>
+						<select name="manual_tier" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-purple-500">
+							<option value="regular">Regular Pass (In-Person)</option>
+							<option value="earlybird">Earlybird Pass</option>
+							<option value="supporter">⭐ Super Supporter (VIP)</option>
+							<option value="free">Free Pass</option>
+						</select>
+					</div>
+
+					<!-- Category: Paying vs General -->
+					<div>
+						<label class="block text-xs font-bold text-slate-300 mb-1">Leaderboard Category</label>
+						<select name="manual_member_type" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-purple-500">
+							<option value="paying">💳 Paying (Prize Eligible)</option>
+							<option value="general">🎟️ General (Aid / Pro)</option>
+						</select>
+					</div>
+
+					<!-- T-Shirt Size -->
+					<div>
+						<label class="block text-xs font-bold text-slate-300 mb-1">T-Shirt Size</label>
+						<select name="manual_tshirt" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-purple-500">
+							<option value="M">Medium (M)</option>
+							<option value="L">Large (L)</option>
+							<option value="XL">Extra Large (XL)</option>
+							<option value="S">Small (S)</option>
+							<option value="XXL">Double XL (XXL)</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="flex justify-end items-center gap-3 pt-2">
+					<button type="button" onclick="document.getElementById('manual-reg-card').classList.add('hidden');" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all">
+						Cancel
+					</button>
+					<button type="submit" class="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition-all">
+						✓ Confirm & Register Attendee
+					</button>
+				</div>
+			</form>
 		</div>
 
 		<!-- REGISTRATIONS TABLE -->
@@ -392,6 +626,7 @@ function aws_sbg_render_admin_dashboard() {
 						<th class="py-3.5 px-4">Phone #</th>
 						<th class="py-3.5 px-4">Email</th>
 						<th class="py-3.5 px-4">Tier / Pass</th>
+						<th class="py-3.5 px-4 text-center">Category (Leaderboard)</th>
 						<th class="py-3.5 px-4 text-center">Payment Screenshot</th>
 						<th class="py-3.5 px-4">University / Org</th>
 					</tr>
@@ -399,7 +634,7 @@ function aws_sbg_render_admin_dashboard() {
 				<tbody class="divide-y divide-slate-100">
 					<?php if ( ! $registrations->have_posts() ) : ?>
 						<tr>
-							<td colspan="7" class="py-8 text-center text-slate-500 font-medium">No registrations found matching your criteria.</td>
+							<td colspan="8" class="py-8 text-center text-slate-500 font-medium">No registrations found matching your criteria.</td>
 						</tr>
 					<?php else : ?>
 						<?php while ( $registrations->have_posts() ) : $registrations->the_post(); ?>
@@ -424,6 +659,13 @@ function aws_sbg_render_admin_dashboard() {
 							$is_supporter  = get_post_meta( $reg_id, 'is_supporter', true ) === '1' || $ticket_tier === 'supporter';
 							$payment_txn   = get_post_meta( $reg_id, 'payment_txn_id', true );
 							$attended      = get_post_meta( $reg_id, 'attended', true ) === 'yes';
+
+							// Member Type Category (Paying vs General)
+							$member_type   = get_post_meta( $reg_id, 'member_type', true );
+							if ( empty( $member_type ) ) {
+								$member_type = ( $ticket_tier === 'free' ) ? 'general' : 'paying';
+							}
+							$is_paying     = ( $member_type === 'paying' );
 
 							// Extract Payment Screenshot URL
 							$payment_meta = get_post_meta( $reg_id, 'payment_screenshot', true );
@@ -459,6 +701,11 @@ function aws_sbg_render_admin_dashboard() {
 									<?php else : ?>
 										<span class="bg-emerald-100 text-emerald-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">FREE</span>
 									<?php endif; ?>
+								</td>
+								<td class="py-3.5 px-4 text-center">
+									<button type="button" onclick="awsToggleMemberType(<?php echo $reg_id; ?>, this)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black cursor-pointer transition-all border <?php echo $is_paying ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'; ?>" title="Click to toggle between Paying (Prize Eligible) and General (Voucher Only)">
+										<span><?php echo $is_paying ? '💳 Paying (Prize)' : '🎟️ General (Aid/Pro)'; ?></span>
+									</button>
 								</td>
 								<td class="py-3.5 px-4 text-center">
 									<?php if ( ! empty( $proof_url ) ) : ?>
@@ -501,6 +748,31 @@ function aws_sbg_render_admin_dashboard() {
 		<?php endif; ?>
 
 		<script>
+		function awsToggleMemberType(regId, btn) {
+			btn.style.opacity = '0.5';
+			btn.disabled = true;
+			jQuery.post(ajaxurl, {
+				action: 'aws_sbg_toggle_member_type',
+				reg_id: regId,
+				nonce: '<?php echo wp_create_nonce( 'aws_sbg_admin_nonce' ); ?>'
+			}, function(response) {
+				btn.style.opacity = '1';
+				btn.disabled = false;
+				if (response.success) {
+					const isPaying = (response.data.new_val === 'paying');
+					if (isPaying) {
+						btn.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black cursor-pointer transition-all border bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100';
+						btn.innerHTML = '<span>💳 Paying (Prize)</span>';
+					} else {
+						btn.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black cursor-pointer transition-all border bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200';
+						btn.innerHTML = '<span>🎟️ General (Aid/Pro)</span>';
+					}
+				} else {
+					alert(response.data || 'Failed to update category');
+				}
+			});
+		}
+
 		function togglePerk(regId, key) {
 			jQuery.post(ajaxurl, {
 				action: 'aws_sbg_toggle_perk',

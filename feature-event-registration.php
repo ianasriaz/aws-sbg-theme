@@ -414,7 +414,22 @@ function aws_sbg_event_form_shortcode( $atts ) {
 	$timer_end            = get_post_meta( $event_id, 'aws_event_timer_end', true );
 	$timer_title          = get_post_meta( $event_id, 'aws_event_timer_title', true ) ?: '⏱️ Registration Deadline';
 	$timer_expired_action = get_post_meta( $event_id, 'aws_event_timer_expired_action', true ) ?: 'show_expired_text';
-	$timer_end_timestamp  = ( $enable_timer && ! empty( $timer_end ) ) ? strtotime( $timer_end ) * 1000 : 0;
+	$timer_end_timestamp  = 0;
+
+	if ( $enable_timer && ! empty( $timer_end ) ) {
+		try {
+			$timer_end_clean = str_replace( ' ', 'T', trim( $timer_end ) );
+			$dt = new DateTime( $timer_end_clean, wp_timezone() );
+			$timer_end_timestamp = $dt->getTimestamp() * 1000;
+		} catch ( Exception $e ) {
+			$timer_end_timestamp = strtotime( $timer_end ) * 1000;
+		}
+	}
+
+	$is_timer_expired       = ( $timer_end_timestamp > 0 && ( time() * 1000 ) >= $timer_end_timestamp );
+	$is_registration_closed = ( $event_status === 'closed' ) || ( $enable_timer && $is_timer_expired && 'auto_close_form' === $timer_expired_action );
+
+
 
 	// Supporter Metadata
 	$enable_supporter_raw = get_post_meta( $event_id, 'aws_event_enable_supporter', true );
@@ -545,9 +560,25 @@ function aws_sbg_event_form_shortcode( $atts ) {
 
 				<script>
 					(function() {
-						var endTime = <?php echo floatval( $timer_end_timestamp ); ?>;
+						var rawTimerEnd = "<?php echo esc_js( $timer_end ); ?>";
 						var eventId = <?php echo intval( $event_id ); ?>;
 						var autoClose = <?php echo $timer_expired_action === 'auto_close_form' ? 'true' : 'false'; ?>;
+						var endTime = 0;
+
+						if (rawTimerEnd) {
+							var cleanStr = rawTimerEnd.trim().replace(' ', 'T');
+							if (cleanStr.length === 16) {
+								cleanStr += ':00';
+							}
+							var parsedDate = new Date(cleanStr);
+							if (parsedDate && !isNaN(parsedDate.getTime())) {
+								endTime = parsedDate.getTime();
+							}
+						}
+						if (!endTime) {
+							endTime = <?php echo floatval( $timer_end_timestamp ); ?>;
+						}
+
 
 						function updateTimer() {
 							var now = new Date().getTime();
@@ -571,12 +602,23 @@ function aws_sbg_event_form_shortcode( $atts ) {
 								if (gridEl) gridEl.style.opacity = "0.4";
 
 								if (autoClose) {
+									var timerContainer = document.getElementById('aws-event-timer-container-' + eventId);
 									var formEl = document.querySelector('.aws-sbg-strict-form form');
-									if (formEl) {
+									var closedTemplate = document.getElementById('aws-reg-closed-screen-template-' + eventId);
+
+									if (closedTemplate) {
+										if (timerContainer) timerContainer.style.display = "none";
+										if (formEl) formEl.style.display = "none";
+										closedTemplate.style.display = "block";
+										closedTemplate.style.opacity = "0";
+										closedTemplate.style.transition = "opacity 0.5s ease-in-out";
+										setTimeout(function() { closedTemplate.style.opacity = "1"; }, 10);
+									} else if (formEl) {
 										formEl.style.opacity = "0.5";
 										formEl.style.pointerEvents = "none";
 									}
 								}
+
 								return;
 							}
 
@@ -597,12 +639,52 @@ function aws_sbg_event_form_shortcode( $atts ) {
 				</script>
 			<?php endif; ?>
 
-			<?php if ( $event_status === 'closed' ) : ?>
-				<div style="padding:32px; background:#fffbeb; border:2px solid #f59e0b; border-radius:16px; text-align:center;">
-					<div style="font-size:40px; margin-bottom:16px;">🛑</div>
-					<h4 style="font-size:20px; font-weight:900; color:#92400e; margin:0 0 8px; padding:0;">Registrations Closed / Full</h4>
-					<p style="font-size:15px; color:#b45309; margin:0; padding:0;">Registrations for this activity are full. Follow our community channels or check back soon!</p>
+			<?php if ( $is_registration_closed ) : ?>
+				<!-- BEAUTIFUL & MINIMAL REGISTRATION CLOSED SCREEN -->
+				<div id="aws-reg-closed-screen-<?php echo esc_attr( $event_id ); ?>" 
+				     style="background: #ffffff; border-radius: 20px; padding: 44px 24px; text-align: center; border: 1.5px solid #e2e8f0; box-shadow: 0 10px 40px rgba(15, 23, 42, 0.05); width: 100%; box-sizing: border-box; position: relative; overflow: hidden;">
+					<div style="position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 200px; height: 200px; background: radial-gradient(circle, rgba(173, 92, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%); pointer-events: none; border-radius: 50%;"></div>
+
+					<div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 100px; margin-bottom: 24px;">
+						<span style="display: block; width: 8px; height: 8px; border-radius: 50%; background: #e11d48;"></span>
+						<span style="font-size: 11px; font-weight: 800; color: #be123c; text-transform: uppercase; letter-spacing: 0.08em;">Registrations Closed</span>
+					</div>
+
+					<div style="width: 72px; height: 72px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.04);">
+						<svg style="width: 32px; height: 32px; color: #475569;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+						</svg>
+					</div>
+
+					<h3 style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0 0 10px; padding: 0; line-height: 1.25;">
+						Registration Time Has Ended
+					</h3>
+
+					<p style="font-size: 14px; color: #64748b; margin: 0 auto 24px; max-width: 460px; line-height: 1.6;">
+						Thank you for your interest! Registrations for <strong style="color: #0f172a;"><?php echo esc_html( $event_title ); ?></strong> have officially closed.
+					</p>
+
+					<div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 16px; padding: 18px 16px; margin-bottom: 28px; text-align: left; display: flex; align-items: flex-start; gap: 12px;">
+						<div style="font-size: 20px; flex-shrink: 0; line-height: 1;">💡</div>
+						<div>
+							<span style="display: block; font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Want to join our next activity?</span>
+							<span style="display: block; font-size: 12px; color: #64748b; line-height: 1.5;">Join our official AWS SBG community network to get instant updates on future masterclasses, hackathons, and certification vouchers.</span>
+						</div>
+					</div>
+
+					<div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center;">
+						<a href="<?php echo esc_url( home_url( '/events/' ) ); ?>" 
+						   style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 22px; background: #ad5cff; color: #ffffff; font-weight: 800; font-size: 13px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 14px rgba(173, 92, 255, 0.3); transition: all 0.2s;">
+							<span>Explore All Events</span>
+							<svg style="width: 14px; height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+						</a>
+						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" 
+						   style="display: inline-flex; align-items: center; justify-content: center; padding: 12px 22px; background: #f1f5f9; color: #334155; font-weight: 800; font-size: 13px; border-radius: 12px; text-decoration: none; transition: all 0.2s;">
+							Return to Homepage
+						</a>
+					</div>
 				</div>
+
 			<?php elseif ( isset( $_GET['status'] ) && $_GET['status'] === 'success' ) :
 				$reg_id     = isset( $_GET['reg_id'] ) ? sanitize_text_field( $_GET['reg_id'] ) : 'N/A';
 				$fname_full = isset( $_GET['fname'] ) ? sanitize_text_field( wp_unslash( $_GET['fname'] ) ) : '';
@@ -730,7 +812,53 @@ function aws_sbg_event_form_shortcode( $atts ) {
 				});
 			</script>
 
+			<!-- Hidden Template for Real-Time Auto-Replacement when countdown finishes -->
+			<div id="aws-reg-closed-screen-template-<?php echo esc_attr( $event_id ); ?>" 
+			     style="display: none; background: #ffffff; border-radius: 20px; padding: 44px 24px; text-align: center; border: 1.5px solid #e2e8f0; box-shadow: 0 10px 40px rgba(15, 23, 42, 0.05); width: 100%; box-sizing: border-box; position: relative; overflow: hidden;">
+				<div style="position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 200px; height: 200px; background: radial-gradient(circle, rgba(173, 92, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%); pointer-events: none; border-radius: 50%;"></div>
+
+				<div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: #fff1f2; border: 1px solid #fecdd3; border-radius: 100px; margin-bottom: 24px;">
+					<span style="display: block; width: 8px; height: 8px; border-radius: 50%; background: #e11d48;"></span>
+					<span style="font-size: 11px; font-weight: 800; color: #be123c; text-transform: uppercase; letter-spacing: 0.08em;">Registrations Closed</span>
+				</div>
+
+				<div style="width: 72px; height: 72px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.04);">
+					<svg style="width: 32px; height: 32px; color: #475569;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+					</svg>
+				</div>
+
+				<h3 style="font-size: 22px; font-weight: 900; color: #0f172a; margin: 0 0 10px; padding: 0; line-height: 1.25;">
+					Registration Time Has Ended
+				</h3>
+
+				<p style="font-size: 14px; color: #64748b; margin: 0 auto 24px; max-width: 460px; line-height: 1.6;">
+					Thank you for your interest! Registrations for <strong style="color: #0f172a;"><?php echo esc_html( $event_title ); ?></strong> have officially closed.
+				</p>
+
+				<div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 16px; padding: 18px 16px; margin-bottom: 28px; text-align: left; display: flex; align-items: flex-start; gap: 12px;">
+					<div style="font-size: 20px; flex-shrink: 0; line-height: 1;">💡</div>
+					<div>
+						<span style="display: block; font-size: 12px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Want to join our next activity?</span>
+						<span style="display: block; font-size: 12px; color: #64748b; line-height: 1.5;">Join our official AWS SBG community network to get instant updates on future masterclasses, hackathons, and certification vouchers.</span>
+					</div>
+				</div>
+
+				<div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center;">
+					<a href="<?php echo esc_url( home_url( '/events/' ) ); ?>" 
+					   style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 22px; background: #ad5cff; color: #ffffff; font-weight: 800; font-size: 13px; border-radius: 12px; text-decoration: none; box-shadow: 0 4px 14px rgba(173, 92, 255, 0.3); transition: all 0.2s;">
+						<span>Explore All Events</span>
+						<svg style="width: 14px; height: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+					</a>
+					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" 
+					   style="display: inline-flex; align-items: center; justify-content: center; padding: 12px 22px; background: #f1f5f9; color: #334155; font-weight: 800; font-size: 13px; border-radius: 12px; text-decoration: none; transition: all 0.2s;">
+						Return to Homepage
+					</a>
+				</div>
+			</div>
+
 			<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" enctype="multipart/form-data" style="margin:0; padding:0;"
+
 			      x-data="awsEventForm"
 			      @submit="handleFormSubmit($event)">
 
@@ -1171,7 +1299,26 @@ function aws_sbg_handle_event_registration() {
 	}
 
 	$event_id    = isset( $_POST['event_id'] ) ? intval( $_POST['event_id'] ) : 0;
+
+	// Server-side check for deadline expiration if timer is set to auto-close form
+	$enable_timer         = (bool) get_post_meta( $event_id, 'aws_event_enable_timer', true );
+	$timer_end            = get_post_meta( $event_id, 'aws_event_timer_end', true );
+	$timer_expired_action = get_post_meta( $event_id, 'aws_event_timer_expired_action', true );
+
+	if ( $enable_timer && ! empty( $timer_end ) && 'auto_close_form' === $timer_expired_action ) {
+		try {
+			$timer_end_clean = str_replace( ' ', 'T', trim( $timer_end ) );
+			$dt = new DateTime( $timer_end_clean, wp_timezone() );
+			if ( time() > $dt->getTimestamp() ) {
+				wp_die( 'Registration deadline has passed. Submissions are no longer accepted for this event.' );
+			}
+		} catch ( Exception $e ) {
+			// ignore fallback
+		}
+	}
+
 	$full_name   = isset( $_POST['full_name'] ) ? sanitize_text_field( wp_unslash( $_POST['full_name'] ) ) : '';
+
 	$email       = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 	$whatsapp    = isset( $_POST['whatsapp_number'] ) ? sanitize_text_field( wp_unslash( $_POST['whatsapp_number'] ) ) : '';
 	$university  = isset( $_POST['university_organization'] ) ? sanitize_text_field( wp_unslash( $_POST['university_organization'] ) ) : '';

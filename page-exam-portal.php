@@ -17,10 +17,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title><?php wp_title( '|', true, 'right' ); ?> AWS Certification Mock Exam Portal</title>
 	
-	<!-- Google Fonts: Inter & Outfit -->
+	<!-- Google Fonts: Inter & Outfit & Great Vibes -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 	
 	<!-- Tailwind CSS & Alpine.js -->
 	<script src="https://cdn.tailwindcss.com?plugins=typography"></script>
@@ -172,6 +172,39 @@
 			</div>
 		</div>
 
+		<!-- 1.5 SLOT WAITING STAGE: TIME SLOT COUNTDOWN -->
+		<div x-show="currentStage === 'slot_waiting'" x-transition:enter="transition ease-out duration-300 transform opacity-0 scale-95" class="max-w-md mx-auto w-full bg-white border border-purple-200/90 rounded-[28px] p-8 sm:p-10 shadow-2xl shadow-purple-950/20 text-slate-800 text-center space-y-6" x-cloak>
+			<div class="w-16 h-16 rounded-2xl bg-purple-50 border border-purple-100 text-purple-600 mx-auto flex items-center justify-center shadow-sm">
+				<svg class="w-8 h-8 text-purple-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+			</div>
+
+			<div>
+				<span class="inline-block text-[10px] font-extrabold px-3 py-1 rounded-full bg-purple-100 text-purple-800 border border-purple-200 uppercase tracking-widest mb-3">Scheduled Exam Time Slot</span>
+				<h2 class="font-display text-2xl font-extrabold text-slate-900" x-text="slotInfo ? slotInfo.slot_name : 'Upcoming Exam Slot'"></h2>
+				<p class="text-xs text-slate-500 mt-2 font-medium" x-text="slotInfo ? (slotInfo.start_time_formatted + ' to ' + slotInfo.end_time_formatted) : ''"></p>
+			</div>
+
+			<!-- BIG LIVE COUNTDOWN BOX -->
+			<div class="p-6 rounded-2xl bg-slate-900 text-white shadow-inner space-y-2">
+				<div class="text-[10px] uppercase font-extrabold tracking-widest text-emerald-400">Exam Slot Opens In</div>
+				<div class="font-mono text-3xl sm:text-4xl font-extrabold text-white tracking-wider" x-text="slotCountdown || '00m 00s'"></div>
+				<div class="text-[10px] text-slate-400">System automatically unlocks when timer reaches zero</div>
+			</div>
+
+
+			<div class="flex items-center gap-3">
+				<button @click="currentStage = 'entry'" class="w-1/3 py-3.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 rounded-2xl font-bold text-xs transition-all">
+					Change Code
+				</button>
+				<button @click="verifyCode()" :disabled="loading" class="flex-1 py-3.5 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl font-bold text-xs shadow-lg shadow-purple-600/20 transition-all flex items-center justify-center gap-2">
+					<template x-if="loading">
+						<svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+					</template>
+					<span>Check Slot Status ➔</span>
+				</button>
+			</div>
+		</div>
+
 		<!-- 2. INSTRUCTIONS STAGE: BRIEFING & RULES -->
 		<div x-show="currentStage === 'instructions'" x-transition:enter="transition ease-out duration-300" class="max-w-2xl mx-auto w-full bg-white border border-slate-200/90 rounded-[28px] p-8 sm:p-10 shadow-2xl shadow-purple-950/20 text-slate-800 space-y-7" x-cloak>
 			
@@ -181,8 +214,14 @@
 					<svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.307 4.491 4.491 0 01-1.307-3.497A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497a4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" /></svg>
 				</div>
 				<div>
-					<div class="flex items-center gap-2">
-						<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200 uppercase" x-text="examDetails.exam_track"></span>
+					<div class="flex items-center gap-2 flex-wrap">
+						<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200 uppercase">AWS Certification Prep</span>
+						<template x-if="examDetails.exam_mode === 'test'">
+							<span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 uppercase">🧪 TEST MODE (10 Qs)</span>
+						</template>
+						<template x-if="examDetails.slot_name">
+							<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200" x-text="'⏱️ ' + examDetails.slot_name"></span>
+						</template>
 						<span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">VERIFIED PARTICIPANT</span>
 					</div>
 					<h2 class="font-display text-2xl font-extrabold text-slate-900 mt-1">Participant: <span class="text-purple-700" x-text="examDetails.member_name"></span></h2>
@@ -198,7 +237,7 @@
 				</div>
 				<div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
 					<div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Per Question Time</div>
-					<div class="font-display text-2xl font-extrabold text-emerald-600 mt-1" x-text="(examDetails.per_question_seconds || 45) + 's'"></div>
+					<div class="font-display text-2xl font-extrabold text-emerald-600 mt-1" x-text="(examDetails.per_question_seconds || 40) + 's'"></div>
 				</div>
 				<div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
 					<div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Pass Mark</div>
@@ -215,7 +254,7 @@
 				<ul class="space-y-2.5 list-none text-slate-800 font-medium p-0 m-0">
 					<li class="flex items-start gap-2.5">
 						<span class="text-base leading-none">⏱️</span>
-						<div><strong class="text-slate-950 font-bold">Per-Question Countdown:</strong> You have <strong class="text-emerald-800 font-extrabold" x-text="(examDetails.per_question_seconds || 45) + ' seconds'">45 seconds</strong> per question.</div>
+						<div><strong class="text-slate-950 font-bold">Per-Question Countdown:</strong> You have <strong class="text-emerald-800 font-extrabold" x-text="(examDetails.per_question_seconds || 40) + ' seconds'">40 seconds</strong> per question.</div>
 					</li>
 					<li class="flex items-start gap-2.5">
 						<span class="text-base leading-none">⏩</span>
@@ -229,7 +268,22 @@
 						<span class="text-base leading-none">🛡️</span>
 						<div><strong class="text-slate-950 font-bold">Anti-Cheating Protection:</strong> Fullscreen is required. Exiting fullscreen gives a 5-second return window before auto-submission.</div>
 					</li>
+					<li class="flex items-start gap-2.5">
+						<span class="text-base leading-none">👁️</span>
+						<div><strong class="text-slate-950 font-bold">Active Presence:</strong> Screen automatically blurs after 3 seconds of idle time. Move your mouse or touch the screen to keep it clear.</div>
+					</li>
 				</ul>
+			</div>
+
+			<!-- INSPIRATIONAL PRE-EXAM MOTIVATION CARD -->
+			<div class="p-5 rounded-2xl bg-gradient-to-r from-purple-50 via-indigo-50/60 to-emerald-50 border border-purple-200/80 shadow-sm text-slate-800 space-y-2">
+				<div class="flex items-center gap-2 text-sm font-black text-purple-950">
+					<span>🌟</span>
+					<span>A Note Before You Begin — Believe in Yourself!</span>
+				</div>
+				<p class="text-xs sm:text-[13px] leading-relaxed text-slate-700 font-medium">
+					Attempt this exam with confidence, focus, and honesty. Trust the knowledge you have gained through your own effort. A score is only one part of your learning journey—what truly matters is staying true to yourself and growing from every attempt.
+				</p>
 			</div>
 
 			<!-- ACTION BUTTONS -->
@@ -251,8 +305,17 @@
 				<div class="flex items-center gap-3">
 					<div class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></div>
 					<div>
-						<div class="flex items-center gap-2">
-							<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800 uppercase border border-purple-200" x-text="examDetails.exam_track"></span>
+						<div class="flex items-center gap-2 flex-wrap">
+							<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800 uppercase border border-purple-200">AWS Certification Prep</span>
+							<template x-if="examDetails.exam_mode === 'test'">
+								<span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-amber-100 text-amber-900 uppercase border border-amber-300">🧪 TEST MODE</span>
+							</template>
+							<template x-if="examDetails.slot_name">
+								<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800 border border-blue-200" x-text="'⏱️ ' + examDetails.slot_name"></span>
+							</template>
+							<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1">
+								<span>👁️</span> <span>Blurs on 3s idle (move mouse to view)</span>
+							</span>
 						</div>
 						<h2 class="text-base font-bold text-slate-900 mt-1">Participant: <span class="text-purple-700" x-text="examDetails.member_name"></span></h2>
 					</div>
@@ -291,26 +354,37 @@
 				<!-- QUESTION CARD CONTAINER (3 COLS) -->
 				<div class="lg:col-span-3 space-y-6">
 					
-					<div id="aws-question-card" class="bg-white border border-slate-200/90 rounded-[28px] p-6 sm:p-10 shadow-xl relative min-h-[380px] overflow-hidden text-slate-800 transition-all duration-300">
+					<div id="aws-question-card" class="bg-white border border-slate-200/90 rounded-[28px] p-6 sm:p-10 shadow-xl relative min-h-[380px] overflow-hidden text-slate-800 transition-all duration-300" @mousemove="resetActivityTimer()" @touchstart="resetActivityTimer()">
 						
-						<!-- DYNAMIC ANTI-CHEAT WATERMARK OVERLAY -->
-						<div class="absolute inset-0 pointer-events-none z-0 flex flex-col justify-around p-6 opacity-[0.04] select-none font-mono text-[10px] text-slate-900 uppercase transform -rotate-12 space-y-8">
+						<!-- FORENSIC ANTI-PHOTO DYNAMIC WATERMARK -->
+						<div class="absolute inset-0 pointer-events-none z-0 flex flex-col justify-around p-6 opacity-[0.06] select-none font-mono text-[11px] text-slate-950 uppercase transform -rotate-12 space-y-8">
 							<div class="flex justify-between">
 								<span x-text="'CANDIDATE: ' + examDetails.member_name + ' | CODE: ' + inputCode"></span>
-								<span x-text="'AWS AIR UNIVERSITY | DO NOT COPY'"></span>
+								<span>AWS AIR UNIVERSITY | DO NOT PHOTOGRAPH</span>
 							</div>
 							<div class="flex justify-between">
-								<span x-text="'CONFIDENTIAL - ' + examDetails.member_email"></span>
-								<span x-text="'CANDIDATE: ' + examDetails.member_name + ' | ' + examDetails.exam_track"></span>
+								<span x-text="'CONFIDENTIAL — ' + examDetails.member_email"></span>
+								<span x-text="'PROCTORED LIVE SESSION | ' + examDetails.exam_track"></span>
 							</div>
 							<div class="flex justify-between">
-								<span x-text="'AWS AIR UNIVERSITY | DO NOT COPY'"></span>
-								<span x-text="'CONFIDENTIAL - ' + examDetails.member_name"></span>
+								<span>AWS STUDENT BUILDER GROUP | STRICTLY MONITORED</span>
+								<span x-text="'CANDIDATE: ' + examDetails.member_name"></span>
+							</div>
+						</div>
+
+						<!-- 3-SECOND INACTIVITY ANTI-CAMERA BLUR OVERLAY -->
+						<div x-show="isQuestionBlurred" x-transition.opacity.duration.150ms class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-slate-900/10 backdrop-blur-md rounded-[28px] p-6 text-center cursor-pointer select-none" @click="resetActivityTimer()">
+							<div class="bg-white/95 border border-purple-200 shadow-2xl px-5 py-3 rounded-2xl flex items-center gap-3 text-slate-900 animate-pulse">
+								<span class="text-xl">👁️</span>
+								<div class="text-left">
+									<div class="text-xs font-black uppercase tracking-wider text-purple-900">Active Presence Required</div>
+									<div class="text-xs text-slate-600 font-semibold">Move mouse or touch screen to reveal question</div>
+								</div>
 							</div>
 						</div>
 
 						<template x-if="questions.length > 0 && currentQuestion">
-							<div class="relative z-10 space-y-6">
+							<div class="relative z-10 space-y-6 transition-all duration-200" :class="isQuestionBlurred ? 'filter blur-[10px] select-none opacity-15 pointer-events-none' : ''">
 								<!-- Question Header -->
 								<div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
 									<div class="flex flex-wrap items-center gap-2.5">
@@ -332,18 +406,20 @@
 									<span class="inline-block text-xs font-bold px-3.5 py-1.5 rounded-xl bg-purple-50 text-purple-800 border border-purple-200" x-text="currentQuestion.is_multi ? 'Select ' + currentQuestion.multi_count + ' correct options:' : 'Select ONE correct option:'"></span>
 								</div>
 
-								<!-- Options List -->
+								<!-- Options List (Text-Only Tiles — Anti-AI Shortcut) -->
 								<div class="space-y-3.5 pt-2">
 									<template x-for="opt in currentQuestion.options" :key="opt.key">
 										<label @click="selectOption(currentQuestion.id, opt.key, currentQuestion.is_multi, currentQuestion.multi_count)" class="flex items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer group" :class="isOptionSelected(currentQuestion.id, opt.key) ? 'bg-purple-50/90 border-2 border-purple-600 text-purple-950 font-bold shadow-md shadow-purple-500/10' : 'bg-slate-50 border-slate-200/90 hover:border-purple-300 hover:bg-purple-50/40 text-slate-800 hover:translate-x-1'">
-											<div class="flex items-start gap-4">
-												<div class="mt-0.5 shrink-0 flex items-center justify-center w-8 h-8 rounded-xl font-bold text-sm transition-all" :class="isOptionSelected(currentQuestion.id, opt.key) ? 'bg-purple-600 text-white font-extrabold shadow-sm' : 'bg-slate-200 text-slate-700 group-hover:bg-purple-600 group-hover:text-white'" x-text="opt.key"></div>
-												<div class="text-base leading-relaxed pt-0.5 font-medium" x-text="opt.text"></div>
+											<div class="flex items-center gap-3.5">
+												<div class="shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all" :class="isOptionSelected(currentQuestion.id, opt.key) ? 'border-purple-600 bg-purple-600 shadow-sm' : 'border-slate-300 bg-white group-hover:border-purple-400'">
+													<div x-show="isOptionSelected(currentQuestion.id, opt.key)" class="w-2.5 h-2.5 rounded-full bg-white"></div>
+												</div>
+												<div class="text-sm sm:text-base leading-relaxed font-medium" x-text="opt.text"></div>
 											</div>
 											
-											<!-- Selection Checkmark -->
-											<div x-show="isOptionSelected(currentQuestion.id, opt.key)" class="shrink-0 w-6 h-6 rounded-full bg-purple-600 text-white flex items-center justify-center shadow-sm">
-												<svg class="w-4 h-4 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+											<!-- Selection Pill -->
+											<div x-show="isOptionSelected(currentQuestion.id, opt.key)" class="shrink-0 text-[11px] px-2.5 py-1 rounded-lg bg-purple-600 text-white font-extrabold tracking-wider uppercase shadow-sm">
+												Selected
 											</div>
 										</label>
 									</template>
@@ -407,11 +483,24 @@
 		<div x-show="currentStage === 'results'" x-transition:enter="transition ease-out duration-300" class="space-y-8 max-w-5xl mx-auto w-full" x-cloak>
 			
 			<!-- SCORE HERO BANNER -->
-			<div class="bg-white border border-slate-200/90 rounded-[28px] p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl text-slate-900" :class="results.passed ? 'border-emerald-300 shadow-emerald-600/10' : 'border-red-300 shadow-red-500/10'">
-				<div class="inline-flex items-center justify-center px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-6" :class="results.passed ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-red-100 text-red-800 border border-red-300'" x-text="results.passed ? '🎉 PASSED AWS CERTIFICATION EXAM' : '❌ DID NOT MEET PASSING THRESHOLD'"></div>
+			<div class="bg-white border border-slate-200/90 rounded-[28px] p-8 sm:p-12 text-center relative overflow-hidden shadow-2xl text-slate-900" :class="results.passed ? 'border-emerald-300 shadow-emerald-600/10' : 'border-amber-300 shadow-amber-500/10'">
+				
+				<!-- Top Status Pill -->
+				<div class="inline-flex items-center justify-center px-5 py-2 rounded-full text-xs font-extrabold uppercase tracking-widest mb-6 shadow-sm" :class="results.passed ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-900 border border-amber-300'" x-text="results.passed ? 'Passed' : 'Below 700'"></div>
 
-				<h1 class="font-display text-4xl sm:text-6xl font-black text-slate-900 mb-3 tracking-tight">Scaled Score: <span :class="results.passed ? 'text-emerald-600' : 'text-red-600'" x-text="results.score"></span> <span class="text-2xl font-normal text-slate-400">/ 1000</span></h1>
-				<p class="text-slate-500 text-sm mb-6">Required Passing Score: <strong class="text-slate-800">700 / 1000</strong></p>
+				<!-- Candidate Name & Event Organization Header -->
+				<div class="max-w-2xl mx-auto mb-6 space-y-2">
+					<div class="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-400">Official Exam Scorecard</div>
+					<h2 class="font-display text-2xl sm:text-3xl font-black text-slate-900 tracking-tight" x-text="results.member_name"></h2>
+					<div class="inline-flex items-center flex-wrap justify-center gap-1.5 px-4 py-2 rounded-2xl bg-slate-50 border border-slate-200 text-slate-600 text-xs font-medium">
+						<span class="font-bold text-slate-800">AWS Certification Preparation Exam</span>
+						<span class="text-slate-300 hidden sm:inline">•</span>
+						<span>Organized by <strong class="text-purple-700 font-bold">AWS Student Builder Group</strong> at <strong class="text-slate-800">Air University Islamabad</strong></span>
+					</div>
+				</div>
+
+				<h1 class="font-display text-4xl sm:text-6xl font-black text-slate-900 mb-3 tracking-tight">Scaled Score: <span :class="results.passed ? 'text-emerald-600' : 'text-amber-600'" x-text="results.score"></span> <span class="text-2xl font-normal text-slate-400">/ 1000</span></h1>
+				<p class="text-slate-500 text-sm mb-6">Passing Benchmark: <strong class="text-slate-800">700 / 1000 (70%)</strong></p>
 
 				<template x-if="results.passed">
 					<div class="mb-8">
@@ -419,6 +508,18 @@
 							<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
 							<span>📜 Download Verified Certificate</span>
 						</button>
+					</div>
+				</template>
+
+				<template x-if="!results.passed">
+					<div class="mb-8 max-w-xl mx-auto p-4 sm:p-5 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 text-center space-y-1.5 shadow-sm">
+						<div class="text-base sm:text-lg font-black flex items-center justify-center gap-1.5 text-amber-950">
+							<span>🌟</span>
+							<span>Best of Luck for Next Time!</span>
+						</div>
+						<p class="text-xs sm:text-sm font-medium leading-relaxed text-amber-800">
+							Awesome effort on the exam! More community learning sessions, challenges, and voucher opportunities are coming soon. Review the explanations below to keep leveling up!
+						</p>
 					</div>
 				</template>
 
@@ -466,17 +567,33 @@
 				
 				<div class="space-y-6">
 					<template x-for="(res, idx) in results.item_results" :key="res.question_id">
-						<div class="p-6 rounded-2xl border bg-slate-50/50" :class="res.is_correct ? 'border-emerald-200' : 'border-red-200'">
+						<div class="p-6 rounded-2xl border bg-slate-50/50" :class="res.is_correct ? 'border-emerald-200' : (res.user_selected && res.user_selected.length > 0 ? 'border-red-200' : 'border-slate-200')">
 							<div class="flex items-center justify-between gap-4 mb-4">
 								<span class="text-xs font-extrabold text-slate-500" x-text="'Question ' + (idx + 1) + ' — ' + res.domain"></span>
-								<span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase" :class="res.is_correct ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'" x-text="res.is_correct ? 'CORRECT (+1)' : 'INCORRECT (0)'"></span>
+								<span class="px-3 py-1 rounded-full text-xs font-extrabold uppercase" 
+									:class="res.is_correct ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : (res.user_selected && res.user_selected.length > 0 ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-slate-100 text-slate-700 border border-slate-300')" 
+									x-text="res.is_correct ? 'CORRECT (+1)' : (res.user_selected && res.user_selected.length > 0 ? 'INCORRECT (0)' : 'NOT ATTEMPTED (0)')">
+								</span>
 							</div>
 
 							<div class="text-slate-900 font-semibold text-base mb-4" x-html="res.question"></div>
 
-							<div class="text-xs space-y-1.5 mb-4 p-4 rounded-xl bg-white border border-slate-200 font-mono">
-								<div>Your Selection: <strong :class="res.is_correct ? 'text-emerald-700' : 'text-red-600'" x-text="res.user_selected.join(', ') || 'None (Timed Out)'"></strong></div>
-								<div>Correct Answer: <strong class="text-emerald-700" x-text="res.correct_answers.join(', ')"></strong></div>
+							<div class="text-xs sm:text-sm space-y-2 mb-4 p-4 rounded-xl bg-white border border-slate-200 font-sans">
+								<div class="flex items-start gap-2">
+									<span class="font-bold text-slate-500 min-w-[105px] shrink-0 text-xs uppercase tracking-wider">Your Selection:</span>
+									<div :class="res.is_correct ? 'text-emerald-700 font-bold' : (res.user_selected && res.user_selected.length > 0 ? 'text-red-600 font-bold' : 'text-slate-500 italic')">
+										<template x-if="res.user_selected_texts && res.user_selected_texts.length > 0">
+											<span x-text="(res.is_correct ? '✅ ' : '❌ ') + res.user_selected_texts.join(', ')"></span>
+										</template>
+										<template x-if="!res.user_selected_texts || res.user_selected_texts.length === 0">
+											<span x-text="(res.user_selected && res.user_selected.length > 0) ? ((res.is_correct ? '✅ ' : '❌ ') + res.user_selected.join(', ')) : '⚠️ Not Attempted (Timed Out)'"></span>
+										</template>
+									</div>
+								</div>
+								<div class="flex items-start gap-2 pt-2 border-t border-slate-100">
+									<span class="font-bold text-slate-500 min-w-[105px] shrink-0 text-xs uppercase tracking-wider">Correct Answer:</span>
+									<div class="text-emerald-700 font-bold" x-text="'✅ ' + ((res.correct_answers_texts && res.correct_answers_texts.length > 0) ? res.correct_answers_texts.join(', ') : res.correct_answers.join(', '))"></div>
+								</div>
 							</div>
 
 							<div class="p-4 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 leading-relaxed">
@@ -507,7 +624,7 @@
 				<div>
 					<h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">Congratulations, <span class="text-emerald-600" x-text="results.member_name"></span>!</h2>
 					<p class="text-xs sm:text-sm text-slate-600 font-medium mt-1.5 leading-relaxed">
-						You passed the <strong class="text-slate-900">AWS Cloud Certification Preparation Exam</strong> with a score of <strong class="text-emerald-600 font-extrabold" x-text="results.score + ' / 1000'"></strong>!
+						You passed the <strong class="text-slate-900">AWS Certification Preparation Exam</strong> with a score of <strong class="text-emerald-600 font-extrabold" x-text="results.score + ' / 1000'"></strong>!
 					</p>
 				</div>
 
@@ -607,12 +724,18 @@
 <script>
 function awsExamApp() {
 	return {
-		currentStage: 'entry', // entry, instructions, active_exam, results
+		currentStage: 'entry', // entry, slot_waiting, instructions, active_exam, results
 		inputCode: '',
 		sessionToken: '',
 		loading: false,
 		isGeneratingCert: false,
 		errorMessage: '',
+
+		// Slot State
+		slotInfo: null,
+		slotCountdown: '',
+		slotCountdownInterval: null,
+		slotRemainingSeconds: 0,
 
 		examDetails: {},
 		questions: [],
@@ -621,6 +744,8 @@ function awsExamApp() {
 
 		// Timers
 		totalTimeSpentSeconds: 0,
+		totalTimeSpentMs: 0,
+		examStartTimeMs: null,
 		qTimerSeconds: 60,
 		qTimerInterval: null,
 		totalTimerInterval: null,
@@ -631,8 +756,28 @@ function awsExamApp() {
 		showSuccessVoucherModal: false,
 		confirmSubmitModal: false,
 		isMobileDevice: false,
+		isSubmitting: false,
 		fullscreenCountdown: 5,
 		fullscreenTimerInterval: null,
+
+		// 3-Second Active Presence Anti-Capture Blur
+		isQuestionBlurred: false,
+		idleBlurTimer: null,
+
+		resetActivityTimer() {
+			this.isQuestionBlurred = false;
+			if (this.idleBlurTimer) {
+				clearTimeout(this.idleBlurTimer);
+				this.idleBlurTimer = null;
+			}
+			if (this.currentStage === 'active_exam') {
+				this.idleBlurTimer = setTimeout(() => {
+					if (this.currentStage === 'active_exam') {
+						this.isQuestionBlurred = true;
+					}
+				}, 3000); // 3 seconds idle threshold
+			}
+		},
 
 		get currentQuestion() {
 			return (this.questions && this.questions.length > 0) ? this.questions[this.currentIndex] : null;
@@ -654,6 +799,18 @@ function awsExamApp() {
 		},
 
 		init() {
+			// Active Presence / Anti-Capture Motion Listeners
+			const onUserPresence = () => {
+				if (this.currentStage === 'active_exam') {
+					this.resetActivityTimer();
+				}
+			};
+			window.addEventListener('mousemove', onUserPresence, { passive: true });
+			window.addEventListener('touchstart', onUserPresence, { passive: true });
+			window.addEventListener('touchmove', onUserPresence, { passive: true });
+			window.addEventListener('scroll', onUserPresence, { passive: true });
+			window.addEventListener('keydown', onUserPresence, { passive: true });
+
 			// Anti-copy protection
 			document.addEventListener('contextmenu', e => {
 				if (this.currentStage === 'active_exam') e.preventDefault();
@@ -688,7 +845,7 @@ function awsExamApp() {
 
 			// Blur question container immediately when window loses focus (e.g. Snipping Tool launch)
 			window.addEventListener('blur', () => {
-				if (this.currentStage === 'active_exam') {
+				if (this.currentStage === 'active_exam' && !this.isSubmitting) {
 					const card = document.getElementById('aws-question-card');
 					if (card) card.style.filter = 'blur(45px)';
 					this.handleTabSwitch();
@@ -706,7 +863,7 @@ function awsExamApp() {
 
 			// Page visibility change detection
 			document.addEventListener('visibilitychange', () => {
-				if (this.currentStage === 'active_exam' && document.hidden) {
+				if (this.currentStage === 'active_exam' && !this.isSubmitting && document.hidden) {
 					const card = document.getElementById('aws-question-card');
 					if (card) card.style.filter = 'blur(45px)';
 				}
@@ -714,7 +871,7 @@ function awsExamApp() {
 
 			// Fullscreen change detection
 			const handleFullscreenChange = () => {
-				if (this.currentStage === 'active_exam') {
+				if (this.currentStage === 'active_exam' && !this.isSubmitting) {
 					const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
 					if (!isFull) {
 						this.showFullscreenModal = true;
@@ -737,6 +894,12 @@ function awsExamApp() {
 						}
 						this.showFullscreenModal = false;
 					}
+				} else {
+					if (this.fullscreenTimerInterval) {
+						clearInterval(this.fullscreenTimerInterval);
+						this.fullscreenTimerInterval = null;
+					}
+					this.showFullscreenModal = false;
 				}
 			};
 
@@ -769,6 +932,22 @@ function awsExamApp() {
 			}
 		},
 
+		exitFullscreen() {
+			try {
+				if (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement) {
+					if (document.exitFullscreen) {
+						document.exitFullscreen().catch(() => {});
+					} else if (document.webkitExitFullscreen) {
+						document.webkitExitFullscreen();
+					} else if (document.mozCancelFullScreen) {
+						document.mozCancelFullScreen();
+					} else if (document.msExitFullscreen) {
+						document.msExitFullscreen();
+					}
+				}
+			} catch(err) {}
+		},
+
 		wipeClipboardAndWarn() {
 			try {
 				navigator.clipboard.writeText('⚠️ Screenshots are prohibited during the AWS Mock Exam session! Candidate: ' + (this.examDetails.member_name || 'Candidate'));
@@ -776,18 +955,68 @@ function awsExamApp() {
 			this.showSecurityModal = true;
 		},
 
+		startSlotCountdown(seconds) {
+			if (this.slotCountdownInterval) clearInterval(this.slotCountdownInterval);
+			this.slotRemainingSeconds = Math.max(0, parseInt(seconds) || 0);
+			this.updateSlotCountdownDisplay();
+
+			this.slotCountdownInterval = setInterval(() => {
+				if (this.slotRemainingSeconds > 0) {
+					this.slotRemainingSeconds--;
+					this.updateSlotCountdownDisplay();
+				} else {
+					clearInterval(this.slotCountdownInterval);
+					this.slotCountdown = '00m 00s';
+					// Auto re-verify when countdown reaches 0
+					setTimeout(() => {
+						this.verifyCode();
+					}, 1000);
+				}
+			}, 1000);
+		},
+
+		updateSlotCountdownDisplay() {
+			const sec = this.slotRemainingSeconds;
+			const h = Math.floor(sec / 3600);
+			const m = Math.floor((sec % 3600) / 60);
+			const s = sec % 60;
+			this.slotCountdown = (h > 0 ? (String(h).padStart(2, '0') + 'h ') : '') + String(m).padStart(2, '0') + 'm ' + String(s).padStart(2, '0') + 's';
+		},
+
 		async verifyCode() {
 			this.loading = true;
 			this.errorMessage = '';
+
+			let deviceFp = 'Unknown';
+			try {
+				const isMobile = ('maxTouchPoints' in navigator && navigator.maxTouchPoints > 0) || (window.screen.height > window.screen.width);
+				deviceFp = `Agent: ${navigator.userAgent.substring(0, 80)} | Touch: ${navigator.maxTouchPoints || 0} | Screen: ${window.screen.width}x${window.screen.height} | Mobile: ${isMobile ? 'Yes' : 'No'}`;
+			} catch(e) {}
+
+			const cleanCode = (this.inputCode || '').trim().toUpperCase();
+			const cachedToken = localStorage.getItem('aws_exam_st_' + cleanCode) || '';
 
 			try {
 				const response = await fetch('/wp-json/aws-sbg/v1/verify-code', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ code: this.inputCode })
+					body: JSON.stringify({ 
+						code: cleanCode,
+						session_token: cachedToken,
+						device_fingerprint: deviceFp
+					})
 				});
 
 				const data = await response.json();
+
+				// Check if slot has not opened yet
+				if (data && data.status === 'slot_not_started') {
+					this.slotInfo = data;
+					this.currentStage = 'slot_waiting';
+					this.startSlotCountdown(data.remaining_seconds);
+					this.loading = false;
+					return;
+				}
 
 				if (!response.ok || !data.success) {
 					this.errorMessage = data.message || 'Invalid access code.';
@@ -795,13 +1024,23 @@ function awsExamApp() {
 					return;
 				}
 
+				if (this.slotCountdownInterval) {
+					clearInterval(this.slotCountdownInterval);
+				}
+
 				this.sessionToken = data.session_token;
+				if (data.session_token && cleanCode) {
+					try {
+						localStorage.setItem('aws_exam_st_' + cleanCode, data.session_token);
+					} catch(e) {}
+				}
+
 				this.examDetails = data;
 				this.questions = data.questions || [];
-				if (!this.examDetails.per_question_seconds || parseInt(this.examDetails.per_question_seconds) === 60) {
-					this.examDetails.per_question_seconds = 45;
+				if (!this.examDetails.per_question_seconds || parseInt(this.examDetails.per_question_seconds) === 60 || parseInt(this.examDetails.per_question_seconds) === 45 || parseInt(this.examDetails.per_question_seconds) === 35 || parseInt(this.examDetails.per_question_seconds) === 30) {
+					this.examDetails.per_question_seconds = 40;
 				}
-				this.qTimerSeconds = parseInt(this.examDetails.per_question_seconds) || 45;
+				this.qTimerSeconds = parseInt(this.examDetails.per_question_seconds) || 40;
 				
 				this.currentStage = 'instructions';
 
@@ -816,20 +1055,30 @@ function awsExamApp() {
 			this.requestFullscreen();
 			this.currentStage = 'active_exam';
 			this.currentIndex = 0;
+			this.examStartTimeMs = Date.now();
+			this.totalTimeSpentSeconds = 0;
+			this.totalTimeSpentMs = 0;
 			this.startTotalTimer();
 			this.resetQuestionTimer();
+			this.resetActivityTimer();
 		},
 
 		startTotalTimer() {
 			if (this.totalTimerInterval) clearInterval(this.totalTimerInterval);
 			this.totalTimerInterval = setInterval(() => {
-				this.totalTimeSpentSeconds++;
+				if (this.examStartTimeMs) {
+					const elapsedMs = Date.now() - this.examStartTimeMs;
+					this.totalTimeSpentMs = elapsedMs;
+					this.totalTimeSpentSeconds = parseFloat((elapsedMs / 1000).toFixed(3));
+				} else {
+					this.totalTimeSpentSeconds++;
+				}
 			}, 1000);
 		},
 
 		resetQuestionTimer() {
 			if (this.qTimerInterval) clearInterval(this.qTimerInterval);
-			const allowedSec = (this.examDetails && this.examDetails.per_question_seconds && parseInt(this.examDetails.per_question_seconds) !== 60) ? parseInt(this.examDetails.per_question_seconds) : 45;
+			const allowedSec = (this.examDetails && this.examDetails.per_question_seconds && parseInt(this.examDetails.per_question_seconds) !== 60 && parseInt(this.examDetails.per_question_seconds) !== 45 && parseInt(this.examDetails.per_question_seconds) !== 35 && parseInt(this.examDetails.per_question_seconds) !== 30) ? parseInt(this.examDetails.per_question_seconds) : 40;
 			this.qTimerSeconds = allowedSec;
 
 			this.qTimerInterval = setInterval(() => {
@@ -843,6 +1092,7 @@ function awsExamApp() {
 		},
 
 		autoTimeoutQuestion() {
+			this.resetActivityTimer();
 			if (this.currentIndex < this.questions.length - 1) {
 				this.currentIndex++;
 				this.resetQuestionTimer();
@@ -853,6 +1103,7 @@ function awsExamApp() {
 
 		advanceToNextQuestion() {
 			if (this.qTimerInterval) clearInterval(this.qTimerInterval);
+			this.resetActivityTimer();
 
 			if (this.currentIndex < this.questions.length - 1) {
 				this.currentIndex++;
@@ -863,9 +1114,14 @@ function awsExamApp() {
 		},
 
 		formatTimer(seconds) {
-			const m = Math.floor(seconds / 60);
-			const s = seconds % 60;
-			return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+			const total = parseFloat(seconds) || 0;
+			const m = Math.floor(total / 60);
+			const s = Math.floor(total % 60);
+			const ms = Math.floor(Math.round((total % 1) * 1000));
+			if (ms > 0) {
+				return `${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}s`;
+			}
+			return `${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
 		},
 
 		selectOption(qId, key, isMulti, multiCount) {
@@ -910,6 +1166,7 @@ function awsExamApp() {
 		},
 
 		handleTabSwitch() {
+			if (this.isSubmitting) return;
 			this.tabSwitchCount++;
 			if (this.tabSwitchCount >= 2) {
 				this.submitExam(true);
@@ -919,11 +1176,30 @@ function awsExamApp() {
 		},
 
 		async submitExam(isViolation) {
+			this.isSubmitting = true;
+			if (this.idleBlurTimer) clearTimeout(this.idleBlurTimer);
+			this.isQuestionBlurred = false;
 			if (this.qTimerInterval) clearInterval(this.qTimerInterval);
 			if (this.totalTimerInterval) clearInterval(this.totalTimerInterval);
 
 			this.confirmSubmitModal = false;
 			this.showSecurityModal = false;
+			this.showFullscreenModal = false;
+			if (this.fullscreenTimerInterval) {
+				clearInterval(this.fullscreenTimerInterval);
+				this.fullscreenTimerInterval = null;
+			}
+			this.exitFullscreen();
+
+			let totalMs = 0;
+			if (this.examStartTimeMs) {
+				totalMs = Math.max(0, Date.now() - this.examStartTimeMs);
+			} else {
+				totalMs = Math.round((this.totalTimeSpentSeconds || 0) * 1000);
+			}
+			this.totalTimeSpentMs = totalMs;
+			const totalSec = parseFloat((totalMs / 1000).toFixed(3));
+			this.totalTimeSpentSeconds = totalSec;
 
 			let deviceFp = 'Unknown';
 			try {
@@ -939,7 +1215,8 @@ function awsExamApp() {
 					body: JSON.stringify({
 						session_token: this.sessionToken,
 						answers: this.answers,
-						time_spent_seconds: this.totalTimeSpentSeconds,
+						time_spent_seconds: totalSec,
+						time_spent_ms: totalMs,
 						tab_switch_count: this.tabSwitchCount,
 						violation_submitted: isViolation,
 						device_fingerprint: deviceFp
@@ -951,6 +1228,12 @@ function awsExamApp() {
 				if (data.success) {
 					this.results = data;
 					this.currentStage = 'results';
+					this.exitFullscreen();
+					if (this.inputCode) {
+						try {
+							localStorage.removeItem('aws_exam_st_' + (this.inputCode || '').trim().toUpperCase());
+						} catch(e) {}
+					}
 					if (data.passed && !data.violation_submitted) {
 						this.showSuccessVoucherModal = true;
 						this.fireConfettiCelebration();
@@ -958,6 +1241,7 @@ function awsExamApp() {
 					this.fetchLeaderboard(this.examDetails.exam_track);
 				}
 			} catch (err) {
+				this.exitFullscreen();
 				alert('Error submitting exam. Please check connection.');
 			}
 		},
@@ -996,8 +1280,8 @@ function awsExamApp() {
 				const img = new Image();
 				img.crossOrigin = 'anonymous';
 				img.onload = () => resolve(img);
-				img.onerror = () => resolve(null);
-				img.src = '<?php echo esc_url( get_template_directory_uri() . '/Certificate Template/Certificate.png' ); ?>';
+				const templatePath = '<?php echo esc_url( get_template_directory_uri() . '/Certificate Template/AWS Certification Preparation Exam Pass Certificate Template.png' ); ?>';
+				img.src = templatePath + '?v=<?php echo time(); ?>';
 			});
 
 			const canvas = document.createElement('canvas');
@@ -1021,41 +1305,41 @@ function awsExamApp() {
 			const scaleX = w / 1920;
 			const scaleY = h / 1357;
 			
-			// 1. Redesigned Top-Left Purple Box Typography (Prestigious Certificate Design)
-			const purpleBoxX = 105 * scaleX;
-			const purpleBoxY = 105 * scaleY;
+			// 1. High-Contrast Top-Left Green Box Typography (Prestigious Certificate Design)
+			const greenBoxX = 105 * scaleX;
+			const greenBoxY = 105 * scaleY;
 			
 			// Eyebrow Badge
-			ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+			ctx.fillStyle = 'rgba(4, 32, 23, 0.9)';
 			if ('letterSpacing' in ctx) ctx.letterSpacing = (2 * scaleX) + 'px';
 			ctx.font = `700 ${Math.round(15 * scaleX)}px "Segoe UI", -apple-system, sans-serif`;
-			ctx.fillText('★ AWS CERTIFICATION CHALLENGE 2026 ★', purpleBoxX + (70 * scaleX), purpleBoxY + (115 * scaleY));
+			ctx.fillText('★ AWS CERTIFICATION CHALLENGE 2026 ★', greenBoxX + (70 * scaleX), greenBoxY + (115 * scaleY));
 			if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 			
 			// Main Grand Headline: Certificate
-			ctx.fillStyle = '#ffffff';
+			ctx.fillStyle = '#042017';
 			ctx.font = `bold ${Math.round(72 * scaleX)}px "Georgia", "Times New Roman", serif`;
-			ctx.fillText('Certificate', purpleBoxX + (70 * scaleX), purpleBoxY + (215 * scaleY));
+			ctx.fillText('Certificate', greenBoxX + (70 * scaleX), greenBoxY + (215 * scaleY));
 			
 			// Sub-headline: PASSED - AWS Certification Preparation Exam
-			ctx.fillStyle = '#ffffff';
+			ctx.fillStyle = '#042017';
 			ctx.font = `800 ${Math.round(24 * scaleX)}px "Segoe UI", sans-serif`;
-			ctx.fillText('PASSED - AWS Certification Preparation Exam', purpleBoxX + (70 * scaleX), purpleBoxY + (305 * scaleY));
+			ctx.fillText('PASSED - AWS Certification Preparation Exam', greenBoxX + (70 * scaleX), greenBoxY + (305 * scaleY));
 			
 			// Elegant Horizontal Accent Line
-			ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-			ctx.lineWidth = 2;
+			ctx.strokeStyle = 'rgba(4, 32, 23, 0.35)';
+			ctx.lineWidth = Math.max(1, Math.round(2 * scaleX));
 			ctx.beginPath();
-			ctx.moveTo(purpleBoxX + (70 * scaleX), purpleBoxY + (345 * scaleY));
-			ctx.lineTo(purpleBoxX + (620 * scaleX), purpleBoxY + (345 * scaleY));
+			ctx.moveTo(greenBoxX + (70 * scaleX), greenBoxY + (345 * scaleY));
+			ctx.lineTo(greenBoxX + (620 * scaleX), greenBoxY + (345 * scaleY));
 			ctx.stroke();
 			
 			// Organization Footer Label
-			ctx.fillStyle = '#f3e8ff';
-			ctx.font = `500 ${Math.round(21 * scaleX)}px "Segoe UI", sans-serif`;
-			ctx.fillText('Organized by AWS Student Builder Group at Air University Islamabad', purpleBoxX + (70 * scaleX), purpleBoxY + (400 * scaleY));
+			ctx.fillStyle = '#064e3b';
+			ctx.font = `600 ${Math.round(20 * scaleX)}px "Segoe UI", sans-serif`;
+			ctx.fillText('Organized by AWS Student Builder Group at Air University Islamabad', greenBoxX + (70 * scaleX), greenBoxY + (400 * scaleY));
 			
-			// 2. Bottom-Right Participant Info Block
+			// 2. Bottom-Right Participant Info Block (Centered in Dark Panel above Signature)
 			const infoX = 1125 * scaleX;
 			const infoY = 685 * scaleY;
 			const infoW = (1920 - 1125 - 105) * scaleX;
@@ -1073,15 +1357,12 @@ function awsExamApp() {
 			
 			// Dynamic Score, Preparation Exam Statement & Date
 			const scoreVal = (this.results && this.results.score) ? this.results.score : 850;
-			const trackCode = (this.results && this.results.exam_track) ? this.results.exam_track : (this.examDetails && this.examDetails.exam_track ? this.examDetails.exam_track : 'CLF-C02');
-			const isAIF = trackCode.toLowerCase().includes('aif');
-			const trackName = isAIF ? 'AWS Certified AI Practitioner' : 'AWS Cloud Certification';
 			const userCode = (this.results && this.results.access_code) ? this.results.access_code : (this.examDetails && this.examDetails.access_code ? this.examDetails.access_code : (this.inputCode ? this.inputCode.toUpperCase() : 'AWS-8K9P'));
 			const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
 
 			ctx.fillStyle = '#94a3b8';
 			ctx.font = `400 ${Math.round(18 * scaleX)}px "Segoe UI", sans-serif`;
-			ctx.fillText(`For successfully passing the ${trackName} Preparation Exam`, infoX + infoW / 2, infoY + (215 * scaleY));
+			ctx.fillText('For successfully passing the AWS Cloud Certification Preparation Exam', infoX + infoW / 2, infoY + (215 * scaleY));
 			ctx.fillText(`with a scaled score of ${scoreVal} / 1000. (Code: ${userCode} • Issued: ${dateStr})`, infoX + infoW / 2, infoY + (250 * scaleY));
 
 			// 3. Small Disclaimer at Bottom of Trophy Box (Bottom-Left Container)
