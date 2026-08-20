@@ -662,6 +662,18 @@
 					<span x-text="isGeneratingCert ? 'Generating...' : '📜 Download Verified Certificate'"></span>
 				</button>
 
+				<!-- Next Step: Official AWS Builder Center -->
+				<a href="https://bit.ly/4w5nmGl" target="_blank" rel="noopener noreferrer" class="block p-4 rounded-2xl bg-gradient-to-r from-purple-900 to-indigo-900 text-white text-left shadow-lg hover:opacity-95 transition-all group border border-purple-400/30">
+					<div class="flex items-center justify-between">
+						<span class="text-[10px] font-extrabold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded text-white font-mono">Next Step 🚀</span>
+						<span class="text-xs font-bold text-purple-200 group-hover:underline">Claim Free Labs ↗</span>
+					</div>
+					<div class="font-bold text-sm mt-1.5 text-white">Join the Official AWS Builder Center</div>
+					<p class="text-xs text-purple-200 mt-0.5 leading-snug">
+						Activate free hands-on labs &amp; AWS credits connected directly to our Air University chapter.
+					</p>
+				</a>
+
 				<button @click="showSuccessVoucherModal = false" class="w-full py-3.5 px-6 rounded-2xl font-bold text-xs bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 transition-all">
 					Awesome! View Detailed Scorecard & Explanations ➔
 				</button>
@@ -718,7 +730,7 @@
 
 	<!-- PORTAL FOOTER -->
 	<footer class="py-4 text-center border-t border-gray-800/60 bg-[#050309]">
-		<p class="text-[11px] text-gray-500">© <?php echo date('Y'); ?> AWS Student Builder Group Air University. All Rights Reserved.</p>
+		<p class="text-[11px] text-gray-500 font-medium">Built with <span class="text-rose-500">❤️</span> for Community by Anas &amp; Team | Deployed on AWS</p>
 	</footer>
 
 <script>
@@ -1313,7 +1325,7 @@ function awsExamApp() {
 			ctx.fillStyle = 'rgba(4, 32, 23, 0.9)';
 			if ('letterSpacing' in ctx) ctx.letterSpacing = (2 * scaleX) + 'px';
 			ctx.font = `700 ${Math.round(15 * scaleX)}px "Segoe UI", -apple-system, sans-serif`;
-			ctx.fillText('★ AWS CERTIFICATION CHALLENGE 2026 ★', greenBoxX + (70 * scaleX), greenBoxY + (115 * scaleY));
+			ctx.fillText('★ AWS CERTIFICATION SELF-ASSESSMENT 2026 ★', greenBoxX + (70 * scaleX), greenBoxY + (115 * scaleY));
 			if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 			
 			// Main Grand Headline: Certificate
@@ -1321,10 +1333,10 @@ function awsExamApp() {
 			ctx.font = `bold ${Math.round(72 * scaleX)}px "Georgia", "Times New Roman", serif`;
 			ctx.fillText('Certificate', greenBoxX + (70 * scaleX), greenBoxY + (215 * scaleY));
 			
-			// Sub-headline: PASSED - AWS Certification Preparation Exam
+			// Sub-headline: PASSED — AWS Certification Self-Assessment
 			ctx.fillStyle = '#042017';
 			ctx.font = `800 ${Math.round(24 * scaleX)}px "Segoe UI", sans-serif`;
-			ctx.fillText('PASSED - AWS Certification Preparation Exam', greenBoxX + (70 * scaleX), greenBoxY + (305 * scaleY));
+			ctx.fillText('PASSED — AWS Certification Self-Assessment', greenBoxX + (70 * scaleX), greenBoxY + (305 * scaleY));
 			
 			// Elegant Horizontal Accent Line
 			ctx.strokeStyle = 'rgba(4, 32, 23, 0.35)';
@@ -1355,15 +1367,15 @@ function awsExamApp() {
 			ctx.font = `bold ${Math.round(54 * scaleX)}px "Georgia", "Times New Roman", serif`;
 			ctx.fillText(nameStr, infoX + infoW / 2, infoY + (145 * scaleY));
 			
-			// Dynamic Score, Preparation Exam Statement & Date
-			const scoreVal = (this.results && this.results.score) ? this.results.score : 850;
+			// Dynamic Score, Self-Assessment Statement & Date
+			const scoreVal = (this.results && this.results.percentage !== undefined) ? this.results.percentage : (this.results && this.results.score ? Math.round((this.results.score / 1000) * 100) : 88);
 			const userCode = (this.results && this.results.access_code) ? this.results.access_code : (this.examDetails && this.examDetails.access_code ? this.examDetails.access_code : (this.inputCode ? this.inputCode.toUpperCase() : 'AWS-8K9P'));
 			const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' });
 
 			ctx.fillStyle = '#94a3b8';
 			ctx.font = `400 ${Math.round(18 * scaleX)}px "Segoe UI", sans-serif`;
-			ctx.fillText('For successfully passing the AWS Cloud Certification Preparation Exam', infoX + infoW / 2, infoY + (215 * scaleY));
-			ctx.fillText(`with a scaled score of ${scoreVal} / 1000. (Code: ${userCode} • Issued: ${dateStr})`, infoX + infoW / 2, infoY + (250 * scaleY));
+			ctx.fillText('For successfully completing the AWS Certification Self-Assessment', infoX + infoW / 2, infoY + (215 * scaleY));
+			ctx.fillText(`with a score of ${scoreVal}% (Certificate ID: ${userCode} • Issued: ${dateStr})`, infoX + infoW / 2, infoY + (250 * scaleY));
 
 			// 3. Small Disclaimer at Bottom of Trophy Box (Bottom-Left Container)
 			const trophyBoxX = 105 * scaleX;
@@ -1374,7 +1386,7 @@ function awsExamApp() {
 			ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
 			ctx.font = `400 ${Math.round(13 * scaleX)}px "Segoe UI", sans-serif`;
 			ctx.textAlign = 'center';
-			ctx.fillText('This is a community-issued preparation exam certificate and does not represent an official AWS certification.', trophyBoxX + trophyBoxW / 2, trophyBoxY + trophyBoxH - (25 * scaleY));
+			ctx.fillText('This is a community-issued self-assessment certificate and does not represent an official AWS certification.', trophyBoxX + trophyBoxW / 2, trophyBoxY + trophyBoxH - (25 * scaleY));
 			
 			ctx.textAlign = 'left'; // Reset alignment
 			

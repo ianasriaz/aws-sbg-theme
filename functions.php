@@ -25,6 +25,9 @@ require_once get_template_directory() . '/feature-mock-exam.php';
 // Load AWS Event & Self-Service Certificate Management System
 require_once get_template_directory() . '/feature-events.php';
 
+// Load Random Swag Picker Wheel Feature
+require_once get_template_directory() . '/feature-swag-wheel.php';
+
 /**
  * Auto-create Mock Exam & Certificate pages if missing
  */

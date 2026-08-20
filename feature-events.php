@@ -26,7 +26,7 @@ function aws_sbg_events_init_db() {
 		referral_url text NOT NULL,
 		cert_top_heading varchar(255) NOT NULL DEFAULT '★ CERTIFICATE OF ACHIEVEMENT ★',
 		cert_main_heading varchar(255) NOT NULL DEFAULT 'Certificate',
-		cert_sub_heading varchar(255) NOT NULL DEFAULT 'PASSED - AWS Certification Preparation Exam',
+		cert_sub_heading varchar(255) NOT NULL DEFAULT 'PASSED — AWS Certification Self-Assessment',
 		cert_purple_footer varchar(255) NOT NULL DEFAULT 'Organized by AWS Student Builder Group at Air University Islamabad',
 		cert_description text NOT NULL,
 		status varchar(50) NOT NULL DEFAULT 'active',
@@ -113,15 +113,15 @@ function aws_sbg_render_events_admin_page() {
 	if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['aws_events_nonce'] ) && wp_verify_nonce( $_POST['aws_events_nonce'], 'aws_events_admin_action' ) ) {
 		if ( $action === 'create_event' ) {
 			$title              = sanitize_text_field( $_POST['title'] );
-			$track              = 'General';
+			$track              = sanitize_text_field( $_POST['track'] );
 			$event_date         = sanitize_text_field( $_POST['event_date'] );
 			$survey_url         = esc_url_raw( $_POST['survey_url'] );
 			$referral_url       = esc_url_raw( $_POST['referral_url'] );
 			$cert_top_heading   = sanitize_text_field( $_POST['cert_top_heading'] ?? '★ CERTIFICATE OF ACHIEVEMENT ★' );
 			$cert_main_heading  = sanitize_text_field( $_POST['cert_main_heading'] ?? 'Certificate' );
-			$cert_sub_heading   = sanitize_text_field( $_POST['cert_sub_heading'] ?? 'PASSED - AWS Certification Preparation Exam' );
+			$cert_sub_heading   = sanitize_text_field( $_POST['cert_sub_heading'] ?? 'PASSED — AWS Certification Self-Assessment' );
 			$cert_purple_footer = sanitize_text_field( $_POST['cert_purple_footer'] ?? 'Organized by AWS Student Builder Group at Air University Islamabad' );
-			$cert_description   = sanitize_text_field( $_POST['cert_description'] ?? 'For successfully passing the AWS Certified Cloud Practitioner Preparation Exam' );
+			$cert_description   = sanitize_text_field( $_POST['cert_description'] ?? 'For successfully completing the AWS Certification Self-Assessment' );
 
 			$wpdb->insert(
 				$table_events,
@@ -137,10 +137,17 @@ function aws_sbg_render_events_admin_page() {
 					'cert_purple_footer' => $cert_purple_footer,
 					'cert_description'   => $cert_description,
 					'status'             => 'active',
-				)
+				),
+				array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
 			);
-			$message = 'New Event created successfully!';
-		} elseif ( $action === 'toggle_status' ) {
+
+			$event_id = $wpdb->insert_id;
+			$message  = "✅ Event created successfully! Participants can now claim certificates with Event ID: <strong>#{$event_id}</strong>";
+		}
+	}
+	
+	if ( $_SERVER['REQUEST_METHOD'] === 'POST' && isset( $_POST['aws_events_nonce'] ) && wp_verify_nonce( $_POST['aws_events_nonce'], 'aws_events_admin_action' ) ) {
+		if ( $action === 'toggle_status' ) {
 			$event_id   = intval( $_POST['event_id'] );
 			$cur_status = sanitize_text_field( $_POST['current_status'] );
 			$new_status = ( $cur_status === 'active' ) ? 'closed' : 'active';
@@ -205,7 +212,7 @@ function aws_sbg_render_events_admin_page() {
 
 					<p>
 						<label style="font-weight:600; font-size:12px; display:block; margin-bottom:4px;">3. Sub-Heading (Purple Section)</label>
-						<input type="text" id="cert_sub_heading" name="cert_sub_heading" required value="PASSED - AWS Certification Preparation Exam" class="regular-text" style="width:100%;">
+						<input type="text" id="cert_sub_heading" name="cert_sub_heading" required value="PASSED — AWS Certification Self-Assessment" class="regular-text" style="width:100%;">
 					</p>
 
 					<p>
@@ -215,7 +222,7 @@ function aws_sbg_render_events_admin_page() {
 
 					<p>
 						<label style="font-weight:600; font-size:12px; display:block; margin-bottom:4px;">5. Certificate Description Text (Dark Section)</label>
-						<textarea id="cert_description" name="cert_description" required rows="2" class="regular-text" style="width:100%; font-size:12px;">For successfully passing the AWS Certified Cloud Practitioner Preparation Exam</textarea>
+						<textarea id="cert_description" name="cert_description" required rows="2" class="regular-text" style="width:100%; font-size:12px;">For successfully completing the AWS Certification Self-Assessment</textarea>
 					</p>
 
 					<p>
@@ -247,11 +254,11 @@ function aws_sbg_render_events_admin_page() {
 				const title = document.getElementById('ev_title').value || 'AWS Event';
 
 				if (type === 'exam') {
-					top.value = '★ CERTIFICATE OF ACHIEVEMENT ★';
+					top.value = '★ AWS CERTIFICATION SELF-ASSESSMENT 2026 ★';
 					main.value = 'Certificate';
-					sub.value = 'PASSED - AWS Certification Preparation Exam';
+					sub.value = 'PASSED — AWS Certification Self-Assessment';
 					foot.value = 'Organized by AWS Student Builder Group at Air University Islamabad';
-					desc.value = 'For successfully passing the AWS Certified Cloud Practitioner Preparation Exam';
+					desc.value = 'For successfully completing the AWS Certification Self-Assessment';
 				} else if (type === 'session') {
 					top.value = '★ CERTIFICATE OF PARTICIPATION ★';
 					main.value = 'Certificate';
@@ -511,11 +518,11 @@ function aws_sbg_rest_issue_certificate( $request ) {
 			'event_title'        => $event->title,
 			'event_track'        => $event->track,
 			'event_date'         => $event->event_date,
-			'cert_top_heading'   => ! empty( $event->cert_top_heading ) ? $event->cert_top_heading : '★ CERTIFICATE OF ACHIEVEMENT ★',
+			'cert_top_heading'   => ! empty( $event->cert_top_heading ) ? $event->cert_top_heading : '★ AWS CERTIFICATION SELF-ASSESSMENT 2026 ★',
 			'cert_main_heading'  => ! empty( $event->cert_main_heading ) ? $event->cert_main_heading : 'Certificate',
-			'cert_sub_heading'   => ! empty( $event->cert_sub_heading ) ? $event->cert_sub_heading : 'PASSED - AWS Certification Preparation Exam',
+			'cert_sub_heading'   => ! empty( $event->cert_sub_heading ) ? $event->cert_sub_heading : 'PASSED — AWS Certification Self-Assessment',
 			'cert_purple_footer' => ! empty( $event->cert_purple_footer ) ? $event->cert_purple_footer : 'Organized by AWS Student Builder Group at Air University Islamabad',
-			'cert_description'   => ! empty( $event->cert_description ) ? $event->cert_description : ( 'For successfully passing the ' . $event->track . ' Preparation Exam' ),
+			'cert_description'   => ! empty( $event->cert_description ) ? $event->cert_description : 'For successfully completing the AWS Certification Self-Assessment',
 		)
 	);
 }

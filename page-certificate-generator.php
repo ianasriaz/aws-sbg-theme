@@ -453,11 +453,11 @@ function awsCertPortal() {
 			const purpleBoxX = 105 * scaleX;
 			const purpleBoxY = 105 * scaleY;
 
-			const topHeading = (this.issuedDetails && this.issuedDetails.cert_top_heading) ? this.issuedDetails.cert_top_heading : (this.selectedEvent && this.selectedEvent.cert_top_heading ? this.selectedEvent.cert_top_heading : '★ AWS CERTIFICATION CHALLENGE 2026 ★');
+			const topHeading = (this.issuedDetails && this.issuedDetails.cert_top_heading) ? this.issuedDetails.cert_top_heading : (this.selectedEvent && this.selectedEvent.cert_top_heading ? this.selectedEvent.cert_top_heading : '★ AWS CERTIFICATION SELF-ASSESSMENT 2026 ★');
 			const mainHeading = (this.issuedDetails && this.issuedDetails.cert_main_heading) ? this.issuedDetails.cert_main_heading : (this.selectedEvent && this.selectedEvent.cert_main_heading ? this.selectedEvent.cert_main_heading : 'Certificate');
-			const subHeading = (this.issuedDetails && this.issuedDetails.cert_sub_heading) ? this.issuedDetails.cert_sub_heading : (this.selectedEvent && this.selectedEvent.cert_sub_heading ? this.selectedEvent.cert_sub_heading : 'PASSED - AWS Certification Preparation Exam');
+			const subHeading = (this.issuedDetails && this.issuedDetails.cert_sub_heading) ? this.issuedDetails.cert_sub_heading : (this.selectedEvent && this.selectedEvent.cert_sub_heading ? this.selectedEvent.cert_sub_heading : 'PASSED — AWS Certification Self-Assessment');
 			const purpleFooter = (this.issuedDetails && this.issuedDetails.cert_purple_footer) ? this.issuedDetails.cert_purple_footer : (this.selectedEvent && this.selectedEvent.cert_purple_footer ? this.selectedEvent.cert_purple_footer : 'Organized by AWS Student Builder Group at Air University Islamabad');
-			const certDesc = (this.issuedDetails && this.issuedDetails.cert_description) ? this.issuedDetails.cert_description : (this.selectedEvent && this.selectedEvent.cert_description ? this.selectedEvent.cert_description : 'For successfully passing the AWS Cloud Certification Preparation Exam');
+			const certDesc = (this.issuedDetails && this.issuedDetails.cert_description) ? this.issuedDetails.cert_description : (this.selectedEvent && this.selectedEvent.cert_description ? this.selectedEvent.cert_description : 'For successfully completing the AWS Certification Self-Assessment');
 
 			// Top Eyebrow Badge
 			ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
@@ -543,7 +543,7 @@ function awsCertPortal() {
 			ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
 			ctx.font = `400 ${Math.round(13 * scaleX)}px "Segoe UI", sans-serif`;
 			ctx.textAlign = 'center';
-			ctx.fillText('This is a community-issued preparation exam certificate and does not represent an official AWS certification.', trophyBoxX + trophyBoxW / 2, trophyBoxY + trophyBoxH - (25 * scaleY));
+			ctx.fillText('This is a community-issued self-assessment certificate and does not represent an official AWS certification.', trophyBoxX + trophyBoxW / 2, trophyBoxY + trophyBoxH - (25 * scaleY));
 
 			ctx.textAlign = 'left';
 

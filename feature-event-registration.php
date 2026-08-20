@@ -694,19 +694,39 @@ function aws_sbg_event_form_shortcode( $atts ) {
 				<!-- SUCCESS INLINE CARD -->
 				<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 				<div x-data x-init="setTimeout(()=>{if(typeof confetti!=='undefined')confetti({particleCount:150,spread:100,origin:{y:0.4},colors:['#ad5cff','#00ef88','#ff9900']});},200)"
-				     style="background:#ffffff; border-radius:20px; border:2px solid #10b981; padding:24px 20px; text-align:center; margin-bottom:20px; box-shadow:0 10px 25px rgba(16,185,129,0.1);">
-					<div style="width:56px; height:56px; background:#ecfdf5; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
-						<svg style="width:28px; height:28px; color:#10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+				     style="background:#ffffff; border-radius:24px; border:2px solid #10b981; padding:32px 24px; text-align:center; margin-bottom:20px; box-shadow:0 12px 35px rgba(16,185,129,0.12);">
+					<div style="width:60px; height:60px; background:#ecfdf5; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; border:2px solid #a7f3d0;">
+						<svg style="width:30px; height:30px; color:#10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
 					</div>
-					<h3 style="font-size:20px; font-weight:900; color:#0f172a; margin:0 0 6px; padding:0;">You're Registered<?php echo $first_name ? ', ' . esc_html( $first_name ) : ''; ?>!</h3>
-					<p style="font-size:14px; color:#64748b; margin:0 0 20px; padding:0; line-height:1.5;">Your registration for <strong style="color:#0f172a;"><?php echo esc_html( $event_title ); ?></strong> is confirmed.</p>
+					<h3 style="font-size:22px; font-weight:900; color:#0f172a; margin:0 0 6px; padding:0;">You're Registered<?php echo $first_name ? ', ' . esc_html( $first_name ) : ''; ?>! 🎉</h3>
+					<p style="font-size:14px; color:#64748b; margin:0 0 24px; padding:0; line-height:1.5;">Your registration for <strong style="color:#0f172a;"><?php echo esc_html( $event_title ); ?></strong> is confirmed.</p>
 					
-					<div style="background:#f8fafc; border:2px dashed #cbd5e1; border-radius:12px; padding:16px; max-width:260px; margin:0 auto 20px;">
-						<span style="display:block; font-size:11px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:4px;">Registration ID</span>
-						<span style="display:block; font-size:28px; font-weight:900; color:#ad5cff; font-family:ui-monospace, monospace; margin:0; line-height:1;"><?php echo esc_html( $reg_id ); ?></span>
+					<!-- DEDICATED EXAM SLOT RESERVATION CTA HERO CARD -->
+					<div style="background: linear-gradient(135deg, #0b0e17 0%, #171b26 100%); border-radius:20px; padding:26px 22px; margin:0 auto 20px; border:1px solid rgba(173,92,255,0.4); box-shadow:0 10px 30px rgba(0,0,0,0.25); text-align:center;">
+						<div style="display:inline-block; font-size:10px; font-weight:900; background:rgba(173,92,255,0.2); color:#c084fc; border:1px solid rgba(173,92,255,0.5); padding:4px 14px; border-radius:20px; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:12px;">
+							⚡ REQUIRED NEXT STEP
+						</div>
+						<h4 style="font-size:18px; font-weight:900; color:#ffffff; margin:0 0 8px; line-height:1.3;">
+							Book Your Exam Time Slot Now
+						</h4>
+						<p style="font-size:13px; color:#94a3b8; margin:0 0 20px; line-height:1.5; max-width:440px; margin-left:auto; margin-right:auto;">
+							To participate in the AWS Certification Self-Assessment and receive your access code, please reserve your preferred time slot immediately.
+						</p>
+						<a href="https://awsairuniversity.com/reserve-slot/" 
+						   style="display:inline-flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:380px; padding:16px 24px; background:linear-gradient(135deg, #ad5cff 0%, #8b31ff 100%); color:#ffffff; font-weight:900; font-size:15px; border-radius:14px; text-decoration:none; box-shadow:0 6px 20px rgba(173,92,255,0.45); transition:all 0.2s; text-transform:uppercase; letter-spacing:0.04em;">
+							<span>Reserve Exam Slot Now</span>
+							<svg style="width:18px; height:18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+						</a>
 					</div>
-					
-					<a href="<?php echo esc_url( get_permalink() ); ?>" style="display:inline-block; padding:12px 24px; background:#0f172a; color:#ffffff; font-weight:800; font-size:14px; border-radius:10px; text-decoration:none; transition:opacity 0.2s;">Return to Event</a>
+
+					<div style="display:flex; align-items:center; justify-content:center; gap:16px; flex-wrap:wrap; margin-top:16px;">
+						<?php if ( ! empty( $reg_id ) && $reg_id !== 'N/A' ) : ?>
+							<span style="font-size:12px; font-weight:700; color:#64748b; background:#f1f5f9; padding:6px 14px; border-radius:8px; font-family:ui-monospace, monospace;">
+								Reg #: <?php echo esc_html( $reg_id ); ?>
+							</span>
+						<?php endif; ?>
+						<a href="<?php echo esc_url( get_permalink() ); ?>" style="font-size:13px; font-weight:700; color:#64748b; text-decoration:underline;">Return to Event</a>
+					</div>
 				</div>
 			<?php else : ?>
 
@@ -930,7 +950,8 @@ function aws_sbg_event_form_shortcode( $atts ) {
 					<input type="hidden" name="ticket_tier" :value="isSupporter ? 'supporter' : ticketTier">
 				</div>
 
-				<?php if ( $event_type === 'free' && $enable_supporter ) : ?>
+				<?php /* TEMPORARILY COMMENTED OUT: "Want to Get Featured? Become a Super Supporter" */ ?>
+				<?php if ( false && $event_type === 'free' && $enable_supporter ) : ?>
 				<!-- FREE EVENT SUPPORTER UPSELL COMPACT CHECKBOX -->
 				<div style="margin-top:24px; border-radius:16px; padding:16px 20px; transition:all 0.2s;"
 				     :style="{
@@ -1052,7 +1073,8 @@ function aws_sbg_event_form_shortcode( $atts ) {
 							</div>
 						</label>
 
-						<?php if ( $enable_supporter ) : ?>
+						<?php /* TEMPORARILY COMMENTED OUT: "Want to Get Featured? Become a Super Supporter" */ ?>
+						<?php if ( false && $enable_supporter ) : ?>
 						<!-- PAID EVENT SUPPORTER UPSELL OPTION -->
 						<div style="<?php echo $grid_item_full; ?> margin-top:12px;">
 							<div style="border-radius:16px; padding:16px 20px; transition:all 0.2s;"

@@ -10,16 +10,22 @@
 				<div class="space-y-4">
 					<div class="mb-6">
 						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-block hover:opacity-90 transition-opacity duration-300">
-							<img src="<?php echo esc_url( content_url( '/uploads/2026/07/AWS-SBG-AIR-UNIVERSITY-LOGO-2-scaled.png' ) ); ?>" alt="AWS SBG Air University" class="h-10 sm:h-12 w-auto max-w-full object-contain">
+							<img src="<?php echo esc_url( get_theme_file_uri( 'media/icons/SBG-Logo-White-Transparent.png' ) ); ?>" alt="AWS SBG Air University" class="h-10 sm:h-12 w-auto max-w-full object-contain">
 						</a>
 					</div>
 					<p class="text-gray-400 text-sm leading-relaxed">
 						Empowering the next generation of cloud architects and DevOps engineers at Air University Islamabad through innovative learning experiences.
 					</p>
 					<!-- Social Links -->
-					<div class="flex space-x-4 pt-4">
-						<a href="https://www.linkedin.com/company/aws-student-builder-group-air-university-islamabad/" target="_blank" class="w-10 h-10 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="LinkedIn">
+					<div class="flex space-x-3 pt-4">
+						<a href="https://www.linkedin.com/company/aws-student-builder-group-air-university-islamabad/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="LinkedIn">
 							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"></path></svg>
+						</a>
+						<a href="https://www.meetup.com/aws-sbg-at-air-university-e9-campus-islamabad/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="Meetup">
+							<img src="<?php echo esc_url( get_theme_file_uri( 'media/icons/meetup-icon.png' ) ); ?>" alt="Meetup" class="w-5 h-5 object-contain">
+						</a>
+						<a href="https://chat.whatsapp.com/KlNgxGopitiCJoTJEyqTaL" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="WhatsApp Community">
+							<img src="<?php echo esc_url( get_theme_file_uri( 'media/icons/whatsapp-color-icon.png' ) ); ?>" alt="WhatsApp" class="w-5 h-5 object-contain">
 						</a>
 					</div>
 				</div>

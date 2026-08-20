@@ -2035,7 +2035,7 @@ function aws_sbg_render_exam_admin_page() {
 		ctx.fillStyle = 'rgba(4, 32, 23, 0.9)';
 		if ('letterSpacing' in ctx) ctx.letterSpacing = (2 * scaleX) + 'px';
 		ctx.font = `700 ${Math.round(15 * scaleX)}px "Segoe UI", -apple-system, sans-serif`;
-		ctx.fillText('★ AWS CERTIFICATION CHALLENGE 2026 ★', greenBoxX + (70 * scaleX), greenBoxY + (115 * scaleY));
+		ctx.fillText('★ AWS CERTIFICATION SELF-ASSESSMENT 2026 ★', greenBoxX + (70 * scaleX), greenBoxY + (115 * scaleY));
 		if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
 
 		// Main Grand Headline: Certificate
@@ -2043,10 +2043,10 @@ function aws_sbg_render_exam_admin_page() {
 		ctx.font = `bold ${Math.round(72 * scaleX)}px "Georgia", "Times New Roman", serif`;
 		ctx.fillText('Certificate', greenBoxX + (70 * scaleX), greenBoxY + (215 * scaleY));
 
-		// Sub-headline: PASSED - AWS Certification Preparation Exam
+		// Sub-headline: PASSED — AWS Certification Self-Assessment
 		ctx.fillStyle = '#042017';
 		ctx.font = `800 ${Math.round(24 * scaleX)}px "Segoe UI", sans-serif`;
-		ctx.fillText('PASSED - AWS Certification Preparation Exam', greenBoxX + (70 * scaleX), greenBoxY + (305 * scaleY));
+		ctx.fillText('PASSED — AWS Certification Self-Assessment', greenBoxX + (70 * scaleX), greenBoxY + (305 * scaleY));
 
 		// Elegant Horizontal Accent Line
 		ctx.strokeStyle = 'rgba(4, 32, 23, 0.35)';
@@ -2079,8 +2079,8 @@ function aws_sbg_render_exam_admin_page() {
 
 		ctx.fillStyle = '#94a3b8';
 		ctx.font = `400 ${Math.round(18 * scaleX)}px "Segoe UI", sans-serif`;
-		ctx.fillText('For successfully passing the AWS Cloud Certification Preparation Exam', infoX + infoW / 2, infoY + (215 * scaleY));
-		ctx.fillText(`with a scaled score of 880 / 1000. (Code: AWS-8K9P • Issued: ${dateStr})`, infoX + infoW / 2, infoY + (250 * scaleY));
+		ctx.fillText('For successfully completing the AWS Certification Self-Assessment', infoX + infoW / 2, infoY + (215 * scaleY));
+		ctx.fillText(`with a score of 88% (Certificate ID: AWS-8K9P • Issued: ${dateStr})`, infoX + infoW / 2, infoY + (250 * scaleY));
 
 		// 3. Small Disclaimer at Bottom of Trophy Box (Bottom-Left Container)
 		const trophyBoxX = 105 * scaleX;
@@ -2091,7 +2091,7 @@ function aws_sbg_render_exam_admin_page() {
 		ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
 		ctx.font = `400 ${Math.round(13 * scaleX)}px "Segoe UI", sans-serif`;
 		ctx.textAlign = 'center';
-		ctx.fillText('This is a community-issued preparation exam certificate and does not represent an official AWS certification.', trophyBoxX + trophyBoxW / 2, trophyBoxY + trophyBoxH - (25 * scaleY));
+		ctx.fillText('This is a community-issued self-assessment certificate and does not represent an official AWS certification.', trophyBoxX + trophyBoxW / 2, trophyBoxY + trophyBoxH - (25 * scaleY));
 
 		ctx.textAlign = 'left';
 
