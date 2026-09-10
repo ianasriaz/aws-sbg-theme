@@ -22,13 +22,14 @@ This document outlines the complete architectural and design specification for t
   - Satellite block: Col 4 / Row 3 (1×1).
   - Main core block: 2×2 block starting at Row 4, Col 2, touching satellite corner-to-corner.
   - Solid fills, **zero outer borders**, **zero drop-shadow glows**.
-- **Typography**:
-  - **Date, Venue, and Header Kickers**: Standard `'Plus Jakarta Sans', sans-serif` (never monospace or "typical AI" fonts).
-  - **Speaker Roles & Affiliations**: `'JetBrains Mono', monospace`.
-  - **Event Headlines**: Heavy bold display typography.
+- **Typography Hierarchy**:
+  - **Headlines (`'Space Grotesk', sans-serif`)**: Event name (`AWS STUDENT COMMUNITY DAY ISLAMABAD 2027`), Speaker Name (`Anwaar Hussain`). Geometric sans with distinct technical character.
+  - **Body & Labels (`'Inter', sans-serif`)**: Date & Venue metadata rows, announcement badges, talk descriptions, and general card copy.
+  - **Data-Style Labels (`'JetBrains Mono', monospace`)**: Tabs, speaker role line (`Cloud Infra. Architect @ AWS`), session card kicker (`SESSION TOPIC`), event title tag, and SBG footer chapter bar.
 - **Shared SBG Footer**:
   - Left box: Dedicated `#0b0e14` container with transparent SBG chip logo.
   - Right bar: Solid, non-gradient off-white titanium `#eaeff5` with dark monospace chapter text (`AWS STUDENT BUILDER GROUP at AIR UNIVERSITY ISLAMABAD`).
+- **AWS Logo Sizing**: Standardized at **32px height** across all creatives (1:1 Main Banner, 4:5 Speaker Banner, and all future formats) with pure white fill (`filter: brightness(0) invert(1)`).
 - **Strict Brand Constraint**: **NO extraneous pseudo-technical micro-stamps** (no artificial `NODE // 01`, `AP-SOUTH-1`, or coordinate crosshairs).
 
 ---
@@ -75,8 +76,13 @@ The Asset Studio runs entirely within the client's browser using native HTML5 an
   - **Sponsor Fields**:
     - Sponsor Tier (`Title Sponsor`, `Platinum Sponsor`, `Gold Sponsor`)
     - Company Name & Logo Upload
-  - **Community Partner Fields**:
-    - Partner Community Name & Logo Upload
+  - **Community Partner Fields (Architectural Spine Layout)**:
+    - Layout: Left 20% artwork spine (pure wireframe 60px grid lines without filled purple blocks, aligned with SBG footer box) + Right 80% clean stage.
+    - Partner Community Name (`Space Grotesk`, e.g. `Google Developer Groups`) & Chapter (`JetBrains Mono`, `ISLAMABAD`).
+    - Partner Logo: Clean, unboxed centered emblem directly on the dark canvas (no dark background container or box fill).
+    - Top Header: Clean announcement badge (`[Icon] COMMUNITY PARTNER` / `[Icon] SPEAKER ANNOUNCEMENT`).
+    - Event Title Strip: Prominent, high-visibility `AWS STUDENT COMMUNITY DAY ISLAMABAD 2027` positioned directly above Date & Venue, styled in bold `Space Grotesk` with Sunlit Builder Purple gradient, justified to align flush from start to end of the line.
+    - Bottom Row: Clean Date & Venue row (`March 2027` • `Air University E9 Campus`).
   - **Attendee Badge Fields**:
     - Attendee Name & University/Company
     - Headshot Upload
