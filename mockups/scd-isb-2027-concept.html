@@ -320,13 +320,12 @@
     .main-meta-footer-row {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: space-between;
       width: 100%;
       font-family: 'Inter', sans-serif;
       font-size: 10px;
       padding-top: 14px;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
-      gap: 12px;
       white-space: nowrap;
       flex-wrap: nowrap;
     }
@@ -530,7 +529,7 @@
     .speaker-category-kicker {
       display: flex;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: space-between;
       width: 100%;
       white-space: nowrap;
     }
@@ -556,13 +555,18 @@
     }
 
     .kicker-event-title {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 9.5px;
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
       white-space: nowrap;
       text-align: right;
-      text-transform: uppercase;
+      line-height: 1;
+      background: var(--saved-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
     }
 
     .speaker-core-grid {
@@ -585,6 +589,14 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .speaker-real-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
     }
 
     .speaker-fallback-placeholder {
@@ -667,7 +679,15 @@
     }
 
     /* Option B: Unified Event & Schedule Block (Single Top Divider, Zero Middle Divider) */
-    .speaker-bottom-stack,
+    .speaker-bottom-stack {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
     .partner-bottom-stack {
       width: 100%;
       display: flex;
@@ -683,7 +703,7 @@
       max-width: 100%;
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
+      align-items: center;
       gap: 6px;
     }
 
@@ -721,17 +741,17 @@
     .speaker-meta-footer-row {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
-      gap: 14px;
+      justify-content: space-between;
       width: 100%;
       font-family: 'Inter', sans-serif;
-      font-size: 10.5px;
+      font-size: 9.5px;
       padding-top: 0;
       border-top: none;
       white-space: nowrap;
       flex-wrap: nowrap;
     }
 
+    .meta-website-item,
     .meta-date-item,
     .meta-venue-item {
       display: inline-flex;
@@ -740,11 +760,13 @@
       color: var(--text-grey-refined);
       font-weight: 500;
       letter-spacing: -0.1px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .meta-icon {
-      width: 12px;
-      height: 12px;
+      width: 11.5px;
+      height: 11.5px;
       stroke: var(--text-grey-muted);
       flex-shrink: 0;
     }
@@ -840,6 +862,16 @@
       width: auto;
       height: auto;
       position: relative;
+    }
+
+    .partner-real-logo {
+      max-width: 230px;
+      max-height: 80px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.45));
     }
 
     .partner-logo-placeholder {
@@ -1064,21 +1096,16 @@
           </svg>
           <span>SPEAKER ANNOUNCEMENT</span>
         </div>
+        <span class="gradient-year kicker-event-title">AWS STUDENT COMMUNITY DAY ISLAMABAD 2027</span>
       </div>
 
       <div class="speaker-core-grid">
         <div class="speaker-image-frame">
-          <div class="speaker-fallback-placeholder">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            <span>SPEAKER PHOTO</span>
-          </div>
+          <img src="https://awsairuniversity.com/wp-content/uploads/2026/07/Awais-Kamran.webp" alt="Awais Kamran" class="speaker-real-photo">
         </div>
 
         <div class="speaker-info-panel">
-          <h2 class="speaker-name-display">Anwaar Hussain</h2>
+          <h2 class="speaker-name-display">Awais Kamran</h2>
           <div class="speaker-role-display">Cloud Infra. Architect @ AWS</div>
 
           <div class="speaker-talk-card">
@@ -1098,30 +1125,33 @@
       </div>
 
       <div class="speaker-bottom-stack">
-        <div class="bottom-aligned-cluster">
-          <div class="banner-event-strip">
-            <span class="gradient-year event-strip-title">AWS STUDENT COMMUNITY DAY ISLAMABAD 2027</span>
+        <div class="speaker-meta-footer-row">
+          <div class="meta-website-item">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span>website.com/scd</span>
           </div>
-
-          <div class="speaker-meta-footer-row">
-            <div class="meta-date-item">
-              <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-              <span>March 2027</span>
-            </div>
-            <div class="meta-venue-item">
-              <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-              <span>Air University E9 Campus</span>
-            </div>
+          <div class="meta-date-item">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>March 2027</span>
+          </div>
+          <div class="meta-venue-item">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>Air University E9 Campus</span>
           </div>
         </div>
       </div>
@@ -1201,20 +1231,11 @@
         <!-- Center Hero: Partner Logo & Community Name -->
         <div class="partner-hero-center">
           <div class="partner-logo-frame">
-            <div class="partner-logo-placeholder">
-              <svg class="partner-emblem-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="2" y1="12" x2="22" y2="12"></line>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
-                </path>
-              </svg>
-              <span>PARTNER LOGO</span>
-            </div>
+            <img src="https://awsairuniversity.com/wp-content/uploads/2026/09/blob_AZox4g8.webp" alt="Change Mechanics" class="partner-real-logo">
           </div>
 
           <div class="partner-titles">
-            <h2 class="partner-name-display">Google Developer Groups</h2>
+            <h2 class="partner-name-display">Change Mechanics</h2>
             <div class="partner-chapter-display">ISLAMABAD</div>
           </div>
         </div>
@@ -1227,6 +1248,15 @@
             </div>
 
             <div class="speaker-meta-footer-row partner-meta-footer-row">
+              <div class="meta-website-item">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <span>website.com/scd</span>
+              </div>
               <div class="meta-date-item">
                 <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                   stroke-linecap="round" stroke-linejoin="round">
