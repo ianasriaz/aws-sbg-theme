@@ -130,7 +130,7 @@ get_header();
 					   target="_blank" 
 					   rel="noopener noreferrer" 
 					   class="inline-flex items-center justify-center gap-3 px-7 py-4 font-mono-tech font-bold text-sm text-gray-200 bg-[#0f141f] hover:bg-[#151c2b] border border-[#1d2636] hover:border-brand/40 transition-all duration-150 text-center">
-						<img src="<?php echo esc_url( get_theme_file_uri( 'media/icons/whatsapp-color-icon.png' ) ); ?>" alt="WhatsApp" class="w-5 h-5 object-contain">
+						<img src="<?php echo esc_url( get_theme_file_uri( 'media/icons/wired-outline-2672-logo-square-whatsapp.png' ) ); ?>" alt="WhatsApp" class="w-5 h-5 object-contain">
 						<span>WhatsApp Community</span>
 					</a>
 				</div>
@@ -476,7 +476,7 @@ get_header();
 				   target="_blank" 
 				   rel="noopener noreferrer" 
 				   class="inline-flex items-center justify-center gap-3 px-8 py-4 font-mono-tech font-bold text-sm text-gray-200 bg-[#0f141f] hover:bg-[#151c2b] border border-[#1d2636] hover:border-brand/40 transition-all duration-150 w-full sm:w-auto">
-					<img src="<?php echo esc_url( get_theme_file_uri( 'media/icons/whatsapp-color-icon.png' ) ); ?>" alt="WhatsApp" class="w-5 h-5 object-contain">
+					<img src="<?php echo esc_url( get_theme_file_uri( 'media/icons/wired-outline-2672-logo-square-whatsapp.png' ) ); ?>" alt="WhatsApp" class="w-5 h-5 object-contain">
 					<span>WhatsApp Community</span>
 				</a>
 			</div>

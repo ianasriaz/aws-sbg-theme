@@ -81,9 +81,42 @@ function aws_sbg_auto_create_exam_page() {
 			update_post_meta( $events_id, '_wp_page_template', 'page-events.php' );
 		}
 	}
+
+	// 4. Dedicated Community Hub & Student Rewards Page (/community/)
+	$community_slug = 'community';
+	$community_check = get_page_by_path( $community_slug );
+	if ( ! isset( $community_check->ID ) ) {
+		$comm_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'Community',
+			'post_content' => '<!-- AWS Student Community Hub & Rewards -->',
+			'post_status'  => 'publish',
+			'post_name'    => $community_slug,
+		) );
+		if ( $comm_id && ! is_wp_error( $comm_id ) ) {
+			update_post_meta( $comm_id, '_wp_page_template', 'page-community.php' );
+		}
+	}
 	flush_rewrite_rules();
 }
 add_action( 'admin_init', 'aws_sbg_auto_create_exam_page' );
+
+/**
+ * Clean alias redirects for /campus, /students, /rewards, and /perks -> /community/
+ */
+function aws_sbg_community_slug_aliases() {
+	if ( is_admin() ) return;
+	
+	$request_uri = trim( parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ), '/' );
+	$aliases = array( 'campus', 'students', 'rewards', 'perks' );
+	
+	if ( in_array( strtolower( $request_uri ), $aliases, true ) ) {
+		wp_safe_redirect( home_url( '/community/' ), 301 );
+		exit;
+	}
+}
+add_action( 'template_redirect', 'aws_sbg_community_slug_aliases' );
+
 
 
 /**
@@ -168,6 +201,22 @@ function aws_sbg_get_tailwind_config() {
 			$colors_js[ $name ] = $value;
 		}
 	}
+
+	// Add charcoal and brand color palette
+	$colors_js['brand'] = '#9353ff';
+	$colors_js['charcoal'] = array(
+		'50'  => '#f8fafc',
+		'100' => '#f1f5f9',
+		'200' => '#e2e8f0',
+		'300' => '#cbd5e1',
+		'400' => '#94a3b8',
+		'500' => '#64748b',
+		'600' => '#475569',
+		'700' => '#334155',
+		'800' => '#1e293b',
+		'900' => '#0f172a',
+		'950' => '#020617',
+	);
 
 	// Build colors JSON
 	$colors_json = json_encode( $colors_js, JSON_FORCE_OBJECT );

@@ -17,31 +17,65 @@ $events_query = new WP_Query( array(
 ) );
 ?>
 
-<div class="min-h-screen bg-[#07040d] text-white font-sans selection:bg-[#ad5cff] selection:text-white py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-	
-	<!-- Glowing Background Accents -->
-	<div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#ad5cff]/15 rounded-full blur-[140px] pointer-events-none"></div>
-	<div class="absolute bottom-10 right-10 w-[400px] h-[400px] bg-[#00ef88]/10 rounded-full blur-[120px] pointer-events-none"></div>
+<!-- Scoped styles to ensure zero conflict with theme style.css dark defaults -->
+<style>
+	.events-page-wrapper {
+		background-color: #ffffff !important;
+		color: #0f172a !important;
+	}
+	.events-page-wrapper h1,
+	.events-page-wrapper h2,
+	.events-page-wrapper h3,
+	.events-page-wrapper h4 {
+		color: #020617 !important;
+	}
+	.events-page-wrapper p {
+		color: #334155 !important;
+	}
+	.events-page-wrapper .text-brand {
+		color: #9353ff !important;
+	}
+	.events-page-wrapper .card-clean {
+		background-color: #ffffff !important;
+		border: 1px solid #e2e8f0 !important;
+		transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+	}
+	.events-page-wrapper .card-clean:hover {
+		border-color: #9353ff !important;
+		transform: translateY(-2px);
+		box-shadow: 0 10px 25px -5px rgba(147, 83, 255, 0.1);
+	}
+	.events-page-wrapper .btn-effect {
+		background-color: #9353ff !important;
+		color: #ffffff !important;
+		box-shadow: 0 4px 14px 0 rgba(147, 83, 255, 0.35);
+		transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+		text-decoration: none !important;
+	}
+	.events-page-wrapper .btn-effect:hover {
+		background-color: #7928ca !important;
+		color: #ffffff !important;
+		transform: translateY(-1px);
+		box-shadow: 0 6px 20px 0 rgba(147, 83, 255, 0.45);
+	}
+</style>
 
-	<div class="max-w-6xl mx-auto relative z-10 space-y-12">
+<div class="events-page-wrapper bg-white text-slate-900 min-h-screen py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
+	<div class="max-w-6xl mx-auto space-y-12">
 
 		<!-- HERO HEADER -->
-		<div class="text-center space-y-4">
-			<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1c1032] border border-[#ad5cff]/30 text-xs font-bold text-[#ad5cff] tracking-wide uppercase shadow-lg shadow-[#ad5cff]/10">
-				<span class="w-2 h-2 rounded-full bg-[#00ef88] animate-pulse"></span>
-				AWS Student Builder Group • Air University Islamabad
-			</div>
-			<h1 class="text-4xl sm:text-6xl font-black tracking-tight text-white font-display uppercase">
-				Activities & <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#ad5cff] to-[#00ef88]">Events Portal</span>
+		<div class="text-center space-y-3">
+			<h1 class="text-3xl sm:text-5xl font-black tracking-tight text-slate-950 uppercase">
+				Activities &amp; <span class="text-[#9353ff]">Events</span>
 			</h1>
-			<p class="text-gray-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-				Explore upcoming bootcamps, hands-on cloud workshops, certification preparation days, and virtual tech talks.
+			<p class="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+				Explore upcoming bootcamps, hands-on cloud workshops, certification preparation days, and tech sessions.
 			</p>
 		</div>
 
 		<!-- EVENTS GRID -->
 		<?php if ( $events_query->have_posts() ) : ?>
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				<?php while ( $events_query->have_posts() ) : $events_query->the_post();
 					$event_id = get_the_ID();
 					$event_type = get_post_meta( $event_id, 'aws_event_type', true ) ?: 'paid';
@@ -87,28 +121,28 @@ $events_query = new WP_Query( array(
 						}
 					}
 				?>
-					<div class="bg-[#120a22]/90 border border-[#ad5cff]/30 rounded-3xl p-6 shadow-2xl backdrop-blur-xl flex flex-col justify-between hover:border-[#ad5cff]/70 transition-all duration-300 hover:-translate-y-1 group relative overflow-hidden">
+					<div class="card-clean rounded-2xl p-6 flex flex-col justify-between group shadow-sm">
 						
 						<!-- Top Badges -->
 						<div>
 							<div class="flex items-center justify-between gap-2 mb-4">
-								<span class="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider <?php echo $event_type === 'free' ? 'bg-[#00ef88]/15 text-[#00ef88] border border-[#00ef88]/30' : 'bg-[#ad5cff]/15 text-[#ad5cff] border border-[#ad5cff]/30'; ?>">
-									<?php echo $event_type === 'free' ? '🟢 Free RSVP' : '🟣 Paid Event'; ?>
+								<span class="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold uppercase tracking-wider <?php echo $event_type === 'free' ? 'bg-slate-100 text-slate-700 border border-slate-200' : 'bg-[#9353ff]/10 text-[#9353ff] border border-[#9353ff]/30'; ?>">
+									<?php echo $event_type === 'free' ? 'Free RSVP' : 'Paid Event'; ?>
 								</span>
 
-								<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider <?php echo $event_status === 'closed' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'; ?>">
-									<?php echo $event_status === 'closed' ? '🛑 Full' : '✅ Active'; ?>
+								<span class="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold uppercase tracking-wider <?php echo $event_status === 'closed' ? 'bg-slate-100 text-slate-500 border border-slate-200' : 'bg-[#9353ff]/10 text-[#9353ff] border border-[#9353ff]/30'; ?>">
+									<?php echo $event_status === 'closed' ? 'Closed' : 'Open'; ?>
 								</span>
 							</div>
 
 							<!-- Title -->
-							<h3 class="text-xl font-bold text-white group-hover:text-[#ad5cff] transition-colors leading-snug mb-2">
+							<h2 class="text-lg sm:text-xl font-bold text-slate-950 group-hover:text-[#9353ff] transition-colors leading-snug mb-2">
 								<a href="<?php echo esc_url( $permalink ); ?>"><?php the_title(); ?></a>
-							</h3>
+							</h2>
 
 							<!-- Mini Countdown Badge -->
 							<?php if ( $enable_timer && ( $timer_end_timestamp > 0 || ! empty( $timer_end ) ) ) : ?>
-								<div class="mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#ad5cff]/15 border border-[#ad5cff]/40 text-[11px] font-bold text-[#ad5cff]"
+								<div class="mb-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#9353ff]/10 border border-[#9353ff]/30 text-[11px] font-bold text-[#9353ff]"
 								     x-data="{ 
 								        timerEndStr: '<?php echo esc_js( $timer_end ); ?>',
 								        endTime: <?php echo floatval( $timer_end_timestamp ); ?>,
@@ -138,27 +172,27 @@ $events_query = new WP_Query( array(
 
 									<span>⏱️</span>
 									<template x-if="distance > 0">
-										<span>Ends in: <strong x-text="`${days}d ${hours}h ${mins}m ${secs}s`" class="text-[#ad5cff]"></strong></span>
+										<span>Ends in: <strong x-text="`${days}d ${hours}h ${mins}m ${secs}s`" class="text-[#9353ff]"></strong></span>
 									</template>
 									<template x-if="distance <= 0">
-										<span class="text-rose-400 font-extrabold flex items-center gap-1">🛑 Registrations Closed</span>
+										<span class="text-rose-500 font-extrabold flex items-center gap-1">Registrations Closed</span>
 									</template>
 
 								</div>
 							<?php endif; ?>
 
 							<!-- Excerpt / Description -->
-							<p class="text-xs text-gray-400 leading-relaxed mb-6 line-clamp-3">
+							<p class="text-xs text-slate-600 leading-relaxed mb-5 line-clamp-3">
 								<?php echo wp_strip_all_tags( get_the_excerpt() ? get_the_excerpt() : get_the_content() ); ?>
 							</p>
 
 							<!-- Perks Bullet Preview -->
-							<div class="space-y-2 mb-6 pt-4 border-t border-white/10">
-								<div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Included Perks:</div>
-								<ul class="space-y-1.5 text-xs text-gray-300">
+							<div class="space-y-2 mb-6 pt-4 border-t border-slate-100">
+								<div class="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider">Included Perks:</div>
+								<ul class="space-y-1.5 text-xs text-slate-600">
 									<?php foreach ( $perks_list as $perk ) : ?>
 										<li class="flex items-center gap-2">
-											<span class="text-[#00ef88] font-bold">✓</span>
+											<span class="text-[#9353ff] font-bold">✓</span>
 											<span class="truncate"><?php echo esc_html( $perk ); ?></span>
 										</li>
 									<?php endforeach; ?>
@@ -167,9 +201,10 @@ $events_query = new WP_Query( array(
 						</div>
 
 						<!-- Footer & CTA -->
-						<div class="pt-4 border-t border-white/10 flex items-center justify-center">
-							<a href="<?php echo esc_url( $permalink ); ?>" class="w-full py-3 bg-gradient-to-r from-[#ad5cff] to-[#7000ff] hover:opacity-90 text-white font-bold text-xs rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 group-hover:shadow-lg group-hover:shadow-[#ad5cff]/20">
-								<span>Register Now ➔</span>
+						<div class="pt-4 border-t border-slate-100 flex items-center justify-center">
+							<a href="<?php echo esc_url( $permalink ); ?>" class="btn-effect w-full py-3 rounded-xl font-bold text-xs text-center flex items-center justify-center gap-1.5 shadow-sm">
+								<span>Register Now</span>
+								<span>→</span>
 							</a>
 						</div>
 
@@ -178,11 +213,11 @@ $events_query = new WP_Query( array(
 			</div>
 		<?php else : ?>
 			<!-- Empty State -->
-			<div class="bg-[#120a22]/90 border border-white/10 rounded-3xl p-12 text-center space-y-4 max-w-lg mx-auto">
-				<div class="w-16 h-16 rounded-full bg-[#ad5cff]/10 text-[#ad5cff] flex items-center justify-center mx-auto text-2xl font-bold">📅</div>
-				<h3 class="text-xl font-bold text-white uppercase">No Activities Published Yet</h3>
-				<p class="text-xs text-gray-400 leading-relaxed">
-					New activities and bootcamps are being prepared. Check back soon or follow our community channels!
+			<div class="bg-slate-50 border border-slate-200 rounded-2xl p-12 text-center space-y-4 max-w-lg mx-auto">
+				<div class="w-12 h-12 rounded-xl bg-[#9353ff]/10 border border-[#9353ff]/20 text-[#9353ff] flex items-center justify-center mx-auto text-xl font-bold">📅</div>
+				<h3 class="text-lg font-bold text-slate-950 uppercase tracking-tight">No Activities Published Yet</h3>
+				<p class="text-xs text-slate-600 leading-relaxed">
+					New activities and bootcamps are being scheduled. Check back soon or stay connected on our community channels!
 				</p>
 			</div>
 		<?php endif; ?>
