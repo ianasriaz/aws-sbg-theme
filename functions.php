@@ -267,8 +267,8 @@ function aws_sbg_get_custom_styles() {
 		}
 		
 		/* Smooth transitions */
-		* {
-			transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+		a, button, .btn-launch, .btn-orange, .btn-ghost, .reward-card, .channel-card, .faq-item {
+			transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 		}
 		
 		/* Link styling */

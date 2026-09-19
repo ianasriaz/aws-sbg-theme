@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AWS Student Community Day Islamabad 2027 - Creative Suite</title>
+  <title>AWS Student Community Day Islamabad 2026 - Creative Suite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -19,8 +19,8 @@
       --brand-purple-light: #eecfff;
       --bg-dark-content: #0e131b;
       --bg-dark-art: #090d14;
-      --grid-line: rgba(255, 255, 255, 0.08);
-      --border-subtle: rgba(255, 255, 255, 0.09);
+      --grid-line: rgba(255, 255, 255, 0.16);
+      --border-subtle: rgba(255, 255, 255, 0.16);
       --text-white: #ffffff;
       --text-grey-refined: #a1b0c4;
       --text-grey-muted: #8090a7;
@@ -32,7 +32,9 @@
       --color-orange: #ff9900;
       --color-orange-glow: #ea580c;
 
-      /* PURE LUMINOUS GRADIENT PRESETS (WHITE + PURPLE + AWS ORANGE) */
+      --grad-luminous-violet: linear-gradient(135deg, #d8b4fe 0%, #a855f7 50%, #6366f1 100%);
+      --grad-cyber-orchid: linear-gradient(135deg, #e879f9 0%, #a855f7 45%, #3b82f6 100%);
+      --grad-electric-dusk: linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #6366f1 100%);
       --grad-user-orange: 
         radial-gradient(circle at 100% 0%, #ffffff 0%, rgba(255, 240, 253, 0.85) 18%, transparent 58%),
         radial-gradient(circle at 0% 100%, #ff9900 0%, rgba(255, 125, 0, 0.75) 28%, transparent 65%),
@@ -42,8 +44,8 @@
       --grad-pure-violet: linear-gradient(145deg, #ffffff 0%, #f3e8ff 10%, #c084fc 30%, #7c3aed 70%, #2e0854 100%);
       --grad-aws-ember: linear-gradient(145deg, #ffffff 0%, #fff7ed 8%, #ffaa22 28%, #ff9900 60%, #9a3412 100%);
 
-      /* ACTIVE ART GRADIENT (Organic Mesh: Soft Sunlit White Top-Right + Ambient AWS Orange Bottom-Left) */
-      --saved-gradient: var(--grad-user-orange);
+      /* ACTIVE ART GRADIENT (Fresh Reference Default) */
+      --saved-gradient: var(--grad-luminous-violet);
       --box-glow: none;
       --box-border: none;
       --footer-bg: #eaeff5;
@@ -372,25 +374,16 @@
     }
 
     /* ========================================================
-       CLEAN COMPUTE BLOCKS (NO BORDERS, NO EXTRA DOTS, PURE GRADIENT)
+       FAISAL MOSQUE WHITE ICON & ACCENT BLOCKS
        ======================================================== */
-    .block-core-main,
     .block-satellite-tr,
     .block-top-edge,
-    .speaker-block-core,
     .speaker-block-top-edge {
       background: var(--saved-gradient);
       border: none !important;
       box-shadow: none !important;
       position: absolute;
       z-index: 2;
-    }
-
-    .block-core-main {
-      left: 20%;
-      top: 33.333%;
-      width: 40%;
-      height: 22.222%;
     }
 
     .block-satellite-tr {
@@ -405,6 +398,28 @@
       top: 0%;
       width: 20%;
       height: 11.111%;
+    }
+
+    .faisal-mosque-box {
+      position: absolute;
+      left: 20%;
+      top: 33.333%;
+      width: 40%;
+      height: 22.222%;
+      background-color: var(--bg-dark-art);
+      border: 1px solid var(--grid-line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      z-index: 2;
+    }
+
+    .faisal-mosque-svg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
     }
 
     /* ========================================================
@@ -486,17 +501,18 @@
       1. Main Big 2x2 Box: Rows 2-3, Cols 2-3 (120px x 120px)
       2. Top Right Corner Box: Row 1, Col 8 (60px x 60px)
     */
-    .speaker-block-core {
+    .speaker-faisal-mosque-box {
       position: absolute;
       right: 12.5%;
-      /* Boxes 2-3 from right side (Cols 6-7) */
       top: 33.333%;
-      /* Rows 2-3 (starts at row 2) */
       width: 25%;
-      /* 2 cells wide = 120px */
       height: 66.666%;
-      /* 2 cells tall = 120px -> EXACT 120px x 120px SQUARE! */
-      background: var(--saved-gradient);
+      background-color: var(--bg-dark-art);
+      border: 1px solid var(--grid-line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
       z-index: 2;
     }
 
@@ -961,7 +977,19 @@
       <span>GRADIENT:</span>
     </div>
     <div class="palette-options">
-      <button class="palette-pill active" onclick="setGradient('user_orange', this)" title="Sunlit Violet with AWS Orange in bottom-left corner">
+      <button class="palette-pill active" onclick="setGradient('luminous_violet', this)" title="Fresh Luminous Lilac & Indigo (As in Reference)">
+        <span class="swatch-circle" style="background: linear-gradient(135deg, #d8b4fe, #a855f7, #6366f1);"></span>
+        <span>Luminous Lilac (Ref)</span>
+      </button>
+      <button class="palette-pill" onclick="setGradient('cyber_orchid', this)" title="Cyber Orchid & Blue">
+        <span class="swatch-circle" style="background: linear-gradient(135deg, #e879f9, #a855f7, #3b82f6);"></span>
+        <span>Cyber Orchid</span>
+      </button>
+      <button class="palette-pill" onclick="setGradient('electric_dusk', this)" title="Electric Dusk & Purple">
+        <span class="swatch-circle" style="background: linear-gradient(135deg, #f472b6, #c084fc, #6366f1);"></span>
+        <span>Electric Dusk</span>
+      </button>
+      <button class="palette-pill" onclick="setGradient('user_orange', this)" title="Sunlit Violet with AWS Orange in bottom-left corner">
         <span class="swatch-circle" style="background: linear-gradient(225deg, #FFF0FD, #CE65FF, #FF9900);"></span>
         <span>Sunlit Violet-Orange</span>
       </button>
@@ -1000,7 +1028,7 @@
           <span class="headline-line">AWS STUDENT</span>
           <span class="headline-line">COMMUNITY DAY</span>
           <div class="headline-line city-year-line">
-            <span class="gradient-year">ISLAMABAD 2027</span>
+            <span class="gradient-year">ISLAMABAD 2026</span>
           </div>
         </div>
 
@@ -1013,7 +1041,7 @@
               <line x1="8" y1="2" x2="8" y2="6"></line>
               <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            <span>March 2027</span>
+            <span>March 2026</span>
           </div>
           <div class="meta-venue-item">
             <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1037,7 +1065,18 @@
         </div>
 
         <div class="block-top-edge"></div>
-        <div class="block-core-main"></div>
+        <div class="faisal-mosque-box">
+          <svg class="faisal-mosque-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#ffffff">
+            <polyline points="41.021,62.694 3.58,95.356 74.866,95.356 "/>
+            <polygon points="38.657,63.599 38.657,46.609 36.136,33.871 33.615,46.609 33.615,67.998 "/>
+            <polygon points="10.93,42.481 7.255,23.914 3.58,42.481 3.58,93.942 10.93,87.531 "/>
+            <polyline points="85.209,76.552 75.666,90.994 75.666,95.121 95.267,95.121 "/>
+            <polygon points="95.267,41.143 92.745,28.405 90.225,41.143 90.225,83.833 95.267,93.141 "/>
+            <polygon points="71.008,17.278 66.963,37.721 66.963,86.565 75.054,94.375 75.054,94.375 75.054,37.721 "/>
+            <polygon points="75.872,67.818 75.872,88.618 84.683,75.34 "/>
+            <path d="M59.274,55.667c1.865-0.685,3.199-2.472,3.199-4.575c0-0.963-0.28-1.862-0.763-2.618c0.094,0.326,0.147,0.669,0.147,1.027  c0,2.042-1.655,3.695-3.695,3.695c-2.041,0-3.696-1.653-3.696-3.695c0-1.258,0.629-2.368,1.591-3.035  c-1.938,0.645-3.336,2.472-3.336,4.626c0,1.773,0.948,3.319,2.362,4.173l-13.206,6.657l23.941,22.985V61.161L59.274,55.667z"/>
+          </svg>
+        </div>
         <div class="block-satellite-tr"></div>
       </div>
 
@@ -1077,9 +1116,19 @@
           </script>
         </div>
 
-        <!-- Two Filled Boxes: Top Right Corner & Main Big Box (Rows 2-3, Cols 2-3) -->
         <div class="speaker-block-top-edge"></div>
-        <div class="speaker-block-core"></div>
+        <div class="speaker-faisal-mosque-box">
+          <svg class="faisal-mosque-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#ffffff">
+            <polyline points="41.021,62.694 3.58,95.356 74.866,95.356 "/>
+            <polygon points="38.657,63.599 38.657,46.609 36.136,33.871 33.615,46.609 33.615,67.998 "/>
+            <polygon points="10.93,42.481 7.255,23.914 3.58,42.481 3.58,93.942 10.93,87.531 "/>
+            <polyline points="85.209,76.552 75.666,90.994 75.666,95.121 95.267,95.121 "/>
+            <polygon points="95.267,41.143 92.745,28.405 90.225,41.143 90.225,83.833 95.267,93.141 "/>
+            <polygon points="71.008,17.278 66.963,37.721 66.963,86.565 75.054,94.375 75.054,94.375 75.054,37.721 "/>
+            <polygon points="75.872,67.818 75.872,88.618 84.683,75.34 "/>
+            <path d="M59.274,55.667c1.865-0.685,3.199-2.472,3.199-4.575c0-0.963-0.28-1.862-0.763-2.618c0.094,0.326,0.147,0.669,0.147,1.027  c0,2.042-1.655,3.695-3.695,3.695c-2.041,0-3.696-1.653-3.696-3.695c0-1.258,0.629-2.368,1.591-3.035  c-1.938,0.645-3.336,2.472-3.336,4.626c0,1.773,0.948,3.319,2.362,4.173l-13.206,6.657l23.941,22.985V61.161L59.274,55.667z"/>
+          </svg>
+        </div>
       </div>
 
     </div>
@@ -1096,7 +1145,7 @@
           </svg>
           <span>SPEAKER ANNOUNCEMENT</span>
         </div>
-        <span class="gradient-year kicker-event-title">AWS STUDENT COMMUNITY DAY ISLAMABAD 2027</span>
+        <span class="gradient-year kicker-event-title">AWS STUDENT COMMUNITY DAY ISLAMABAD 2026</span>
       </div>
 
       <div class="speaker-core-grid">
@@ -1143,7 +1192,7 @@
               <line x1="8" y1="2" x2="8" y2="6"></line>
               <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            <span>March 2027</span>
+            <span>March 2026</span>
           </div>
           <div class="meta-venue-item">
             <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1193,7 +1242,18 @@
         </div>
 
         <div class="speaker-block-top-edge"></div>
-        <div class="speaker-block-core"></div>
+        <div class="speaker-faisal-mosque-box">
+          <svg class="faisal-mosque-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#ffffff">
+            <polyline points="41.021,62.694 3.58,95.356 74.866,95.356 "/>
+            <polygon points="38.657,63.599 38.657,46.609 36.136,33.871 33.615,46.609 33.615,67.998 "/>
+            <polygon points="10.93,42.481 7.255,23.914 3.58,42.481 3.58,93.942 10.93,87.531 "/>
+            <polyline points="85.209,76.552 75.666,90.994 75.666,95.121 95.267,95.121 "/>
+            <polygon points="95.267,41.143 92.745,28.405 90.225,41.143 90.225,83.833 95.267,93.141 "/>
+            <polygon points="71.008,17.278 66.963,37.721 66.963,86.565 75.054,94.375 75.054,94.375 75.054,37.721 "/>
+            <polygon points="75.872,67.818 75.872,88.618 84.683,75.34 "/>
+            <path d="M59.274,55.667c1.865-0.685,3.199-2.472,3.199-4.575c0-0.963-0.28-1.862-0.763-2.618c0.094,0.326,0.147,0.669,0.147,1.027  c0,2.042-1.655,3.695-3.695,3.695c-2.041,0-3.696-1.653-3.696-3.695c0-1.258,0.629-2.368,1.591-3.035  c-1.938,0.645-3.336,2.472-3.336,4.626c0,1.773,0.948,3.319,2.362,4.173l-13.206,6.657l23.941,22.985V61.161L59.274,55.667z"/>
+          </svg>
+        </div>
       </div>
     </div>
 
@@ -1244,7 +1304,7 @@
         <div class="partner-bottom-stack">
           <div class="bottom-aligned-cluster">
             <div class="banner-event-strip partner-event-strip">
-              <span class="gradient-year event-strip-title">AWS STUDENT COMMUNITY DAY ISLAMABAD 2027</span>
+              <span class="gradient-year event-strip-title">AWS STUDENT COMMUNITY DAY ISLAMABAD 2026</span>
             </div>
 
             <div class="speaker-meta-footer-row partner-meta-footer-row">
@@ -1265,7 +1325,7 @@
                   <line x1="8" y1="2" x2="8" y2="6"></line>
                   <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
-                <span>March 2027</span>
+                <span>March 2026</span>
               </div>
               <div class="meta-venue-item">
                 <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -1322,6 +1382,9 @@
     }
 
     const GRADIENTS = {
+      luminous_violet: 'linear-gradient(135deg, #d8b4fe 0%, #a855f7 50%, #6366f1 100%)',
+      cyber_orchid: 'linear-gradient(135deg, #e879f9 0%, #a855f7 45%, #3b82f6 100%)',
+      electric_dusk: 'linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #6366f1 100%)',
       user_orange: 'radial-gradient(circle at 100% 0%, #ffffff 0%, rgba(255, 240, 253, 0.85) 18%, transparent 58%), radial-gradient(circle at 0% 100%, #ff9900 0%, rgba(255, 125, 0, 0.75) 28%, transparent 65%), linear-gradient(135deg, #d86bff 0%, #9933ff 100%)',
       amber_violet: 'linear-gradient(135deg, #ffffff 0%, #fff0dc 6%, #ff9900 28%, #d946ef 58%, #7c3aed 82%, #2e0854 100%)',
       prism_sunset: 'linear-gradient(150deg, #ffffff 0%, #ffd199 10%, #ff9900 36%, #a855f7 70%, #3b0764 100%)',
@@ -1343,14 +1406,14 @@
       const speaker = document.getElementById('speakerBanner');
       const partner = document.getElementById('partnerBanner');
       let target = main;
-      let filename = 'AWS_SCD_Islamabad_2027_Master_Cover.png';
+      let filename = 'AWS_SCD_Islamabad_2026_Master_Cover.png';
 
       if (speaker.style.display !== 'none') {
         target = speaker;
-        filename = 'AWS_SCD_Islamabad_2027_Speaker_Creative.png';
+        filename = 'AWS_SCD_Islamabad_2026_Speaker_Creative.png';
       } else if (partner.style.display !== 'none') {
         target = partner;
-        filename = 'AWS_SCD_Islamabad_2027_Community_Partner.png';
+        filename = 'AWS_SCD_Islamabad_2026_Community_Partner.png';
       }
 
       html2canvas(target, {

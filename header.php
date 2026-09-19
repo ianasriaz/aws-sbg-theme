@@ -9,7 +9,7 @@
 	<?php wp_body_open(); ?>
 
 	<!-- Clean Announcement Bar: AWS Student Rewards -->
-	<aside aria-label="AWS Student Rewards Announcement" class="bg-[#0c0e17] text-gray-200 py-2 sm:py-2.5 px-4 font-mono text-[11px] sm:text-xs border-b border-[#9353ff]/20 relative z-40">
+	<aside aria-label="AWS Student Rewards Announcement" class="bg-[#000000] text-gray-200 py-2 sm:py-2.5 px-4 text-[11px] sm:text-xs border-b border-[#9353ff]/20 relative z-40">
 		<div class="max-w-7xl mx-auto flex items-center justify-center text-center">
 			<a href="https://builder.aws.com/start?trk=8e356433-7e2c-4ee9-8c3a-5bccc682a4f5&amp;sc_channel=el" target="_blank" rel="noopener noreferrer" class="group inline-flex items-center justify-center gap-2 text-gray-300 hover:text-white font-bold tracking-wider transition-colors">
 				<span>CLAIM $579 AWS STUDENT REWARDS</span>
@@ -27,11 +27,9 @@
 			position: sticky;
 			top: 0;
 			z-index: 50;
-			background-color: rgba(10, 13, 20, 0.48) !important;
-			backdrop-filter: blur(18px) saturate(220%) contrast(105%) !important;
-			-webkit-backdrop-filter: blur(18px) saturate(220%) contrast(105%) !important;
-			border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-			box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25) !important;
+			background-color: #000000 !important;
+			border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+			box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4) !important;
 			transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 		}
 
@@ -49,11 +47,9 @@
 			transition: opacity 0.3s ease;
 		}
 
-		/* Scrolled state: Deeper frosted glass refraction & illuminated accent */
+		/* Scrolled state: Clean solid black with purple edge glow */
 		.site-glass-header.is-scrolled {
-			background-color: rgba(10, 13, 20, 0.68) !important;
-			backdrop-filter: blur(24px) saturate(240%) contrast(108%) !important;
-			-webkit-backdrop-filter: blur(24px) saturate(240%) contrast(108%) !important;
+			background-color: #000000 !important;
 			border-bottom-color: rgba(147, 83, 255, 0.3) !important;
 			box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 1px 0 0 rgba(147, 83, 255, 0.25) !important;
 		}
@@ -94,7 +90,7 @@
 					</button>
 
 					<!-- Desktop Navigation Menu -->
-					<div class="hidden lg:flex items-center space-x-1.5 font-mono text-xs tracking-wider">
+					<div class="hidden lg:flex items-center space-x-1 font-semibold text-xs tracking-wider">
 						<?php
 						$desktop_menu = array(
 							array( 'title' => 'HOME', 'url' => home_url( '/' ) ),
@@ -106,17 +102,9 @@
 						$current_url = home_url( add_query_arg( array(), $GLOBALS['wp']->request ?? '' ) );
 
 						foreach ( $desktop_menu as $item ) {
-							$is_current = ( untrailingslashit( $current_url ) === untrailingslashit( $item['url'] ) );
-							
-							if ( $is_current ) {
-								echo '<a href="' . esc_url( $item['url'] ) . '" class="px-3.5 py-2 rounded-xl bg-[#9353ff]/20 border border-[#9353ff]/50 text-white font-bold whitespace-nowrap">';
-								echo esc_html( $item['title'] );
-								echo '</a>';
-							} else {
-								echo '<a href="' . esc_url( $item['url'] ) . '" class="px-3.5 py-2 rounded-xl text-gray-300 hover:text-white hover:bg-white/[0.08] border border-transparent whitespace-nowrap">';
-								echo esc_html( $item['title'] );
-								echo '</a>';
-							}
+							echo '<a href="' . esc_url( $item['url'] ) . '" class="px-3.5 py-2 text-gray-300 hover:text-white transition-colors whitespace-nowrap">';
+							echo esc_html( $item['title'] );
+							echo '</a>';
 						}
 						?>
 					</div>
@@ -131,7 +119,7 @@
 
 				<!-- Right: CTA (Meetup) -->
 				<div class="flex-1 lg:flex-1 flex justify-end items-center">
-					<a href="https://www.meetup.com/aws-sbg-at-air-university-e9-campus-islamabad/" target="_blank" rel="noopener noreferrer" class="px-4 py-2 sm:px-5 sm:py-2.5 bg-[#9353ff] hover:bg-[#7928ca] text-white font-mono font-bold text-xs sm:text-sm rounded-xl transition-all duration-200 shadow-md shadow-[#9353ff]/30 hover:shadow-[#9353ff]/50 whitespace-nowrap flex items-center gap-2">
+					<a href="https://www.meetup.com/aws-sbg-at-air-university-e9-campus-islamabad/" target="_blank" rel="noopener noreferrer" class="px-4 py-2 sm:px-5 sm:py-2.5 bg-[#9353ff] hover:bg-[#7928ca] text-white font-bold text-xs sm:text-sm rounded-xl transition-all duration-200 shadow-md shadow-[#9353ff]/30 hover:shadow-[#9353ff]/50 whitespace-nowrap flex items-center gap-2">
 						<span>Community</span>
 						<span>→</span>
 					</a>
@@ -177,17 +165,9 @@
 				);
 
 				foreach ( $mobile_menu as $item ) {
-					$is_current = ( untrailingslashit( $current_url ) === untrailingslashit( $item['url'] ) );
-					
-					if ( $is_current ) {
-						echo '<a href="' . esc_url( $item['url'] ) . '" class="mobile-nav-link block px-4 py-3.5 rounded-xl border border-[#9353ff]/50 bg-[#9353ff]/20 text-white font-bold">';
-						echo esc_html( $item['title'] );
-						echo '</a>';
-					} else {
-						echo '<a href="' . esc_url( $item['url'] ) . '" class="mobile-nav-link block px-4 py-3.5 rounded-xl border border-[#1d2636] bg-[#0f141f]/80 text-gray-300 hover:text-white hover:bg-[#151c2b]">';
-						echo esc_html( $item['title'] );
-						echo '</a>';
-					}
+					echo '<a href="' . esc_url( $item['url'] ) . '" class="mobile-nav-link block px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/[0.06] transition-colors">';
+					echo esc_html( $item['title'] );
+					echo '</a>';
 				}
 				?>
 			</div>
