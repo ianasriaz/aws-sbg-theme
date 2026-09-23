@@ -28,6 +28,9 @@ require_once get_template_directory() . '/feature-events.php';
 // Load Random Swag Picker Wheel Feature
 require_once get_template_directory() . '/feature-swag-wheel.php';
 
+// Load Modular On-Campus Giveaway Engine
+require_once get_template_directory() . '/feature-giveaway.php';
+
 /**
  * Auto-create Mock Exam & Certificate pages if missing
  */
@@ -97,6 +100,22 @@ function aws_sbg_auto_create_exam_page() {
 			update_post_meta( $comm_id, '_wp_page_template', 'page-community.php' );
 		}
 	}
+	// 5. Dedicated On-Campus Giveaway Page (/giveaway/)
+	$giveaway_slug = 'giveaway';
+	$giveaway_check = get_page_by_path( $giveaway_slug );
+	if ( ! isset( $giveaway_check->ID ) ) {
+		$giveaway_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'Campus Giveaway',
+			'post_content' => '<!-- AWS SBG Campus Giveaway -->',
+			'post_status'  => 'publish',
+			'post_name'    => $giveaway_slug,
+		) );
+		if ( $giveaway_id && ! is_wp_error( $giveaway_id ) ) {
+			update_post_meta( $giveaway_id, '_wp_page_template', 'page-giveaway.php' );
+		}
+	}
+
 	flush_rewrite_rules();
 }
 add_action( 'admin_init', 'aws_sbg_auto_create_exam_page' );
@@ -109,6 +128,11 @@ function aws_sbg_community_slug_aliases() {
 	
 	$request_uri = trim( parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ), '/' );
 	$aliases = array( 'campus', 'students', 'rewards', 'perks' );
+	$giveaway_aliases = array( 'win', 'swag' );
+	if ( in_array( strtolower( $request_uri ), $giveaway_aliases, true ) ) {
+		wp_safe_redirect( home_url( '/giveaway/' ), 301 );
+		exit;
+	}
 	
 	if ( in_array( strtolower( $request_uri ), $aliases, true ) ) {
 		wp_safe_redirect( home_url( '/community/' ), 301 );
