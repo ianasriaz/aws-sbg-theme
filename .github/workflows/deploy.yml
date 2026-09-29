@@ -1,0 +1,73 @@
+name: Deploy to WordPress
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy to ${{ github.event.inputs.environment }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      
+      - name: Add host to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SFTP_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Deploy via SFTP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SFTP_PORT || '22' }}
+          source: "."
+          target: ${{ secrets.REMOTE_PATH }}
+          strip_components: 0
+          rm: false
+          overwrite: true
+          # Exclude files that shouldn't be deployed
+          exclude: |
+            .git/**
+            .github/**
+            .gitignore
+            README.md
+            docs/**
+            config/seed-*.json
+            .vscode/**
+            .DS_Store
+            node_modules/**
+            *.zip
+            *.lock
+      
+      - name: Deployment Summary
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Branch: ${{ github.event.inputs.branch }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Deployed at: $(date)"

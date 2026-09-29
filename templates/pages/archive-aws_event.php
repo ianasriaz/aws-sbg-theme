@@ -5,4 +5,4 @@
  * Package: AWS_SBG_Theme
  */
 
-require_once get_template_directory() . '/page-events.php';
+require_once get_template_directory() . '/templates/pages/page-events.php';

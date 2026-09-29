@@ -12,24 +12,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Load color and font helper functions
-require_once get_template_directory() . '/helpers-colors.php';
-require_once get_template_directory() . '/helpers-fonts.php';
+require_once get_template_directory() . '/includes/helpers/helpers-colors.php';
+require_once get_template_directory() . '/includes/helpers/helpers-fonts.php';
 
 // Load universal event registration system & dashboard
-require_once get_template_directory() . '/feature-event-registration.php';
-require_once get_template_directory() . '/admin-dashboard.php';
+require_once get_template_directory() . '/includes/features/feature-event-registration.php';
+require_once get_template_directory() . '/includes/admin/admin-dashboard.php';
 
 // Load AWS Foundational Certification Mock Exam Feature
-require_once get_template_directory() . '/feature-mock-exam.php';
+require_once get_template_directory() . '/includes/features/feature-mock-exam.php';
 
 // Load AWS Event & Self-Service Certificate Management System
-require_once get_template_directory() . '/feature-events.php';
+require_once get_template_directory() . '/includes/features/feature-events.php';
 
 // Load Random Swag Picker Wheel Feature
-require_once get_template_directory() . '/feature-swag-wheel.php';
+require_once get_template_directory() . '/includes/features/feature-swag-wheel.php';
 
 // Load Modular On-Campus Giveaway Engine
-require_once get_template_directory() . '/feature-giveaway.php';
+require_once get_template_directory() . '/includes/features/feature-giveaway.php';
 
 /**
  * Auto-create Mock Exam & Certificate pages if missing

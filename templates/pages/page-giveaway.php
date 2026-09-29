@@ -35,22 +35,22 @@ if ( 'announced' === $status ) {
 	), ARRAY_A );
 }
 
-$swag_kit_url = file_exists( get_theme_file_path( 'media/AWS-Swags-Kit.webp' ) )
-	? get_theme_file_uri( 'media/AWS-Swags-Kit.webp' )
-	: ( file_exists( get_theme_file_path( 'media/AWS-Swags.webp' ) )
-		? get_theme_file_uri( 'media/AWS-Swags.webp' )
+$swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.webp' ) )
+	? get_theme_file_uri( 'assets/images/AWS-Swags-Kit.webp' )
+	: ( file_exists( get_theme_file_path( 'assets/images/AWS-Swags.webp' ) )
+		? get_theme_file_uri( 'assets/images/AWS-Swags.webp' )
 		: 'https://awsairuniversity.com/wp-content/uploads/2026/09/AWS-Swags-Kit.webp' );
 
-$linkedin_icon = file_exists( get_theme_file_path( 'media/icons/wired-outline-2677-logo-square-linkedin.png' ) )
-	? get_theme_file_uri( 'media/icons/wired-outline-2677-logo-square-linkedin.png' )
+$linkedin_icon = file_exists( get_theme_file_path( 'assets/images/icons/wired-outline-2677-logo-square-linkedin.png' ) )
+	? get_theme_file_uri( 'assets/images/icons/wired-outline-2677-logo-square-linkedin.png' )
 	: '';
 
-$instagram_icon = file_exists( get_theme_file_path( 'media/icons/wired-outline-2542-logo-instagram.png' ) )
-	? get_theme_file_uri( 'media/icons/wired-outline-2542-logo-instagram.png' )
+$instagram_icon = file_exists( get_theme_file_path( 'assets/images/icons/wired-outline-2542-logo-instagram.png' ) )
+	? get_theme_file_uri( 'assets/images/icons/wired-outline-2542-logo-instagram.png' )
 	: '';
 
-$whatsapp_icon = file_exists( get_theme_file_path( 'media/icons/wired-outline-2672-logo-square-whatsapp.png' ) )
-	? get_theme_file_uri( 'media/icons/wired-outline-2672-logo-square-whatsapp.png' )
+$whatsapp_icon = file_exists( get_theme_file_path( 'assets/images/icons/wired-outline-2672-logo-square-whatsapp.png' ) )
+	? get_theme_file_uri( 'assets/images/icons/wired-outline-2672-logo-square-whatsapp.png' )
 	: '';
 ?>
 

@@ -612,8 +612,8 @@ get_header();
 					<div class="absolute inset-0 bg-gradient-to-tr from-[#FF9900]/25 via-[#9353ff]/22 to-[#00ef88]/20 rounded-full blur-3xl pointer-events-none"></div>
 
 					<?php
-					$hp_img_url = file_exists( get_theme_file_path( 'media/AWS-Home.webp' ) )
-						? get_theme_file_uri( 'media/AWS-Home.webp' )
+$hp_img_url = file_exists( get_theme_file_path( 'assets/images/AWS-Home.webp' ) )
+					? get_theme_file_uri( 'assets/images/AWS-Home.webp' )
 						: 'https://awsairuniversity.com/wp-content/uploads/2026/09/AWS-Home.webp';
 					?>
 					<img src="<?php echo esc_url( $hp_img_url ); ?>" 

@@ -553,8 +553,8 @@ get_header();
 					<div class="absolute inset-0 bg-gradient-to-tr from-[#FF9900]/25 via-[#9353ff]/22 to-[#00ef88]/20 rounded-full blur-3xl pointer-events-none"></div>
 
 					<?php
-					$swag_kit_url = file_exists( get_theme_file_path( 'media/AWS-Swags-Kit.webp' ) )
-						? get_theme_file_uri( 'media/AWS-Swags-Kit.webp' )
+$swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.webp' ) )
+					? get_theme_file_uri( 'assets/images/AWS-Swags-Kit.webp' )
 						: 'https://awsairuniversity.com/wp-content/uploads/2026/09/AWS-Swags-Kit.webp';
 					?>
 					<img src="<?php echo esc_url( $swag_kit_url ); ?>"
@@ -730,7 +730,7 @@ get_header();
 				<a href="https://chat.whatsapp.com/KlNgxGopitiCJoTJEyqTaL" target="_blank" rel="noopener noreferrer" class="channel-card reveal p-7 space-y-5">
 					<div>
 						<div class="channel-icon">
-							<img src="<?php echo esc_url( get_theme_file_uri( 'media/icons/wired-outline-2672-logo-square-whatsapp.png' ) ); ?>" alt="WhatsApp" class="w-7 h-7 object-contain">
+							<img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/icons/wired-outline-2672-logo-square-whatsapp.png' ) ); ?>" alt="WhatsApp" class="w-7 h-7 object-contain">
 						</div>
 					</div>
 					<div>
@@ -746,7 +746,7 @@ get_header();
 				<a href="https://www.linkedin.com/company/aws-student-builder-group-air-university-islamabad/" target="_blank" rel="noopener noreferrer" class="channel-card reveal reveal-d1 p-7 space-y-5">
 					<div>
 						<div class="channel-icon">
-							<img src="<?php echo esc_url( get_theme_file_uri( 'media/icons/wired-outline-2677-logo-square-linkedin.png' ) ); ?>" alt="LinkedIn" class="w-7 h-7 object-contain">
+							<img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/icons/wired-outline-2677-logo-square-linkedin.png' ) ); ?>" alt="LinkedIn" class="w-7 h-7 object-contain">
 						</div>
 					</div>
 					<div>
@@ -762,7 +762,7 @@ get_header();
 				<a href="https://www.instagram.com/awssbgairuniversity/" target="_blank" rel="noopener noreferrer" class="channel-card reveal reveal-d2 p-7 space-y-5">
 					<div>
 						<div class="channel-icon">
-							<img src="<?php echo esc_url( get_theme_file_uri( 'media/icons/wired-outline-2542-logo-instagram.png' ) ); ?>" alt="Instagram" class="w-7 h-7 object-contain">
+							<img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/icons/wired-outline-2542-logo-instagram.png' ) ); ?>" alt="Instagram" class="w-7 h-7 object-contain">
 						</div>
 					</div>
 					<div>
