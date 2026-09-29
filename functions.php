@@ -32,6 +32,53 @@ require_once get_template_directory() . '/includes/features/feature-swag-wheel.p
 require_once get_template_directory() . '/includes/features/feature-giveaway.php';
 
 /**
+ * Register custom template directory for WordPress
+ * Allows templates to be in templates/pages/ subdirectory
+ */
+add_filter( 'theme_page_templates', 'aws_sbg_add_page_templates' );
+function aws_sbg_add_page_templates( $templates ) {
+	$template_dir = get_template_directory() . '/templates/pages/';
+	
+	// Get all page templates from templates/pages/
+	$template_files = glob( $template_dir . 'page-*.php' );
+	
+	foreach ( $template_files as $template_file ) {
+		$basename = basename( $template_file );
+		$template_path = 'templates/pages/' . $basename;
+		
+		// Get template name from file header
+		$template_data = get_file_data( $template_file, array( 'Template Name' => 'Template Name' ) );
+		$template_name = $template_data['Template Name'] ?: ucwords( str_replace( array( 'page-', '.php', '-' ), array( '', '', ' ' ), $basename ) );
+		
+		$templates[ $template_path ] = $template_name;
+	}
+	
+	return $templates;
+}
+
+/**
+ * Filter template path to support templates in subdirectory
+ */
+add_filter( 'template_include', 'aws_sbg_template_include' );
+function aws_sbg_template_include( $template ) {
+	// If template is in templates/pages/, use it directly
+	if ( strpos( $template, 'templates/pages/' ) !== false ) {
+		return $template;
+	}
+	
+	// Get template basename
+	$basename = basename( $template );
+	
+	// Check if template exists in templates/pages/
+	$subdir_template = get_template_directory() . '/templates/pages/' . $basename;
+	if ( file_exists( $subdir_template ) ) {
+		return $subdir_template;
+	}
+	
+	return $template;
+}
+
+/**
  * Auto-create Mock Exam & Certificate pages if missing
  */
 function aws_sbg_auto_create_exam_page() {
@@ -49,7 +96,7 @@ function aws_sbg_auto_create_exam_page() {
 			'post_name'    => $page_slug,
 		) );
 		if ( $page_id && ! is_wp_error( $page_id ) ) {
-			update_post_meta( $page_id, '_wp_page_template', 'page-exam-portal.php' );
+			update_post_meta( $page_id, '_wp_page_template', 'templates/pages/page-exam-portal.php' );
 		}
 	}
 
@@ -65,7 +112,7 @@ function aws_sbg_auto_create_exam_page() {
 			'post_name'    => $cert_slug,
 		) );
 		if ( $cert_id && ! is_wp_error( $cert_id ) ) {
-			update_post_meta( $cert_id, '_wp_page_template', 'page-certificate-generator.php' );
+			update_post_meta( $cert_id, '_wp_page_template', 'templates/pages/page-certificate-generator.php' );
 		}
 	}
 
@@ -81,7 +128,7 @@ function aws_sbg_auto_create_exam_page() {
 			'post_name'    => $events_slug,
 		) );
 		if ( $events_id && ! is_wp_error( $events_id ) ) {
-			update_post_meta( $events_id, '_wp_page_template', 'page-events.php' );
+			update_post_meta( $events_id, '_wp_page_template', 'templates/pages/page-events.php' );
 		}
 	}
 
@@ -97,7 +144,7 @@ function aws_sbg_auto_create_exam_page() {
 			'post_name'    => $community_slug,
 		) );
 		if ( $comm_id && ! is_wp_error( $comm_id ) ) {
-			update_post_meta( $comm_id, '_wp_page_template', 'page-community.php' );
+			update_post_meta( $comm_id, '_wp_page_template', 'templates/pages/page-community.php' );
 		}
 	}
 	// 5. Dedicated On-Campus Giveaway Page (/giveaway/)
@@ -112,7 +159,7 @@ function aws_sbg_auto_create_exam_page() {
 			'post_name'    => $giveaway_slug,
 		) );
 		if ( $giveaway_id && ! is_wp_error( $giveaway_id ) ) {
-			update_post_meta( $giveaway_id, '_wp_page_template', 'page-giveaway.php' );
+			update_post_meta( $giveaway_id, '_wp_page_template', 'templates/pages/page-giveaway.php' );
 		}
 	}
 
