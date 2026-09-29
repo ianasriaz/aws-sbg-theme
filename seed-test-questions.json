@@ -1,0 +1,282 @@
+[
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "Which AWS cloud architectural benefit allows a company to automatically acquire compute resources as traffic increases and release them when traffic drops?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Elasticity"
+      },
+      {
+        "key": "B",
+        "text": "Agility"
+      },
+      {
+        "key": "C",
+        "text": "High Availability"
+      },
+      {
+        "key": "D",
+        "text": "Fault Tolerance"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "Elasticity is the ability of an AWS architecture to automatically scale resources up or down to meet fluctuating demand, minimizing unnecessary costs.",
+    "doc_link": "https://docs.aws.amazon.com/whitepapers/latest/architecting-for-the-cloud/scalability.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-concepts",
+    "question": "How does moving workloads from an on-premises data center to the AWS Cloud impact a company's financial model?",
+    "options": [
+      {
+        "key": "A",
+        "text": "It replaces variable operational expenses (OpEx) with upfront capital expenses (CapEx)."
+      },
+      {
+        "key": "B",
+        "text": "It trades upfront capital expenses (CapEx) for low variable operational expenses (OpEx)."
+      },
+      {
+        "key": "C",
+        "text": "It eliminates both operational and capital expenses entirely."
+      },
+      {
+        "key": "D",
+        "text": "It requires multi-year long-term financial commitments for all computing services."
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "In cloud computing, organizations trade upfront capital expenses (purchasing servers, hardware, and physical data center space) for pay-as-you-go operational expenses.",
+    "doc_link": "https://aws.amazon.com/what-is-cloud-computing/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "According to the AWS Shared Responsibility Model, which of the following is a customer responsibility when running an Amazon EC2 instance?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Patching the guest operating system and application software"
+      },
+      {
+        "key": "B",
+        "text": "Decommissioning defective hard disk drives"
+      },
+      {
+        "key": "C",
+        "text": "Physical security of the server hardware"
+      },
+      {
+        "key": "D",
+        "text": "Securing the hypervisor virtualization software"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS is responsible for security OF the cloud (physical data centers, hardware, hypervisors), while the customer is responsible for security IN the cloud (OS patches, firewall configuration, IAM, application code).",
+    "doc_link": "https://aws.amazon.com/compliance/shared-responsibility-model/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "Which AWS service is used to create and manage users, groups, roles, and fine-grained access policies to AWS services?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS CloudTrail"
+      },
+      {
+        "key": "B",
+        "text": "AWS Identity and Access Management (IAM)"
+      },
+      {
+        "key": "C",
+        "text": "AWS Shield"
+      },
+      {
+        "key": "D",
+        "text": "Amazon GuardDuty"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "AWS IAM enables you to securely control access to AWS services and resources for your users and applications.",
+    "doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "security-compliance",
+    "question": "What is the recommended security best practice regarding the AWS account root user?",
+    "options": [
+      {
+        "key": "A",
+        "text": "Share the root user password with all developers in the team."
+      },
+      {
+        "key": "B",
+        "text": "Use the root user for everyday administrative tasks."
+      },
+      {
+        "key": "C",
+        "text": "Lock away the root user credentials and enable Multi-Factor Authentication (MFA)."
+      },
+      {
+        "key": "D",
+        "text": "Disable MFA on the root user to avoid lockout."
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "AWS strongly recommends securing root user credentials, enabling Multi-Factor Authentication (MFA), and using IAM users or roles for daily tasks.",
+    "doc_link": "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html#lock-away-credentials"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which of the following describes an AWS Availability Zone (AZ)?",
+    "options": [
+      {
+        "key": "A",
+        "text": "A single physical hard drive inside an EC2 server rack."
+      },
+      {
+        "key": "B",
+        "text": "A collection of AWS geographic Regions connected across different continents."
+      },
+      {
+        "key": "C",
+        "text": "One or more discrete physical data centers with redundant power, networking, and connectivity within an AWS Region."
+      },
+      {
+        "key": "D",
+        "text": "A content delivery caching server located near end users."
+      }
+    ],
+    "correct": [
+      "C"
+    ],
+    "explanation": "An Availability Zone consists of one or more physical data centers isolated from failures in other AZs within the same geographic Region.",
+    "doc_link": "https://aws.amazon.com/about-aws/global-infrastructure/regions_az/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which Amazon EC2 purchasing option offers up to a 90% discount on compute costs and is ideal for fault-tolerant, interruptible batch processing workloads?",
+    "options": [
+      {
+        "key": "A",
+        "text": "On-Demand Instances"
+      },
+      {
+        "key": "B",
+        "text": "Reserved Instances"
+      },
+      {
+        "key": "C",
+        "text": "Dedicated Hosts"
+      },
+      {
+        "key": "D",
+        "text": "Spot Instances"
+      }
+    ],
+    "correct": [
+      "D"
+    ],
+    "explanation": "Amazon EC2 Spot Instances let you take advantage of unused EC2 capacity in the AWS cloud at steep discounts (up to 90%), suitable for stateless, fault-tolerant workloads.",
+    "doc_link": "https://aws.amazon.com/ec2/spot/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "cloud-technology-services",
+    "question": "Which AWS compute service is serverless, allowing you to run backend code in response to events without provisioning or managing any virtual servers?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Lambda"
+      },
+      {
+        "key": "B",
+        "text": "Amazon EC2"
+      },
+      {
+        "key": "C",
+        "text": "AWS Elastic Beanstalk"
+      },
+      {
+        "key": "D",
+        "text": "Amazon Lightsail"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS Lambda runs code on a high-availability compute infrastructure without server management, automatically scaling in response to incoming events.",
+    "doc_link": "https://aws.amazon.com/lambda/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "Which free AWS tool allows you to visualize, understand, and manage your AWS costs and usage over time, including forecasting future spend for the next 12 months?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Cost Explorer"
+      },
+      {
+        "key": "B",
+        "text": "AWS Pricing Calculator"
+      },
+      {
+        "key": "C",
+        "text": "AWS Artifact"
+      },
+      {
+        "key": "D",
+        "text": "AWS Marketplace"
+      }
+    ],
+    "correct": [
+      "A"
+    ],
+    "explanation": "AWS Cost Explorer has an easy-to-use interface that lets you visualize, understand, and manage your AWS costs and usage over time, and forecast future costs.",
+    "doc_link": "https://aws.amazon.com/aws-cost-management/aws-cost-explorer/"
+  },
+  {
+    "exam_track": "clf-c02",
+    "domain": "billing-pricing-support",
+    "question": "Which tool should a solutions architect use to estimate the monthly cost of an AWS architecture before creating or deploying any actual resources?",
+    "options": [
+      {
+        "key": "A",
+        "text": "AWS Cost Explorer"
+      },
+      {
+        "key": "B",
+        "text": "AWS Pricing Calculator"
+      },
+      {
+        "key": "C",
+        "text": "AWS Budgets"
+      },
+      {
+        "key": "D",
+        "text": "AWS CloudTrail"
+      }
+    ],
+    "correct": [
+      "B"
+    ],
+    "explanation": "The AWS Pricing Calculator is a web-based planning tool that allows you to create cost estimates for proposed architectural solutions before building.",
+    "doc_link": "https://calculator.aws/"
+  }
+]

@@ -15,6 +15,134 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once get_template_directory() . '/helpers-colors.php';
 require_once get_template_directory() . '/helpers-fonts.php';
 
+// Load universal event registration system & dashboard
+require_once get_template_directory() . '/feature-event-registration.php';
+require_once get_template_directory() . '/admin-dashboard.php';
+
+// Load AWS Foundational Certification Mock Exam Feature
+require_once get_template_directory() . '/feature-mock-exam.php';
+
+// Load AWS Event & Self-Service Certificate Management System
+require_once get_template_directory() . '/feature-events.php';
+
+// Load Random Swag Picker Wheel Feature
+require_once get_template_directory() . '/feature-swag-wheel.php';
+
+// Load Modular On-Campus Giveaway Engine
+require_once get_template_directory() . '/feature-giveaway.php';
+
+/**
+ * Auto-create Mock Exam & Certificate pages if missing
+ */
+function aws_sbg_auto_create_exam_page() {
+	if ( ! is_admin() ) return;
+	
+	// 1. Exam Portal Page
+	$page_slug = 'exam-portal';
+	$page_check = get_page_by_path( $page_slug );
+	if ( ! isset( $page_check->ID ) ) {
+		$page_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'AWS Exam Portal',
+			'post_content' => '<!-- AWS Exam Portal -->',
+			'post_status'  => 'publish',
+			'post_name'    => $page_slug,
+		) );
+		if ( $page_id && ! is_wp_error( $page_id ) ) {
+			update_post_meta( $page_id, '_wp_page_template', 'page-exam-portal.php' );
+		}
+	}
+
+	// 2. Self-Service Event Certificate Generator Page
+	$cert_slug = 'claim-certificate';
+	$cert_check = get_page_by_path( $cert_slug );
+	if ( ! isset( $cert_check->ID ) ) {
+		$cert_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'Claim Event Certificate',
+			'post_content' => '<!-- Claim Event Certificate -->',
+			'post_status'  => 'publish',
+			'post_name'    => $cert_slug,
+		) );
+		if ( $cert_id && ! is_wp_error( $cert_id ) ) {
+			update_post_meta( $cert_id, '_wp_page_template', 'page-certificate-generator.php' );
+		}
+	}
+
+	// 3. Dedicated Events Portal Page
+	$events_slug = 'events';
+	$events_check = get_page_by_path( $events_slug );
+	if ( ! isset( $events_check->ID ) ) {
+		$events_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'Activities & Events',
+			'post_content' => '<!-- AWS Activities & Events Portal -->',
+			'post_status'  => 'publish',
+			'post_name'    => $events_slug,
+		) );
+		if ( $events_id && ! is_wp_error( $events_id ) ) {
+			update_post_meta( $events_id, '_wp_page_template', 'page-events.php' );
+		}
+	}
+
+	// 4. Dedicated Community Hub & Student Rewards Page (/community/)
+	$community_slug = 'community';
+	$community_check = get_page_by_path( $community_slug );
+	if ( ! isset( $community_check->ID ) ) {
+		$comm_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'Community',
+			'post_content' => '<!-- AWS Student Community Hub & Rewards -->',
+			'post_status'  => 'publish',
+			'post_name'    => $community_slug,
+		) );
+		if ( $comm_id && ! is_wp_error( $comm_id ) ) {
+			update_post_meta( $comm_id, '_wp_page_template', 'page-community.php' );
+		}
+	}
+	// 5. Dedicated On-Campus Giveaway Page (/giveaway/)
+	$giveaway_slug = 'giveaway';
+	$giveaway_check = get_page_by_path( $giveaway_slug );
+	if ( ! isset( $giveaway_check->ID ) ) {
+		$giveaway_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'Campus Giveaway',
+			'post_content' => '<!-- AWS SBG Campus Giveaway -->',
+			'post_status'  => 'publish',
+			'post_name'    => $giveaway_slug,
+		) );
+		if ( $giveaway_id && ! is_wp_error( $giveaway_id ) ) {
+			update_post_meta( $giveaway_id, '_wp_page_template', 'page-giveaway.php' );
+		}
+	}
+
+	flush_rewrite_rules();
+}
+add_action( 'admin_init', 'aws_sbg_auto_create_exam_page' );
+
+/**
+ * Clean alias redirects for /campus, /students, /rewards, and /perks -> /community/
+ */
+function aws_sbg_community_slug_aliases() {
+	if ( is_admin() ) return;
+	
+	$request_uri = trim( parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ), '/' );
+	$aliases = array( 'campus', 'students', 'rewards', 'perks' );
+	$giveaway_aliases = array( 'win', 'swag' );
+	if ( in_array( strtolower( $request_uri ), $giveaway_aliases, true ) ) {
+		wp_safe_redirect( home_url( '/giveaway/' ), 301 );
+		exit;
+	}
+	
+	if ( in_array( strtolower( $request_uri ), $aliases, true ) ) {
+		wp_safe_redirect( home_url( '/community/' ), 301 );
+		exit;
+	}
+}
+add_action( 'template_redirect', 'aws_sbg_community_slug_aliases' );
+
+
+
 /**
  * ============================================================================
  * 1. THEME SETUP & SUPPORT
@@ -50,24 +178,22 @@ function aws_sbg_enqueue_scripts() {
 		'all'
 	);
 
-	// Enqueue Tailwind CSS v4 via CDN with fallback
+	// Enqueue Tailwind CSS v3 via CDN
 	wp_enqueue_script(
 		'tailwind-css-script',
-		'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.0.0',
+		'https://cdn.tailwindcss.com?plugins=typography',
 		array(),
-		'4.0.0',
+		'3.4.16',
 		false
 	);
 
-	// Alpine.js (must load before Tailwind config script)
+	// Alpine.js
 	wp_enqueue_script(
 		'alpinejs',
 		'https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js',
 		array(),
 		'3.14.1',
-		array(
-			'strategy' => 'defer',
-		)
+		false // Load in head, defer added via filter below
 	);
 
 	// Initialize Tailwind with theme configuration
@@ -100,30 +226,45 @@ function aws_sbg_get_tailwind_config() {
 		}
 	}
 
+	// Add charcoal and brand color palette
+	$colors_js['brand'] = '#9353ff';
+	$colors_js['charcoal'] = array(
+		'50'  => '#f8fafc',
+		'100' => '#f1f5f9',
+		'200' => '#e2e8f0',
+		'300' => '#cbd5e1',
+		'400' => '#94a3b8',
+		'500' => '#64748b',
+		'600' => '#475569',
+		'700' => '#334155',
+		'800' => '#1e293b',
+		'900' => '#0f172a',
+		'950' => '#020617',
+	);
+
 	// Build colors JSON
 	$colors_json = json_encode( $colors_js, JSON_FORCE_OBJECT );
 	
 	// Return Tailwind configuration script
 	return "
-		if (typeof tailwind !== 'undefined') {
-			tailwind.config = {
-				theme: {
-					extend: {
-						colors: {$colors_json},
-						boxShadow: {
-							'glow': '0 0 20px rgba(173, 92, 255, 0.4)',
-							'glow-soft': '0 0 15px rgba(173, 92, 255, 0.2)',
-							'glow-success': '0 0 20px rgba(0, 239, 136, 0.3)',
-							'card-subtle': '0 4px 15px rgba(0, 0, 0, 0.3)'
-						},
-						fontFamily: {
-							'sans': ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-							'mono': ['Fira Code', 'Courier New', 'monospace']
-						}
+		window.tailwind = window.tailwind || {};
+		window.tailwind.config = {
+			theme: {
+				extend: {
+					colors: {$colors_json},
+					boxShadow: {
+						'glow': '0 0 20px rgba(173, 92, 255, 0.4)',
+						'glow-soft': '0 0 15px rgba(173, 92, 255, 0.2)',
+						'glow-success': '0 0 20px rgba(0, 239, 136, 0.3)',
+						'card-subtle': '0 4px 15px rgba(0, 0, 0, 0.3)'
+					},
+					fontFamily: {
+						'sans': ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+						'mono': ['Fira Code', 'Courier New', 'monospace']
 					}
 				}
-			};
-		}
+			}
+		};
 	";
 }
 
@@ -150,8 +291,8 @@ function aws_sbg_get_custom_styles() {
 		}
 		
 		/* Smooth transitions */
-		* {
-			transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+		a, button, .btn-launch, .btn-orange, .btn-ghost, .reward-card, .channel-card, .faq-item {
+			transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 		}
 		
 		/* Link styling */
@@ -206,34 +347,40 @@ function aws_sbg_get_custom_styles() {
 
 function aws_sbg_register_post_types() {
 	// Register RSVP Post Type
-	if ( function_exists( 'acf_register_post_type' ) ) {
-		acf_register_post_type( array(
-			'post_type' => 'rsvp',
-			'description' => 'Event Registration Submissions',
-			'public' => false,
-			'show_in_ui' => true,
-			'show_in_rest' => false,
-			'supports' => array( 'title' ),
-			'menu_position' => 20,
-			'menu_icon' => 'dashicons-clipboard',
-			'has_archive' => false,
-			'can_export' => true,
-		) );
+	register_post_type( 'rsvp', array(
+		'labels' => array(
+			'name' => 'RSVPs',
+			'singular_name' => 'RSVP',
+		),
+		'description' => 'Event Registration Submissions',
+		'public' => false,
+		'show_ui' => true,
+		'show_in_menu' => 'aws-sbg-suite',
+		'show_in_rest' => false,
+		'supports' => array( 'title', 'custom-fields' ),
+		'menu_position' => 20,
+		'menu_icon' => 'dashicons-clipboard',
+		'has_archive' => false,
+		'can_export' => true,
+	) );
 
-		// Register Contact Submission Post Type
-		acf_register_post_type( array(
-			'post_type' => 'contact_submission',
-			'description' => 'Contact Form Submissions',
-			'public' => false,
-			'show_in_ui' => true,
-			'show_in_rest' => false,
-			'supports' => array( 'title' ),
-			'menu_position' => 21,
-			'menu_icon' => 'dashicons-email',
-			'has_archive' => false,
-			'can_export' => true,
-		) );
-	}
+	// Register Contact Submission Post Type
+	register_post_type( 'contact_submission', array(
+		'labels' => array(
+			'name' => 'Contacts',
+			'singular_name' => 'Contact',
+		),
+		'description' => 'Contact Form Submissions',
+		'public' => false,
+		'show_ui' => true,
+		'show_in_menu' => 'aws-sbg-suite',
+		'show_in_rest' => false,
+		'supports' => array( 'title', 'custom-fields' ),
+		'menu_position' => 21,
+		'menu_icon' => 'dashicons-email',
+		'has_archive' => false,
+		'can_export' => true,
+	) );
 }
 add_action( 'init', 'aws_sbg_register_post_types' );
 
@@ -541,3 +688,14 @@ function aws_sbg_debug_info() {
 function aws_sbg_is_mobile_menu_open() {
 	return false;
 }
+
+/**
+ * Add defer attribute to Alpine.js
+ */
+add_filter( 'script_loader_tag', function ( $tag, $handle ) {
+    if ( 'alpinejs' !== $handle ) {
+        return $tag;
+    }
+    return str_replace( ' src', ' defer src', $tag );
+}, 10, 2 );
+

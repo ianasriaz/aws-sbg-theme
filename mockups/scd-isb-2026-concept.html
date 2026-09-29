@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS Student Community Day Islamabad 2026 - Creative Suite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --brand-purple: #B15CFC;
+      --brand-purple-deep: #8f2fd4;
+      --brand-purple-mid: #c780ff;
+      --brand-purple-light: #eecfff;
+      --bg-dark-content: #0e131b;
+      --bg-dark-art: #090d14;
+      --grid-line: rgba(255, 255, 255, 0.16);
+      --border-subtle: rgba(255, 255, 255, 0.16);
+      --text-white: #ffffff;
+      --text-grey-refined: #a1b0c4;
+      --text-grey-muted: #8090a7;
+
+      /* STRICT PALETTE TOKENS: WHITE, PURPLE, AWS ORANGE */
+      --color-white: #ffffff;
+      --color-purple: #7c3aed;
+      --color-purple-deep: #2e0854;
+      --color-orange: #ff9900;
+      --color-orange-glow: #ea580c;
+
+      --grad-luminous-violet: linear-gradient(135deg, #d8b4fe 0%, #a855f7 50%, #6366f1 100%);
+      --grad-cyber-orchid: linear-gradient(135deg, #e879f9 0%, #a855f7 45%, #3b82f6 100%);
+      --grad-electric-dusk: linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #6366f1 100%);
+      --grad-user-orange: 
+        radial-gradient(circle at 100% 0%, #ffffff 0%, rgba(255, 240, 253, 0.85) 18%, transparent 58%),
+        radial-gradient(circle at 0% 100%, #ff9900 0%, rgba(255, 125, 0, 0.75) 28%, transparent 65%),
+        linear-gradient(135deg, #d86bff 0%, #9933ff 100%);
+      --grad-amber-violet: linear-gradient(135deg, #ffffff 0%, #fff0dc 6%, #ff9900 28%, #d946ef 58%, #7c3aed 82%, #2e0854 100%);
+      --grad-prism-sunset: linear-gradient(150deg, #ffffff 0%, #ffd199 10%, #ff9900 36%, #a855f7 70%, #3b0764 100%);
+      --grad-pure-violet: linear-gradient(145deg, #ffffff 0%, #f3e8ff 10%, #c084fc 30%, #7c3aed 70%, #2e0854 100%);
+      --grad-aws-ember: linear-gradient(145deg, #ffffff 0%, #fff7ed 8%, #ffaa22 28%, #ff9900 60%, #9a3412 100%);
+
+      /* ACTIVE ART GRADIENT (Fresh Reference Default) */
+      --saved-gradient: var(--grad-luminous-violet);
+      --box-glow: none;
+      --box-border: none;
+      --footer-bg: #eaeff5;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #040609;
+      color: var(--text-white);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px 60px 20px;
+    }
+
+    /* Controls Bar */
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 660px;
+      margin-bottom: 20px;
+      padding: 12px 20px;
+      background: rgba(16, 22, 32, 0.9);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      backdrop-filter: blur(12px);
+    }
+
+    .view-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-grey-refined);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 7px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: rgba(177, 92, 252, 0.15);
+      border-color: var(--brand-purple);
+      color: #fff;
+    }
+
+    .export-btn {
+      background: var(--brand-purple);
+      color: #ffffff;
+      border: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 9px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .export-btn:hover {
+      background: #9d3beb;
+      transform: translateY(-1px);
+    }
+
+    /* Vibrant Palette Switcher */
+    .palette-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 660px;
+      margin-bottom: 24px;
+      padding: 10px 16px;
+      background: rgba(16, 22, 32, 0.75);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      overflow-x: auto;
+    }
+
+    .palette-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-grey-refined);
+      letter-spacing: 0.8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .palette-options {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .palette-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-grey-refined);
+      font-family: 'Inter', sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .palette-pill:hover {
+      background: rgba(255, 255, 255, 0.09);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: #fff;
+    }
+
+    .palette-pill.active {
+      background: rgba(255, 153, 0, 0.12);
+      border-color: #ff9900;
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 0 12px rgba(255, 153, 0, 0.2);
+    }
+
+    .swatch-circle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* SHARED OFFICIAL SBG FOOTER */
+    .shared-sbg-footer {
+      width: 100%;
+      height: 60px;
+      min-height: 60px;
+      display: grid;
+      grid-template-columns: 18% 82%;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      z-index: 3;
+    }
+
+    .sbg-icon-box {
+      background-color: #0b0e14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sbg-chip-img {
+      height: 26px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .sbg-text-bar {
+      background-color: var(--footer-bg, #eaeff5);
+      color: #0b0e14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+    }
+
+    /* ========================================================
+       CREATIVE 1: MASTER SQUARE COVER (1:1 Ratio)
+       ======================================================== */
+    .master-cover-wrap {
+      width: 100%;
+      max-width: 600px;
+      aspect-ratio: 1 / 1;
+      background-color: var(--bg-dark-content);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.95);
+    }
+
+    .upper-split-body {
+      width: 100%;
+      height: 540px;
+      display: grid;
+      grid-template-columns: 52% 48%;
+      position: relative;
+    }
+
+    .left-content-area {
+      background-color: var(--bg-dark-content);
+      padding: 40px 14px 26px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      border-right: 1px solid var(--border-subtle);
+      position: relative;
+      z-index: 2;
+    }
+
+    .aws-logo-pure-white {
+      height: 32px;
+      width: auto;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
+
+    .main-headline-group {
+      margin: auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .headline-line {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 29px;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.6px;
+      white-space: nowrap;
+      display: block;
+      color: #ffffff;
+    }
+
+    .city-year-line {
+      display: flex;
+      align-items: baseline;
+      gap: 9px;
+    }
+
+    .gradient-year {
+      background: var(--saved-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+      display: inline-block;
+    }
+
+    .main-meta-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      white-space: nowrap;
+      flex-wrap: nowrap;
+    }
+
+    .main-meta-footer-row .meta-icon {
+      width: 12px;
+      height: 12px;
+      stroke: var(--text-grey-muted);
+      flex-shrink: 0;
+    }
+
+    .main-meta-footer-row .meta-date-item,
+    .main-meta-footer-row .meta-venue-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-grey-refined);
+      font-weight: 500;
+      letter-spacing: -0.1px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .right-art-area {
+      background-color: var(--bg-dark-art);
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .art-square-grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(5, 20%);
+      grid-template-rows: repeat(9, 11.111%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .art-grid-square {
+      border-right: 1px solid var(--grid-line);
+      border-bottom: 1px solid var(--grid-line);
+    }
+
+    /* ========================================================
+       FAISAL MOSQUE WHITE ICON & ACCENT BLOCKS
+       ======================================================== */
+    .block-satellite-tr,
+    .block-top-edge,
+    .speaker-block-top-edge {
+      background: var(--saved-gradient);
+      border: none !important;
+      box-shadow: none !important;
+      position: absolute;
+      z-index: 2;
+    }
+
+    .block-satellite-tr {
+      left: 60%;
+      top: 22.222%;
+      width: 20%;
+      height: 11.111%;
+    }
+
+    .block-top-edge {
+      right: 0%;
+      top: 0%;
+      width: 20%;
+      height: 11.111%;
+    }
+
+    .faisal-mosque-box {
+      position: absolute;
+      left: 20%;
+      top: 33.333%;
+      width: 40%;
+      height: 22.222%;
+      background-color: var(--bg-dark-art);
+      border: 1px solid var(--grid-line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      z-index: 2;
+    }
+
+    .faisal-mosque-svg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+    }
+
+    /* ========================================================
+       CREATIVE 2: SPEAKER CREATIVE (EXACT SAME FILLED BOX PATTERN)
+       Vertical 4:5 (600px x 750px scale)
+       - Top Bar: AWS Logo Box on Left // Exact Same Block Pattern on Right
+       - Middle: Spacious Speaker Details
+       - Bottom: Exact Same Footer
+       ======================================================== */
+    .speaker-creative-wrap {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+      aspect-ratio: 4 / 5;
+      background-color: var(--bg-dark-content);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      flex-direction: column;
+      box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.95);
+    }
+
+    /* 1. TOP ART BAR (180px Height) */
+    .speaker-top-compact-bar {
+      width: 100%;
+      height: 180px;
+      background-color: var(--bg-dark-art);
+      border-bottom: 1px solid var(--border-subtle);
+      position: relative;
+      display: grid;
+      grid-template-columns: 20% 80%;
+      overflow: hidden;
+    }
+
+    /* Dedicated Top-Left Corner Box for AWS Logo */
+    .top-aws-box {
+      background-color: #0b0e14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid var(--border-subtle);
+      position: relative;
+      z-index: 3;
+    }
+
+    .top-aws-box .aws-logo-pure-white {
+      height: 32px;
+      width: auto;
+      filter: brightness(0) invert(1);
+    }
+
+    /* Right Art Canvas: 480px wide x 180px tall
+       Grid is 16 columns x 6 rows -> Every cell is exactly 30px x 30px mathematical Square! */
+    .top-art-canvas {
+      background-color: var(--bg-dark-art);
+      position: relative;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .top-bar-grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(8, 12.5%);
+      grid-template-rows: repeat(3, 33.333%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .top-grid-cell {
+      border-right: 1px solid var(--grid-line);
+      border-bottom: 1px solid var(--grid-line);
+    }
+
+    /* 
+      SPEAKER BANNER: TWO FILLED BOXES
+      1. Main Big 2x2 Box: Rows 2-3, Cols 2-3 (120px x 120px)
+      2. Top Right Corner Box: Row 1, Col 8 (60px x 60px)
+    */
+    .speaker-faisal-mosque-box {
+      position: absolute;
+      right: 12.5%;
+      top: 33.333%;
+      width: 25%;
+      height: 66.666%;
+      background-color: var(--bg-dark-art);
+      border: 1px solid var(--grid-line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      z-index: 2;
+    }
+
+    .speaker-block-top-edge {
+      position: absolute;
+      right: 0%;
+      /* Top right corner (Col 8) as it is */
+      top: 0%;
+      /* Row 1 */
+      width: 12.5%;
+      /* 1 cell = 60px */
+      height: 33.333%;
+      /* 1 cell = 60px */
+      background: var(--saved-gradient);
+      z-index: 2;
+    }
+
+    /* 2. MAIN SPEAKER CONTENT ZONE (Spacious, Clean, High-Contrast) */
+    .speaker-main-zone {
+      flex: 1;
+      background-color: var(--bg-dark-content);
+      padding: 38px 42px 28px 42px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      z-index: 2;
+    }
+
+    .speaker-category-kicker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      white-space: nowrap;
+    }
+
+    .announcement-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-grey-refined);
+      flex-shrink: 0;
+    }
+
+    .announcement-icon {
+      width: 13px;
+      height: 13px;
+      stroke: var(--text-grey-muted);
+      flex-shrink: 0;
+    }
+
+    .kicker-event-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      text-align: right;
+      line-height: 1;
+      background: var(--saved-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .speaker-core-grid {
+      display: grid;
+      grid-template-columns: 155px 1fr;
+      gap: 30px;
+      align-items: center;
+      margin: auto 0;
+    }
+
+    .speaker-image-frame {
+      width: 155px;
+      height: 155px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background-color: #121824;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .speaker-real-photo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+    }
+
+    .speaker-fallback-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--text-grey-refined);
+      gap: 8px;
+    }
+
+    .speaker-fallback-placeholder svg {
+      width: 32px;
+      height: 32px;
+      stroke: var(--text-grey-muted);
+    }
+
+    .speaker-info-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .speaker-name-display {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(26px, 4.4vw, 32px);
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.12;
+      letter-spacing: -0.6px;
+    }
+
+    .speaker-role-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-grey-refined);
+      letter-spacing: 0.3px;
+    }
+
+    .speaker-talk-card {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .talk-card-kicker {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: var(--text-grey-refined);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .keynote-icon {
+      width: 12px;
+      height: 12px;
+      stroke: var(--text-grey-refined);
+      flex-shrink: 0;
+    }
+
+    .talk-card-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 14.5px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.38;
+      letter-spacing: -0.2px;
+    }
+
+    /* Option B: Unified Event & Schedule Block (Single Top Divider, Zero Middle Divider) */
+    .speaker-bottom-stack {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .partner-bottom-stack {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .bottom-aligned-cluster {
+      width: fit-content;
+      max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .banner-event-strip {
+      width: 100%;
+      padding-top: 0;
+      border-top: none;
+      line-height: 1.1;
+    }
+
+    .banner-event-strip .event-strip-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      text-transform: uppercase;
+      display: block;
+      white-space: nowrap;
+      text-align: center;
+      letter-spacing: 0.2px;
+      line-height: 1.15;
+      background: var(--saved-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .partner-event-strip .event-strip-title {
+      font-size: 15px;
+      letter-spacing: 0.2px;
+      text-align: center;
+      background: var(--saved-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .speaker-meta-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 9.5px;
+      padding-top: 0;
+      border-top: none;
+      white-space: nowrap;
+      flex-wrap: nowrap;
+    }
+
+    .meta-website-item,
+    .meta-date-item,
+    .meta-venue-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-grey-refined);
+      font-weight: 500;
+      letter-spacing: -0.1px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .meta-icon {
+      width: 11.5px;
+      height: 11.5px;
+      stroke: var(--text-grey-muted);
+      flex-shrink: 0;
+    }
+
+    /* ========================================================
+       CREATIVE 3: COMMUNITY PARTNER (ARCHITECTURAL SPINE 4:5)
+       - Top Bar: AWS Logo Box + Compute Grid (180px)
+       - Middle: Left 20% Art Spine + Right 80% Clean Partner Showcase
+       - Bottom: Aligned SBG Footer
+       ======================================================== */
+    .partner-creative-wrap {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+      aspect-ratio: 4 / 5;
+      background-color: var(--bg-dark-content);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      flex-direction: column;
+      box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.95);
+    }
+
+    .partner-middle-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 20% 80%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .partner-left-spine {
+      background-color: var(--bg-dark-art);
+      border-right: 1px solid var(--border-subtle);
+      position: relative;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .spine-grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(2, 50%);
+      grid-template-rows: repeat(8, 60px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .spine-grid-cell {
+      border-right: 1px solid var(--grid-line);
+      border-bottom: 1px solid var(--grid-line);
+    }
+
+    .partner-content-area {
+      background-color: var(--bg-dark-content);
+      padding: 34px 38px 24px 38px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .partner-top-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      width: 100%;
+      white-space: nowrap;
+    }
+
+    .partner-hero-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin: auto 0;
+      gap: 16px;
+    }
+
+    .partner-logo-frame {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 10px 0;
+      width: auto;
+      height: auto;
+      position: relative;
+    }
+
+    .partner-real-logo {
+      max-width: 230px;
+      max-height: 80px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.45));
+    }
+
+    .partner-logo-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      color: var(--text-grey-refined);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    .partner-emblem-icon {
+      width: 72px;
+      height: 72px;
+      stroke: var(--brand-purple);
+      filter: drop-shadow(0 6px 20px rgba(177, 92, 252, 0.2));
+    }
+
+    .partner-titles {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .partner-name-display {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.2;
+      letter-spacing: -0.4px;
+    }
+
+    .partner-chapter-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-grey-refined);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .partner-meta-footer-row {
+      padding-top: 0;
+      border-top: none;
+    }
+
+    .speaker-creative-wrap .shared-sbg-footer,
+    .partner-creative-wrap .shared-sbg-footer {
+      grid-template-columns: 20% 80%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Controls Bar -->
+  <div class="controls-bar">
+    <div class="view-tabs">
+      <button class="tab-btn" onclick="switchView('main', this)">01 // Main Event (1:1)</button>
+      <button class="tab-btn" onclick="switchView('speaker', this)">02 // Speaker (4:5)</button>
+      <button class="tab-btn active" onclick="switchView('partner', this)">03 // Community Partner (4:5)</button>
+    </div>
+    <button class="export-btn" onclick="downloadActiveCreative()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+      Download High-Res PNG
+    </button>
+  </div>
+
+  <!-- Vibrant Gradient Presets Bar (Using Allowed 5 AWS Colors) -->
+  <div class="palette-bar">
+    <div class="palette-title">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="m4.93 4.93 4.24 4.24"></path>
+        <path d="m14.83 9.17 4.24-4.24"></path>
+        <path d="m14.83 14.83 4.24 4.24"></path>
+        <path d="m9.17 14.83-4.24 4.24"></path>
+      </svg>
+      <span>GRADIENT:</span>
+    </div>
+    <div class="palette-options">
+      <button class="palette-pill active" onclick="setGradient('luminous_violet', this)" title="Fresh Luminous Lilac & Indigo (As in Reference)">
+        <span class="swatch-circle" style="background: linear-gradient(135deg, #d8b4fe, #a855f7, #6366f1);"></span>
+        <span>Luminous Lilac (Ref)</span>
+      </button>
+      <button class="palette-pill" onclick="setGradient('cyber_orchid', this)" title="Cyber Orchid & Blue">
+        <span class="swatch-circle" style="background: linear-gradient(135deg, #e879f9, #a855f7, #3b82f6);"></span>
+        <span>Cyber Orchid</span>
+      </button>
+      <button class="palette-pill" onclick="setGradient('electric_dusk', this)" title="Electric Dusk & Purple">
+        <span class="swatch-circle" style="background: linear-gradient(135deg, #f472b6, #c084fc, #6366f1);"></span>
+        <span>Electric Dusk</span>
+      </button>
+      <button class="palette-pill" onclick="setGradient('user_orange', this)" title="Sunlit Violet with AWS Orange in bottom-left corner">
+        <span class="swatch-circle" style="background: linear-gradient(225deg, #FFF0FD, #CE65FF, #FF9900);"></span>
+        <span>Sunlit Violet-Orange</span>
+      </button>
+      <button class="palette-pill" onclick="setGradient('amber_violet', this)" title="Luminous Amber-Violet">
+        <span class="swatch-circle" style="background: linear-gradient(135deg, #ffffff, #ff9900, #7c3aed, #2e0854);"></span>
+        <span>Amber-Violet</span>
+      </button>
+      <button class="palette-pill" onclick="setGradient('prism_sunset', this)" title="Prism Sunset">
+        <span class="swatch-circle" style="background: linear-gradient(150deg, #ffffff, #ff9900, #a855f7, #3b0764);"></span>
+        <span>Prism Sunset</span>
+      </button>
+      <button class="palette-pill" onclick="setGradient('pure_violet', this)" title="Pure Builder Violet">
+        <span class="swatch-circle" style="background: linear-gradient(145deg, #ffffff, #8b5cf6, #2e0854);"></span>
+        <span>Builder Violet</span>
+      </button>
+      <button class="palette-pill" onclick="setGradient('ember', this)" title="AWS Ember">
+        <span class="swatch-circle" style="background: linear-gradient(145deg, #ffffff, #ff9900, #9a3412);"></span>
+        <span>AWS Ember</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       CREATIVE 1: MASTER SQUARE COVER (1:1 Ratio)
+       ========================================== -->
+  <div class="master-cover-wrap" id="mainBanner">
+    <div class="upper-split-body">
+
+      <!-- Left Content Area -->
+      <div class="left-content-area">
+        <div class="header-mark">
+          <img src="../media/icons/aws.png" alt="AWS Logo" class="aws-logo-pure-white">
+        </div>
+
+        <div class="main-headline-group">
+          <span class="headline-line">AWS STUDENT</span>
+          <span class="headline-line">COMMUNITY DAY</span>
+          <div class="headline-line city-year-line">
+            <span class="gradient-year">ISLAMABAD 2026</span>
+          </div>
+        </div>
+
+        <div class="main-meta-footer-row">
+          <div class="meta-date-item">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>March 2026</span>
+          </div>
+          <div class="meta-venue-item">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>Air University E9 Campus</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Art Area -->
+      <div class="right-art-area">
+        <div class="art-square-grid">
+          <script>
+            for (let i = 0; i < 45; i++) {
+              document.write('<div class="art-grid-square"></div>');
+            }
+          </script>
+        </div>
+
+        <div class="block-top-edge"></div>
+        <div class="faisal-mosque-box">
+          <svg class="faisal-mosque-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#ffffff">
+            <polyline points="41.021,62.694 3.58,95.356 74.866,95.356 "/>
+            <polygon points="38.657,63.599 38.657,46.609 36.136,33.871 33.615,46.609 33.615,67.998 "/>
+            <polygon points="10.93,42.481 7.255,23.914 3.58,42.481 3.58,93.942 10.93,87.531 "/>
+            <polyline points="85.209,76.552 75.666,90.994 75.666,95.121 95.267,95.121 "/>
+            <polygon points="95.267,41.143 92.745,28.405 90.225,41.143 90.225,83.833 95.267,93.141 "/>
+            <polygon points="71.008,17.278 66.963,37.721 66.963,86.565 75.054,94.375 75.054,94.375 75.054,37.721 "/>
+            <polygon points="75.872,67.818 75.872,88.618 84.683,75.34 "/>
+            <path d="M59.274,55.667c1.865-0.685,3.199-2.472,3.199-4.575c0-0.963-0.28-1.862-0.763-2.618c0.094,0.326,0.147,0.669,0.147,1.027  c0,2.042-1.655,3.695-3.695,3.695c-2.041,0-3.696-1.653-3.696-3.695c0-1.258,0.629-2.368,1.591-3.035  c-1.938,0.645-3.336,2.472-3.336,4.626c0,1.773,0.948,3.319,2.362,4.173l-13.206,6.657l23.941,22.985V61.161L59.274,55.667z"/>
+          </svg>
+        </div>
+        <div class="block-satellite-tr"></div>
+      </div>
+
+    </div>
+
+    <!-- Shared Official Footer -->
+    <footer class="shared-sbg-footer">
+      <div class="sbg-icon-box">
+        <img src="../media/icons/SBG-Logo-White-Transparent.png" alt="SBG Chip" class="sbg-chip-img">
+      </div>
+      <div class="sbg-text-bar">
+        AWS STUDENT BUILDER GROUP at AIR UNIVERSITY ISLAMABAD
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==========================================
+       CREATIVE 2: SPEAKER CREATIVE (EXACT SAME BLOCK PATTERN)
+       ========================================== -->
+  <div class="speaker-creative-wrap" id="speakerBanner" style="display: none;">
+
+    <!-- 1. Compact Top Art Bar (Exact Same Blocks Pattern as Main Banner) -->
+    <div class="speaker-top-compact-bar">
+
+      <!-- Dedicated Top-Left Corner Box for Pure White AWS Logo -->
+      <div class="top-aws-box">
+        <img src="../media/icons/aws.png" alt="AWS Logo" class="aws-logo-pure-white">
+      </div>
+
+      <!-- Right Art Canvas (Exact Same 4-Block Constellation) -->
+      <div class="top-art-canvas">
+        <div class="top-bar-grid">
+          <script>
+            for (let i = 0; i < 24; i++) {
+              document.write('<div class="top-grid-cell"></div>');
+            }
+          </script>
+        </div>
+
+        <div class="speaker-block-top-edge"></div>
+        <div class="speaker-faisal-mosque-box">
+          <svg class="faisal-mosque-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#ffffff">
+            <polyline points="41.021,62.694 3.58,95.356 74.866,95.356 "/>
+            <polygon points="38.657,63.599 38.657,46.609 36.136,33.871 33.615,46.609 33.615,67.998 "/>
+            <polygon points="10.93,42.481 7.255,23.914 3.58,42.481 3.58,93.942 10.93,87.531 "/>
+            <polyline points="85.209,76.552 75.666,90.994 75.666,95.121 95.267,95.121 "/>
+            <polygon points="95.267,41.143 92.745,28.405 90.225,41.143 90.225,83.833 95.267,93.141 "/>
+            <polygon points="71.008,17.278 66.963,37.721 66.963,86.565 75.054,94.375 75.054,94.375 75.054,37.721 "/>
+            <polygon points="75.872,67.818 75.872,88.618 84.683,75.34 "/>
+            <path d="M59.274,55.667c1.865-0.685,3.199-2.472,3.199-4.575c0-0.963-0.28-1.862-0.763-2.618c0.094,0.326,0.147,0.669,0.147,1.027  c0,2.042-1.655,3.695-3.695,3.695c-2.041,0-3.696-1.653-3.696-3.695c0-1.258,0.629-2.368,1.591-3.035  c-1.938,0.645-3.336,2.472-3.336,4.626c0,1.773,0.948,3.319,2.362,4.173l-13.206,6.657l23.941,22.985V61.161L59.274,55.667z"/>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 2. Main Speaker Content Zone -->
+    <div class="speaker-main-zone">
+
+      <div class="speaker-category-kicker">
+        <div class="announcement-badge">
+          <svg class="announcement-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 11 18-5v12L3 14v-3z"></path>
+            <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
+          </svg>
+          <span>SPEAKER ANNOUNCEMENT</span>
+        </div>
+        <span class="gradient-year kicker-event-title">AWS STUDENT COMMUNITY DAY ISLAMABAD 2026</span>
+      </div>
+
+      <div class="speaker-core-grid">
+        <div class="speaker-image-frame">
+          <img src="https://awsairuniversity.com/wp-content/uploads/2026/07/Awais-Kamran.webp" alt="Awais Kamran" class="speaker-real-photo">
+        </div>
+
+        <div class="speaker-info-panel">
+          <h2 class="speaker-name-display">Awais Kamran</h2>
+          <div class="speaker-role-display">Cloud Infra. Architect @ AWS</div>
+
+          <div class="speaker-talk-card">
+            <div class="talk-card-kicker">
+              <svg class="keynote-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+              <span>SESSION TOPIC</span>
+            </div>
+            <div class="talk-card-title">"Architecting Autonomous Multi-Agent Workflows on AWS Bedrock"</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="speaker-bottom-stack">
+        <div class="speaker-meta-footer-row">
+          <div class="meta-website-item">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span>website.com/scd</span>
+          </div>
+          <div class="meta-date-item">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>March 2026</span>
+          </div>
+          <div class="meta-venue-item">
+            <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>Air University E9 Campus</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 3. Exact Same Shared Footer -->
+    <footer class="shared-sbg-footer">
+      <div class="sbg-icon-box">
+        <img src="../media/icons/SBG-Logo-White-Transparent.png" alt="SBG Chip" class="sbg-chip-img">
+      </div>
+      <div class="sbg-text-bar">
+        AWS STUDENT BUILDER GROUP at AIR UNIVERSITY ISLAMABAD
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ==========================================
+       CREATIVE 3: COMMUNITY PARTNER CREATIVE (4:5)
+       ========================================== -->
+  <div class="partner-creative-wrap" id="partnerBanner" style="display: flex;">
+
+    <!-- 1. Top Art Bar (Exact Same As Speaker Banner) -->
+    <div class="speaker-top-compact-bar">
+      <!-- Dedicated Top-Left Corner Box for Pure White AWS Logo -->
+      <div class="top-aws-box">
+        <img src="../media/icons/aws.png" alt="AWS Logo" class="aws-logo-pure-white">
+      </div>
+
+      <!-- Right Art Canvas (8 cols x 3 rows grid of 60px) -->
+      <div class="top-art-canvas">
+        <div class="top-bar-grid">
+          <script>
+            for (let i = 0; i < 24; i++) {
+              document.write('<div class="top-grid-cell"></div>');
+            }
+          </script>
+        </div>
+
+        <div class="speaker-block-top-edge"></div>
+        <div class="speaker-faisal-mosque-box">
+          <svg class="faisal-mosque-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#ffffff">
+            <polyline points="41.021,62.694 3.58,95.356 74.866,95.356 "/>
+            <polygon points="38.657,63.599 38.657,46.609 36.136,33.871 33.615,46.609 33.615,67.998 "/>
+            <polygon points="10.93,42.481 7.255,23.914 3.58,42.481 3.58,93.942 10.93,87.531 "/>
+            <polyline points="85.209,76.552 75.666,90.994 75.666,95.121 95.267,95.121 "/>
+            <polygon points="95.267,41.143 92.745,28.405 90.225,41.143 90.225,83.833 95.267,93.141 "/>
+            <polygon points="71.008,17.278 66.963,37.721 66.963,86.565 75.054,94.375 75.054,94.375 75.054,37.721 "/>
+            <polygon points="75.872,67.818 75.872,88.618 84.683,75.34 "/>
+            <path d="M59.274,55.667c1.865-0.685,3.199-2.472,3.199-4.575c0-0.963-0.28-1.862-0.763-2.618c0.094,0.326,0.147,0.669,0.147,1.027  c0,2.042-1.655,3.695-3.695,3.695c-2.041,0-3.696-1.653-3.696-3.695c0-1.258,0.629-2.368,1.591-3.035  c-1.938,0.645-3.336,2.472-3.336,4.626c0,1.773,0.948,3.319,2.362,4.173l-13.206,6.657l23.941,22.985V61.161L59.274,55.667z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Middle Body: Left Art Spine + Right Content Area -->
+    <div class="partner-middle-body">
+
+      <!-- Left Art Spine (Aligned with SBG logo box) -->
+      <div class="partner-left-spine">
+        <div class="spine-grid">
+          <script>
+            for (let i = 0; i < 16; i++) {
+              document.write('<div class="spine-grid-cell"></div>');
+            }
+          </script>
+        </div>
+      </div>
+
+      <!-- Right Clean Content Area -->
+      <div class="partner-content-area">
+
+        <!-- Top Header: Community Partner Badge -->
+        <div class="partner-top-header">
+          <div class="announcement-badge">
+            <svg class="announcement-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span>COMMUNITY PARTNER</span>
+          </div>
+        </div>
+
+        <!-- Center Hero: Partner Logo & Community Name -->
+        <div class="partner-hero-center">
+          <div class="partner-logo-frame">
+            <img src="https://awsairuniversity.com/wp-content/uploads/2026/09/blob_AZox4g8.webp" alt="Change Mechanics" class="partner-real-logo">
+          </div>
+
+          <div class="partner-titles">
+            <h2 class="partner-name-display">Change Mechanics</h2>
+            <div class="partner-chapter-display">ISLAMABAD</div>
+          </div>
+        </div>
+
+        <!-- Bottom Stack: Event Title Strip Above Date & Venue -->
+        <div class="partner-bottom-stack">
+          <div class="bottom-aligned-cluster">
+            <div class="banner-event-strip partner-event-strip">
+              <span class="gradient-year event-strip-title">AWS STUDENT COMMUNITY DAY ISLAMABAD 2026</span>
+            </div>
+
+            <div class="speaker-meta-footer-row partner-meta-footer-row">
+              <div class="meta-website-item">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <span>website.com/scd</span>
+              </div>
+              <div class="meta-date-item">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>March 2026</span>
+              </div>
+              <div class="meta-venue-item">
+                <svg class="meta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>Air University E9 Campus</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- 3. Exact Same Aligned Footer -->
+    <footer class="shared-sbg-footer">
+      <div class="sbg-icon-box">
+        <img src="../media/icons/SBG-Logo-White-Transparent.png" alt="SBG Chip" class="sbg-chip-img">
+      </div>
+      <div class="sbg-text-bar">
+        AWS STUDENT BUILDER GROUP at AIR UNIVERSITY ISLAMABAD
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    function switchView(viewName, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      const main = document.getElementById('mainBanner');
+      const speaker = document.getElementById('speakerBanner');
+      const partner = document.getElementById('partnerBanner');
+
+      main.style.display = 'none';
+      speaker.style.display = 'none';
+      partner.style.display = 'none';
+
+      if (viewName === 'main') {
+        main.style.display = 'flex';
+      } else if (viewName === 'speaker') {
+        speaker.style.display = 'flex';
+      } else if (viewName === 'partner') {
+        partner.style.display = 'flex';
+      }
+
+      if (btn) {
+        btn.classList.add('active');
+      } else if (window.event && window.event.target) {
+        window.event.target.classList.add('active');
+      }
+    }
+
+    const GRADIENTS = {
+      luminous_violet: 'linear-gradient(135deg, #d8b4fe 0%, #a855f7 50%, #6366f1 100%)',
+      cyber_orchid: 'linear-gradient(135deg, #e879f9 0%, #a855f7 45%, #3b82f6 100%)',
+      electric_dusk: 'linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #6366f1 100%)',
+      user_orange: 'radial-gradient(circle at 100% 0%, #ffffff 0%, rgba(255, 240, 253, 0.85) 18%, transparent 58%), radial-gradient(circle at 0% 100%, #ff9900 0%, rgba(255, 125, 0, 0.75) 28%, transparent 65%), linear-gradient(135deg, #d86bff 0%, #9933ff 100%)',
+      amber_violet: 'linear-gradient(135deg, #ffffff 0%, #fff0dc 6%, #ff9900 28%, #d946ef 58%, #7c3aed 82%, #2e0854 100%)',
+      prism_sunset: 'linear-gradient(150deg, #ffffff 0%, #ffd199 10%, #ff9900 36%, #a855f7 70%, #3b0764 100%)',
+      pure_violet: 'linear-gradient(145deg, #ffffff 0%, #f3e8ff 10%, #c084fc 30%, #7c3aed 70%, #2e0854 100%)',
+      ember: 'linear-gradient(145deg, #ffffff 0%, #fff7ed 8%, #ffaa22 28%, #ff9900 60%, #9a3412 100%)'
+    };
+
+    function setGradient(name, btn) {
+      document.querySelectorAll('.palette-pill').forEach(p => p.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      const grad = GRADIENTS[name];
+      if (grad) {
+        document.documentElement.style.setProperty('--saved-gradient', grad);
+      }
+    }
+
+    function downloadActiveCreative() {
+      const main = document.getElementById('mainBanner');
+      const speaker = document.getElementById('speakerBanner');
+      const partner = document.getElementById('partnerBanner');
+      let target = main;
+      let filename = 'AWS_SCD_Islamabad_2026_Master_Cover.png';
+
+      if (speaker.style.display !== 'none') {
+        target = speaker;
+        filename = 'AWS_SCD_Islamabad_2026_Speaker_Creative.png';
+      } else if (partner.style.display !== 'none') {
+        target = partner;
+        filename = 'AWS_SCD_Islamabad_2026_Community_Partner.png';
+      }
+
+      html2canvas(target, {
+        scale: 3,
+        backgroundColor: '#0e131b',
+        useCORS: true,
+        logging: false
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png', 1.0);
+        link.click();
+      });
+    }
+  </script>
+</body>
+
+</html>
