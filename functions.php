@@ -108,7 +108,7 @@ function aws_sbg_auto_create_exam_page() {
 			'post_name'    => $page_slug,
 		) );
 		if ( $page_id && ! is_wp_error( $page_id ) ) {
-			update_post_meta( $page_id, '_wp_page_template', 'templates/pages/page-exam-portal.php' );
+			update_post_meta( $page_id, '_wp_page_template', 'page-exam-portal.php' );
 		}
 	}
 
@@ -124,7 +124,7 @@ function aws_sbg_auto_create_exam_page() {
 			'post_name'    => $cert_slug,
 		) );
 		if ( $cert_id && ! is_wp_error( $cert_id ) ) {
-			update_post_meta( $cert_id, '_wp_page_template', 'templates/pages/page-certificate-generator.php' );
+			update_post_meta( $cert_id, '_wp_page_template', 'page-certificate-generator.php' );
 		}
 	}
 
@@ -140,7 +140,7 @@ function aws_sbg_auto_create_exam_page() {
 			'post_name'    => $events_slug,
 		) );
 		if ( $events_id && ! is_wp_error( $events_id ) ) {
-			update_post_meta( $events_id, '_wp_page_template', 'templates/pages/page-events.php' );
+			update_post_meta( $events_id, '_wp_page_template', 'page-events.php' );
 		}
 	}
 
@@ -156,7 +156,7 @@ function aws_sbg_auto_create_exam_page() {
 			'post_name'    => $community_slug,
 		) );
 		if ( $comm_id && ! is_wp_error( $comm_id ) ) {
-			update_post_meta( $comm_id, '_wp_page_template', 'templates/pages/page-community.php' );
+			update_post_meta( $comm_id, '_wp_page_template', 'page-community.php' );
 		}
 	}
 	// 5. Dedicated On-Campus Giveaway Page (/giveaway/)
@@ -171,7 +171,7 @@ function aws_sbg_auto_create_exam_page() {
 			'post_name'    => $giveaway_slug,
 		) );
 		if ( $giveaway_id && ! is_wp_error( $giveaway_id ) ) {
-			update_post_meta( $giveaway_id, '_wp_page_template', 'templates/pages/page-giveaway.php' );
+			update_post_meta( $giveaway_id, '_wp_page_template', 'page-giveaway.php' );
 		}
 	}
 
@@ -203,10 +203,8 @@ function aws_sbg_fix_page_template_paths() {
 		$page = get_page_by_path( $slug );
 		if ( $page ) {
 			$current_template = get_post_meta( $page->ID, '_wp_page_template', true );
-			// If using old template path, update to new path
-			if ( $current_template === $old_template ) {
-				update_post_meta( $page->ID, '_wp_page_template', 'templates/pages/' . $old_template );
-			}
+			// Template path is correct (wrapper in root)
+			// No change needed - wrapper files handle includes
 		}
 	}
 	
