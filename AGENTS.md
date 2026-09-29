@@ -156,6 +156,54 @@ aws-sbg-theme/
 
 ---
 
+### 2026-09-29 13:25 - GitHub Copilot (DeepSeek V3.2)
+
+**Task**: Remove "Ready to Launch Your Cloud Career?" section and ticker from community page
+
+**Files Changed**:
+- `templates/pages/page-community.php` - Removed the "Ready to Launch Your Cloud Career?" CTA section and the scrolling ticker that showed benefits
+
+**Summary**: Cleaned up the community page by removing two sections as requested: the final CTA section titled "Ready to Launch Your Cloud Career?" and the scrolling ticker that displayed benefits like "Skill Builder Premium — Free", "$30 AWS Credits", etc.
+
+**Key Decisions**:
+- Removed both the HTML markup and associated CSS styles for the ticker
+- Removed the entire CTA section including buttons and background effects
+- Kept the rest of the page structure intact
+- Maintained all other functionality like FAQ accordion and reveal animations
+
+**Notes for Future Agents**:
+- Ticker section (scrolling benefits) has been completely removed
+- Final CTA "Ready to Launch Your Cloud Career?" section has been removed
+- No ticker-related CSS remains in the styles
+
+---
+
+### 2026-09-29 13:30 - GitHub Copilot (DeepSeek V3.2)
+
+**Task**: Update footer logo to match header and enhance footer design beyond basic layout
+
+**Files Changed**:
+- `templates/partials/footer.php` - Updated logo to match header (external URL), added background glow effects, enhanced typography, improved contact info styling, added social proof section
+
+**Summary**: Enhanced the footer design to match the header's logo and significantly improved the visual appeal beyond the basic layout. Added modern design elements while maintaining clean minimalism.
+
+**Key Decisions**:
+- Updated logo to use same external URL as header: `https://awsairuniversity.com/wp-content/uploads/2026/09/SBG-Logo-White-Transparent.png`
+- Added background glow effects (purple and orange blurs) for visual depth
+- Enhanced contact info with interactive cards (hover effects, borders, shadows)
+- Added social proof/trust badge section with colored indicators
+- Improved typography hierarchy with better font sizes and weights
+- Maintained clean, centered layout while adding visual interest
+
+**Notes for Future Agents**:
+- Footer now uses same logo as header (external URL)
+- Contact info cards have interactive hover states with brand colors
+- Background glow effects match the site's aesthetic
+- Social proof section adds credibility with visual indicators
+- Enhanced bottom bar with better spacing and icons
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*
