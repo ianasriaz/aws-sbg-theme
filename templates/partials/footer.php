@@ -8,7 +8,7 @@
 				<!-- Column 1: Brand & About -->
 				<div class="space-y-4">
 					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-block hover:opacity-90 transition-opacity">
-						<img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/icons/SBG-Logo-White.png' ) ); ?>" alt="AWS SBG Air University" class="h-9 sm:h-10 w-auto max-w-full object-contain">
+						<img src="https://awsairuniversity.com/wp-content/uploads/2026/09/SBG-Logo-White-Transparent.png" alt="AWS SBG Air University" class="h-9 sm:h-10 w-auto max-w-full object-contain">
 					</a>
 					<p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
 						Official AWS Student Builder Group chapter at Air University Islamabad. Empowering students to build, innovate, and lead in Cloud and AI.
@@ -17,16 +17,16 @@
 					<!-- Social Links (Preserved as requested) -->
 					<div class="flex space-x-3 pt-2">
 						<a href="https://www.linkedin.com/company/aws-student-builder-group-air-university-islamabad/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-lg bg-brand/10 text-brand hover:bg-brand hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="LinkedIn">
-							<img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/icons/wired-outline-2677-logo-square-linkedin.png' ) ); ?>" alt="LinkedIn" class="w-5 h-5 object-contain">
+							<img src="https://awsairuniversity.com/wp-content/uploads/2026/09/wired-outline-2677-logo-square-linkedin.png" alt="LinkedIn" class="w-5 h-5 object-contain">
 						</a>
 						<a href="https://www.instagram.com/awssbgairuniversity/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-lg bg-pink-500/10 text-pink-400 hover:bg-pink-600 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="Instagram">
-							<img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/icons/wired-outline-2542-logo-instagram.png' ) ); ?>" alt="Instagram" class="w-5 h-5 object-contain">
+							<img src="https://awsairuniversity.com/wp-content/uploads/2026/09/wired-outline-2542-logo-instagram.png" alt="Instagram" class="w-5 h-5 object-contain">
 						</a>
 						<a href="https://www.meetup.com/aws-sbg-at-air-university-e9-campus-islamabad/" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="Meetup">
 							<img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/icons/meetup-icon.png' ) ); ?>" alt="Meetup" class="w-5 h-5 object-contain">
 						</a>
 						<a href="https://chat.whatsapp.com/KlNgxGopitiCJoTJEyqTaL" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white flex items-center justify-center transition-all duration-300 hover:scale-110" title="WhatsApp Community">
-							<img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/icons/wired-outline-2672-logo-square-whatsapp.png' ) ); ?>" alt="WhatsApp" class="w-5 h-5 object-contain">
+							<img src="https://awsairuniversity.com/wp-content/uploads/2026/09/wired-outline-2672-logo-square-whatsapp.png" alt="WhatsApp" class="w-5 h-5 object-contain">
 						</a>
 					</div>
 				</div>
