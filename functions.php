@@ -59,9 +59,9 @@ function aws_sbg_add_page_templates( $templates ) {
 /**
  * Filter template path to support templates in subdirectory
  */
-add_filter( 'template_include', 'aws_sbg_template_include' );
+add_filter( 'template_include', 'aws_sbg_template_include', 99 );
 function aws_sbg_template_include( $template ) {
-	// If template is in templates/pages/, use it directly
+	// If already using a template from templates/pages/, use it
 	if ( strpos( $template, 'templates/pages/' ) !== false ) {
 		return $template;
 	}
@@ -73,6 +73,18 @@ function aws_sbg_template_include( $template ) {
 	$subdir_template = get_template_directory() . '/templates/pages/' . $basename;
 	if ( file_exists( $subdir_template ) ) {
 		return $subdir_template;
+	}
+	
+	// Special handling for page templates
+	if ( is_page() ) {
+		$page_template = get_page_template_slug();
+		if ( $page_template && strpos( $page_template, 'templates/pages/' ) === false ) {
+			// Try to find in templates/pages/
+			$subdir_template = get_template_directory() . '/templates/pages/' . basename( $page_template );
+			if ( file_exists( $subdir_template ) ) {
+				return $subdir_template;
+			}
+		}
 	}
 	
 	return $template;
@@ -166,6 +178,42 @@ function aws_sbg_auto_create_exam_page() {
 	flush_rewrite_rules();
 }
 add_action( 'admin_init', 'aws_sbg_auto_create_exam_page' );
+
+/**
+ * Fix template paths for existing pages after folder reorganization
+ * One-time fix to update old template paths to new structure
+ */
+function aws_sbg_fix_page_template_paths() {
+	// Only run once - check if we've already fixed
+	$fixed = get_option( 'aws_sbg_template_paths_fixed', false );
+	if ( $fixed ) {
+		return;
+	}
+	
+	// Pages that need template path updates
+	$pages_to_fix = array(
+		'exam-portal'       => 'page-exam-portal.php',
+		'claim-certificate' => 'page-certificate-generator.php',
+		'events'            => 'page-events.php',
+		'community'         => 'page-community.php',
+		'giveaway'          => 'page-giveaway.php',
+	);
+	
+	foreach ( $pages_to_fix as $slug => $old_template ) {
+		$page = get_page_by_path( $slug );
+		if ( $page ) {
+			$current_template = get_post_meta( $page->ID, '_wp_page_template', true );
+			// If using old template path, update to new path
+			if ( $current_template === $old_template ) {
+				update_post_meta( $page->ID, '_wp_page_template', 'templates/pages/' . $old_template );
+			}
+		}
+	}
+	
+	// Mark as fixed
+	update_option( 'aws_sbg_template_paths_fixed', true );
+}
+add_action( 'admin_init', 'aws_sbg_fix_page_template_paths', 20 );
 
 /**
  * Clean alias redirects for /campus, /students, /rewards, and /perks -> /community/
