@@ -32,32 +32,8 @@ require_once get_template_directory() . '/includes/features/feature-swag-wheel.p
 require_once get_template_directory() . '/includes/features/feature-giveaway.php';
 
 /**
- * Register custom template directory for WordPress
- * Allows templates to be in templates/pages/ subdirectory
- */
-add_filter( 'theme_page_templates', 'aws_sbg_add_page_templates' );
-function aws_sbg_add_page_templates( $templates ) {
-	$template_dir = get_template_directory() . '/templates/pages/';
-	
-	// Get all page templates from templates/pages/
-	$template_files = glob( $template_dir . 'page-*.php' );
-	
-	foreach ( $template_files as $template_file ) {
-		$basename = basename( $template_file );
-		$template_path = 'templates/pages/' . $basename;
-		
-		// Get template name from file header
-		$template_data = get_file_data( $template_file, array( 'Template Name' => 'Template Name' ) );
-		$template_name = $template_data['Template Name'] ?: ucwords( str_replace( array( 'page-', '.php', '-' ), array( '', '', ' ' ), $basename ) );
-		
-		$templates[ $template_path ] = $template_name;
-	}
-	
-	return $templates;
-}
-
-/**
  * Filter template path to support templates in subdirectory
+ * This handles templates stored in templates/pages/ while WP looks in root
  */
 add_filter( 'template_include', 'aws_sbg_template_include', 99 );
 function aws_sbg_template_include( $template ) {
@@ -75,19 +51,32 @@ function aws_sbg_template_include( $template ) {
 		return $subdir_template;
 	}
 	
-	// Special handling for page templates
-	if ( is_page() ) {
-		$page_template = get_page_template_slug();
-		if ( $page_template && strpos( $page_template, 'templates/pages/' ) === false ) {
-			// Try to find in templates/pages/
-			$subdir_template = get_template_directory() . '/templates/pages/' . basename( $page_template );
-			if ( file_exists( $subdir_template ) ) {
-				return $subdir_template;
-			}
-		}
+	return $template;
+}
+
+/**
+ * Register templates from templates/pages/ directory
+ * Makes them appear in WP Admin page template dropdown
+ */
+add_filter( 'theme_page_templates', 'aws_sbg_add_page_templates' );
+function aws_sbg_add_page_templates( $templates ) {
+	$template_dir = get_template_directory() . '/templates/pages/';
+	
+	// Get all page templates from templates/pages/
+	$template_files = glob( $template_dir . 'page-*.php' );
+	
+	foreach ( $template_files as $template_file ) {
+		$basename = basename( $template_file );
+		
+		// Get template name from file header
+		$template_data = get_file_data( $template_file, array( 'Template Name' => 'Template Name' ) );
+		$template_name = $template_data['Template Name'] ?: ucwords( str_replace( array( 'page-', '.php', '-' ), array( '', '', ' ' ), $basename ) );
+		
+		// Register with simple basename (WP looks in root, we redirect in template_include)
+		$templates[ $basename ] = $template_name;
 	}
 	
-	return $template;
+	return $templates;
 }
 
 /**

@@ -36,9 +36,6 @@ jobs:
           # Copy theme core files (root level - required by WordPress)
           cp style.css functions.php header.php footer.php index.php deploy/ 2>/dev/null || true
           
-          # Copy page template wrappers (in root for WP compatibility)
-          cp page-*.php deploy/ 2>/dev/null || true
-          
           # Copy directories needed on server
           cp -r assets/images deploy/assets/ 2>/dev/null || true
           cp -r assets/css deploy/assets/ 2>/dev/null || true
