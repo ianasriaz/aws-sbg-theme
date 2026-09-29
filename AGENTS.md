@@ -132,6 +132,30 @@ aws-sbg-theme/
 
 ---
 
+### 2026-09-29 13:20 - GitHub Copilot (DeepSeek V3.2)
+
+**Task**: Update footer design to clean and minimal layout
+
+**Files Changed**:
+- `templates/partials/footer.php` - Completely redesigned footer to be clean and minimal with centered layout, removed 4-column grid and social links, simplified to just logo, description, contact info, and copyright
+
+**Summary**: Redesigned the footer to match user's request for a clean, minimal design. Changed from a complex 4-column layout to a simple centered design with only essential elements: SBG logo, description, email, phone, and copyright.
+
+**Key Decisions**:
+- Used local logo file (`assets/images/icons/SBG-Logo-White.png`) instead of external URL
+- Removed social links, quick links, and community info sections to achieve minimal design
+- Centered all content for clean visual presentation
+- Kept "Powered by AWS • Deployed on EC2" text as it's minimal and informative
+- Used fixed year "2026" in copyright instead of dynamic year as requested
+
+**Notes for Future Agents**:
+- Footer is now minimal with centered layout
+- Logo uses local file: `assets/images/icons/SBG-Logo-White.png`
+- Copyright shows "© 2026" (hardcoded as requested)
+- Contact info formatted as requested with ✉ and ☎ symbols
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*
