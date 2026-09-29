@@ -55,6 +55,57 @@ function aws_sbg_template_include( $template ) {
 }
 
 /**
+ * Filter template hierarchy for front-page and other special templates
+ * WordPress looks for front-page.php in root, redirect to templates/pages/
+ */
+add_filter( 'frontpage_template', 'aws_sbg_frontpage_template' );
+function aws_sbg_frontpage_template( $template ) {
+	$subdir_template = get_template_directory() . '/templates/pages/front-page.php';
+	if ( file_exists( $subdir_template ) ) {
+		return $subdir_template;
+	}
+	return $template;
+}
+
+/**
+ * Filter template hierarchy for home (blog) template
+ */
+add_filter( 'home_template', 'aws_sbg_home_template' );
+function aws_sbg_home_template( $template ) {
+	$subdir_template = get_template_directory() . '/templates/pages/index.php';
+	if ( file_exists( $subdir_template ) ) {
+		return $subdir_template;
+	}
+	return $template;
+}
+
+/**
+ * Filter template hierarchy for single posts
+ */
+add_filter( 'single_template', 'aws_sbg_single_template' );
+function aws_sbg_single_template( $template ) {
+	$basename = basename( $template );
+	$subdir_template = get_template_directory() . '/templates/pages/' . $basename;
+	if ( file_exists( $subdir_template ) ) {
+		return $subdir_template;
+	}
+	return $template;
+}
+
+/**
+ * Filter template hierarchy for archives
+ */
+add_filter( 'archive_template', 'aws_sbg_archive_template' );
+function aws_sbg_archive_template( $template ) {
+	$basename = basename( $template );
+	$subdir_template = get_template_directory() . '/templates/pages/' . $basename;
+	if ( file_exists( $subdir_template ) ) {
+		return $subdir_template;
+	}
+	return $template;
+}
+
+/**
  * Register templates from templates/pages/ directory
  * Makes them appear in WP Admin page template dropdown
  */
