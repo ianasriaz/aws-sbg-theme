@@ -8,7 +8,7 @@
 				<!-- Column 1: Brand & About -->
 				<div class="space-y-4">
 					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-block hover:opacity-90 transition-opacity">
-						<img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/icons/' . rawurlencode( 'SBG Logo White.png' ) ) ); ?>" alt="AWS SBG Air University" class="h-9 sm:h-10 w-auto max-w-full object-contain">
+						<img src="<?php echo esc_url( get_theme_file_uri( 'assets/images/icons/SBG-Logo-White.png' ) ); ?>" alt="AWS SBG Air University" class="h-9 sm:h-10 w-auto max-w-full object-contain">
 					</a>
 					<p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
 						Official AWS Student Builder Group chapter at Air University Islamabad. Empowering students to build, innovate, and lead in Cloud and AI.
