@@ -38,31 +38,42 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SFTP_HOST }} >> ~/.ssh/known_hosts
       
-      - name: Deploy via SFTP
+      - name: Prepare deployment package
+        run: |
+          # Create deploy directory with only required files
+          mkdir -p deploy
+          
+          # Copy theme core files
+          cp style.css functions.php header.php footer.php README.md deploy/ 2>/dev/null || true
+          
+          # Copy directories needed on server
+          cp -r assets/images deploy/assets/ 2>/dev/null || true
+          cp -r assets/css deploy/assets/ 2>/dev/null || true
+          cp -r assets/js deploy/assets/ 2>/dev/null || true
+          cp -r assets/fonts deploy/assets/ 2>/dev/null || true
+          cp -r includes deploy/
+          cp -r templates deploy/
+          cp -r languages deploy/ 2>/dev/null || true
+          
+          # Copy config files (except seed data)
+          cp config/config-theme.php deploy/config/ 2>/dev/null || true
+          
+          echo "=== Files ready for deployment ==="
+          find deploy -type f | head -20
+          echo "... ($(find deploy -type f | wc -l) total files)"
+      
+      - name: Deploy to WordPress
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SFTP_PORT || '22' }}
-          source: "."
+          source: "deploy/*"
           target: ${{ secrets.REMOTE_PATH }}
-          strip_components: 0
+          strip_components: 1
           rm: false
           overwrite: true
-          # Exclude files that shouldn't be deployed
-          exclude: |
-            .git/**
-            .github/**
-            .gitignore
-            README.md
-            docs/**
-            config/seed-*.json
-            .vscode/**
-            .DS_Store
-            node_modules/**
-            *.zip
-            *.lock
       
       - name: Deployment Summary
         run: |

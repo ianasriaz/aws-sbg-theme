@@ -42,15 +42,23 @@ Go to your repository settings → Secrets and variables → Actions, then add t
 
 ## What Gets Deployed
 
-The workflow deploys all theme files except:
-- `.git/` - Git repository files
-- `.github/` - GitHub Actions workflows
-- `docs/` - Documentation files
-- `config/seed-*.json` - Seed data files
-- `.vscode/` - VS Code settings
-- `README.md` - Repository readme
-- `node_modules/` - Node dependencies
-- `*.zip`, `*.lock` - Archive and lock files
+Only **required theme files** are deployed:
+
+| Category | Files | Status |
+|----------|-------|--------|
+| **Theme Core** | `style.css`, `functions.php`, `header.php`, `footer.php` | ✅ Deployed |
+| **Assets** | `assets/images/`, `assets/css/`, `assets/js/`, `assets/fonts/` | ✅ Deployed |
+| **PHP Code** | `includes/`, `templates/` | ✅ Deployed |
+| **Translations** | `languages/` | ✅ Deployed |
+| **Config** | `config/config-theme.php` | ✅ Deployed |
+
+**Excluded** (repo-only):
+- `.git/`, `.github/` - Repository files
+- `docs/` - Documentation
+- `AGENTS.md`, `README.md` - Project docs
+- `config/seed-*.json` - Seed data
+- `assets/mockups/` - Design mockups
+- `.copilot-instructions.md` - Agent instructions
 
 ## Troubleshooting
 
