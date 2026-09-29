@@ -2,33 +2,44 @@
 
 This theme uses GitHub Actions for manual deployment to your WordPress server.
 
-## Required GitHub Secrets
+## Required GitHub Secrets (CloudPanel SFTP)
 
 Go to your repository settings → Secrets and variables → Actions, then add these secrets:
 
 | Secret Name | Description | Example |
 |-------------|-------------|---------|
-| `SSH_PRIVATE_KEY` | Your SSH private key for server access | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
-| `SFTP_HOST` | Your server hostname or IP | `aws-ec2-m-wp1.anasriaz.com` |
-| `SFTP_USERNAME` | SSH/SFTP username | `awsairuniversity-ssh` |
-| `SFTP_PORT` | SSH port (optional, defaults to 22) | `22` |
-| `REMOTE_PATH` | Absolute path to theme directory on server | `/home/awsairuniversity/htdocs/awsairuniversity.com/wp-content/themes/aws-sbg-theme` |
+| `SFTP_HOST` | Your server IP or domain | `203.0.113.10` or `aws-ec2-m-wp1.anasriaz.com` |
+| `SFTP_USERNAME` | CloudPanel SSH user | `awsairuniversity-ssh` |
+| `SFTP_PASSWORD` | CloudPanel SSH user password | `your-password` |
+| `SFTP_PORT` | SFTP port (optional, default 22) | `22` |
+| `REMOTE_PATH` | Path to theme on server | `/home/awsairuniversity/htdocs/awsairuniversity.com/wp-content/themes/aws-sbg-theme` |
 
-## How to Set Up SSH Key
+**Note**: This workflow uses password-based SFTP authentication (compatible with CloudPanel).
 
-1. **Generate a new SSH key pair** (if you don't have one):
-   ```bash
-   ssh-keygen -t ed25519 -C "github-actions@aws-sbg-theme"
-   ```
+## How to Set Up (CloudPanel SFTP)
 
-2. **Add the public key to your server**:
-   ```bash
-   ssh-copy-id -i ~/.ssh/id_ed25519.pub awsairuniversity-ssh@aws-ec2-m-wp1.anasriaz.com
-   ```
+Since you're using CloudPanel with password-based SFTP:
 
-3. **Add the private key to GitHub Secrets**:
-   - Copy the contents of `~/.ssh/id_ed25519`
-   - Paste it as the `SSH_PRIVATE_KEY` secret in GitHub
+1. **Get your CloudPanel SFTP credentials**:
+   - Log into CloudPanel
+   - Go to **SSH/FTP** → **SSH Users**
+   - Note down:
+     - **Host**: Your server IP or domain
+     - **Username**: Your SSH user
+     - **Password**: The password you set
+     - **Port**: Usually `22`
+
+2. **Add secrets to GitHub**:
+   - Go to your repo → **Settings** → **Secrets and variables** → **Actions**
+   - Click **New repository secret** for each:
+
+| Secret | Value | Example |
+|--------|-------|---------|
+| `SFTP_HOST` | Your server IP/domain | `203.0.113.10` or `aws-ec2-m-wp1.anasriaz.com` |
+| `SFTP_USERNAME` | CloudPanel SSH user | `awsairuniversity-ssh` |
+| `SFTP_PASSWORD` | The password you set | `your-secure-password` |
+| `SFTP_PORT` | SFTP port | `22` |
+| `REMOTE_PATH` | Path to theme folder | `/home/awsairuniversity/htdocs/awsairuniversity.com/wp-content/themes/aws-sbg-theme` |
 
 ## How to Deploy
 
