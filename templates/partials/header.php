@@ -8,15 +8,6 @@
 <body <?php body_class( 'bg-dark-bg text-white' ); ?>>
 	<?php wp_body_open(); ?>
 
-	<!-- Clean Announcement Bar: AWS Student Rewards -->
-	<aside aria-label="AWS Student Rewards Announcement" class="bg-[#000000] text-gray-200 py-2 sm:py-2.5 px-4 text-[11px] sm:text-xs border-b border-[#9353ff]/20 relative z-40">
-		<div class="max-w-7xl mx-auto flex items-center justify-center text-center">
-			<a href="https://builder.aws.com/start?trk=8e356433-7e2c-4ee9-8c3a-5bccc682a4f5&amp;sc_channel=el" target="_blank" rel="noopener noreferrer" class="group inline-flex items-center justify-center gap-2 text-gray-300 hover:text-white font-bold tracking-wider transition-colors">
-				<span>CLAIM $579 AWS STUDENT REWARDS</span>
-				<span class="text-[#9353ff] group-hover:text-white transition-all group-hover:translate-x-1">→</span>
-			</a>
-		</div>
-	</aside>
 	<!-- Glassmorphic Header Styling -->
 	<style id="site-glass-header-css">
 		/* ==========================================================================

@@ -11,94 +11,259 @@
 get_header();
 ?>
 
-<!-- Scoped styles for Community Hub -->
+<!-- Scoped styles for Community Hub - Minimal & Engaging -->
 <style>
-	/* ============ SCOPE & BASE ============ */
+	/* ============ PHASE 1: FOUNDATION ============ */
+	:root {
+		--cp-primary: #0F141F;
+		--cp-accent: #9353FF;
+		--cp-secondary: #FF9900;
+		--cp-surface: #F8FAFC;
+		--cp-text: #475569;
+		--cp-text-heading: #020617;
+		--cp-border: #E2E8F0;
+	}
+
 	.community-page-wrapper {
-		background-color: #ffffff !important;
-		color: #0f172a !important;
-		font-family: 'Amazon Ember', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		background-color: #ffffff;
+		color: var(--cp-text);
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 		width: 100%;
 		overflow-x: hidden;
+		line-height: 1.6;
 	}
-	.community-page-wrapper h1,
-	.community-page-wrapper h2,
-	.community-page-wrapper h3,
-	.community-page-wrapper h4 { color: #020617 !important; margin: 0; }
-	.community-page-wrapper p  { color: #475569 !important; margin: 0; }
-	.community-page-wrapper a  { text-decoration: none !important; }
-	.community-page-wrapper *  { box-sizing: border-box; }
 
-	/* ============ MULTI-COLOR AURORA BLOBS ============ */
-	.community-page-wrapper .aurora-canvas {
+	/* Typography Scale - 8px grid */
+	.community-page-wrapper h1 {
+		font-size: clamp(40px, 5vw, 64px);
+		line-height: 1.1;
+		font-weight: 800;
+		letter-spacing: -0.03em;
+		color: var(--cp-text-heading);
+		margin: 0;
+	}
+
+	.community-page-wrapper h2 {
+		font-size: clamp(32px, 4vw, 48px);
+		line-height: 1.15;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		color: var(--cp-text-heading);
+		margin: 0;
+	}
+
+	.community-page-wrapper h3 {
+		font-size: clamp(24px, 3vw, 32px);
+		line-height: 1.2;
+		font-weight: 700;
+		color: var(--cp-text-heading);
+		margin: 0;
+	}
+
+	.community-page-wrapper p {
+		font-size: 16px;
+		line-height: 1.75;
+		color: var(--cp-text);
+		margin: 0;
+	}
+
+	.community-page-wrapper a {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.community-page-wrapper * {
+		box-sizing: border-box;
+	}
+
+	/* ============ PHASE 1: COMPONENT LIBRARY ============ */
+
+	/* Primary Button */
+	.cp-btn-primary {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 14px 28px;
+		background: var(--cp-accent);
+		color: #ffffff;
+		font-weight: 600;
+		font-size: 15px;
+		border-radius: 8px;
+		border: none;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.cp-btn-primary:hover {
+		background: #7928ca;
+		transform: translateY(-2px);
+	}
+
+	.cp-btn-primary:hover .cp-btn-arrow {
+		transform: translateX(4px);
+	}
+
+	.cp-btn-arrow {
+		transition: transform 0.2s ease;
+	}
+
+	/* Secondary Button */
+	.cp-btn-secondary {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 14px 28px;
+		background: transparent;
+		color: var(--cp-text-heading);
+		font-weight: 600;
+		font-size: 15px;
+		border-radius: 8px;
+		border: 1.5px solid var(--cp-border);
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	.cp-btn-secondary:hover {
+		border-color: var(--cp-accent);
+		color: var(--cp-accent);
+	}
+
+	/* Card Component */
+	.cp-card {
+		background: #ffffff;
+		border: 1px solid var(--cp-border);
+		border-radius: 12px;
+		padding: 27px;
+		transition: all 0.3s ease;
+	}
+
+	.cp-card:hover {
+		transform: translateY(-4px);
+		box-shadow: 0 12px 32px -12px rgba(15, 20, 31, 0.12);
+		border-color: rgba(147, 83, 255, 0.3);
+	}
+
+	/* Dark Card for Rewards */
+	.cp-card-dark {
+		background: var(--cp-primary);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 12px;
+		padding: 27px;
 		position: relative;
 		overflow: hidden;
+		transition: all 0.3s ease;
 	}
-	.community-page-wrapper .aurora-blob {
+
+	.cp-card-dark::before {
+		content: '';
 		position: absolute;
-		border-radius: 9999px;
-		filter: blur(80px);
-		pointer-events: none;
-		will-change: transform;
-		z-index: 0;
-	}
-	.community-page-wrapper .aurora-purple {
-		width: 550px; height: 550px;
-		top: -160px; right: -120px;
-		background: radial-gradient(circle, rgba(147,83,255,0.28), transparent 65%);
-		animation: cpAuroraFloat 12s ease-in-out infinite;
-	}
-	.community-page-wrapper .aurora-orange {
-		width: 480px; height: 480px;
-		top: 10%; left: -140px;
-		background: radial-gradient(circle, rgba(255,153,0,0.22), transparent 65%);
-		animation: cpAuroraFloat 14s ease-in-out infinite reverse;
-	}
-	.community-page-wrapper .aurora-green {
-		width: 420px; height: 420px;
-		bottom: -100px; right: 15%;
-		background: radial-gradient(circle, rgba(0,239,136,0.20), transparent 65%);
-		animation: cpAuroraFloat 10s ease-in-out infinite 2s;
-	}
-	@keyframes cpAuroraFloat {
-		0%,100% { transform: translate(0,0) scale(1); }
-		50%     { transform: translate(30px,-24px) scale(1.08); }
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 2px;
+		background: linear-gradient(90deg, var(--cp-secondary), var(--cp-accent));
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 0.3s ease;
 	}
 
-	/* Blueprint & Dot Matrix */
-	.community-page-wrapper .cp-grid-lines {
-		position: absolute; inset: 0;
-		background-size: 38px 38px;
-		background-image: 
-			linear-gradient(to right, rgba(147,83,255,0.07) 1px, transparent 1px),
-			linear-gradient(to bottom, rgba(147,83,255,0.07) 1px, transparent 1px);
-		mask-image: radial-gradient(ellipse 85% 75% at 50% 40%, #000000 40%, transparent 92%);
-		-webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 40%, #000000 40%, transparent 92%);
-		pointer-events: none;
-	}
-	.community-page-wrapper .cp-dot-matrix {
-		background-image: radial-gradient(rgba(147,83,255,0.15) 1px, transparent 1px);
-		background-size: 20px 20px;
+	.cp-card-dark:hover::before {
+		transform: scaleX(1);
 	}
 
-	/* ============ TEXT HIGHLIGHT PILLS ============ */
-	.community-page-wrapper .cp-text-highlight-green {
-		background: #00ef88 !important;
-		color: #020617 !important;
-		padding: 2px 14px;
-		border-radius: 12px;
-		display: inline-block;
-		transform: rotate(-1deg);
-		box-shadow: 0 4px 15px rgba(0,239,136,0.3);
+	.cp-card-dark:hover {
+		transform: translateY(-4px);
+		border-color: rgba(147, 83, 255, 0.4);
 	}
-	.community-page-wrapper .cp-text-highlight-orange {
-		background: #FF9900 !important;
-		color: #020617 !important;
-		padding: 2px 14px;
-		border-radius: 12px;
-		display: inline-block;
-		transform: rotate(1deg);
-		box-shadow: 0 4px 15px rgba(255,153,0,0.3);
+
+	/* Section Container */
+	.cp-section {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 96px 24px;
+	}
+
+	@media (max-width: 768px) {
+		.cp-section {
+			padding: 64px 20px;
+		}
+	}
+
+	/* Grid System */
+	.cp-grid-2 {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 64px;
+		align-items: center;
+	}
+
+	.cp-grid-3 {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 24px;
+	}
+
+	.cp-grid-4 {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 24px;
+	}
+
+	@media (max-width: 1024px) {
+		.cp-grid-2 {
+			grid-template-columns: 1fr;
+			gap: 40px;
+		}
+		.cp-grid-3 {
+			grid-template-columns: repeat(2, 1fr);
+		}
+		.cp-grid-4 {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	@media (max-width: 640px) {
+		.cp-grid-3,
+		.cp-grid-4 {
+			grid-template-columns: 1fr;
+		}
+	}
+
+	/* Scroll Animation Base */
+	.cp-reveal {
+		opacity: 0;
+		transform: translateY(20px);
+		transition: opacity 0.6s ease, transform 0.6s ease;
+	}
+
+	.cp-reveal.in {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	/* Stagger delays */
+	.cp-reveal-delay-1 { transition-delay: 0.05s; }
+	.cp-reveal-delay-2 { transition-delay: 0.1s; }
+	.cp-reveal-delay-3 { transition-delay: 0.15s; }
+	.cp-reveal-delay-4 { transition-delay: 0.2s; }
+
+	/* Focus States for Accessibility */
+	.community-page-wrapper *:focus-visible {
+		outline: 2px solid var(--cp-accent);
+		outline-offset: 2px;
+	}
+
+	/* Reduced Motion */
+	@media (prefers-reduced-motion: reduce) {
+		.cp-reveal {
+			opacity: 1;
+			transform: none;
+		}
+		.cp-btn-primary:hover,
+		.cp-btn-secondary:hover,
+		.cp-card:hover {
+			transform: none;
+		}
 	}
 
 	/* ============ BRAND & AWS GRADIENT TEXT ============ */
@@ -458,12 +623,10 @@ get_header();
 	}
 </style>
 
-<div class="community-page-wrapper" style="background:#ffffff;">
+<div class="community-page-wrapper">
 
-	<!-- ========================================================================= -->
-	<!-- HERO: JOIN THE MOVEMENT (MULTI-COLOR AURORA & CLEAN TYPOGRAPHY)          -->
-	<!-- ========================================================================= -->
-	<header class="aurora-canvas" style="position:relative; overflow:hidden; background:#ffffff; border-b:1px solid #f1f5f9;">
+	<!-- HERO SECTION -->
+	<section class="cp-hero">
 		<!-- Multi-Color Aurora Glow Spots -->
 		<div class="aurora-blob aurora-purple"></div>
 		<div class="aurora-blob aurora-orange"></div>
@@ -539,26 +702,42 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 		</div>
 	</header>
 
-	<main style="max-width:1120px; margin:0 auto; padding:0 20px;">
+	<!-- REWARDS SECTION -->
+	<section class="cp-rewards cp-section">
+		<div class="cp-reveal">
+			<h2>Welcome <span>Rewards</span></h2>
+			<p class="cp-rewards-intro">Air University students unlock premium training, real cloud credits, and certification vouchers.</p>
+		</div>
 
-		<!-- ========================================================================= -->
-		<!-- REWARDS SECTION (LIGHT SURFACE `#f8fafc` WITH ACCENT CARDS)               -->
-		<!-- ========================================================================= -->
-		<section id="rewards" style="padding:88px 0 0; width:100%;">
-			<div class="reveal max-w-2xl">
-				<h2 style="font-size:clamp(28px,4vw,44px); font-weight:900; letter-spacing:-0.02em; text-transform:uppercase;">
-					Claim Your <span class="grad-text-orange">Welcome Rewards</span>
-				</h2>
-				<p style="padding-top:10px; font-size:15px; line-height:1.75; color:#475569 !important;">
-					Air University students unlock premium training, real cloud credits for projects, and a certification voucher.
-				</p>
+		<div class="cp-grid-3 cp-reveal cp-reveal-delay-1" style="margin-top: 48px;">
+			<!-- Reward 1 -->
+			<div class="cp-card-dark">
+				<div class="cp-reward-value">$579</div>
+				<div class="cp-reward-title">Total Value</div>
+				<div class="cp-reward-desc">Combined value of all student rewards including training, credits, and certification.</div>
 			</div>
 
-			<div class="cp-grid cp-grid-3" style="padding-top:36px;">
-				<!-- Reward 1 -->
-				<div class="reward-card reveal p-7 space-y-4">
-					<div class="reward-icon">
-						<svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+			<!-- Reward 2 -->
+			<div class="cp-card-dark">
+				<div class="cp-reward-value">$30</div>
+				<div class="cp-reward-title">AWS Credits</div>
+				<div class="cp-reward-desc">Cloud credits for building and hosting your projects on real AWS infrastructure.</div>
+			</div>
+
+			<!-- Reward 3 -->
+			<div class="cp-card-dark">
+				<div class="cp-reward-value">Free</div>
+				<div class="cp-reward-title">Exam Voucher</div>
+				<div class="cp-reward-desc">Official certification voucher for Cloud Practitioner or AI Practitioner exam.</div>
+			</div>
+		</div>
+
+		<div class="cp-reveal cp-reveal-delay-2" style="margin-top: 48px; text-align: center;">
+			<a href="https://builder.aws.com/start" target="_blank" rel="noopener noreferrer" class="cp-btn-primary">
+				Claim Student Rewards
+				<span class="cp-btn-arrow">→</span>
+			</a>
+		</div>
 					</div>
 					<div>
 						<div class="reward-value">12 Months</div>
