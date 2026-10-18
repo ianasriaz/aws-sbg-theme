@@ -3,7 +3,7 @@
  * Template Name: Community Hub & Student Rewards
  *
  * Clean EduFi-inspired high-conversion launchpad featuring multi-color aurora glow canvas,
- * dark AWS container journey section, and high-contrast typography adhering strictly to the brand palette + AWS Orange.
+ * welcome rewards, community channels, and high-contrast typography adhering strictly to the brand palette + AWS Orange.
  *
  * @package AWS_SBG_Theme
  */
@@ -174,19 +174,6 @@ get_header();
 	.cp-card-dark:hover {
 		transform: translateY(-4px);
 		border-color: rgba(147, 83, 255, 0.4);
-	}
-
-	/* Section Container */
-	.cp-section {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 96px 24px;
-	}
-
-	@media (max-width: 768px) {
-		.cp-section {
-			padding: 64px 20px;
-		}
 	}
 
 	/* Grid System */
@@ -405,69 +392,6 @@ get_header();
 		color: #020617 !important; line-height: 1.1;
 	}
 
-	/* ============ DEEP DARK AWS CONTAINER FOR JOURNEY STEPS ============ */
-	.community-page-wrapper .cp-dark-journey-section {
-		position: relative;
-		background: linear-gradient(180deg, #070913 0%, #0c0f24 100%) !important;
-		color: #ffffff !important;
-		border-radius: 32px;
-		overflow: hidden;
-		box-shadow: 0 30px 80px -20px rgba(7, 9, 19, 0.5);
-		padding: 32px;
-		width: 100%;
-	}
-	@media (min-width: 640px) {
-		.community-page-wrapper .cp-dark-journey-section { padding: 48px; }
-	}
-
-	.community-page-wrapper .journey-item {
-		position: relative;
-		background: rgba(15, 23, 42, 0.75) !important;
-		backdrop-filter: blur(14px);
-		-webkit-backdrop-filter: blur(14px);
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		border-radius: 22px;
-		transition: all .28s ease;
-	}
-	.community-page-wrapper .journey-item:hover {
-		border-color: rgba(255,153,0,0.5) !important;
-		box-shadow: 0 20px 42px -16px rgba(255,153,0,0.30);
-		transform: translateX(6px);
-	}
-	.community-page-wrapper .journey-num {
-		width: 48px; height: 48px; border-radius: 16px;
-		display: flex; align-items: center; justify-content: center;
-		background: linear-gradient(135deg, #FF9900, #ffaa2b) !important;
-		color: #020617 !important;
-		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-		font-weight: 900; font-size: 17px;
-		flex-shrink: 0;
-		box-shadow: 0 8px 18px -6px rgba(255,153,0,0.4);
-		position: relative; z-index: 1;
-	}
-	.community-page-wrapper .journey-connector {
-		display: none;
-		position: absolute; left: 23px; top: 60px; bottom: -24px;
-		width: 2px;
-		background: linear-gradient(180deg, #FF9900, rgba(255,153,0,0.1));
-	}
-	@media (min-width: 640px) {
-		.community-page-wrapper .journey-connector { display: block; }
-	}
-
-	.community-page-wrapper .step-chip {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		padding: 5px 12px;
-		border-radius: 10px;
-		background: rgba(255, 153, 0, 0.12);
-		border: 1px solid rgba(255, 153, 0, 0.3);
-		color: #ffaa2b;
-		font-size: 12px;
-		font-weight: 700;
-	}
-
 	/* ============ CHANNEL CARDS ============ */
 	.community-page-wrapper .channel-card {
 		position: relative;
@@ -511,14 +435,9 @@ get_header();
 	.community-page-wrapper .arrow-slide { transition: transform .25s ease; }
 	.community-page-wrapper .channel-card:hover .arrow-slide { transform: translateX(5px); }
 
-	/* ============ FAQ ACCORDION (FULL WIDTH ALIGNED) ============ */
-	.community-page-wrapper .faq-section-wrapper {
-		width: 100%;
-		padding: 88px 0 96px;
-	}
+	/* ============ FAQ ACCORDION ============ */
 	.community-page-wrapper .faq-list {
-		width: 100% !important;
-		max-width: 100% !important;
+		width: 100%;
 		padding-top: 36px;
 		display: flex;
 		flex-direction: column;
@@ -676,12 +595,14 @@ get_header();
 		box-shadow: 0 4px 15px rgba(255,153,0,0.3);
 	}
 
-	/* ============ REWARDS SECTION ============ */
-	.community-page-wrapper .cp-rewards {
+	/* ============ BOXED SECTION CONTAINER (shared left/right gutter) ============ */
+	.community-page-wrapper .cp-narrow {
 		max-width: 1120px;
 		margin: 0 auto;
 		padding: 88px 20px 0;
 	}
+
+	/* ============ REWARDS SECTION ============ */
 	.community-page-wrapper .cp-rewards h2 {
 		font-weight: 900;
 		font-size: clamp(28px, 4vw, 44px);
@@ -802,7 +723,7 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 	</section>
 
 	<!-- REWARDS SECTION -->
-	<section class="cp-rewards cp-section">
+	<section class="cp-rewards cp-narrow">
 		<div class="cp-reveal">
 			<h2>Welcome <span>Rewards</span></h2>
 			<p class="cp-rewards-intro">Air University students unlock premium training, real cloud credits, and certification vouchers.</p>
@@ -840,71 +761,9 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 	</section>
 
 		<!-- ========================================================================= -->
-		<!-- JOURNEY STEPS (DEEP DARK CONTAINER SECTION SHIFT)                         -->
+		<!-- CHANNELS SECTION                                                          -->
 		<!-- ========================================================================= -->
-		<section id="journey" style="padding:88px 0 0; width:100%;">
-			<div class="cp-dark-journey-section">
-				<div class="reveal max-w-2xl">
-					<h3 style="font-weight:900; font-size:clamp(28px,4vw,44px); text-transform:uppercase; letter-spacing:-0.02em; color:#ffffff !important;">
-						Your Journey <span class="grad-text-orange">in 3 Steps</span>
-					</h3>
-					<p style="padding-top:8px; font-size:15px; color:#94a3b8 !important;">
-						Follow these quick steps on Builder Center to unlock your student benefits.
-					</p>
-				</div>
-
-				<div style="padding-top:36px; position:relative;">
-					<div class="space-y-6">
-
-						<!-- Step 1 -->
-						<div class="journey-item reveal flex gap-6 p-6 sm:p-7">
-							<div class="journey-connector"></div>
-							<div class="journey-num">01</div>
-							<div>
-								<h4 style="font-weight:800; font-size:17px; color:#ffffff !important;">Verify Student Status</h4>
-								<p style="font-size:14px; line-height:1.75; color:#94a3b8 !important; padding-top:6px;">
-									Sign in to Builder Center and verify via SheerID with your name, institution, and student email. Most verifications finish in minutes.
-								</p>
-							</div>
-						</div>
-
-						<!-- Step 2 -->
-						<div class="journey-item reveal reveal-d1 flex gap-6 p-6 sm:p-7">
-							<div class="journey-connector"></div>
-							<div class="journey-num">02</div>
-							<div>
-								<h4 style="font-weight:800; font-size:17px; color:#ffffff !important;">Complete Your Profile</h4>
-								<p style="font-size:14px; line-height:1.75; color:#94a3b8 !important; padding-top:6px;">
-									Add a photo and fill your About section — this instantly unlocks <strong style="color:#ffffff;">12 months of Skill Builder Premium</strong>.
-								</p>
-							</div>
-						</div>
-
-						<!-- Step 3 -->
-						<div class="journey-item reveal reveal-d2 flex gap-6 p-6 sm:p-7">
-							<div class="journey-num">03</div>
-							<div>
-								<h4 style="font-weight:800; font-size:17px; color:#ffffff !important;">Earn Badges, Unlock More</h4>
-								<p style="font-size:14px; line-height:1.75; color:#94a3b8 !important; padding-top:6px;">
-									Publish articles and stay engaged on Builder Center. The more badges you earn, the bigger the reward:
-								</p>
-								<div class="flex flex-wrap gap-2 pt-3">
-									<span class="step-chip">7 Badges: $10 Credits</span>
-									<span class="step-chip">14 Badges: +$20 Credits</span>
-									<span class="step-chip">21 Badges: $100 Exam Voucher</span>
-								</div>
-							</div>
-						</div>
-
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- ========================================================================= -->
-		<!-- CHANNELS SECTION                                                         -->
-		<!-- ========================================================================= -->
-		<section id="channels" style="padding:88px 0 0; width:100%;">
+		<section id="channels" class="cp-narrow">
 			<div class="reveal max-w-2xl">
 				<h2 style="font-size:clamp(28px,4vw,44px); font-weight:900; letter-spacing:-0.02em; text-transform:uppercase;">
 					Get <span class="grad-text-orange">Connected</span>
@@ -970,7 +829,7 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 		<!-- ========================================================================= -->
 		<!-- FAQ SECTION (FULL-WIDTH ALIGNED WITH OTHER SECTIONS)                      -->
 		<!-- ========================================================================= -->
-		<section id="faq" class="faq-section-wrapper">
+		<section id="faq" class="cp-narrow">
 			<div class="reveal w-full">
 				<h2 style="font-size:clamp(28px,4vw,44px); font-weight:900; letter-spacing:-0.02em; text-transform:uppercase;">
 					Questions? <span class="grad-text-orange">Answered.</span>
