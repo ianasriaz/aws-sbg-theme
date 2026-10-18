@@ -617,9 +617,108 @@ get_header();
 		}
 	}
 
+	/* ============ HERO DECORATION (AURORA, GRIDLINES, HIGHLIGHT PILL) ============ */
+	.community-page-wrapper .cp-hero {
+		position: relative;
+		overflow: hidden;
+		background: #ffffff;
+	}
+
+	.community-page-wrapper .aurora-blob {
+		position: absolute;
+		border-radius: 9999px;
+		filter: blur(80px);
+		pointer-events: none;
+		will-change: transform;
+		z-index: 0;
+	}
+	.community-page-wrapper .aurora-purple {
+		width: 550px; height: 550px;
+		top: -160px; right: -120px;
+		background: radial-gradient(circle, rgba(147,83,255,0.28), transparent 65%);
+		animation: cpAuroraFloat 12s ease-in-out infinite;
+	}
+	.community-page-wrapper .aurora-orange {
+		width: 480px; height: 480px;
+		top: 10%; left: -140px;
+		background: radial-gradient(circle, rgba(255,153,0,0.22), transparent 65%);
+		animation: cpAuroraFloat 14s ease-in-out infinite reverse;
+	}
+	.community-page-wrapper .aurora-green {
+		width: 420px; height: 420px;
+		bottom: -100px; right: 15%;
+		background: radial-gradient(circle, rgba(0,239,136,0.20), transparent 65%);
+		animation: cpAuroraFloat 10s ease-in-out infinite 2s;
+	}
+	@keyframes cpAuroraFloat {
+		0%, 100% { transform: translate(0, 0) scale(1); }
+		50%      { transform: translate(30px, -24px) scale(1.08); }
+	}
+
+	.community-page-wrapper .cp-grid-lines {
+		position: absolute; inset: 0;
+		background-size: 38px 38px;
+		background-image:
+			linear-gradient(to right, rgba(147,83,255,0.07) 1px, transparent 1px),
+			linear-gradient(to bottom, rgba(147,83,255,0.07) 1px, transparent 1px);
+		mask-image: radial-gradient(ellipse 85% 75% at 50% 40%, #000000 40%, transparent 92%);
+		-webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 40%, #000000 40%, transparent 92%);
+		pointer-events: none;
+	}
+
+	.community-page-wrapper .cp-text-highlight-orange {
+		background: #FF9900 !important;
+		color: #020617 !important;
+		padding: 2px 14px;
+		border-radius: 12px;
+		display: inline-block;
+		transform: rotate(1deg);
+		box-shadow: 0 4px 15px rgba(255,153,0,0.3);
+	}
+
+	/* ============ REWARDS SECTION ============ */
+	.community-page-wrapper .cp-rewards {
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: 88px 20px 0;
+	}
+	.community-page-wrapper .cp-rewards h2 {
+		font-weight: 900;
+		font-size: clamp(28px, 4vw, 44px);
+		letter-spacing: -0.02em;
+		text-transform: uppercase;
+	}
+	.community-page-wrapper .cp-rewards h2 span { color: var(--cp-secondary); }
+	.community-page-wrapper .cp-rewards-intro {
+		padding-top: 10px;
+		font-size: 15px;
+		line-height: 1.75;
+		color: #475569;
+	}
+	.community-page-wrapper .cp-reward-value {
+		font-size: 34px;
+		font-weight: 900;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		color: #ffffff;
+	}
+	.community-page-wrapper .cp-reward-title {
+		padding-top: 6px;
+		font-size: 15px;
+		font-weight: 700;
+		color: var(--cp-secondary);
+	}
+	.community-page-wrapper .cp-reward-desc {
+		padding-top: 10px;
+		font-size: 13.5px;
+		line-height: 1.7;
+		color: rgba(255, 255, 255, 0.68);
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.community-page-wrapper * { animation: none !important; transition: none !important; }
-		.community-page-wrapper .reveal { opacity: 1; transform: none; }
+		.community-page-wrapper .reveal,
+		.community-page-wrapper .cp-reveal { opacity: 1; transform: none; }
 	}
 </style>
 
@@ -655,7 +754,7 @@ get_header();
 							Become Member
 							<span class="arrow-slide">→</span>
 						</a>
-						<a href="https://chat.whatsapp.com/KlNgxGopitiCJoTJEyqTaL" target="_blank" rel="noopener noreferrer" class="btn-ghost">
+						<a href="https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI" target="_blank" rel="noopener noreferrer" class="btn-ghost">
 							<svg class="w-4 h-4 text-[#25D366] shrink-0" fill="currentColor" viewBox="0 0 24 24">
 								<path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
 							</svg>
@@ -700,7 +799,7 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 
 			</div>
 		</div>
-	</header>
+	</section>
 
 	<!-- REWARDS SECTION -->
 	<section class="cp-rewards cp-section">
@@ -738,51 +837,7 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 				<span class="cp-btn-arrow">→</span>
 			</a>
 		</div>
-					</div>
-					<div>
-						<div class="reward-value">12 Months</div>
-						<h3 style="font-weight:800; font-size:16.5px; color:#0f172a !important; padding-top:4px;">Skill Builder Premium</h3>
-						<p style="font-size:13.5px; line-height:1.7; color:#64748b !important; padding-top:8px;">
-							900+ official hands-on labs, courses, and practice exams — free for a full year.
-						</p>
-					</div>
-				</div>
-
-				<!-- Reward 2 -->
-				<div class="reward-card reveal reveal-d1 p-7 space-y-4">
-					<div class="reward-icon">
-						<svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941"/></svg>
-					</div>
-					<div>
-						<div class="reward-value">$30 AWS</div>
-						<h3 style="font-weight:800; font-size:16.5px; color:#0f172a !important; padding-top:4px;">Cloud Credits</h3>
-						<p style="font-size:13.5px; line-height:1.7; color:#64748b !important; padding-top:8px;">
-							Build and host your semester and final-year projects on real AWS infrastructure.
-						</p>
-					</div>
-				</div>
-
-				<!-- Reward 3 -->
-				<div class="reward-card reveal reveal-d2 p-7 space-y-4">
-					<div class="reward-icon">
-						<svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0"/></svg>
-					</div>
-					<div>
-						<div class="reward-value">Free Exam</div>
-						<h3 style="font-weight:800; font-size:16.5px; color:#0f172a !important; padding-top:4px;">Certification Voucher</h3>
-						<p style="font-size:13.5px; line-height:1.7; color:#64748b !important; padding-top:8px;">
-							Official Pearson VUE voucher for Cloud Practitioner or AI Practitioner.
-						</p>
-					</div>
-				</div>
-			</div>
-
-			<div class="reveal reveal-d1 flex flex-wrap items-center gap-4" style="padding-top:36px;">
-				<a href="https://builder.aws.com/start?trk=8e356433-7e2c-4ee9-8c3a-5bccc682a4f5&amp;sc_channel=el" target="_blank" rel="noopener noreferrer" class="btn-orange">
-					Claim Student Rewards <span class="arrow-slide">→</span>
-				</a>
-			</div>
-		</section>
+	</section>
 
 		<!-- ========================================================================= -->
 		<!-- JOURNEY STEPS (DEEP DARK CONTAINER SECTION SHIFT)                         -->
@@ -862,7 +917,7 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 			<div class="cp-grid cp-grid-3" style="padding-top:36px;">
 
 				<!-- WhatsApp -->
-				<a href="https://chat.whatsapp.com/KlNgxGopitiCJoTJEyqTaL" target="_blank" rel="noopener noreferrer" class="channel-card reveal p-7 space-y-5">
+				<a href="https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI" target="_blank" rel="noopener noreferrer" class="channel-card reveal p-7 space-y-5">
 					<div>
 						<div class="channel-icon">
 							<img src="https://awsairuniversity.com/wp-content/uploads/2026/09/wired-outline-2672-logo-square-whatsapp.png" alt="WhatsApp" class="w-7 h-7 object-contain">
@@ -977,7 +1032,6 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 			</div>
 		</section>
 
-	</main>
 </div>
 
 <script>
@@ -1003,7 +1057,7 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 
 	/* Scroll reveal */
 	(function () {
-		const targets = document.querySelectorAll('.community-page-wrapper .reveal');
+		const targets = document.querySelectorAll('.community-page-wrapper .reveal, .community-page-wrapper .cp-reveal');
 		if (!('IntersectionObserver' in window)) {
 			targets.forEach(function (t) { t.classList.add('in'); });
 			return;
@@ -1016,7 +1070,14 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 				}
 			});
 		}, { threshold: 0.12 });
-		targets.forEach(function (t) { io.observe(t); });
+		// Immediately reveal elements already in view on load so no section stays hidden.
+		targets.forEach(function (t) {
+			if (t.getBoundingClientRect().top < window.innerHeight) {
+				t.classList.add('in');
+			} else {
+				io.observe(t);
+			}
+		});
 	})();
 </script>
 

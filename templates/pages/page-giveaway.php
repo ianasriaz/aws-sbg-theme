@@ -757,7 +757,7 @@ $whatsapp_icon = file_exists( get_theme_file_path( 'assets/images/icons/wired-ou
 					</div>
 
 					<!-- WhatsApp Community Button -->
-					<a href="https://chat.whatsapp.com/KlNgxGopitiCJoTJEyqTaL" target="_blank" rel="noopener noreferrer" class="btn-launch" style="display:inline-flex; width:auto; padding:14px 28px; font-size:14px;">
+					<a href="https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI" target="_blank" rel="noopener noreferrer" class="btn-launch" style="display:inline-flex; width:auto; padding:14px 28px; font-size:14px;">
 						💬 Join WhatsApp Community for Next Campus Drop ↗
 					</a>
 

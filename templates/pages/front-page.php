@@ -593,7 +593,7 @@ get_header();
 							<span class="text-base leading-none">→</span>
 						</a>
 
-						<a href="https://chat.whatsapp.com/KlNgxGopitiCJoTJEyqTaL" 
+						<a href="https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI" 
 						   target="_blank" 
 						   rel="noopener noreferrer" 
 						   class="btn-ghost text-center">
@@ -933,7 +933,7 @@ $hp_img_url = file_exists( get_theme_file_path( 'assets/images/AWS-Home.webp' ) 
 					<span class="text-base leading-none">→</span>
 				</a>
 
-				<a href="https://chat.whatsapp.com/KlNgxGopitiCJoTJEyqTaL" 
+				<a href="https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI" 
 				   target="_blank" 
 				   rel="noopener noreferrer" 
 				   class="btn-ghost w-full sm:w-auto text-center">

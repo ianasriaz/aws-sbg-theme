@@ -34,6 +34,30 @@
 
 ## Change Log (Newest First)
 
+### 2026-10-18 - Command Code
+
+**Task**: Remove header announcement top bar, update WhatsApp community link, and fix the broken community page.
+
+**Files Changed**:
+- `templates/partials/header.php` - Removed the "CLAIM $579 AWS STUDENT REWARDS" announcement `<aside>` completely.
+- `templates/pages/front-page.php`, `templates/pages/page-community.php`, `templates/pages/page-giveaway.php`, `includes/features/feature-giveaway.php` - Updated WhatsApp community link to `https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI` (6 occurrences).
+- `templates/pages/page-community.php` - Fixed the broken page (see summary).
+
+**Summary**: The community page had a half-finished refactor. The rewards section contained a duplicated/orphaned legacy markup block with an unclosed `<div>`, plus stray `</header>` and `</main>` closers from a bad find-and-replace. The hero's Aurora CSS, gridlines and highlight pill were never defined, and the new reward card classes (`.cp-card-dark`, `.cp-reward-value/title/desc`, `.cp-rewards*`, `.cp-section`) had no styles. The reveal observer also only targeted `.reveal`, so `.cp-reveal` sections stayed at `opacity: 0`.
+
+**Key Decisions**:
+- Removed the orphaned legacy reward markup rather than reverting, keeping the newer dark-card design.
+- Fixed the mismatched `</header>`/`</main>` to correct `</section>` / wrapper close.
+- Restored the missing hero CSS from `page-community-backup-20260929-174257.php` and wrote the missing rewards CSS.
+- Updated the IntersectionObserver selector to cover both `.reveal` and `.cp-reveal`, and added an immediate in-view reveal on load so no section stays hidden.
+
+**Notes for Future Agents**:
+- The reveal system is now two class families: `.reveal` (legacy) and `.cp-reveal` (new). Both are observed by the same script at the bottom of `page-community.php`.
+- The `page-community-backup-*.php` files live inside `templates/pages/` and match the `page-*.php` glob used by `aws_sbg_add_page_templates()`, so they appear in the WP page template dropdown. Consider removing them.
+- The page-level `:root` vars are defined without the `.community-page-wrapper` scope; some rules use scoped selectors while card styles reference the vars. Keep this in mind when editing.
+
+---
+
 ### 2024-09-29 12:30 - GitHub Copilot (Kimi K2.5)
 
 **Task**: Reorganize theme folder structure and setup GitHub Actions deployment

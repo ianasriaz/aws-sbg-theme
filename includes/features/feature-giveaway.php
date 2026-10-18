@@ -90,7 +90,7 @@ function aws_sbg_get_giveaway_settings() {
 				'title'       => 'Join WhatsApp Community',
 				'subtitle'    => 'Official announcements & discussion hub',
 				'icon'        => 'whatsapp',
-				'url'         => 'https://chat.whatsapp.com/KlNgxGopitiCJoTJEyqTaL',
+				'url'         => 'https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI',
 				'button_text' => 'Join WhatsApp Community',
 				'is_required' => 1,
 			),
