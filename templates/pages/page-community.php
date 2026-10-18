@@ -85,7 +85,7 @@ get_header();
 		gap: 8px;
 		padding: 14px 28px;
 		background: var(--cp-accent);
-		color: #ffffff;
+		color: #ffffff !important;
 		font-weight: 600;
 		font-size: 15px;
 		border-radius: 8px;
@@ -753,7 +753,7 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 		</div>
 
 		<div class="cp-reveal cp-reveal-delay-2" style="margin-top: 48px; text-align: center;">
-			<a href="https://builder.aws.com/start" target="_blank" rel="noopener noreferrer" class="cp-btn-primary">
+			<a href="https://builder.aws.com?inviteId=daab681a-b41c-43d0-bfcb-b21f2993b354" target="_blank" rel="noopener noreferrer" class="cp-btn-primary">
 				Claim Student Rewards
 				<span class="cp-btn-arrow">→</span>
 			</a>

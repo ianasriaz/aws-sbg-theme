@@ -36,6 +36,33 @@
 
 ### 2026-10-18 - Command Code
 
+**Task**: Build a multi-giveaway system (create giveaways with requirements, public submissions, admin winner publishing) replacing the single hardcoded campus campaign.
+
+**Files Changed**:
+- `includes/features/feature-giveaway.php` - Rewritten as a multi-giveaway engine (CPT, meta boxes, submission handler, admin screen, migration).
+- `templates/pages/page-giveaway.php` - Rewritten as the public multi-giveaway page.
+- `includes/admin/admin-dashboard.php` - Nav tab `giveaway` → `giveaways` (points to the new submissions screen).
+- `functions.php` - Unchanged (same require path).
+
+**Summary**: Giveaways are now a `aws_giveaway` custom post type instead of one global option. Each giveaway has its own requirements (tick / link-or-text proof / image upload ≤2 MB) and its own details-field builder (Name/Email/Phone pre-seeded). The public `/giveaway/` page lists every open giveaway with its own form and shows published winners for announced ones. Admin gets a `AWS SBG Suite > 🎁 Giveaway Submissions` screen with per-giveaway filtering, uploaded-file thumbnails, winner pick/re-roll/publish, and CSV export.
+
+**Key Decisions**:
+- Requirements and fields are stored as JSON post meta; responses live in a new `wp_aws_giveaway_requirement_values` table.
+- Public submissions POST to `admin-post.php` (native multipart) rather than REST so file uploads work; nonce + honeypot + capability checks retained.
+- Migrated the legacy `aws_sbg_giveaway_settings` into the first giveaway post and backfilled `giveaway_id` on existing entries; legacy tasks became `check` requirements.
+- Swapped the legacy unique keys for per-giveaway keys so the same email can enter multiple giveaways.
+- UniqueKeys are swapped via explicit `ALTER` (dbDelta does not drop indexes); gated by `aws_sbg_giveaway_migrated`.
+
+**Notes for Future Agents**:
+- Old single-campaign functions/endpoints (`aws_sbg_get_giveaway_settings`, `giveaway/enter`, `giveaway/check-ticket`, `aws-campus-giveaway`) were removed. `aws-sbg/v1/giveaway/stats` remains and now needs a `giveaway_id`.
+- The upload input name is `gw_file_<requirement_id>`; requirement/detail field ids are `sanitize_key`'d.
+- `page-giveaway.php` no longer uses Alpine or the confetti CDN.
+- Migration runs on `admin_init` priority 20 (after `aws_sbg_giveaway_init_db` on priority 10). It only creates a giveaway if the legacy `aws_sbg_giveaway_settings` option exists.
+
+---
+
+### 2026-10-18 - Command Code
+
 **Task**: Remove header announcement top bar, update WhatsApp community link, and fix the broken community page.
 
 **Files Changed**:

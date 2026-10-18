@@ -1,11 +1,12 @@
 <?php
 /**
- * AWS SBG Modular Campus Giveaway Engine
+ * AWS SBG Multi-Giveaway Engine
  * File: feature-giveaway.php
  *
- * Lightweight, zero-server-overload giveaway system with configurable email domains,
- * modular action tasks, cached live counters, compound duplicate prevention,
- * and an interactive admin random winner selection tool.
+ * Create unlimited giveaways from WP Admin, each with its own requirements
+ * (tick / link-or-text proof / image upload) and its own detail fields.
+ * Public visitors fulfil requirements and submit; admins review submissions
+ * per giveaway and publish winners.
  *
  * @package AWS_SBG_Theme
  */
@@ -14,175 +15,220 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * 1. DATABASE SCHEMA INITIALIZATION
- * Uses a dedicated single flat table for 100% zero wp_postmeta overhead.
- */
+define( 'AWS_SBG_GIVEAWAY_DBV', '2' );
+define( 'AWS_SBG_GIVEAWAY_MAX_UPLOAD', 2 * 1024 * 1024 ); // 2 MB
+
+/* ============================================================================
+ * 1. DATABASE SCHEMA
+ * ============================================================================ */
+
 function aws_sbg_giveaway_init_db() {
 	global $wpdb;
 	$charset_collate = $wpdb->get_charset_collate();
-	$table_name      = $wpdb->prefix . 'aws_giveaway_entries';
 
-	$sql = "CREATE TABLE $table_name (
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+	// Entries / submissions
+	$table_entries = $wpdb->prefix . 'aws_giveaway_entries';
+	dbDelta( "CREATE TABLE $table_entries (
 		id bigint(20) NOT NULL AUTO_INCREMENT,
-		campaign_id varchar(50) NOT NULL DEFAULT 'campus-campaign',
+		giveaway_id bigint(20) NOT NULL DEFAULT 0,
+		campaign_id varchar(50) NOT NULL DEFAULT '',
 		ticket_number varchar(50) NOT NULL,
-		full_name varchar(255) NOT NULL,
-		email varchar(255) NOT NULL,
-		phone varchar(50) NOT NULL,
-		source varchar(100) NOT NULL DEFAULT 'campus_qr',
+		full_name varchar(255) NOT NULL DEFAULT '',
+		email varchar(255) NOT NULL DEFAULT '',
+		phone varchar(50) NOT NULL DEFAULT '',
+		custom_data longtext,
+		source varchar(100) NOT NULL DEFAULT '',
+		status varchar(20) NOT NULL DEFAULT 'pending',
 		is_winner tinyint(1) NOT NULL DEFAULT 0,
 		winner_drawn_at datetime DEFAULT NULL,
 		ip_address varchar(45) NOT NULL DEFAULT '',
 		created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		PRIMARY KEY  (id),
 		UNIQUE KEY unique_ticket (ticket_number),
-		UNIQUE KEY unique_campaign_email (campaign_id, email),
-		UNIQUE KEY unique_campaign_phone (campaign_id, phone),
-		KEY campaign_idx (campaign_id),
+		KEY giveaway_idx (giveaway_id),
 		KEY is_winner_idx (is_winner)
-	) $charset_collate;";
+	) $charset_collate;" );
 
-	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-	dbDelta( $sql );
+	// Requirement responses (one row per requirement per submission)
+	$table_rv = $wpdb->prefix . 'aws_giveaway_requirement_values';
+	dbDelta( "CREATE TABLE $table_rv (
+		id bigint(20) NOT NULL AUTO_INCREMENT,
+		entry_id bigint(20) NOT NULL DEFAULT 0,
+		giveaway_id bigint(20) NOT NULL DEFAULT 0,
+		requirement_id varchar(64) NOT NULL DEFAULT '',
+		req_type varchar(10) NOT NULL DEFAULT 'check',
+		check_state tinyint(1) NOT NULL DEFAULT 0,
+		value_text text,
+		attachment_id bigint(20) NOT NULL DEFAULT 0,
+		created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY  (id),
+		KEY entry_idx (entry_id),
+		KEY giveaway_idx (giveaway_id)
+	) $charset_collate;" );
 }
 add_action( 'after_switch_theme', 'aws_sbg_giveaway_init_db' );
-add_action( 'admin_init', 'aws_sbg_giveaway_init_db' );
+add_action( 'admin_init', 'aws_sbg_giveaway_init_db', 10 );
 
 /**
- * 2. CAMPAIGN SETTINGS HELPER
- * Retrieves modular campaign configuration with sensible Air University defaults.
+ * Does an index exist on a table?
  */
-function aws_sbg_get_giveaway_settings() {
-	$defaults = array(
-		'campaign_id'           => 'campus-campaign',
-		'campaign_title'        => 'AWS SBG Campus Giveaway',
-		'campaign_subtitle'     => 'Air University Chapter • Enter to win 1 of 5 exclusive AWS Swag Bundles',
-		'campaign_description'  => 'Complete the quick steps to claim your official Lucky Ticket. 5 random Air University students will win exclusive AWS Swag Bundles in this giveaway.',
-		'campaign_status'       => 'active', // active, announced, paused
-		'allowed_email_domains' => 'students.au.edu.pk, au.edu.pk',
-		'ticket_prefix'         => 'AU-AWS',
-		'winner_count'          => 5,
-		'prize_title'           => '5 Official AWS Swag Bundles',
-		'prize_description'     => 'Official AWS T-Shirts, Cloud Badges, Stickers & Cloud Learning Perks',
-		'booth_claim_location'  => 'AWS SBG Campus Desk (Ground Floor, Main Cafeteria) — Bring your AU Student ID Card',
-		'tasks'                 => array(
-			array(
-				'id'          => 'linkedin',
-				'title'       => 'Follow on LinkedIn',
-				'subtitle'    => 'AWS Student Builder Group Air University',
-				'icon'        => 'linkedin',
-				'url'         => 'https://www.linkedin.com/company/aws-student-builder-group-air-university-islamabad/',
-				'button_text' => 'Follow on LinkedIn',
-				'is_required' => 1,
-			),
-			array(
-				'id'          => 'instagram',
-				'title'       => 'Follow on Instagram',
-				'subtitle'    => '@awssbgairuniversity',
-				'icon'        => 'instagram',
-				'url'         => 'https://www.instagram.com/awssbgairuniversity/',
-				'button_text' => 'Follow @awssbgairuniversity',
-				'is_required' => 1,
-			),
-			array(
-				'id'          => 'whatsapp',
-				'title'       => 'Join WhatsApp Community',
-				'subtitle'    => 'Official announcements & discussion hub',
-				'icon'        => 'whatsapp',
-				'url'         => 'https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI',
-				'button_text' => 'Join WhatsApp Community',
-				'is_required' => 1,
-			),
-		),
-	);
-
-	$saved = get_option( 'aws_sbg_giveaway_settings', array() );
-	if ( ! is_array( $saved ) ) {
-		$saved = array();
-	}
-
-	return wp_parse_args( $saved, $defaults );
+function aws_sbg_giveaway_index_exists( $table, $index ) {
+	global $wpdb;
+	$found = $wpdb->get_var( $wpdb->prepare( "SHOW INDEX FROM $table WHERE Key_name = %s", $index ) );
+	return ! empty( $found );
 }
 
 /**
- * 3. LIVE COUNTER CACHING (Zero MySQL Hammering)
- * Reads participant count from transient memory or executes a fast indexed query.
+ * Drop legacy unique keys and add per-giveaway composite unique keys.
+ * Runs once, after any legacy rows have been backfilled.
  */
-function aws_sbg_get_giveaway_live_count( $campaign_id = 'campus-campaign' ) {
-	$cache_key = 'aws_sbg_giveaway_count_' . sanitize_key( $campaign_id );
-	$count     = get_transient( $cache_key );
+function aws_sbg_giveaway_swap_indexes() {
+	global $wpdb;
+	$table = $wpdb->prefix . 'aws_giveaway_entries';
+
+	foreach ( array( 'unique_campaign_email', 'unique_campaign_phone' ) as $legacy ) {
+		if ( aws_sbg_giveaway_index_exists( $table, $legacy ) ) {
+			$wpdb->query( "ALTER TABLE $table DROP INDEX $legacy" );
+		}
+	}
+	if ( ! aws_sbg_giveaway_index_exists( $table, 'unique_giveaway_email' ) ) {
+		$wpdb->query( "ALTER TABLE $table ADD UNIQUE KEY unique_giveaway_email (giveaway_id, email)" );
+	}
+	if ( ! aws_sbg_giveaway_index_exists( $table, 'unique_giveaway_phone' ) ) {
+		$wpdb->query( "ALTER TABLE $table ADD UNIQUE KEY unique_giveaway_phone (giveaway_id, phone)" );
+	}
+}
+
+/* ============================================================================
+ * 2. CUSTOM POST TYPE
+ * ============================================================================ */
+
+function aws_sbg_register_giveaway_cpt() {
+	register_post_type( 'aws_giveaway', array(
+		'labels'          => array(
+			'name'          => 'Giveaways',
+			'singular_name' => 'Giveaway',
+			'add_new_item'  => 'Add New Giveaway',
+			'edit_item'     => 'Edit Giveaway',
+			'all_items'     => 'All Giveaways',
+			'menu_name'     => '🎁 Giveaways',
+		),
+		'public'          => false,
+		'show_ui'         => true,
+		'show_in_menu'    => 'aws-sbg-suite',
+		'supports'        => array( 'title' ),
+		'has_archive'     => false,
+		'rewrite'         => false,
+		'menu_icon'       => 'dashicons-megaphone',
+		'capability_type' => 'post',
+	) );
+}
+add_action( 'init', 'aws_sbg_register_giveaway_cpt', 5 );
+
+/* ============================================================================
+ * 3. HELPERS
+ * ============================================================================ */
+
+function aws_sbg_default_giveaway_fields() {
+	return array(
+		array( 'id' => 'full_name', 'label' => 'Full Name', 'type' => 'text', 'required' => 1, 'options' => '' ),
+		array( 'id' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => 1, 'options' => '' ),
+		array( 'id' => 'phone', 'label' => 'Phone / WhatsApp', 'type' => 'tel', 'required' => 1, 'options' => '' ),
+	);
+}
+
+function aws_sbg_get_giveaway_meta( $giveaway_id ) {
+	$defaults = array(
+		'giveaway_status'       => 'open',
+		'giveaway_description'  => '',
+		'opens_at'              => '',
+		'closes_at'             => '',
+		'allowed_email_domains' => 'students.au.edu.pk, au.edu.pk',
+		'winner_count'          => 5,
+		'ticket_prefix'         => 'AU-AWS',
+		'prize_title'           => '',
+		'prize_description'     => '',
+	);
+
+	$meta = array();
+	foreach ( $defaults as $key => $default ) {
+		$val          = get_post_meta( $giveaway_id, $key, true );
+		$meta[ $key ] = ( '' === $val || null === $val ) ? $default : $val;
+	}
+	return $meta;
+}
+
+function aws_sbg_get_giveaway_requirements( $giveaway_id ) {
+	$reqs = get_post_meta( $giveaway_id, 'giveaway_requirements', true );
+	return is_array( $reqs ) ? $reqs : array();
+}
+
+function aws_sbg_get_giveaway_fields( $giveaway_id ) {
+	$fields = get_post_meta( $giveaway_id, 'giveaway_fields', true );
+	if ( ! is_array( $fields ) || empty( $fields ) ) {
+		$fields = aws_sbg_default_giveaway_fields();
+	}
+	return $fields;
+}
+
+/**
+ * Published giveaways matching the given statuses (date window applied to "open").
+ */
+function aws_sbg_get_giveaways( $statuses = array( 'open' ) ) {
+	$query = new WP_Query( array(
+		'post_type'      => 'aws_giveaway',
+		'post_status'    => 'publish',
+		'posts_per_page' => 50,
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+		'meta_query'     => array(
+			array(
+				'key'     => 'giveaway_status',
+				'value'   => (array) $statuses,
+				'compare' => 'IN',
+			),
+		),
+	) );
+
+	$giveaways = array();
+	foreach ( $query->posts as $post ) {
+		$meta = aws_sbg_get_giveaway_meta( $post->ID );
+		if ( 'open' === $meta['giveaway_status'] ) {
+			$now = current_time( 'timestamp' );
+			if ( ! empty( $meta['opens_at'] ) && strtotime( $meta['opens_at'] ) > $now ) {
+				continue;
+			}
+			if ( ! empty( $meta['closes_at'] ) && strtotime( $meta['closes_at'] ) < $now ) {
+				continue;
+			}
+		}
+		$giveaways[] = $post;
+	}
+	return $giveaways;
+}
+
+function aws_sbg_get_giveaway_live_count( $giveaway_id ) {
+	$giveaway_id = intval( $giveaway_id );
+	$cache_key   = 'aws_sbg_giveaway_count_' . $giveaway_id;
+	$count       = get_transient( $cache_key );
 
 	if ( false === $count ) {
 		global $wpdb;
-		$table_name = $wpdb->prefix . 'aws_giveaway_entries';
-		$count      = (int) $wpdb->get_var( $wpdb->prepare(
-			"SELECT COUNT(*) FROM $table_name WHERE campaign_id = %s",
-			$campaign_id
-		) );
-		set_transient( $cache_key, $count, 60 ); // Cache for 60 seconds
+		$table = $wpdb->prefix . 'aws_giveaway_entries';
+		$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE giveaway_id = %d", $giveaway_id ) );
+		set_transient( $cache_key, $count, 60 );
 	}
-
 	return (int) $count;
 }
 
-/**
- * Invalidate cached live counter on new entry or purge.
- */
-function aws_sbg_invalidate_giveaway_count( $campaign_id = 'campus-campaign' ) {
-	$cache_key = 'aws_sbg_giveaway_count_' . sanitize_key( $campaign_id );
-	delete_transient( $cache_key );
+function aws_sbg_invalidate_giveaway_count( $giveaway_id ) {
+	delete_transient( 'aws_sbg_giveaway_count_' . intval( $giveaway_id ) );
 }
 
-/**
- * 4. PUBLIC REST API ENDPOINTS
- * Lightweight REST endpoints for live counter and form submission.
- */
-add_action( 'rest_api_init', function () {
-	// Endpoint 1: Get Live Stats & Config
-	register_rest_route( 'aws-sbg/v1', '/giveaway/stats', array(
-		'methods'             => 'GET',
-		'callback'            => 'aws_sbg_rest_giveaway_stats',
-		'permission_callback' => '__return_true',
-	) );
-
-	// Endpoint 2: Submit Giveaway Entry
-	register_rest_route( 'aws-sbg/v1', '/giveaway/enter', array(
-		'methods'             => 'POST',
-		'callback'            => 'aws_sbg_rest_giveaway_enter',
-		'permission_callback' => '__return_true',
-	) );
-
-	// Endpoint 3: Check My Ticket / Status
-	register_rest_route( 'aws-sbg/v1', '/giveaway/check-ticket', array(
-		'methods'             => 'GET',
-		'callback'            => 'aws_sbg_rest_giveaway_check_ticket',
-		'permission_callback' => '__return_true',
-	) );
-} );
-
-/**
- * REST Callback: Stats
- */
-function aws_sbg_rest_giveaway_stats( WP_REST_Request $request ) {
-	$settings    = aws_sbg_get_giveaway_settings();
-	$campaign_id = $settings['campaign_id'];
-	$count       = aws_sbg_get_giveaway_live_count( $campaign_id );
-
-	return rest_ensure_response( array(
-		'success'        => true,
-		'count'          => $count,
-		'status'         => $settings['campaign_status'],
-		'campaign_title' => $settings['campaign_title'],
-		'winner_count'   => (int) $settings['winner_count'],
-	) );
-}
-
-/**
- * Helper: Validate Email Domain against configurable allowed domains
- */
 function aws_sbg_validate_giveaway_domain( $email, $allowed_domains_str ) {
-	$allowed_domains_str = trim( $allowed_domains_str );
+	$allowed_domains_str = trim( (string) $allowed_domains_str );
 	if ( empty( $allowed_domains_str ) || '*' === $allowed_domains_str ) {
 		return true;
 	}
@@ -194,228 +240,536 @@ function aws_sbg_validate_giveaway_domain( $email, $allowed_domains_str ) {
 	}
 
 	$email_domain = $parts[1];
-
 	foreach ( $domains as $domain ) {
 		if ( empty( $domain ) ) {
 			continue;
 		}
-		// Exact match or sub-domain match
 		if ( $email_domain === $domain || str_ends_with( $email_domain, '.' . $domain ) ) {
 			return true;
 		}
 	}
-
 	return false;
 }
 
-/**
- * REST Callback: Enter Giveaway
- */
-function aws_sbg_rest_giveaway_enter( WP_REST_Request $request ) {
+function aws_sbg_giveaway_is_open( $giveaway_id ) {
+	$post = get_post( $giveaway_id );
+	if ( ! $post || 'aws_giveaway' !== $post->post_type || 'publish' !== $post->post_status ) {
+		return false;
+	}
+	$meta = aws_sbg_get_giveaway_meta( $giveaway_id );
+	return ( 'open' === $meta['giveaway_status'] );
+}
+
+/* ============================================================================
+ * 4. ADMIN META BOXES
+ * ============================================================================ */
+
+function aws_sbg_giveaway_add_meta_boxes() {
+	add_meta_box( 'aws_sbg_giveaway_settings', '⚙️ Giveaway Settings', 'aws_sbg_giveaway_render_settings_box', 'aws_giveaway', 'normal', 'high' );
+	add_meta_box( 'aws_sbg_giveaway_fields', '👤 Details Fields (what entrants fill in)', 'aws_sbg_giveaway_render_fields_box', 'aws_giveaway', 'normal', 'high' );
+	add_meta_box( 'aws_sbg_giveaway_reqs', '✅ Requirements (what entrants must do)', 'aws_sbg_giveaway_render_reqs_box', 'aws_giveaway', 'normal', 'high' );
+}
+add_action( 'add_meta_boxes', 'aws_sbg_giveaway_add_meta_boxes' );
+
+function aws_sbg_giveaway_render_settings_box( $post ) {
+	wp_nonce_field( 'aws_sbg_giveaway_meta_action', 'aws_sbg_giveaway_meta_nonce' );
+	$m = aws_sbg_get_giveaway_meta( $post->ID );
+	?>
+	<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px;">
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Status</label>
+			<select name="giveaway_status" style="width:100%;">
+				<option value="open" <?php selected( $m['giveaway_status'], 'open' ); ?>>🟢 Open (accepting entries)</option>
+				<option value="closed" <?php selected( $m['giveaway_status'], 'closed' ); ?>>⏸ Closed</option>
+				<option value="announced" <?php selected( $m['giveaway_status'], 'announced' ); ?>>🏆 Winners announced</option>
+			</select>
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Number of Winners</label>
+			<input type="number" name="winner_count" min="1" max="100" value="<?php echo esc_attr( $m['winner_count'] ); ?>" style="width:100%;">
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Ticket Prefix</label>
+			<input type="text" name="ticket_prefix" value="<?php echo esc_attr( $m['ticket_prefix'] ); ?>" style="width:100%;">
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Allowed Email Domains <span style="font-weight:400;color:#64748b;">(comma separated, or * for any)</span></label>
+			<input type="text" name="allowed_email_domains" value="<?php echo esc_attr( $m['allowed_email_domains'] ); ?>" style="width:100%;">
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Opens At (optional)</label>
+			<input type="datetime-local" name="opens_at" value="<?php echo esc_attr( $m['opens_at'] ); ?>" style="width:100%;">
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Closes At (optional)</label>
+			<input type="datetime-local" name="closes_at" value="<?php echo esc_attr( $m['closes_at'] ); ?>" style="width:100%;">
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Prize Headline</label>
+			<input type="text" name="prize_title" value="<?php echo esc_attr( $m['prize_title'] ); ?>" style="width:100%;" placeholder="e.g. 5 Official AWS Swag Bundles">
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Prize Details</label>
+			<input type="text" name="prize_description" value="<?php echo esc_attr( $m['prize_description'] ); ?>" style="width:100%;">
+		</div>
+	</div>
+	<div style="margin-top:14px;">
+		<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Description (shown to entrants)</label>
+		<textarea name="giveaway_description" rows="3" style="width:100%;"><?php echo esc_textarea( $m['giveaway_description'] ); ?></textarea>
+	</div>
+	<?php
+}
+
+function aws_sbg_giveaway_render_reqs_box( $post ) {
+	$reqs = aws_sbg_get_giveaway_requirements( $post->ID );
+	?>
+	<p style="margin-top:0;color:#64748b;font-size:13px;">Entrants must complete each requirement before submitting.</p>
+	<input type="hidden" name="requirements_json" id="aws-reqs-json" value="<?php echo esc_attr( wp_json_encode( $reqs ) ); ?>">
+	<div id="aws-reqs-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+	<button type="button" id="aws-add-req" class="button" style="margin-top:12px;">+ Add Requirement</button>
+
+	<script>
+	(function(){
+		var types = { check: 'Tick (self-confirm)', proof: 'Tick + link/text proof', upload: 'Image upload (max 2 MB)' };
+		var list = document.getElementById('aws-reqs-list');
+		var hidden = document.getElementById('aws-reqs-json');
+		var data = [];
+		try { data = JSON.parse(hidden.value || '[]'); } catch(e) { data = []; }
+
+		function esc(v){ return String(v == null ? '' : v).replace(/"/g,'&quot;'); }
+
+		function rowHtml(r) {
+			var opts = '';
+			Object.keys(types).forEach(function(k){
+				opts += '<option value="'+k+'"'+(r.type===k?' selected':'')+'>'+types[k]+'</option>';
+			});
+			return '<div class="aws-req-row" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px;display:grid;grid-template-columns:1fr 210px 110px 40px;gap:10px;align-items:center;">'
+				+ '<input type="text" class="req-label" placeholder="Requirement label (e.g. Follow on Instagram)" value="'+esc(r.label)+'" style="padding:6px 10px;">'
+				+ '<select class="req-type" style="padding:6px 10px;">'+opts+'</select>'
+				+ '<label style="font-size:12px;display:flex;align-items:center;gap:6px;"><input type="checkbox" class="req-required"'+(r.required?' checked':'')+'> Required</label>'
+				+ '<button type="button" class="button-link aws-del-req" style="color:#ef4444;text-decoration:none;">✕</button>'
+				+ '<input type="text" class="req-help" placeholder="Optional helper text" value="'+esc(r.help)+'" style="grid-column:1/-1;padding:6px 10px;">'
+				+ '</div>';
+		}
+		function render() {
+			list.innerHTML = '';
+			data.forEach(function(r){ list.insertAdjacentHTML('beforeend', rowHtml(r)); });
+			bind();
+		}
+		function bind() {
+			list.querySelectorAll('.aws-del-req').forEach(function(b){
+				b.onclick = function(){ this.closest('.aws-req-row').remove(); };
+			});
+		}
+		function serialize() {
+			var out = [];
+			list.querySelectorAll('.aws-req-row').forEach(function(row){
+				var label = row.querySelector('.req-label').value.trim();
+				if (!label) return;
+				out.push({
+					id: 'req_' + Math.random().toString(36).slice(2,9),
+					label: label,
+					type: row.querySelector('.req-type').value,
+					required: row.querySelector('.req-required').checked ? 1 : 0,
+					help: row.querySelector('.req-help').value.trim()
+				});
+			});
+			hidden.value = JSON.stringify(out);
+		}
+		document.getElementById('aws-add-req').onclick = function(){
+			list.insertAdjacentHTML('beforeend', rowHtml({type:'check',required:1}));
+			bind();
+		};
+		var form = document.getElementById('post');
+		if (form) form.addEventListener('submit', serialize);
+		render();
+	})();
+	</script>
+	<?php
+}
+
+function aws_sbg_giveaway_render_fields_box( $post ) {
+	$fields = get_post_meta( $post->ID, 'giveaway_fields', true );
+	if ( ! is_array( $fields ) || empty( $fields ) ) {
+		$fields = aws_sbg_default_giveaway_fields();
+	}
+	?>
+	<p style="margin-top:0;color:#64748b;font-size:13px;">The personal details entrants fill in. Name / Email / Phone are pre-added.</p>
+	<input type="hidden" name="fields_json" id="aws-fields-json" value="<?php echo esc_attr( wp_json_encode( $fields ) ); ?>">
+	<div id="aws-fields-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+	<button type="button" id="aws-add-field" class="button" style="margin-top:12px;">+ Add Field</button>
+
+	<script>
+	(function(){
+		var types = { text:'Text', email:'Email', tel:'Phone', textarea:'Long text', select:'Dropdown' };
+		var list = document.getElementById('aws-fields-list');
+		var hidden = document.getElementById('aws-fields-json');
+		var data = [];
+		try { data = JSON.parse(hidden.value || '[]'); } catch(e) { data = []; }
+
+		function esc(v){ return String(v == null ? '' : v).replace(/"/g,'&quot;'); }
+
+		function rowHtml(f) {
+			var opts = '';
+			Object.keys(types).forEach(function(k){
+				opts += '<option value="'+k+'"'+(f.type===k?' selected':'')+'>'+types[k]+'</option>';
+			});
+			return '<div class="aws-field-row" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px;display:grid;grid-template-columns:1fr 160px 110px 40px;gap:10px;align-items:center;">'
+				+ '<input type="text" class="fld-label" placeholder="Field label" value="'+esc(f.label)+'" style="padding:6px 10px;">'
+				+ '<select class="fld-type" style="padding:6px 10px;">'+opts+'</select>'
+				+ '<label style="font-size:12px;display:flex;align-items:center;gap:6px;"><input type="checkbox" class="fld-required"'+(f.required?' checked':'')+'> Required</label>'
+				+ '<button type="button" class="button-link aws-del-field" style="color:#ef4444;text-decoration:none;">✕</button>'
+				+ '<input type="text" class="fld-options" placeholder="Dropdown options, comma separated" value="'+esc(f.options)+'" style="grid-column:1/-1;padding:6px 10px;">'
+				+ '</div>';
+		}
+		function render() {
+			list.innerHTML = '';
+			data.forEach(function(f){ list.insertAdjacentHTML('beforeend', rowHtml(f)); });
+			bind();
+		}
+		function bind() {
+			list.querySelectorAll('.aws-del-field').forEach(function(b){
+				b.onclick = function(){ this.closest('.aws-field-row').remove(); };
+			});
+		}
+		function serialize() {
+			var out = [];
+			list.querySelectorAll('.aws-field-row').forEach(function(row){
+				var label = row.querySelector('.fld-label').value.trim();
+				if (!label) return;
+				out.push({
+					id: 'field_' + Math.random().toString(36).slice(2,9),
+					label: label,
+					type: row.querySelector('.fld-type').value,
+					required: row.querySelector('.fld-required').checked ? 1 : 0,
+					options: row.querySelector('.fld-options').value.trim()
+				});
+			});
+			hidden.value = JSON.stringify(out);
+		}
+		document.getElementById('aws-add-field').onclick = function(){
+			list.insertAdjacentHTML('beforeend', rowHtml({type:'text'}));
+			bind();
+		};
+		var form = document.getElementById('post');
+		if (form) form.addEventListener('submit', serialize);
+		render();
+	})();
+	</script>
+	<?php
+}
+
+function aws_sbg_giveaway_save_meta( $post_id ) {
+	if ( ! isset( $_POST['aws_sbg_giveaway_meta_nonce'] ) || ! wp_verify_nonce( $_POST['aws_sbg_giveaway_meta_nonce'], 'aws_sbg_giveaway_meta_action' ) ) {
+		return;
+	}
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	$text_keys = array( 'giveaway_status', 'opens_at', 'closes_at', 'allowed_email_domains', 'ticket_prefix', 'prize_title', 'prize_description' );
+	foreach ( $text_keys as $key ) {
+		if ( isset( $_POST[ $key ] ) ) {
+			update_post_meta( $post_id, $key, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
+		}
+	}
+
+	if ( isset( $_POST['winner_count'] ) ) {
+		update_post_meta( $post_id, 'winner_count', max( 1, intval( $_POST['winner_count'] ) ) );
+	}
+	if ( isset( $_POST['giveaway_description'] ) ) {
+		update_post_meta( $post_id, 'giveaway_description', sanitize_textarea_field( wp_unslash( $_POST['giveaway_description'] ) ) );
+	}
+
+	if ( isset( $_POST['requirements_json'] ) ) {
+		$decoded = json_decode( wp_unslash( $_POST['requirements_json'] ), true );
+		$clean   = array();
+		if ( is_array( $decoded ) ) {
+			foreach ( $decoded as $r ) {
+				if ( empty( $r['label'] ) ) {
+					continue;
+				}
+				$type    = in_array( $r['type'] ?? '', array( 'check', 'proof', 'upload' ), true ) ? $r['type'] : 'check';
+				$clean[] = array(
+					'id'       => sanitize_key( $r['id'] ?? uniqid( 'req_' ) ),
+					'label'    => sanitize_text_field( $r['label'] ),
+					'type'     => $type,
+					'required' => ! empty( $r['required'] ) ? 1 : 0,
+					'help'     => sanitize_text_field( $r['help'] ?? '' ),
+				);
+			}
+		}
+		update_post_meta( $post_id, 'giveaway_requirements', $clean );
+	}
+
+	if ( isset( $_POST['fields_json'] ) ) {
+		$decoded = json_decode( wp_unslash( $_POST['fields_json'] ), true );
+		$clean   = array();
+		if ( is_array( $decoded ) ) {
+			foreach ( $decoded as $f ) {
+				if ( empty( $f['label'] ) ) {
+					continue;
+				}
+				$type    = in_array( $f['type'] ?? '', array( 'text', 'email', 'tel', 'textarea', 'select' ), true ) ? $f['type'] : 'text';
+				$clean[] = array(
+					'id'       => sanitize_key( $f['id'] ?? uniqid( 'field_' ) ),
+					'label'    => sanitize_text_field( $f['label'] ),
+					'type'     => $type,
+					'required' => ! empty( $f['required'] ) ? 1 : 0,
+					'options'  => sanitize_text_field( $f['options'] ?? '' ),
+				);
+			}
+		}
+		if ( ! empty( $clean ) ) {
+			update_post_meta( $post_id, 'giveaway_fields', $clean );
+		}
+	}
+}
+add_action( 'save_post_aws_giveaway', 'aws_sbg_giveaway_save_meta' );
+
+/* ============================================================================
+ * 5. PUBLIC SUBMISSION HANDLER (native multipart POST so uploads work)
+ * ============================================================================ */
+
+function aws_sbg_giveaway_submission_error( $giveaway_id, $code ) {
+	$url = wp_get_referer() ? wp_get_referer() : home_url( '/giveaway/' );
+	$url = add_query_arg( array( 'gw_status' => 'error', 'gw_error' => $code, 'gw_id' => intval( $giveaway_id ) ), $url );
+	wp_safe_redirect( $url );
+	exit;
+}
+
+function aws_sbg_handle_giveaway_submission() {
+	if ( ! isset( $_POST['giveaway_nonce'] ) || ! wp_verify_nonce( $_POST['giveaway_nonce'], 'aws_sbg_giveaway_submit' ) ) {
+		wp_die( 'Security check failed.', 'Error', array( 'response' => 403 ) );
+	}
+
+	$giveaway_id = isset( $_POST['giveaway_id'] ) ? intval( $_POST['giveaway_id'] ) : 0;
+	if ( ! aws_sbg_giveaway_is_open( $giveaway_id ) ) {
+		aws_sbg_giveaway_submission_error( $giveaway_id, 'closed' );
+	}
+
+	if ( ! empty( $_POST['website_url'] ) ) { // honeypot
+		aws_sbg_giveaway_submission_error( $giveaway_id, 'spam' );
+	}
+
 	global $wpdb;
-	$table_name = $wpdb->prefix . 'aws_giveaway_entries';
-	$settings   = aws_sbg_get_giveaway_settings();
+	$table_entries = $wpdb->prefix . 'aws_giveaway_entries';
+	$table_rv      = $wpdb->prefix . 'aws_giveaway_requirement_values';
 
-	// Check campaign status
-	if ( 'active' !== $settings['campaign_status'] ) {
-		return new WP_REST_Response( array(
-			'success' => false,
-			'message' => 'Entries for this giveaway are currently closed.',
-		), 400 );
+	$meta   = aws_sbg_get_giveaway_meta( $giveaway_id );
+	$fields = aws_sbg_get_giveaway_fields( $giveaway_id );
+	$reqs   = aws_sbg_get_giveaway_requirements( $giveaway_id );
+
+	// 1. Detail fields
+	$values = array();
+	$raw    = isset( $_POST['gw_field'] ) ? (array) wp_unslash( $_POST['gw_field'] ) : array();
+	foreach ( $fields as $field ) {
+		$fid = $field['id'];
+		$val = isset( $raw[ $fid ] ) ? $raw[ $fid ] : '';
+		switch ( $field['type'] ) {
+			case 'email':
+				$val = sanitize_email( $val );
+				break;
+			case 'textarea':
+				$val = sanitize_textarea_field( $val );
+				break;
+			default:
+				$val = sanitize_text_field( $val );
+		}
+		if ( ! empty( $field['required'] ) && '' === trim( (string) $val ) ) {
+			aws_sbg_giveaway_submission_error( $giveaway_id, 'required' );
+		}
+		$values[ $fid ] = $val;
 	}
 
-	// 1. Anti-Spam Honeypot check (hidden field)
-	$honeypot = $request->get_param( 'website_url' );
-	if ( ! empty( $honeypot ) ) {
-		// Silent success for bots
-		return rest_ensure_response( array(
-			'success' => true,
-			'ticket'  => 'AU-AWS-0000',
-			'message' => 'Entry received.',
-		) );
-	}
+	$full_name = isset( $values['full_name'] ) ? $values['full_name'] : '';
+	$email     = isset( $values['email'] ) ? $values['email'] : '';
+	$phone     = isset( $values['phone'] ) ? $values['phone'] : '';
 
-	// 2. Sanitize & Validate Inputs
-	$full_name = sanitize_text_field( $request->get_param( 'full_name' ) );
-	$email     = sanitize_email( strtolower( trim( (string) $request->get_param( 'email' ) ) ) );
-	$phone     = sanitize_text_field( trim( (string) $request->get_param( 'phone' ) ) );
-	$source    = sanitize_text_field( $request->get_param( 'source' ) );
-	if ( empty( $source ) ) {
-		$source = 'campus_qr';
+	if ( empty( $email ) ) {
+		foreach ( $fields as $field ) {
+			if ( 'email' === $field['type'] && ! empty( $values[ $field['id'] ] ) ) {
+				$email = $values[ $field['id'] ];
+				break;
+			}
+		}
 	}
-
-	if ( empty( $full_name ) || empty( $email ) || empty( $phone ) ) {
-		return new WP_REST_Response( array(
-			'success' => false,
-			'message' => 'Please provide your Full Name, AU Student Email, and WhatsApp Number.',
-		), 400 );
+	if ( empty( $full_name ) ) {
+		$full_name = $email ? strstr( $email, '@', true ) : 'Entrant';
 	}
 
 	if ( ! is_email( $email ) ) {
-		return new WP_REST_Response( array(
-			'success' => false,
-			'message' => 'Please enter a valid email address.',
-		), 400 );
+		aws_sbg_giveaway_submission_error( $giveaway_id, 'email' );
+	}
+	if ( ! aws_sbg_validate_giveaway_domain( $email, $meta['allowed_email_domains'] ) ) {
+		aws_sbg_giveaway_submission_error( $giveaway_id, 'domain' );
 	}
 
-	// Clean up phone number (remove extra spaces/dashes for uniform comparison)
 	$clean_phone = preg_replace( '/[^0-9+]/', '', $phone );
-	if ( strlen( $clean_phone ) < 10 ) {
-		return new WP_REST_Response( array(
-			'success' => false,
-			'message' => 'Please enter a valid WhatsApp phone number.',
-		), 400 );
-	}
 
-	// 3. Domain Enforcement (defaults to @students.au.edu.pk)
-	if ( ! aws_sbg_validate_giveaway_domain( $email, $settings['allowed_email_domains'] ) ) {
-		$domain_display = implode( ', ', array_map( function( $d ) {
-			return '@' . trim( $d );
-		}, explode( ',', $settings['allowed_email_domains'] ) ) );
-
-		return new WP_REST_Response( array(
-			'success' => false,
-			'message' => sprintf( 'Only institutional student emails (%s) are eligible for this on-campus giveaway.', $domain_display ),
-		), 400 );
-	}
-
-	$campaign_id = $settings['campaign_id'];
-
-	// 4. Polite "Already Entered" Check (Compound check on email OR phone)
+	// 2. Duplicate check per giveaway
 	$existing = $wpdb->get_row( $wpdb->prepare(
-		"SELECT id, ticket_number, full_name, email, created_at 
-		 FROM $table_name 
-		 WHERE campaign_id = %s AND (email = %s OR phone = %s) 
-		 LIMIT 1",
-		$campaign_id,
+		"SELECT id, ticket_number FROM $table_entries WHERE giveaway_id = %d AND (email = %s OR (phone <> '' AND phone = %s)) LIMIT 1",
+		$giveaway_id,
 		$email,
 		$clean_phone
 	) );
-
 	if ( $existing ) {
-		$current_count = aws_sbg_get_giveaway_live_count( $campaign_id );
-		return rest_ensure_response( array(
-			'success'         => true,
-			'already_entered' => true,
-			'ticket_number'   => $existing->ticket_number,
-			'full_name'       => $existing->full_name,
-			'email'           => $existing->email,
-			'created_at'      => mysql2date( 'M j, Y • g:i a', $existing->created_at ),
-			'live_count'      => $current_count,
-			'message'         => 'You are already registered in this giveaway! Keep your ticket safe.',
-		) );
+		$url = wp_get_referer() ? wp_get_referer() : home_url( '/giveaway/' );
+		$url = add_query_arg( array( 'gw_status' => 'exists', 'gw_ticket' => $existing->ticket_number, 'gw_id' => $giveaway_id ), $url );
+		wp_safe_redirect( $url );
+		exit;
 	}
 
-	// 5. Generate Sequential Clean Ticket Number (e.g. AU-AWS-1042)
-	$prefix     = ! empty( $settings['ticket_prefix'] ) ? trim( $settings['ticket_prefix'] ) : 'AU-AWS';
-	$max_id     = (int) $wpdb->get_var( "SELECT MAX(id) FROM $table_name" );
-	$next_num   = 1000 + $max_id + 1;
-	$ticket_num = $prefix . '-' . $next_num;
-
-	// 6. Insert Entry
-	$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	// 3. Ticket number
+	$prefix = ! empty( $meta['ticket_prefix'] ) ? trim( $meta['ticket_prefix'] ) : 'AU-AWS';
+	$max_id = (int) $wpdb->get_var( "SELECT MAX(id) FROM $table_entries" );
+	$ticket = $prefix . '-' . ( 1000 + $max_id + 1 );
+	$ip     = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$source = isset( $_POST['gw_source'] ) ? sanitize_text_field( wp_unslash( $_POST['gw_source'] ) ) : 'web';
 
 	$inserted = $wpdb->insert(
-		$table_name,
+		$table_entries,
 		array(
-			'campaign_id'   => $campaign_id,
-			'ticket_number' => $ticket_num,
+			'giveaway_id'   => $giveaway_id,
+			'campaign_id'   => 'gw-' . $giveaway_id,
+			'ticket_number' => $ticket,
 			'full_name'     => $full_name,
 			'email'         => $email,
 			'phone'         => $clean_phone,
+			'custom_data'   => wp_json_encode( $values ),
 			'source'        => $source,
+			'status'        => 'pending',
 			'is_winner'     => 0,
 			'ip_address'    => $ip,
 			'created_at'    => current_time( 'mysql' ),
 		),
-		array( '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s' )
+		array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s' )
 	);
 
 	if ( false === $inserted ) {
-		return new WP_REST_Response( array(
-			'success' => false,
-			'message' => 'Unable to register your entry. Please try again.',
-		), 500 );
+		aws_sbg_giveaway_submission_error( $giveaway_id, 'db' );
+	}
+	$entry_id = (int) $wpdb->insert_id;
+
+	// 4. Requirements
+	$allowed_mimes = array( 'image/jpeg', 'image/png', 'image/webp' );
+	foreach ( $reqs as $req ) {
+		$rid        = $req['id'];
+		$type       = $req['type'];
+		$required   = ! empty( $req['required'] );
+		$checked    = isset( $_POST['gw_check'][ $rid ] ) ? 1 : 0;
+		$value_text = isset( $_POST['gw_text'][ $rid ] ) ? sanitize_text_field( wp_unslash( $_POST['gw_text'][ $rid ] ) ) : '';
+		$attach     = 0;
+
+		if ( 'upload' === $type ) {
+			$file_key = 'gw_file_' . $rid;
+			if ( ! empty( $_FILES[ $file_key ]['name'] ) ) {
+				$file = $_FILES[ $file_key ];
+
+				if ( $file['size'] > AWS_SBG_GIVEAWAY_MAX_UPLOAD ) {
+					aws_sbg_giveaway_submission_error( $giveaway_id, 'filesize' );
+				}
+				$check = wp_check_filetype_and_ext( $file['tmp_name'], $file['name'] );
+				if ( ! in_array( $check['type'], $allowed_mimes, true ) ) {
+					aws_sbg_giveaway_submission_error( $giveaway_id, 'filetype' );
+				}
+
+				require_once ABSPATH . 'wp-admin/includes/image.php';
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+				require_once ABSPATH . 'wp-admin/includes/media.php';
+
+				$attach_id = media_handle_upload( $file_key, 0 );
+				if ( is_wp_error( $attach_id ) ) {
+					aws_sbg_giveaway_submission_error( $giveaway_id, 'upload' );
+				}
+				$attach  = (int) $attach_id;
+				$checked = 1;
+			}
+			if ( $required && ! $attach ) {
+				aws_sbg_giveaway_submission_error( $giveaway_id, 'reqfile' );
+			}
+		} elseif ( 'proof' === $type ) {
+			if ( $required && ( ! $checked || '' === $value_text ) ) {
+				aws_sbg_giveaway_submission_error( $giveaway_id, 'reqproof' );
+			}
+		} else {
+			if ( $required && ! $checked ) {
+				aws_sbg_giveaway_submission_error( $giveaway_id, 'reqcheck' );
+			}
+		}
+
+		$wpdb->insert(
+			$table_rv,
+			array(
+				'entry_id'       => $entry_id,
+				'giveaway_id'    => $giveaway_id,
+				'requirement_id' => $rid,
+				'req_type'       => $type,
+				'check_state'    => $checked,
+				'value_text'     => $value_text,
+				'attachment_id'  => $attach,
+				'created_at'     => current_time( 'mysql' ),
+			),
+			array( '%d', '%d', '%s', '%s', '%d', '%s', '%d', '%s' )
+		);
 	}
 
-	// Invalidate counter cache
-	aws_sbg_invalidate_giveaway_count( $campaign_id );
-	$new_count = aws_sbg_get_giveaway_live_count( $campaign_id );
+	aws_sbg_invalidate_giveaway_count( $giveaway_id );
 
-	return rest_ensure_response( array(
-		'success'         => true,
-		'already_entered' => false,
-		'ticket_number'   => $ticket_num,
-		'full_name'       => $full_name,
-		'email'           => $email,
-		'created_at'      => current_time( 'M j, Y • g:i a' ),
-		'live_count'      => $new_count,
-		'message'         => 'Lucky Ticket successfully generated!',
-	) );
+	$url = wp_get_referer() ? wp_get_referer() : home_url( '/giveaway/' );
+	$url = add_query_arg( array( 'gw_status' => 'success', 'gw_ticket' => $ticket, 'gw_name' => $full_name, 'gw_id' => $giveaway_id ), $url );
+	wp_safe_redirect( $url );
+	exit;
 }
+add_action( 'admin_post_nopriv_aws_sbg_giveaway_submit', 'aws_sbg_handle_giveaway_submission' );
+add_action( 'admin_post_aws_sbg_giveaway_submit', 'aws_sbg_handle_giveaway_submission' );
 
-/**
- * REST Callback: Check Ticket (Used in Winners Mode or student lookup)
- */
-function aws_sbg_rest_giveaway_check_ticket( WP_REST_Request $request ) {
-	global $wpdb;
-	$table_name = $wpdb->prefix . 'aws_giveaway_entries';
-	$settings   = aws_sbg_get_giveaway_settings();
+/* ============================================================================
+ * 6. REST: live count
+ * ============================================================================ */
 
-	$query_str = sanitize_text_field( strtolower( trim( (string) $request->get_param( 'q' ) ) ) );
-	if ( empty( $query_str ) ) {
-		return new WP_REST_Response( array(
-			'success' => false,
-			'message' => 'Please enter your Ticket # or AU Student Email.',
-		), 400 );
-	}
-
-	$entry = $wpdb->get_row( $wpdb->prepare(
-		"SELECT ticket_number, full_name, email, is_winner, winner_drawn_at, created_at 
-		 FROM $table_name 
-		 WHERE campaign_id = %s AND (LOWER(ticket_number) = %s OR LOWER(email) = %s) 
-		 LIMIT 1",
-		$settings['campaign_id'],
-		$query_str,
-		$query_str
+add_action( 'rest_api_init', function () {
+	register_rest_route( 'aws-sbg/v1', '/giveaway/stats', array(
+		'methods'             => 'GET',
+		'callback'            => function ( WP_REST_Request $request ) {
+			$gid = intval( $request->get_param( 'giveaway_id' ) );
+			return rest_ensure_response( array(
+				'success' => true,
+				'count'   => aws_sbg_get_giveaway_live_count( $gid ),
+			) );
+		},
+		'permission_callback' => '__return_true',
 	) );
+} );
 
-	if ( ! $entry ) {
-		return rest_ensure_response( array(
-			'found'   => false,
-			'message' => 'No participant found with this Ticket # or Email.',
-		) );
-	}
+/* ============================================================================
+ * 7. ADMIN: submissions screen, winner tools, CSV
+ * ============================================================================ */
 
-	return rest_ensure_response( array(
-		'found'         => true,
-		'ticket_number' => $entry->ticket_number,
-		'full_name'     => $entry->full_name,
-		'is_winner'     => (bool) $entry->is_winner,
-		'created_at'    => mysql2date( 'M j, Y', $entry->created_at ),
-	) );
-}
-
-/**
- * 5. ADMIN MENU & AJAX ACTIONS
- */
-
-// Register Admin Submenu under AWS SBG Suite
 function aws_sbg_register_giveaway_admin_menu() {
 	add_submenu_page(
 		'aws-sbg-suite',
-		'🎁 Campus Giveaway',
-		'🎁 Campus Giveaway',
+		'🎁 Giveaway Submissions',
+		'🎁 Giveaway Submissions',
 		'manage_options',
-		'aws-campus-giveaway',
-		'aws_sbg_render_giveaway_admin_page'
+		'aws-giveaway-submissions',
+		'aws_sbg_render_giveaway_submissions_page'
 	);
 }
 add_action( 'admin_menu', 'aws_sbg_register_giveaway_admin_menu', 22 );
 
-/**
- * AJAX Handler: Pick Random Winners
- */
+function aws_sbg_giveaway_row_actions( $actions, $post ) {
+	if ( 'aws_giveaway' === $post->post_type ) {
+		$actions['submissions'] = '<a href="' . esc_url( admin_url( 'admin.php?page=aws-giveaway-submissions&giveaway_id=' . $post->ID ) ) . '">View Submissions</a>';
+	}
+	return $actions;
+}
+add_filter( 'post_row_actions', 'aws_sbg_giveaway_row_actions', 10, 2 );
+
 function aws_sbg_ajax_pick_giveaway_winners() {
 	check_ajax_referer( 'aws_giveaway_admin_nonce', 'nonce' );
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -423,36 +777,30 @@ function aws_sbg_ajax_pick_giveaway_winners() {
 	}
 
 	global $wpdb;
-	$table_name = $wpdb->prefix . 'aws_giveaway_entries';
-	$settings   = aws_sbg_get_giveaway_settings();
-	$count      = isset( $_POST['count'] ) ? intval( $_POST['count'] ) : (int) $settings['winner_count'];
+	$table       = $wpdb->prefix . 'aws_giveaway_entries';
+	$giveaway_id = isset( $_POST['giveaway_id'] ) ? intval( $_POST['giveaway_id'] ) : 0;
+	$count       = isset( $_POST['count'] ) ? intval( $_POST['count'] ) : 5;
 	if ( $count < 1 ) {
 		$count = 5;
 	}
+	if ( ! $giveaway_id ) {
+		wp_send_json_error( array( 'message' => 'No giveaway selected.' ) );
+	}
 
-	// Pick random unique non-winners
-	$candidates = $wpdb->get_results( $wpdb->prepare(
-		"SELECT id, ticket_number, full_name, email, phone, source, created_at 
-		 FROM $table_name 
-		 WHERE campaign_id = %s AND is_winner = 0 
-		 ORDER BY RAND() LIMIT %d",
-		$settings['campaign_id'],
+	$winners = $wpdb->get_results( $wpdb->prepare(
+		"SELECT id, ticket_number, full_name, email, phone, source, created_at FROM $table
+		 WHERE giveaway_id = %d AND is_winner = 0 ORDER BY RAND() LIMIT %d",
+		$giveaway_id,
 		$count
 	), ARRAY_A );
 
-	if ( empty( $candidates ) ) {
-		wp_send_json_error( array( 'message' => 'No eligible non-winner entries found in this campaign.' ) );
+	if ( empty( $winners ) ) {
+		wp_send_json_error( array( 'message' => 'No eligible non-winner entries found in this giveaway.' ) );
 	}
-
-	wp_send_json_success( array(
-		'winners' => $candidates,
-	) );
+	wp_send_json_success( array( 'winners' => $winners ) );
 }
 add_action( 'wp_ajax_aws_sbg_pick_giveaway_winners', 'aws_sbg_ajax_pick_giveaway_winners' );
 
-/**
- * AJAX Handler: Re-roll 1 Individual Winner Slot
- */
 function aws_sbg_ajax_reroll_giveaway_winner() {
 	check_ajax_referer( 'aws_giveaway_admin_nonce', 'nonce' );
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -460,37 +808,28 @@ function aws_sbg_ajax_reroll_giveaway_winner() {
 	}
 
 	global $wpdb;
-	$table_name = $wpdb->prefix . 'aws_giveaway_entries';
-	$settings   = aws_sbg_get_giveaway_settings();
-
+	$table       = $wpdb->prefix . 'aws_giveaway_entries';
+	$giveaway_id = isset( $_POST['giveaway_id'] ) ? intval( $_POST['giveaway_id'] ) : 0;
 	$exclude_ids = isset( $_POST['exclude_ids'] ) ? array_map( 'intval', (array) $_POST['exclude_ids'] ) : array();
 
 	$exclude_sql = '';
 	if ( ! empty( $exclude_ids ) ) {
-		$exclude_sql = " AND id NOT IN (" . implode( ',', $exclude_ids ) . ") ";
+		$exclude_sql = ' AND id NOT IN (' . implode( ',', $exclude_ids ) . ') ';
 	}
 
-	$new_candidate = $wpdb->get_row( $wpdb->prepare(
-		"SELECT id, ticket_number, full_name, email, phone, source, created_at 
-		 FROM $table_name 
-		 WHERE campaign_id = %s AND is_winner = 0 $exclude_sql 
-		 ORDER BY RAND() LIMIT 1",
-		$settings['campaign_id']
+	$candidate = $wpdb->get_row( $wpdb->prepare(
+		"SELECT id, ticket_number, full_name, email, phone, source, created_at FROM $table
+		 WHERE giveaway_id = %d AND is_winner = 0 $exclude_sql ORDER BY RAND() LIMIT 1",
+		$giveaway_id
 	), ARRAY_A );
 
-	if ( ! $new_candidate ) {
+	if ( ! $candidate ) {
 		wp_send_json_error( array( 'message' => 'No additional eligible candidates available to re-roll.' ) );
 	}
-
-	wp_send_json_success( array(
-		'winner' => $new_candidate,
-	) );
+	wp_send_json_success( array( 'winner' => $candidate ) );
 }
 add_action( 'wp_ajax_aws_sbg_reroll_giveaway_winner', 'aws_sbg_ajax_reroll_giveaway_winner' );
 
-/**
- * AJAX Handler: Save & Publish Confirmed Winners
- */
 function aws_sbg_ajax_publish_giveaway_winners() {
 	check_ajax_referer( 'aws_giveaway_admin_nonce', 'nonce' );
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -498,38 +837,23 @@ function aws_sbg_ajax_publish_giveaway_winners() {
 	}
 
 	global $wpdb;
-	$table_name = $wpdb->prefix . 'aws_giveaway_entries';
-	$settings   = aws_sbg_get_giveaway_settings();
-	$winner_ids = isset( $_POST['winner_ids'] ) ? array_map( 'intval', (array) $_POST['winner_ids'] ) : array();
+	$table       = $wpdb->prefix . 'aws_giveaway_entries';
+	$giveaway_id = isset( $_POST['giveaway_id'] ) ? intval( $_POST['giveaway_id'] ) : 0;
+	$winner_ids  = isset( $_POST['winner_ids'] ) ? array_map( 'intval', (array) $_POST['winner_ids'] ) : array();
 
-	if ( empty( $winner_ids ) ) {
+	if ( ! $giveaway_id || empty( $winner_ids ) ) {
 		wp_send_json_error( array( 'message' => 'No winners selected to publish.' ) );
 	}
 
-	// 1. Reset existing winners for this campaign if requested
-	$wpdb->update(
-		$table_name,
-		array( 'is_winner' => 0, 'winner_drawn_at' => null ),
-		array( 'campaign_id' => $settings['campaign_id'] )
-	);
+	$wpdb->update( $table, array( 'is_winner' => 0, 'winner_drawn_at' => null ), array( 'giveaway_id' => $giveaway_id ) );
 
-	// 2. Mark confirmed winners
 	$now = current_time( 'mysql' );
 	foreach ( $winner_ids as $id ) {
-		$wpdb->update(
-			$table_name,
-			array( 'is_winner' => 1, 'winner_drawn_at' => $now ),
-			array( 'id' => $id )
-		);
+		$wpdb->update( $table, array( 'is_winner' => 1, 'winner_drawn_at' => $now ), array( 'id' => $id ) );
 	}
 
-	// 3. Update campaign status to 'announced' if requested
-	if ( ! empty( $_POST['set_status_announced'] ) ) {
-		$settings['campaign_status'] = 'announced';
-		update_option( 'aws_sbg_giveaway_settings', $settings );
-	}
-
-	aws_sbg_invalidate_giveaway_count( $settings['campaign_id'] );
+	update_post_meta( $giveaway_id, 'giveaway_status', 'announced' );
+	aws_sbg_invalidate_giveaway_count( $giveaway_id );
 
 	wp_send_json_success( array(
 		'message' => 'Winners confirmed and published successfully!',
@@ -538,811 +862,396 @@ function aws_sbg_ajax_publish_giveaway_winners() {
 }
 add_action( 'wp_ajax_aws_sbg_publish_giveaway_winners', 'aws_sbg_ajax_publish_giveaway_winners' );
 
-/**
- * AJAX Handler: Save Campaign Settings
- */
-function aws_sbg_ajax_save_giveaway_settings() {
-	check_ajax_referer( 'aws_giveaway_admin_nonce', 'nonce' );
-	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_send_json_error( array( 'message' => 'Unauthorized' ), 403 );
-	}
-
-	$existing = aws_sbg_get_giveaway_settings();
-
-	$updated = array(
-		'campaign_id'           => sanitize_key( $_POST['campaign_id'] ?? $existing['campaign_id'] ),
-		'campaign_title'        => sanitize_text_field( $_POST['campaign_title'] ?? $existing['campaign_title'] ),
-		'campaign_subtitle'     => sanitize_text_field( $_POST['campaign_subtitle'] ?? $existing['campaign_subtitle'] ),
-		'campaign_description'  => sanitize_textarea_field( $_POST['campaign_description'] ?? $existing['campaign_description'] ),
-		'campaign_status'       => sanitize_text_field( $_POST['campaign_status'] ?? $existing['campaign_status'] ),
-		'allowed_email_domains' => sanitize_text_field( $_POST['allowed_email_domains'] ?? $existing['allowed_email_domains'] ),
-		'ticket_prefix'         => sanitize_text_field( $_POST['ticket_prefix'] ?? $existing['ticket_prefix'] ),
-		'winner_count'          => intval( $_POST['winner_count'] ?? $existing['winner_count'] ),
-		'prize_title'           => sanitize_text_field( $_POST['prize_title'] ?? $existing['prize_title'] ),
-		'prize_description'     => sanitize_text_field( $_POST['prize_description'] ?? $existing['prize_description'] ),
-		'booth_claim_location'  => sanitize_text_field( $_POST['booth_claim_location'] ?? $existing['booth_claim_location'] ),
-		'tasks'                 => $existing['tasks'],
-	);
-
-	// Parse modular tasks if submitted
-	if ( isset( $_POST['tasks_json'] ) ) {
-		$decoded = json_decode( wp_unslash( $_POST['tasks_json'] ), true );
-		if ( is_array( $decoded ) ) {
-			$clean_tasks = array();
-			foreach ( $decoded as $t ) {
-				if ( empty( $t['title'] ) || empty( $t['url'] ) ) continue;
-				$clean_tasks[] = array(
-					'id'          => sanitize_key( $t['id'] ?? uniqid( 'task_' ) ),
-					'title'       => sanitize_text_field( $t['title'] ),
-					'subtitle'    => sanitize_text_field( $t['subtitle'] ?? '' ),
-					'icon'        => sanitize_key( $t['icon'] ?? 'link' ),
-					'url'         => esc_url_raw( $t['url'] ),
-					'button_text' => sanitize_text_field( $t['button_text'] ?? 'Open Link' ),
-					'is_required' => ! empty( $t['is_required'] ) ? 1 : 0,
-				);
-			}
-			if ( ! empty( $clean_tasks ) ) {
-				$updated['tasks'] = $clean_tasks;
-			}
-		}
-	}
-
-	update_option( 'aws_sbg_giveaway_settings', $updated );
-	aws_sbg_invalidate_giveaway_count( $updated['campaign_id'] );
-
-	wp_send_json_success( array( 'message' => 'Campaign settings saved successfully!' ) );
-}
-add_action( 'wp_ajax_aws_sbg_save_giveaway_settings', 'aws_sbg_ajax_save_giveaway_settings' );
-
-/**
- * AJAX Handler: Purge Test Entries
- */
-function aws_sbg_ajax_purge_test_giveaway_entries() {
+function aws_sbg_ajax_purge_giveaway_entries() {
 	check_ajax_referer( 'aws_giveaway_admin_nonce', 'nonce' );
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_send_json_error( array( 'message' => 'Unauthorized' ), 403 );
 	}
 
 	global $wpdb;
-	$table_name = $wpdb->prefix . 'aws_giveaway_entries';
-	$settings   = aws_sbg_get_giveaway_settings();
+	$giveaway_id = isset( $_POST['giveaway_id'] ) ? intval( $_POST['giveaway_id'] ) : 0;
+	if ( ! $giveaway_id ) {
+		wp_send_json_error( array( 'message' => 'No giveaway selected.' ) );
+	}
 
-	$wpdb->delete( $table_name, array( 'campaign_id' => $settings['campaign_id'] ) );
-	aws_sbg_invalidate_giveaway_count( $settings['campaign_id'] );
+	$table_rv = $wpdb->prefix . 'aws_giveaway_requirement_values';
+	$files    = $wpdb->get_col( $wpdb->prepare( "SELECT attachment_id FROM $table_rv WHERE giveaway_id = %d AND attachment_id > 0", $giveaway_id ) );
+	foreach ( $files as $att ) {
+		wp_delete_attachment( intval( $att ), true );
+	}
+	$wpdb->delete( $table_rv, array( 'giveaway_id' => $giveaway_id ), array( '%d' ) );
+	$wpdb->delete( $wpdb->prefix . 'aws_giveaway_entries', array( 'giveaway_id' => $giveaway_id ), array( '%d' ) );
 
-	wp_send_json_success( array( 'message' => 'All test entries for this campaign have been cleanly purged.' ) );
+	aws_sbg_invalidate_giveaway_count( $giveaway_id );
+	wp_send_json_success( array( 'message' => 'All entries for this giveaway have been purged.' ) );
 }
-add_action( 'wp_ajax_aws_sbg_purge_giveaway_entries', 'aws_sbg_ajax_purge_test_giveaway_entries' );
+add_action( 'wp_ajax_aws_sbg_purge_giveaway_entries', 'aws_sbg_ajax_purge_giveaway_entries' );
 
-/**
- * AJAX Handler: Export to CSV
- */
 function aws_sbg_ajax_export_giveaway_csv() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( 'Unauthorized', 'Error', array( 'response' => 403 ) );
 	}
 
 	global $wpdb;
-	$table_name = $wpdb->prefix . 'aws_giveaway_entries';
-	$settings   = aws_sbg_get_giveaway_settings();
+	$giveaway_id = isset( $_GET['giveaway_id'] ) ? intval( $_GET['giveaway_id'] ) : 0;
+	$table       = $wpdb->prefix . 'aws_giveaway_entries';
+	$table_rv    = $wpdb->prefix . 'aws_giveaway_requirement_values';
 
-	$entries = $wpdb->get_results( $wpdb->prepare(
-		"SELECT ticket_number, full_name, email, phone, source, is_winner, winner_drawn_at, created_at 
-		 FROM $table_name 
-		 WHERE campaign_id = %s 
-		 ORDER BY id ASC",
-		$settings['campaign_id']
-	), ARRAY_A );
+	$entries = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE giveaway_id = %d ORDER BY id ASC", $giveaway_id ), ARRAY_A );
 
-	$filename = 'giveaway-entries-' . sanitize_key( $settings['campaign_id'] ) . '-' . gmdate( 'Y-m-d' ) . '.csv';
-
-	header( 'Content-Type: text/csv; charset=utf-8' );
-	header( 'Content-Disposition: attachment; filename=' . $filename );
-	header( 'Pragma: no-cache' );
-	header( 'Expires: 0' );
-
-	$output = fopen( 'php://output', 'w' );
-	fputcsv( $output, array( 'Ticket Number', 'Full Name', 'AU Student Email', 'WhatsApp Number', 'Source', 'Winner Status', 'Giveaway Win Date', 'Registered At' ) );
-
-	if ( ! empty( $entries ) ) {
-		foreach ( $entries as $row ) {
-			fputcsv( $output, array(
-				$row['ticket_number'],
-				$row['full_name'],
-				$row['email'],
-				$row['phone'],
-				$row['source'],
-				$row['is_winner'] ? 'WINNER' : 'Participant',
-				$row['winner_drawn_at'] ? $row['winner_drawn_at'] : '-',
-				$row['created_at'],
-			) );
-		}
+	$responses = array();
+	$rows      = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table_rv WHERE giveaway_id = %d", $giveaway_id ), ARRAY_A );
+	foreach ( $rows as $r ) {
+		$responses[ $r['entry_id'] ][ $r['requirement_id'] ] = $r;
 	}
 
+	$reqs = aws_sbg_get_giveaway_requirements( $giveaway_id );
+
+	header( 'Content-Type: text/csv; charset=utf-8' );
+	header( 'Content-Disposition: attachment; filename=giveaway-' . $giveaway_id . '-' . gmdate( 'Y-m-d' ) . '.csv' );
+
+	$output = fopen( 'php://output', 'w' );
+	$header = array( 'Ticket', 'Name', 'Email', 'Phone', 'Custom Data', 'Source', 'Winner', 'Created At' );
+	foreach ( $reqs as $req ) {
+		$header[] = 'Req: ' . $req['label'];
+	}
+	fputcsv( $output, $header );
+
+	foreach ( $entries as $e ) {
+		$line = array( $e['ticket_number'], $e['full_name'], $e['email'], $e['phone'], $e['custom_data'], $e['source'], $e['is_winner'] ? 'WINNER' : 'Participant', $e['created_at'] );
+		foreach ( $reqs as $req ) {
+			$rv = $responses[ $e['id'] ][ $req['id'] ] ?? null;
+			if ( ! $rv ) {
+				$line[] = '';
+			} elseif ( 'upload' === $req['type'] ) {
+				$line[] = $rv['attachment_id'] ? wp_get_attachment_url( $rv['attachment_id'] ) : 'No file';
+			} elseif ( 'proof' === $req['type'] ) {
+				$line[] = $rv['value_text'] . ( $rv['check_state'] ? ' (confirmed)' : '' );
+			} else {
+				$line[] = $rv['check_state'] ? 'Yes' : 'No';
+			}
+		}
+		fputcsv( $output, $line );
+	}
 	fclose( $output );
 	exit;
 }
 add_action( 'wp_ajax_aws_sbg_export_giveaway_csv', 'aws_sbg_ajax_export_giveaway_csv' );
 
-/**
- * 6. RENDER ADMIN CONTROL PAGE
- */
-function aws_sbg_render_giveaway_admin_page() {
+function aws_sbg_render_giveaway_submissions_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( 'Unauthorized', 'Error', array( 'response' => 403 ) );
 	}
 
 	global $wpdb;
-	$table_name = $wpdb->prefix . 'aws_giveaway_entries';
-	$settings   = aws_sbg_get_giveaway_settings();
-	$nonce      = wp_create_nonce( 'aws_giveaway_admin_nonce' );
+	$table    = $wpdb->prefix . 'aws_giveaway_entries';
+	$table_rv = $wpdb->prefix . 'aws_giveaway_requirement_values';
+	$nonce    = wp_create_nonce( 'aws_giveaway_admin_nonce' );
 
-	// Metrics
-	$total_entries = (int) $wpdb->get_var( $wpdb->prepare(
-		"SELECT COUNT(*) FROM $table_name WHERE campaign_id = %s",
-		$settings['campaign_id']
+	$giveaways = get_posts( array(
+		'post_type'      => 'aws_giveaway',
+		'posts_per_page' => 100,
+		'post_status'    => 'any',
+		'orderby'        => 'date',
+		'order'          => 'DESC',
 	) );
 
-	$total_winners = (int) $wpdb->get_var( $wpdb->prepare(
-		"SELECT COUNT(*) FROM $table_name WHERE campaign_id = %s AND is_winner = 1",
-		$settings['campaign_id']
-	) );
+	$giveaway_id = isset( $_GET['giveaway_id'] ) ? intval( $_GET['giveaway_id'] ) : 0;
+	if ( ! $giveaway_id && ! empty( $giveaways ) ) {
+		$giveaway_id = $giveaways[0]->ID;
+	}
 
-	// Existing Published Winners
-	$published_winners = $wpdb->get_results( $wpdb->prepare(
-		"SELECT id, ticket_number, full_name, email, phone, source, winner_drawn_at 
-		 FROM $table_name 
-		 WHERE campaign_id = %s AND is_winner = 1 
-		 ORDER BY id ASC",
-		$settings['campaign_id']
-	), ARRAY_A );
+	$reqs = $giveaway_id ? aws_sbg_get_giveaway_requirements( $giveaway_id ) : array();
 
-	// Pagination for entries table
 	$per_page     = 50;
 	$current_page = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
 	$offset       = ( $current_page - 1 ) * $per_page;
-	$search_query = isset( $_GET['s'] ) ? sanitize_text_field( trim( $_GET['s'] ) ) : '';
+	$search       = isset( $_GET['s'] ) ? sanitize_text_field( trim( $_GET['s'] ) ) : '';
 
-	$where_sql = $wpdb->prepare( " WHERE campaign_id = %s", $settings['campaign_id'] );
-	if ( ! empty( $search_query ) ) {
-		$like       = '%' . $wpdb->esc_like( $search_query ) . '%';
-		$where_sql .= $wpdb->prepare( " AND (ticket_number LIKE %s OR full_name LIKE %s OR email LIKE %s OR phone LIKE %s)", $like, $like, $like, $like );
+	$where = $wpdb->prepare( ' WHERE giveaway_id = %d', $giveaway_id );
+	if ( '' !== $search ) {
+		$like   = '%' . $wpdb->esc_like( $search ) . '%';
+		$where .= $wpdb->prepare( ' AND (ticket_number LIKE %s OR full_name LIKE %s OR email LIKE %s OR phone LIKE %s)', $like, $like, $like, $like );
 	}
 
-	$entries = $wpdb->get_results(
-		"SELECT id, ticket_number, full_name, email, phone, source, is_winner, created_at 
-		 FROM $table_name 
-		 $where_sql 
-		 ORDER BY id DESC 
-		 LIMIT $per_page OFFSET $offset",
-		ARRAY_A
-	);
+	$entries        = $wpdb->get_results( "SELECT * FROM $table $where ORDER BY id DESC LIMIT $per_page OFFSET $offset", ARRAY_A );
+	$total_filtered = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $table $where" );
+	$total_pages    = (int) ceil( $total_filtered / $per_page );
 
-	$total_filtered = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $table_name $where_sql" );
-	$total_pages    = ceil( $total_filtered / $per_page );
+	$responses = array();
+	if ( ! empty( $entries ) ) {
+		$ids = implode( ',', array_map( 'intval', wp_list_pluck( $entries, 'id' ) ) );
+		$rv  = $wpdb->get_results( "SELECT * FROM $table_rv WHERE entry_id IN ($ids)", ARRAY_A );
+		foreach ( $rv as $r ) {
+			$responses[ $r['entry_id'] ][ $r['requirement_id'] ] = $r;
+		}
+	}
 
-	$active_subtab = isset( $_GET['tab'] ) ? sanitize_key( $_GET['tab'] ) : 'overview';
+	$total_entries = $giveaway_id ? aws_sbg_get_giveaway_live_count( $giveaway_id ) : 0;
+	$winners       = $giveaway_id ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE giveaway_id = %d AND is_winner = 1", $giveaway_id ) ) : 0;
+	$meta          = $giveaway_id ? aws_sbg_get_giveaway_meta( $giveaway_id ) : array( 'winner_count' => 5, 'giveaway_status' => 'open' );
 	?>
 	<div class="wrap" style="max-width:1200px; margin:20px auto 40px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+		<?php if ( function_exists( 'aws_sbg_render_admin_nav_tabs' ) ) { aws_sbg_render_admin_nav_tabs( 'giveaways' ); } ?>
 
-		<!-- Reusable SBG Suite Header -->
-		<?php
-		if ( function_exists( 'aws_sbg_render_admin_nav_tabs' ) ) {
-			aws_sbg_render_admin_nav_tabs( 'giveaway' );
-		}
-		?>
-
-		<!-- Page Header & Metrics Row -->
-		<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:24px 28px; margin-bottom:24px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
-			<div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px;">
+		<div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px 28px;margin-bottom:24px;">
+			<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;">
 				<div>
-					<div style="display:inline-flex; align-items:center; gap:8px; background:#f5f3ff; border:1px solid #ddd6fe; color:#7c3aed; font-size:11px; font-weight:800; padding:4px 12px; border-radius:20px; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">
-						Campus Campaign Engine
-					</div>
-					<h1 style="margin:0; font-size:22px; font-weight:800; color:#0f172a; line-height:1.2;">
-						🎁 <?php echo esc_html( $settings['campaign_title'] ); ?>
-					</h1>
-					<p style="margin:4px 0 0; color:#64748b; font-size:13px;">
-						Clean, zero-overload giveaway system with configurable email domains, modular tasks, and winner selection tools.
-					</p>
+					<h1 style="margin:0;font-size:22px;font-weight:800;color:#0f172a;">🎁 Giveaway Submissions</h1>
+					<p style="margin:4px 0 0;color:#64748b;font-size:13px;">Review entries per giveaway, inspect uploads, and publish winners.</p>
 				</div>
-				<div style="display:flex; align-items:center; gap:10px;">
-					<a href="<?php echo esc_url( home_url( '/giveaway/' ) ); ?>" target="_blank" style="display:inline-flex; align-items:center; gap:6px; background:#ffffff; border:1.5px solid #e2e8f0; color:#0f172a; font-weight:700; font-size:13px; padding:10px 18px; border-radius:10px; text-decoration:none; transition:all .2s ease;">
-						↗ View Live Page
-					</a>
-					<a href="<?php echo esc_url( admin_url( 'admin-ajax.php?action=aws_sbg_export_giveaway_csv' ) ); ?>" style="display:inline-flex; align-items:center; gap:6px; background:#0f172a; color:#ffffff; font-weight:700; font-size:13px; padding:10px 18px; border-radius:10px; text-decoration:none; transition:all .2s ease;">
-						📥 Export CSV
-					</a>
+				<div style="display:flex;gap:10px;">
+					<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=aws_giveaway' ) ); ?>" class="button button-primary">+ New Giveaway</a>
+					<a href="<?php echo esc_url( admin_url( 'admin-ajax.php?action=aws_sbg_export_giveaway_csv&giveaway_id=' . $giveaway_id ) ); ?>" class="button">📥 Export CSV</a>
 				</div>
 			</div>
 
-			<!-- Metrics Cards -->
-			<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
-				<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px 20px;">
-					<div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; margin-bottom:4px;">Total Participants</div>
-					<div style="font-size:28px; font-weight:900; color:#0f172a; line-height:1;"><?php echo esc_html( number_format( $total_entries ) ); ?></div>
-					<div style="font-size:11px; color:#10b981; font-weight:600; margin-top:6px;">✓ Clean unique students</div>
-				</div>
-
-				<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px 20px;">
-					<div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; margin-bottom:4px;">Winners to Pick</div>
-					<div style="font-size:28px; font-weight:900; color:#9353ff; line-height:1;"><?php echo esc_html( $settings['winner_count'] ); ?></div>
-					<div style="font-size:11px; color:#64748b; margin-top:6px;"><?php echo esc_html( $total_winners ); ?> published</div>
-				</div>
-
-				<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px 20px;">
-					<div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; margin-bottom:4px;">Campaign Status</div>
-					<div style="margin-top:4px;">
-						<?php if ( 'active' === $settings['campaign_status'] ) : ?>
-							<span style="display:inline-flex; align-items:center; gap:6px; background:#ecfdf5; border:1px solid #a7f3d0; color:#059669; font-weight:800; font-size:12px; padding:4px 10px; border-radius:8px;">
-								<span style="width:6px; height:6px; border-radius:50%; background:#10b981;"></span> Active (Accepting Entries)
-							</span>
-						<?php elseif ( 'announced' === $settings['campaign_status'] ) : ?>
-							<span style="display:inline-flex; align-items:center; gap:6px; background:#eff6ff; border:1px solid #bfdbfe; color:#2563eb; font-weight:800; font-size:12px; padding:4px 10px; border-radius:8px;">
-								🏆 Winners Announced
-							</span>
-						<?php else : ?>
-							<span style="display:inline-flex; align-items:center; gap:6px; background:#fef2f2; border:1px solid #fecaca; color:#dc2626; font-weight:800; font-size:12px; padding:4px 10px; border-radius:8px;">
-								⏸ Paused
-							</span>
-						<?php endif; ?>
-					</div>
-					<div style="font-size:11px; color:#64748b; margin-top:6px;">URL: <code>/giveaway/</code></div>
-				</div>
-
-				<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px 20px;">
-					<div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; margin-bottom:4px;">Eligible Email Domain</div>
-					<div style="font-size:13px; font-weight:800; color:#0f172a; margin-top:2px;">
-						<code>@<?php echo esc_html( explode( ',', $settings['allowed_email_domains'] )[0] ); ?></code>
-					</div>
-					<div style="font-size:11px; color:#64748b; margin-top:6px;">1 entry per student enforced</div>
-				</div>
-			</div>
-		</div>
-
-		<!-- Inner Navigation Sub-Tabs -->
-		<div style="display:flex; gap:8px; border-bottom:1px solid #e2e8f0; margin-bottom:24px; padding-bottom:12px;">
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-campus-giveaway&tab=overview' ) ); ?>" style="padding:8px 18px; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none; <?php echo ( 'overview' === $active_subtab ) ? 'background:#9353ff; color:#ffffff;' : 'background:#ffffff; color:#64748b; border:1px solid #e2e8f0;'; ?>">
-				👥 Participants (<?php echo esc_html( $total_entries ); ?>)
-			</a>
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-campus-giveaway&tab=draw' ) ); ?>" style="padding:8px 18px; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none; <?php echo ( 'draw' === $active_subtab ) ? 'background:#9353ff; color:#ffffff;' : 'background:#ffffff; color:#64748b; border:1px solid #e2e8f0;'; ?>">
-				🎁 Pick 5 Winners
-			</a>
-			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-campus-giveaway&tab=settings' ) ); ?>" style="padding:8px 18px; border-radius:8px; font-size:13px; font-weight:700; text-decoration:none; <?php echo ( 'settings' === $active_subtab ) ? 'background:#9353ff; color:#ffffff;' : 'background:#ffffff; color:#64748b; border:1px solid #e2e8f0;'; ?>">
-				⚙️ Campaign Settings
-			</a>
-		</div>
-
-		<!-- TAB 1: PARTICIPANTS ROSTER -->
-		<?php if ( 'overview' === $active_subtab ) : ?>
-			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
-				<div style="padding:18px 24px; border-bottom:1px solid #e2e8f0; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
-					<h3 style="margin:0; font-size:16px; font-weight:800; color:#0f172a;">All Valid Campus Entries</h3>
-
-					<form method="get" style="display:flex; align-items:center; gap:8px;">
-						<input type="hidden" name="page" value="aws-campus-giveaway">
-						<input type="hidden" name="tab" value="overview">
-						<input type="text" name="s" value="<?php echo esc_attr( $search_query ); ?>" placeholder="Search name, email, ticket..." style="padding:7px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; width:220px;">
-						<button type="submit" class="button" style="padding:5px 14px; font-weight:600;">Search</button>
-						<?php if ( ! empty( $search_query ) ) : ?>
-							<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-campus-giveaway&tab=overview' ) ); ?>" style="color:#ef4444; font-size:12px; text-decoration:none; margin-left:4px;">Clear</a>
-						<?php endif; ?>
-					</form>
-				</div>
-
-				<?php if ( empty( $entries ) ) : ?>
-					<div style="padding:60px 20px; text-align:center;">
-						<div style="font-size:36px; margin-bottom:8px;">🎟️</div>
-						<h4 style="margin:0; font-size:16px; font-weight:800; color:#0f172a;">No entries recorded yet</h4>
-						<p style="margin:6px 0 0; color:#64748b; font-size:13px;">When students scan the QR code on campus, their Lucky Tickets will appear here.</p>
-					</div>
-				<?php else : ?>
-					<table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px;">
-						<thead>
-							<tr style="background:#f8fafc; border-bottom:1px solid #e2e8f0; color:#475569; font-size:11px; text-transform:uppercase; letter-spacing:0.06em;">
-								<th style="padding:12px 18px;">Ticket #</th>
-								<th style="padding:12px 18px;">Student Name</th>
-								<th style="padding:12px 18px;">AU Email</th>
-								<th style="padding:12px 18px;">WhatsApp</th>
-								<th style="padding:12px 18px;">Source</th>
-								<th style="padding:12px 18px;">Status</th>
-								<th style="padding:12px 18px;">Registered At</th>
-							</tr>
-						</thead>
-						<tbody>
-							<?php foreach ( $entries as $r ) : ?>
-								<tr style="border-bottom:1px solid #f1f5f9;">
-									<td style="padding:12px 18px; font-family:monospace; font-weight:800; color:#9353ff;">
-										#<?php echo esc_html( $r['ticket_number'] ); ?>
-									</td>
-									<td style="padding:12px 18px; font-weight:700; color:#0f172a;">
-										<?php echo esc_html( $r['full_name'] ); ?>
-									</td>
-									<td style="padding:12px 18px; color:#475569;">
-										<?php echo esc_html( $r['email'] ); ?>
-									</td>
-									<td style="padding:12px 18px;">
-										<a href="https://wa.me/<?php echo esc_attr( preg_replace( '/[^0-9]/', '', $r['phone'] ) ); ?>" target="_blank" style="display:inline-flex; align-items:center; gap:4px; color:#059669; font-weight:700; text-decoration:none;">
-											💬 <?php echo esc_html( $r['phone'] ); ?>
-										</a>
-									</td>
-									<td style="padding:12px 18px; color:#64748b; font-size:12px;">
-										<code><?php echo esc_html( $r['source'] ); ?></code>
-									</td>
-									<td style="padding:12px 18px;">
-										<?php if ( $r['is_winner'] ) : ?>
-											<span style="background:#ecfdf5; border:1px solid #a7f3d0; color:#059669; font-size:11px; font-weight:800; padding:2px 8px; border-radius:6px;">
-												🏆 WINNER
-											</span>
-										<?php else : ?>
-											<span style="background:#f1f5f9; color:#64748b; font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px;">
-												Participant
-											</span>
-										<?php endif; ?>
-									</td>
-									<td style="padding:12px 18px; color:#64748b; font-size:12px;">
-										<?php echo esc_html( mysql2date( 'M j, g:i a', $r['created_at'] ) ); ?>
-									</td>
-								</tr>
-							<?php endforeach; ?>
-						</tbody>
-					</table>
-
-					<!-- Pagination -->
-					<?php if ( $total_pages > 1 ) : ?>
-						<div style="padding:14px 20px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; font-size:12px; color:#64748b;">
-							<div>Showing page <?php echo esc_html( $current_page ); ?> of <?php echo esc_html( $total_pages ); ?></div>
-							<div style="display:flex; gap:6px;">
-								<?php for ( $i = 1; $i <= $total_pages; $i++ ) : ?>
-									<a href="<?php echo esc_url( add_query_arg( 'paged', $i ) ); ?>" style="padding:4px 10px; border:1px solid #cbd5e1; border-radius:6px; text-decoration:none; <?php echo ( $i === $current_page ) ? 'background:#9353ff; color:#fff; border-color:#9353ff;' : 'color:#0f172a;'; ?>">
-										<?php echo esc_html( $i ); ?>
-									</a>
-								<?php endfor; ?>
-							</div>
-						</div>
+			<form method="get" style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+				<input type="hidden" name="page" value="aws-giveaway-submissions">
+				<select name="giveaway_id" style="min-width:280px;padding:6px 10px;">
+					<?php if ( empty( $giveaways ) ) : ?>
+						<option value="0">No giveaways yet</option>
+					<?php else : ?>
+						<?php foreach ( $giveaways as $g ) : ?>
+							<option value="<?php echo esc_attr( $g->ID ); ?>" <?php selected( $giveaway_id, $g->ID ); ?>>
+								<?php echo esc_html( $g->post_title ); ?> (#<?php echo esc_html( $g->ID ); ?>)
+							</option>
+						<?php endforeach; ?>
 					<?php endif; ?>
+				</select>
+				<input type="text" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="Search name, email, ticket..." style="padding:6px 10px;width:240px;">
+				<button type="submit" class="button">Search</button>
+			</form>
+
+			<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:18px;">
+				<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;">
+					<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;">Total Entries</div>
+					<div style="font-size:26px;font-weight:900;color:#0f172a;"><?php echo esc_html( number_format( $total_entries ) ); ?></div>
+				</div>
+				<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;">
+					<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;">Published Winners</div>
+					<div style="font-size:26px;font-weight:900;color:#9353ff;"><?php echo esc_html( $winners ); ?></div>
+				</div>
+				<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;">
+					<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;">Status</div>
+					<div style="margin-top:4px;font-weight:800;font-size:13px;color:#0f172a;"><?php echo esc_html( ucfirst( $meta['giveaway_status'] ) ); ?></div>
+				</div>
+			</div>
+		</div>
+
+		<?php if ( ! $giveaway_id ) : ?>
+			<div style="background:#fff;border:2px dashed #e2e8f0;border-radius:16px;padding:60px 20px;text-align:center;">
+				<div style="font-size:40px;">🎁</div>
+				<h3 style="margin:8px 0 0;color:#0f172a;">No giveaways yet</h3>
+				<p style="color:#64748b;">Create your first giveaway to start collecting entries.</p>
+				<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=aws_giveaway' ) ); ?>" class="button button-primary">+ Create Giveaway</a>
+			</div>
+		<?php else : ?>
+
+			<div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px;margin-bottom:24px;">
+				<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid #e2e8f0;padding-bottom:16px;">
+					<div>
+						<h3 style="margin:0;font-size:17px;font-weight:800;color:#0f172a;">🏆 Winner Selection</h3>
+						<p style="margin:4px 0 0;color:#64748b;font-size:13px;">Pick <?php echo esc_html( $meta['winner_count'] ); ?> random winners, re-roll slots, then publish.</p>
+					</div>
+					<button type="button" id="aws-draw-btn" class="button button-primary">🎁 Pick <?php echo esc_html( $meta['winner_count'] ); ?> Winners</button>
+				</div>
+				<div id="aws-draw-results" style="margin-top:18px;"></div>
+				<div id="aws-publish-section" style="display:none;margin-top:18px;padding-top:16px;border-top:1px solid #e2e8f0;text-align:right;">
+					<button type="button" id="aws-publish-btn" class="button button-primary" style="background:#10b981;border-color:#10b981;">📢 Publish Winners</button>
+				</div>
+			</div>
+
+			<div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
+				<table style="width:100%;border-collapse:collapse;text-align:left;font-size:13px;">
+					<thead>
+						<tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">
+							<th style="padding:12px 18px;">Ticket</th>
+							<th style="padding:12px 18px;">Name</th>
+							<th style="padding:12px 18px;">Email</th>
+							<th style="padding:12px 18px;">Phone</th>
+							<th style="padding:12px 18px;">Requirements</th>
+							<th style="padding:12px 18px;">Status</th>
+							<th style="padding:12px 18px;">Date</th>
+						</tr>
+					</thead>
+					<tbody>
+					<?php if ( empty( $entries ) ) : ?>
+						<tr><td colspan="7" style="padding:50px 20px;text-align:center;color:#64748b;">No entries yet for this giveaway.</td></tr>
+					<?php else : ?>
+						<?php foreach ( $entries as $e ) : ?>
+							<tr style="border-bottom:1px solid #f1f5f9;vertical-align:top;">
+								<td style="padding:12px 18px;font-family:monospace;font-weight:800;color:#9353ff;">#<?php echo esc_html( $e['ticket_number'] ); ?></td>
+								<td style="padding:12px 18px;font-weight:700;color:#0f172a;"><?php echo esc_html( $e['full_name'] ); ?></td>
+								<td style="padding:12px 18px;color:#475569;"><?php echo esc_html( $e['email'] ); ?></td>
+								<td style="padding:12px 18px;">
+									<?php if ( $e['phone'] ) : ?>
+										<a href="https://wa.me/<?php echo esc_attr( preg_replace( '/[^0-9]/', '', $e['phone'] ) ); ?>" target="_blank" style="color:#059669;font-weight:700;text-decoration:none;">💬 <?php echo esc_html( $e['phone'] ); ?></a>
+									<?php endif; ?>
+								</td>
+								<td style="padding:12px 18px;color:#334155;font-size:12px;">
+									<?php
+									if ( empty( $reqs ) ) {
+										echo '<span style="color:#94a3b8;">—</span>';
+									}
+									foreach ( $reqs as $req ) {
+										$rv = $responses[ $e['id'] ][ $req['id'] ] ?? null;
+										echo '<div style="margin-bottom:4px;">';
+										if ( ! $rv ) {
+											echo '<span style="color:#cbd5e1;">◻</span> ' . esc_html( $req['label'] );
+										} elseif ( 'upload' === $req['type'] ) {
+											if ( $rv['attachment_id'] ) {
+												$thumb = wp_get_attachment_image_url( $rv['attachment_id'], 'thumbnail' );
+												echo '<a href="' . esc_url( wp_get_attachment_url( $rv['attachment_id'] ) ) . '" target="_blank"><img src="' . esc_url( $thumb ) . '" style="height:34px;width:34px;object-fit:cover;border-radius:6px;vertical-align:middle;"></a> ';
+											}
+											echo esc_html( $req['label'] );
+										} elseif ( 'proof' === $req['type'] ) {
+											echo '<span style="color:#059669;">✔</span> ' . esc_html( $req['label'] ) . ': ' . esc_html( $rv['value_text'] );
+										} else {
+											echo ( $rv['check_state'] ? '<span style="color:#059669;">✔</span> ' : '<span style="color:#cbd5e1;">◻</span> ' ) . esc_html( $req['label'] );
+										}
+										echo '</div>';
+									}
+									?>
+								</td>
+								<td style="padding:12px 18px;">
+									<?php if ( $e['is_winner'] ) : ?>
+										<span style="background:#ecfdf5;border:1px solid #a7f3d0;color:#059669;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;">🏆 WINNER</span>
+									<?php else : ?>
+										<span style="background:#f1f5f9;color:#64748b;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;">Participant</span>
+									<?php endif; ?>
+								</td>
+								<td style="padding:12px 18px;color:#64748b;font-size:12px;"><?php echo esc_html( mysql2date( 'M j, g:i a', $e['created_at'] ) ); ?></td>
+							</tr>
+						<?php endforeach; ?>
+					<?php endif; ?>
+					</tbody>
+				</table>
+
+				<?php if ( $total_pages > 1 ) : ?>
+					<div style="padding:14px 20px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#64748b;">
+						<div>Page <?php echo esc_html( $current_page ); ?> of <?php echo esc_html( $total_pages ); ?></div>
+						<div style="display:flex;gap:6px;">
+							<?php for ( $i = 1; $i <= $total_pages; $i++ ) : ?>
+								<a href="<?php echo esc_url( add_query_arg( 'paged', $i ) ); ?>" style="padding:4px 10px;border:1px solid #cbd5e1;border-radius:6px;text-decoration:none;<?php echo ( $i === $current_page ) ? 'background:#9353ff;color:#fff;' : 'color:#0f172a;'; ?>"><?php echo esc_html( $i ); ?></a>
+							<?php endfor; ?>
+						</div>
+					</div>
 				<?php endif; ?>
 			</div>
 
-			<!-- Clean Purge Box for testing -->
-			<div style="margin-top:24px; background:#fff1f2; border:1px solid #fecdd3; border-radius:12px; padding:18px 24px; display:flex; justify-content:space-between; align-items:center;">
+			<div style="margin-top:24px;background:#fff1f2;border:1px solid #fecdd3;border-radius:12px;padding:18px 24px;display:flex;justify-content:space-between;align-items:center;">
 				<div>
-					<h4 style="margin:0; color:#9f1239; font-size:14px; font-weight:800;">Purge Test Entries</h4>
-					<p style="margin:2px 0 0; color:#e11d48; font-size:12px;">Wipes test entries for this campaign before placing physical posters on campus.</p>
+					<h4 style="margin:0;color:#9f1239;font-size:14px;font-weight:800;">Purge Entries</h4>
+					<p style="margin:2px 0 0;color:#e11d48;font-size:12px;">Deletes all entries and uploaded files for this giveaway.</p>
 				</div>
-				<button type="button" id="aws-sbg-purge-btn" style="background:#e11d48; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">
-					Purge Test Entries
-				</button>
+				<button type="button" id="aws-sbg-purge-btn" class="button" style="color:#e11d48;border-color:#fecdd3;">Purge Entries</button>
 			</div>
-
-		<!-- TAB 2: PICK 5 WINNERS TOOL -->
-		<?php elseif ( 'draw' === $active_subtab ) : ?>
-			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:28px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
-				<div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px; margin-bottom:24px; border-bottom:1px solid #e2e8f0; padding-bottom:18px;">
-					<div>
-						<h3 style="margin:0; font-size:18px; font-weight:800; color:#0f172a;">🎁 Live Winner Selection</h3>
-						<p style="margin:4px 0 0; color:#64748b; font-size:13px;">
-							Select 5 random giveaway winners. You can 1-click verify their WhatsApp and re-roll individual candidates if unverified.
-						</p>
-					</div>
-					<div style="display:flex; align-items:center; gap:10px;">
-						<button type="button" id="aws-sbg-draw-btn" style="background:linear-gradient(135deg, #7928ca 0%, #9353ff 100%); color:#ffffff; border:none; padding:12px 26px; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 14px rgba(147,83,255,0.35);">
-							🎁 Pick 5 Giveaway Winners
-						</button>
-					</div>
-				</div>
-
-				<!-- Results Container -->
-				<div id="aws-draw-results-container">
-					<?php if ( ! empty( $published_winners ) ) : ?>
-						<div style="margin-bottom:16px; padding:12px 18px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; color:#1e40af; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:space-between;">
-							<span>🏆 <strong>Currently Published Winners</strong> on <code>/giveaway/</code></span>
-							<span style="font-size:11px; background:#dbeafe; padding:3px 8px; border-radius:6px;"><?php echo count( $published_winners ); ?> Winners Active</span>
-						</div>
-
-						<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;" id="aws-winners-grid">
-							<?php foreach ( $published_winners as $idx => $w ) : ?>
-								<div class="aws-winner-card" data-id="<?php echo esc_attr( $w['id'] ); ?>" style="background:#ffffff; border:2px solid #10b981; border-radius:14px; padding:20px; box-shadow:0 4px 12px rgba(16,185,129,0.08);">
-									<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-										<span style="background:#ecfdf5; color:#059669; font-weight:900; font-size:12px; padding:3px 10px; border-radius:8px;">
-											Winner #<?php echo esc_html( $idx + 1 ); ?>
-										</span>
-										<span style="font-family:monospace; font-weight:800; color:#9353ff; font-size:13px;">
-											#<?php echo esc_html( $w['ticket_number'] ); ?>
-										</span>
-									</div>
-
-									<h4 style="margin:0 0 4px; font-size:16px; font-weight:800; color:#0f172a;"><?php echo esc_html( $w['full_name'] ); ?></h4>
-									<div style="font-size:12px; color:#64748b; margin-bottom:14px;"><?php echo esc_html( $w['email'] ); ?></div>
-
-									<div style="display:flex; gap:8px;">
-										<a href="https://wa.me/<?php echo esc_attr( preg_replace( '/[^0-9]/', '', $w['phone'] ) ); ?>" target="_blank" style="flex:1; text-align:center; background:#ecfdf5; border:1px solid #a7f3d0; color:#059669; font-weight:700; font-size:12px; padding:8px 12px; border-radius:8px; text-decoration:none;">
-											💬 WhatsApp
-										</a>
-										<button type="button" class="aws-reroll-btn" data-id="<?php echo esc_attr( $w['id'] ); ?>" style="background:#f8fafc; border:1px solid #cbd5e1; color:#475569; font-size:12px; font-weight:700; padding:8px 12px; border-radius:8px; cursor:pointer;">
-											🔄 Re-roll
-										</button>
-									</div>
-								</div>
-							<?php endforeach; ?>
-						</div>
-					<?php else : ?>
-						<div style="text-align:center; padding:60px 20px; border:2px dashed #e2e8f0; border-radius:14px;">
-							<div style="font-size:42px; margin-bottom:10px;">🎁</div>
-							<h4 style="margin:0; font-size:16px; font-weight:800; color:#0f172a;">Ready for the Giveaway</h4>
-							<p style="margin:6px 0 18px; color:#64748b; font-size:13px;">
-								Click the button above to select 5 random unique students from the pool of <?php echo esc_html( $total_entries ); ?> entries.
-							</p>
-						</div>
-					<?php endif; ?>
-				</div>
-
-				<!-- Publish Action Footer (revealed when winners are selected) -->
-				<div id="aws-publish-section" style="<?php echo empty( $published_winners ) ? 'display:none;' : ''; ?> margin-top:24px; padding-top:20px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
-					<div style="font-size:13px; color:#64748b;">
-						Confirming will update <code>/giveaway/</code> to display these 5 winners.
-					</div>
-					<button type="button" id="aws-publish-btn" style="background:#10b981; color:#ffffff; border:none; padding:12px 24px; border-radius:10px; font-weight:800; font-size:13px; cursor:pointer; box-shadow:0 4px 12px rgba(16,185,129,0.3);">
-						📢 Publish Winners to Giveaway Page
-					</button>
-				</div>
-			</div>
-
-		<!-- TAB 3: CAMPAIGN SETTINGS -->
-		<?php elseif ( 'settings' === $active_subtab ) : ?>
-			<form id="aws-giveaway-settings-form" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; padding:28px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
-				<h3 style="margin:0 0 20px; font-size:18px; font-weight:800; color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:14px;">
-					⚙️ Campaign Configuration
-				</h3>
-
-				<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px; margin-bottom:24px;">
-					<div>
-						<label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">Campaign Name</label>
-						<input type="text" name="campaign_title" value="<?php echo esc_attr( $settings['campaign_title'] ); ?>" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;" required>
-					</div>
-
-					<div>
-						<label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">Campaign Status</label>
-						<select name="campaign_status" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;">
-							<option value="active" <?php selected( $settings['campaign_status'], 'active' ); ?>>🟢 Active (Accepting Entries)</option>
-							<option value="announced" <?php selected( $settings['campaign_status'], 'announced' ); ?>>🏆 Winners Announced (Showcase Mode)</option>
-							<option value="paused" <?php selected( $settings['campaign_status'], 'paused' ); ?>>⏸ Paused</option>
-						</select>
-					</div>
-
-					<div>
-						<label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">
-							Allowed Email Domain(s) <span style="font-weight:400; color:#64748b;">(comma-separated, or * for any)</span>
-						</label>
-						<input type="text" name="allowed_email_domains" value="<?php echo esc_attr( $settings['allowed_email_domains'] ); ?>" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;" required>
-						<span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">Default: <code>students.au.edu.pk, au.edu.pk</code></span>
-					</div>
-
-					<div>
-						<label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">Ticket Number Prefix</label>
-						<input type="text" name="ticket_prefix" value="<?php echo esc_attr( $settings['ticket_prefix'] ); ?>" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;" required>
-						<span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">Outputs: <code>AU-AWS-1001</code></span>
-					</div>
-
-					<div>
-						<label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">Number of Giveaway Winners</label>
-						<input type="number" name="winner_count" min="1" max="50" value="<?php echo esc_attr( $settings['winner_count'] ); ?>" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;" required>
-					</div>
-
-					<div>
-						<label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">Prize Headline</label>
-						<input type="text" name="prize_title" value="<?php echo esc_attr( $settings['prize_title'] ); ?>" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;">
-					</div>
-				</div>
-
-				<div style="margin-bottom:20px;">
-					<label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">Campaign Description (Displayed on Giveaway Page)</label>
-					<textarea name="campaign_description" rows="3" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px; font-family:inherit;"><?php echo esc_textarea( $settings['campaign_description'] ?? '' ); ?></textarea>
-					<span style="font-size:11px; color:#64748b; margin-top:4px; display:block;">Explains the campaign rules/instructions to students scanning on campus.</span>
-				</div>
-
-				<div style="margin-bottom:24px;">
-					<label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:6px;">Booth Claim Location Instructions (Shown in Winners Mode)</label>
-					<input type="text" name="booth_claim_location" value="<?php echo esc_attr( $settings['booth_claim_location'] ); ?>" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:8px; font-size:14px;">
-				</div>
-
-				<!-- Modular Tasks Section -->
-				<h4 style="margin:28px 0 12px; font-size:15px; font-weight:800; color:#0f172a;">📋 Modular Action Tasks</h4>
-				<p style="margin:0 0 16px; color:#64748b; font-size:13px;">Students complete these tasks before claiming their ticket.</p>
-
-				<div id="aws-tasks-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
-					<?php foreach ( $settings['tasks'] as $idx => $task ) : ?>
-						<div class="aws-task-row" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 18px; display:grid; grid-template-columns:120px 1fr 1fr 140px 40px; gap:12px; align-items:center;">
-							<input type="hidden" class="task-id" value="<?php echo esc_attr( $task['id'] ); ?>">
-							
-							<select class="task-icon" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px;">
-								<option value="linkedin" <?php selected( $task['icon'], 'linkedin' ); ?>>LinkedIn</option>
-								<option value="instagram" <?php selected( $task['icon'], 'instagram' ); ?>>Instagram</option>
-								<option value="whatsapp" <?php selected( $task['icon'], 'whatsapp' ); ?>>WhatsApp</option>
-								<option value="meetup" <?php selected( $task['icon'], 'meetup' ); ?>>Meetup</option>
-								<option value="link" <?php selected( $task['icon'], 'link' ); ?>>Custom Link</option>
-							</select>
-
-							<input type="text" class="task-title" value="<?php echo esc_attr( $task['title'] ); ?>" placeholder="Task Title" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-							<input type="url" class="task-url" value="<?php echo esc_attr( $task['url'] ); ?>" placeholder="Destination URL" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-							<input type="text" class="task-btn" value="<?php echo esc_attr( $task['button_text'] ); ?>" placeholder="Button Text" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px;">
-
-							<button type="button" class="aws-remove-task-btn" style="background:none; border:none; color:#ef4444; font-size:16px; cursor:pointer;" title="Remove">✕</button>
-						</div>
-					<?php endforeach; ?>
-				</div>
-
-				<button type="button" id="aws-add-task-btn" style="background:#ffffff; border:1.5px dashed #cbd5e1; color:#475569; font-weight:700; font-size:12px; padding:8px 16px; border-radius:8px; cursor:pointer; margin-bottom:28px;">
-					+ Add Another Task
-				</button>
-
-				<div style="border-top:1px solid #e2e8f0; padding-top:20px; display:flex; justify-content:flex-end;">
-					<button type="submit" id="aws-save-settings-btn" style="background:#0f172a; color:#ffffff; border:none; padding:12px 28px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer;">
-						Save Campaign Settings
-					</button>
-				</div>
-			</form>
 		<?php endif; ?>
-
 	</div>
 
-	<!-- Admin JavaScript Engine -->
 	<script>
-	document.addEventListener('DOMContentLoaded', function() {
-		const ajaxUrl = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
-		const nonce   = '<?php echo esc_js( $nonce ); ?>';
+	document.addEventListener('DOMContentLoaded', function () {
+		var ajaxUrl = '<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>';
+		var nonce = '<?php echo esc_js( $nonce ); ?>';
+		var giveawayId = <?php echo intval( $giveaway_id ); ?>;
+		var current = [];
 
-		// 1. Pick Giveaway Winners
-		const drawBtn = document.getElementById('aws-sbg-draw-btn');
-		if (drawBtn) {
-			drawBtn.addEventListener('click', function() {
-				drawBtn.disabled = true;
-				drawBtn.innerText = '🎁 Selecting Winners...';
-
-				const formData = new FormData();
-				formData.append('action', 'aws_sbg_pick_giveaway_winners');
-				formData.append('nonce', nonce);
-
-				fetch(ajaxUrl, { method: 'POST', body: formData })
-					.then(r => r.json())
-					.then(res => {
-						drawBtn.disabled = false;
-						drawBtn.innerText = '🎁 Re-select All Winners';
-						if (res.success && res.data.winners) {
-							renderDrawnWinners(res.data.winners);
-						} else {
-							alert(res.data && res.data.message ? res.data.message : 'Error selecting winners.');
-						}
-					})
-					.catch(err => {
-						drawBtn.disabled = false;
-						drawBtn.innerText = '🎁 Pick 5 Giveaway Winners';
-						alert('Network error selecting candidates.');
-					});
-			});
+		function fd(action) {
+			var f = new FormData();
+			f.append('action', action);
+			f.append('nonce', nonce);
+			f.append('giveaway_id', giveawayId);
+			return f;
 		}
+		function esc(v){ return String(v == null ? '' : v).replace(/</g,'&lt;'); }
 
-		function renderDrawnWinners(winners) {
-			const container = document.getElementById('aws-draw-results-container');
-			const publishSec = document.getElementById('aws-publish-section');
-
-			let html = '<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;" id="aws-winners-grid">';
-			winners.forEach((w, idx) => {
-				const cleanPhone = (w.phone || '').replace(/[^0-9]/g, '');
-				html += `
-					<div class="aws-winner-card" data-id="${w.id}" style="background:#ffffff; border:2px solid #9353ff; border-radius:14px; padding:20px; box-shadow:0 4px 12px rgba(147,83,255,0.12); animation:awsCardPop .3s ease;">
-						<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-							<span style="background:#f5f3ff; color:#7c3aed; font-weight:900; font-size:12px; padding:3px 10px; border-radius:8px;">
-								Selected Winner #${idx + 1}
-							</span>
-							<span style="font-family:monospace; font-weight:800; color:#9353ff; font-size:13px;">
-								#${w.ticket_number}
-							</span>
-						</div>
-						<h4 style="margin:0 0 4px; font-size:16px; font-weight:800; color:#0f172a;">${w.full_name}</h4>
-						<div style="font-size:12px; color:#64748b; margin-bottom:14px;">${w.email}</div>
-						<div style="display:flex; gap:8px;">
-							<a href="https://wa.me/${cleanPhone}" target="_blank" style="flex:1; text-align:center; background:#ecfdf5; border:1px solid #a7f3d0; color:#059669; font-weight:700; font-size:12px; padding:8px 12px; border-radius:8px; text-decoration:none;">
-								💬 WhatsApp
-							</a>
-							<button type="button" class="aws-reroll-btn" data-id="${w.id}" style="background:#f8fafc; border:1px solid #cbd5e1; color:#475569; font-size:12px; font-weight:700; padding:8px 12px; border-radius:8px; cursor:pointer;">
-								🔄 Re-roll
-							</button>
-						</div>
-					</div>
-				`;
+		function render() {
+			var box = document.getElementById('aws-draw-results');
+			if (!box) return;
+			if (!current.length) { box.innerHTML = ''; document.getElementById('aws-publish-section').style.display = 'none'; return; }
+			var html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;" id="aws-winners-grid">';
+			current.forEach(function (w, idx) {
+				var phone = (w.phone || '').replace(/[^0-9]/g, '');
+				html += '<div class="aws-winner-card" data-id="' + w.id + '" style="background:#fff;border:2px solid #9353ff;border-radius:12px;padding:16px;">'
+					+ '<div style="display:flex;justify-content:space-between;margin-bottom:8px;">'
+					+ '<span style="background:#f5f3ff;color:#7c3aed;font-weight:900;font-size:11px;padding:2px 8px;border-radius:6px;">Winner #' + (idx + 1) + '</span>'
+					+ '<span style="font-family:monospace;font-weight:800;color:#9353ff;font-size:12px;">#' + esc(w.ticket_number) + '</span></div>'
+					+ '<div style="font-weight:800;color:#0f172a;">' + esc(w.full_name) + '</div>'
+					+ '<div style="font-size:12px;color:#64748b;margin-bottom:10px;">' + esc(w.email) + '</div>'
+					+ '<div style="display:flex;gap:8px;">'
+					+ '<a href="https://wa.me/' + phone + '" target="_blank" class="button" style="flex:1;text-align:center;">💬 WhatsApp</a>'
+					+ '<button type="button" class="button aws-reroll-btn" data-idx="' + idx + '">🔄 Re-roll</button>'
+					+ '</div></div>';
 			});
 			html += '</div>';
-
-			container.innerHTML = html;
-			if (publishSec) publishSec.style.display = 'flex';
-			bindRerollButtons();
-		}
-
-		// 2. Individual Re-roll
-		function bindRerollButtons() {
-			document.querySelectorAll('.aws-reroll-btn').forEach(btn => {
-				btn.addEventListener('click', function() {
-					const card = this.closest('.aws-winner-card');
-					const currentId = card.getAttribute('data-id');
-
-					const allCards = document.querySelectorAll('.aws-winner-card');
-					const currentIds = Array.from(allCards).map(c => parseInt(c.getAttribute('data-id')));
-
-					this.disabled = true;
-					this.innerText = '...';
-
-					const formData = new FormData();
-					formData.append('action', 'aws_sbg_reroll_giveaway_winner');
-					formData.append('nonce', nonce);
-					currentIds.forEach(id => formData.append('exclude_ids[]', id));
-
-					fetch(ajaxUrl, { method: 'POST', body: formData })
-						.then(r => r.json())
-						.then(res => {
-							if (res.success && res.data.winner) {
-								const nw = res.data.winner;
-								const cleanPhone = (nw.phone || '').replace(/[^0-9]/g, '');
-								card.setAttribute('data-id', nw.id);
-								card.querySelector('h4').innerText = nw.full_name;
-								card.querySelector('div[style*="margin-bottom:14px"]').innerText = nw.email;
-								card.querySelector('span[style*="monospace"]').innerText = '#' + nw.ticket_number;
-								const waLink = card.querySelector('a[href^="https://wa.me"]');
-								if (waLink) waLink.href = 'https://wa.me/' + cleanPhone;
-								btn.disabled = false;
-								btn.innerText = '🔄 Re-roll';
-							} else {
-								alert(res.data && res.data.message ? res.data.message : 'No replacement candidate available.');
-								btn.disabled = false;
-								btn.innerText = '🔄 Re-roll';
-							}
-						});
-				});
+			box.innerHTML = html;
+			document.getElementById('aws-publish-section').style.display = 'block';
+			box.querySelectorAll('.aws-reroll-btn').forEach(function (btn) {
+				btn.onclick = reroll;
 			});
 		}
-		bindRerollButtons();
 
-		// 3. Publish Confirmed Winners
-		const publishBtn = document.getElementById('aws-publish-btn');
+		function reroll() {
+			var idx = parseInt(this.getAttribute('data-idx'));
+			var btn = this;
+			btn.disabled = true;
+			var data = fd('aws_sbg_reroll_giveaway_winner');
+			current.forEach(function (c) { data.append('exclude_ids[]', c.id); });
+			fetch(ajaxUrl, { method: 'POST', body: data })
+				.then(r => r.json())
+				.then(function (res) {
+					if (res.success && res.data.winner) { current[idx] = res.data.winner; render(); }
+					else { btn.disabled = false; alert(res.data && res.data.message ? res.data.message : 'No replacement available.'); }
+				})
+				.catch(function () { btn.disabled = false; alert('Network error.'); });
+		}
+
+		var drawBtn = document.getElementById('aws-draw-btn');
+		if (drawBtn) {
+			drawBtn.addEventListener('click', function () {
+				drawBtn.disabled = true;
+				drawBtn.innerText = '🎁 Selecting...';
+				fetch(ajaxUrl, { method: 'POST', body: fd('aws_sbg_pick_giveaway_winners') })
+					.then(r => r.json())
+					.then(function (res) {
+						drawBtn.disabled = false;
+						drawBtn.innerText = '🎁 Re-select Winners';
+						if (res.success && res.data.winners) { current = res.data.winners; render(); }
+						else { alert(res.data && res.data.message ? res.data.message : 'Error selecting winners.'); }
+					})
+					.catch(function () { drawBtn.disabled = false; drawBtn.innerText = '🎁 Pick Winners'; alert('Network error.'); });
+			});
+		}
+
+		var publishBtn = document.getElementById('aws-publish-btn');
 		if (publishBtn) {
-			publishBtn.addEventListener('click', function() {
-				const cards = document.querySelectorAll('.aws-winner-card');
-				const winnerIds = Array.from(cards).map(c => parseInt(c.getAttribute('data-id')));
-
-				if (!winnerIds.length) {
-					alert('No winners selected.');
-					return;
-				}
-
-				if (!confirm('Publish these ' + winnerIds.length + ' winners to the public page? This will set /giveaway/ to Winners Announced mode.')) {
-					return;
-				}
-
+			publishBtn.addEventListener('click', function () {
+				if (!current.length) { alert('No winners selected.'); return; }
+				if (!confirm('Publish these ' + current.length + ' winners and set the giveaway to Announce mode?')) { return; }
 				publishBtn.disabled = true;
-				publishBtn.innerText = 'Publishing...';
-
-				const formData = new FormData();
-				formData.append('action', 'aws_sbg_publish_giveaway_winners');
-				formData.append('nonce', nonce);
-				formData.append('set_status_announced', '1');
-				winnerIds.forEach(id => formData.append('winner_ids[]', id));
-
-				fetch(ajaxUrl, { method: 'POST', body: formData })
+				var data = fd('aws_sbg_publish_giveaway_winners');
+				current.forEach(function (c) { data.append('winner_ids[]', c.id); });
+				fetch(ajaxUrl, { method: 'POST', body: data })
 					.then(r => r.json())
-					.then(res => {
+					.then(function (res) {
 						publishBtn.disabled = false;
-						publishBtn.innerText = '📢 Publish Winners to Giveaway Page';
-						if (res.success) {
-							alert('Winners successfully published to /giveaway/!');
-							window.location.reload();
-						} else {
-							alert(res.data && res.data.message ? res.data.message : 'Error publishing winners.');
-						}
+						if (res.success) { alert('Winners published!'); window.location.reload(); }
+						else { alert(res.data && res.data.message ? res.data.message : 'Error publishing winners.'); }
 					});
 			});
 		}
 
-		// 4. Purge Test Entries
-		const purgeBtn = document.getElementById('aws-sbg-purge-btn');
+		var purgeBtn = document.getElementById('aws-sbg-purge-btn');
 		if (purgeBtn) {
-			purgeBtn.addEventListener('click', function() {
-				if (!confirm('Are you sure you want to permanently delete all entries in this campaign? This cannot be undone.')) {
-					return;
-				}
+			purgeBtn.addEventListener('click', function () {
+				if (!confirm('Permanently delete all entries and uploads for this giveaway?')) { return; }
 				purgeBtn.disabled = true;
-				purgeBtn.innerText = 'Purging...';
-
-				const formData = new FormData();
-				formData.append('action', 'aws_sbg_purge_giveaway_entries');
-				formData.append('nonce', nonce);
-
-				fetch(ajaxUrl, { method: 'POST', body: formData })
+				fetch(ajaxUrl, { method: 'POST', body: fd('aws_sbg_purge_giveaway_entries') })
 					.then(r => r.json())
-					.then(res => {
-						if (res.success) {
-							alert('Test entries purged successfully.');
-							window.location.reload();
-						} else {
-							alert('Error purging entries.');
-							purgeBtn.disabled = false;
-						}
-					});
-			});
-		}
-
-		// 5. Settings & Modular Tasks
-		const addTaskBtn = document.getElementById('aws-add-task-btn');
-		const tasksList = document.getElementById('aws-tasks-list');
-		if (addTaskBtn && tasksList) {
-			addTaskBtn.addEventListener('click', function() {
-				const row = document.createElement('div');
-				row.className = 'aws-task-row';
-				row.style = 'background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 18px; display:grid; grid-template-columns:120px 1fr 1fr 140px 40px; gap:12px; align-items:center;';
-				row.innerHTML = `
-					<input type="hidden" class="task-id" value="task_${Date.now()}">
-					<select class="task-icon" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px;">
-						<option value="link">Custom Link</option>
-						<option value="linkedin">LinkedIn</option>
-						<option value="instagram">Instagram</option>
-						<option value="whatsapp">WhatsApp</option>
-						<option value="meetup">Meetup</option>
-					</select>
-					<input type="text" class="task-title" placeholder="Task Title" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-					<input type="url" class="task-url" placeholder="Destination URL" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-					<input type="text" class="task-btn" value="Open Link" placeholder="Button Text" style="padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; font-size:12px;">
-					<button type="button" class="aws-remove-task-btn" style="background:none; border:none; color:#ef4444; font-size:16px; cursor:pointer;" title="Remove">✕</button>
-				`;
-				tasksList.appendChild(row);
-				bindRemoveButtons();
-			});
-		}
-
-		function bindRemoveButtons() {
-			document.querySelectorAll('.aws-remove-task-btn').forEach(btn => {
-				btn.onclick = function() {
-					this.closest('.aws-task-row').remove();
-				};
-			});
-		}
-		bindRemoveButtons();
-
-		const settingsForm = document.getElementById('aws-giveaway-settings-form');
-		if (settingsForm) {
-			settingsForm.addEventListener('submit', function(e) {
-				e.preventDefault();
-				const submitBtn = document.getElementById('aws-save-settings-btn');
-				submitBtn.disabled = true;
-				submitBtn.innerText = 'Saving...';
-
-				const taskRows = document.querySelectorAll('.aws-task-row');
-				const tasks = [];
-				taskRows.forEach(r => {
-					tasks.push({
-						id: r.querySelector('.task-id').value,
-						icon: r.querySelector('.task-icon').value,
-						title: r.querySelector('.task-title').value,
-						url: r.querySelector('.task-url').value,
-						button_text: r.querySelector('.task-btn').value,
-						is_required: 1,
-					});
-				});
-
-				const formData = new FormData(settingsForm);
-				formData.append('action', 'aws_sbg_save_giveaway_settings');
-				formData.append('nonce', nonce);
-				formData.append('tasks_json', JSON.stringify(tasks));
-
-				fetch(ajaxUrl, { method: 'POST', body: formData })
-					.then(r => r.json())
-					.then(res => {
-						submitBtn.disabled = false;
-						submitBtn.innerText = 'Save Campaign Settings';
-						if (res.success) {
-							alert('Settings saved successfully!');
-							window.location.reload();
-						} else {
-							alert(res.data && res.data.message ? res.data.message : 'Error saving settings.');
-						}
+					.then(function (res) {
+						if (res.success) { alert('Entries purged.'); window.location.reload(); }
+						else { purgeBtn.disabled = false; alert('Error purging entries.'); }
 					});
 			});
 		}
@@ -1350,3 +1259,63 @@ function aws_sbg_render_giveaway_admin_page() {
 	</script>
 	<?php
 }
+
+/* ============================================================================
+ * 8. MIGRATION (legacy single campaign -> first giveaway)
+ * ============================================================================ */
+
+function aws_sbg_giveaway_maybe_migrate() {
+	if ( get_option( 'aws_sbg_giveaway_migrated' ) ) {
+		return;
+	}
+	if ( ! post_type_exists( 'aws_giveaway' ) ) {
+		return;
+	}
+
+	global $wpdb;
+	$table  = $wpdb->prefix . 'aws_giveaway_entries';
+	$legacy = get_option( 'aws_sbg_giveaway_settings', array() );
+
+	if ( is_array( $legacy ) && ! empty( $legacy ) ) {
+		$gid = wp_insert_post( array(
+			'post_type'   => 'aws_giveaway',
+			'post_status' => 'publish',
+			'post_title'  => ! empty( $legacy['campaign_title'] ) ? $legacy['campaign_title'] : 'AWS SBG Campus Giveaway',
+		) );
+
+		if ( $gid && ! is_wp_error( $gid ) ) {
+			update_post_meta( $gid, 'giveaway_description', $legacy['campaign_description'] ?? '' );
+			update_post_meta( $gid, 'giveaway_status', ( ( $legacy['campaign_status'] ?? 'active' ) === 'announced' ) ? 'announced' : 'open' );
+			update_post_meta( $gid, 'allowed_email_domains', $legacy['allowed_email_domains'] ?? 'students.au.edu.pk, au.edu.pk' );
+			update_post_meta( $gid, 'ticket_prefix', $legacy['ticket_prefix'] ?? 'AU-AWS' );
+			update_post_meta( $gid, 'winner_count', intval( $legacy['winner_count'] ?? 5 ) );
+			update_post_meta( $gid, 'prize_title', $legacy['prize_title'] ?? '' );
+			update_post_meta( $gid, 'prize_description', $legacy['prize_description'] ?? '' );
+
+			$reqs = array();
+			if ( ! empty( $legacy['tasks'] ) && is_array( $legacy['tasks'] ) ) {
+				foreach ( $legacy['tasks'] as $t ) {
+					$reqs[] = array(
+						'id'       => 'req_' . sanitize_key( $t['id'] ?? uniqid() ),
+						'label'    => $t['title'] ?? 'Task',
+						'type'     => 'check',
+						'required' => ! empty( $t['is_required'] ) ? 1 : 0,
+						'help'     => $t['subtitle'] ?? '',
+					);
+				}
+			}
+			if ( ! empty( $reqs ) ) {
+				update_post_meta( $gid, 'giveaway_requirements', $reqs );
+			}
+			update_post_meta( $gid, 'giveaway_fields', aws_sbg_default_giveaway_fields() );
+
+			$wpdb->query( $wpdb->prepare( "UPDATE $table SET giveaway_id = %d, campaign_id = %s WHERE giveaway_id = 0", $gid, 'gw-' . $gid ) );
+		}
+	}
+
+	aws_sbg_giveaway_swap_indexes();
+
+	update_option( 'aws_sbg_giveaway_migrated', time() );
+	update_option( 'aws_sbg_giveaway_db_version', AWS_SBG_GIVEAWAY_DBV );
+}
+add_action( 'admin_init', 'aws_sbg_giveaway_maybe_migrate', 20 );
