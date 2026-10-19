@@ -36,9 +36,6 @@ $error_messages = array(
 	'reqcheck' => 'Please confirm all required items.',
 );
 
-$swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.webp' ) )
-	? get_theme_file_uri( 'assets/images/AWS-Swags-Kit.webp' )
-	: 'https://awsairuniversity.com/wp-content/uploads/2026/09/AWS-Swags-Kit.webp';
 ?>
 
 <style>
@@ -75,7 +72,6 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 
 	.sbg-giveaway-root .sbg-gw-inner { max-width: 1080px; margin: 0 auto; padding: 52px 20px 80px; position: relative; z-index: 10; }
 	.sbg-giveaway-root .sbg-gw-head { text-align: center; margin-bottom: 40px; }
-	.sbg-giveaway-root .sbg-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: #ecfdf5; border: 1px solid #a7f3d0; color: #059669; font-size: 11.5px; font-weight: 900; letter-spacing: 0.04em; padding: 5px 12px; border-radius: 999px; margin-bottom: 14px; }
 	.sbg-giveaway-root .sbg-gw-head h1 { font-size: clamp(34px, 5vw, 54px); font-weight: 900; letter-spacing: -0.03em; line-height: 1.05; }
 
 	.sbg-giveaway-root .sbg-notice { max-width: 720px; margin: 0 auto 28px; padding: 14px 20px; border-radius: 14px; font-size: 14px; font-weight: 700; }
@@ -88,7 +84,11 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 	.sbg-giveaway-root .sbg-gw-card h2 { font-size: clamp(22px, 3vw, 30px); font-weight: 900; letter-spacing: -0.02em; }
 	.sbg-giveaway-root .sbg-gw-count { display: inline-flex; align-items: center; gap: 6px; background: #f5f3ff; border: 1px solid #ede9fe; color: #7928ca; font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 999px; white-space: nowrap; }
 	.sbg-giveaway-root .sbg-gw-desc { font-size: 15px; line-height: 1.7; margin-bottom: 8px; }
-	.sbg-giveaway-root .sbg-gw-prize { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #fff7ed, #ffedd5); border: 1px solid #fed7aa; color: #c2410c; font-size: 13px; font-weight: 800; padding: 8px 14px; border-radius: 12px; margin: 10px 0 6px; }
+	.sbg-giveaway-root .sbg-gw-prize { display: flex; align-items: flex-start; gap: 14px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px 18px; margin: 16px 0 4px; max-width: 600px; box-shadow: 0 1px 2px rgba(15,23,42,0.03); }
+	.sbg-giveaway-root .sbg-gw-prize-mark { flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; background: #f5f3ff; border: 1px solid #ede9fe; color: #7928ca; display: flex; align-items: center; justify-content: center; }
+	.sbg-giveaway-root .sbg-gw-prize-label { display: block; font-size: 10.5px; font-weight: 900; letter-spacing: 0.12em; text-transform: uppercase; color: #94a3b8; margin-bottom: 3px; }
+	.sbg-giveaway-root .sbg-gw-prize-title { font-size: 16.5px; font-weight: 800; color: #020617 !important; line-height: 1.35; }
+	.sbg-giveaway-root .sbg-gw-prize-desc { font-size: 13px; color: #64748b !important; margin-top: 3px; line-height: 1.5; }
 
 	.sbg-giveaway-root .sbg-sec-title { font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; margin: 22px 0 12px; }
 
@@ -138,7 +138,6 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 	.sbg-giveaway-root .sbg-winner-card .email { font-size: 12.5px; color: #64748b; margin-top: 2px; }
 
 	.sbg-giveaway-root .sbg-empty { text-align: center; padding: 70px 24px; border: 2px dashed #e2e8f0; border-radius: 22px; }
-	.sbg-giveaway-root .sbg-empty .emoji { font-size: 44px; margin-bottom: 10px; }
 </style>
 
 <div class="sbg-giveaway-root">
@@ -150,14 +149,13 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 
 		<div class="sbg-gw-inner">
 			<div class="sbg-gw-head">
-				<span class="sbg-eyebrow">AIR UNIVERSITY ISLAMABAD • ON-CAMPUS DROPS</span>
 				<h1>Giveaways &amp; Rewards</h1>
 			</div>
 
 			<?php if ( 'success' === $gw_status ) : ?>
-				<div class="sbg-notice success">🎉 You're in! Your entry is confirmed with ticket <strong><?php echo esc_html( $gw_ticket ); ?></strong>. Keep it safe.</div>
+				<div class="sbg-notice success">You're in — your entry is confirmed with ticket <strong><?php echo esc_html( $gw_ticket ); ?></strong>. Keep it safe.</div>
 			<?php elseif ( 'exists' === $gw_status ) : ?>
-				<div class="sbg-notice info">✅ You have already entered this giveaway — ticket <strong><?php echo esc_html( $gw_ticket ); ?></strong>.</div>
+				<div class="sbg-notice info">You have already entered this giveaway — ticket <strong><?php echo esc_html( $gw_ticket ); ?></strong>.</div>
 			<?php elseif ( 'error' === $gw_status ) : ?>
 				<div class="sbg-notice error"><?php echo esc_html( $error_messages[ $gw_error ] ?? 'Something went wrong. Please try again.' ); ?></div>
 			<?php endif; ?>
@@ -174,7 +172,7 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 					<section class="sbg-gw-card">
 						<div class="sbg-gw-card-head">
 							<h2><?php echo esc_html( $giveaway->post_title ); ?></h2>
-							<span class="sbg-gw-count">🎟️ <?php echo esc_html( number_format( $count ) ); ?> entered</span>
+							<span class="sbg-gw-count"><?php echo esc_html( number_format( $count ) ); ?> entered</span>
 						</div>
 
 						<?php if ( ! empty( $meta['giveaway_description'] ) ) : ?>
@@ -182,7 +180,18 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 						<?php endif; ?>
 
 						<?php if ( ! empty( $meta['prize_title'] ) ) : ?>
-							<div class="sbg-gw-prize">🏆 <?php echo esc_html( $meta['prize_title'] ); ?><?php echo ! empty( $meta['prize_description'] ) ? ' — ' . esc_html( $meta['prize_description'] ) : ''; ?></div>
+							<div class="sbg-gw-prize">
+								<span class="sbg-gw-prize-mark" aria-hidden="true">
+									<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>
+								</span>
+								<div>
+									<span class="sbg-gw-prize-label">Prize</span>
+									<div class="sbg-gw-prize-title"><?php echo esc_html( $meta['prize_title'] ); ?></div>
+									<?php if ( ! empty( $meta['prize_description'] ) ) : ?>
+										<div class="sbg-gw-prize-desc"><?php echo esc_html( $meta['prize_description'] ); ?></div>
+									<?php endif; ?>
+								</div>
+							</div>
 						<?php endif; ?>
 
 						<form method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -253,7 +262,7 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 							</div>
 
 							<div style="margin-top:22px;">
-								<button type="submit" class="btn-launch" style="width:100%;">Enter Giveaway 🎟️</button>
+								<button type="submit" class="btn-launch" style="width:100%;">Enter Giveaway</button>
 							</div>
 						</form>
 					</section>
@@ -274,10 +283,18 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 				<section class="sbg-gw-card">
 					<div class="sbg-gw-card-head">
 						<h2><?php echo esc_html( $giveaway->post_title ); ?></h2>
-						<span class="sbg-gw-count" style="background:#ecfdf5;border-color:#a7f3d0;color:#059669;">🏆 Winners Announced</span>
+						<span class="sbg-gw-count" style="background:#ecfdf5;border-color:#a7f3d0;color:#059669;">Winners announced</span>
 					</div>
 					<?php if ( ! empty( $meta['prize_title'] ) ) : ?>
-						<div class="sbg-gw-prize">🏆 <?php echo esc_html( $meta['prize_title'] ); ?></div>
+						<div class="sbg-gw-prize">
+							<span class="sbg-gw-prize-mark" aria-hidden="true">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>
+							</span>
+							<div>
+								<span class="sbg-gw-prize-label">Prize</span>
+								<div class="sbg-gw-prize-title"><?php echo esc_html( $meta['prize_title'] ); ?></div>
+							</div>
+						</div>
 					<?php endif; ?>
 
 					<?php if ( ! empty( $winners ) ) : ?>
@@ -305,9 +322,8 @@ $swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.w
 
 			<?php if ( empty( $open_giveaways ) && empty( $announced_giveaways ) ) : ?>
 				<div class="sbg-empty">
-					<div class="emoji">🎁</div>
 					<h3 style="font-size:20px;font-weight:900;margin-bottom:6px;">No active giveaways right now</h3>
-					<p style="color:#64748b;">Check back soon — new campus drops are announced regularly.</p>
+					<p style="color:#64748b;">Check back soon — new giveaways are announced regularly.</p>
 				</div>
 			<?php endif; ?>
 		</div>

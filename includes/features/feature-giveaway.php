@@ -145,7 +145,7 @@ function aws_sbg_get_giveaway_meta( $giveaway_id ) {
 		'giveaway_description'  => '',
 		'opens_at'              => '',
 		'closes_at'             => '',
-		'allowed_email_domains' => 'students.au.edu.pk, au.edu.pk',
+		'allowed_email_domains' => 'students.au.edu.pk',
 		'winner_count'          => 5,
 		'ticket_prefix'         => 'AU-AWS',
 		'prize_title'           => '',
@@ -265,9 +265,9 @@ function aws_sbg_giveaway_is_open( $giveaway_id ) {
  * ============================================================================ */
 
 function aws_sbg_giveaway_add_meta_boxes() {
-	add_meta_box( 'aws_sbg_giveaway_settings', '⚙️ Giveaway Settings', 'aws_sbg_giveaway_render_settings_box', 'aws_giveaway', 'normal', 'high' );
-	add_meta_box( 'aws_sbg_giveaway_fields', '👤 Details Fields (what entrants fill in)', 'aws_sbg_giveaway_render_fields_box', 'aws_giveaway', 'normal', 'high' );
-	add_meta_box( 'aws_sbg_giveaway_reqs', '✅ Requirements (what entrants must do)', 'aws_sbg_giveaway_render_reqs_box', 'aws_giveaway', 'normal', 'high' );
+	add_meta_box( 'aws_sbg_giveaway_settings', 'Settings', 'aws_sbg_giveaway_render_settings_box', 'aws_giveaway', 'normal', 'high' );
+	add_meta_box( 'aws_sbg_giveaway_fields', 'Details fields (what entrants fill in)', 'aws_sbg_giveaway_render_fields_box', 'aws_giveaway', 'normal', 'high' );
+	add_meta_box( 'aws_sbg_giveaway_reqs', 'Requirements (what entrants must do)', 'aws_sbg_giveaway_render_reqs_box', 'aws_giveaway', 'normal', 'high' );
 }
 add_action( 'add_meta_boxes', 'aws_sbg_giveaway_add_meta_boxes' );
 
@@ -279,9 +279,9 @@ function aws_sbg_giveaway_render_settings_box( $post ) {
 		<div>
 			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Status</label>
 			<select name="giveaway_status" style="width:100%;">
-				<option value="open" <?php selected( $m['giveaway_status'], 'open' ); ?>>🟢 Open (accepting entries)</option>
-				<option value="closed" <?php selected( $m['giveaway_status'], 'closed' ); ?>>⏸ Closed</option>
-				<option value="announced" <?php selected( $m['giveaway_status'], 'announced' ); ?>>🏆 Winners announced</option>
+				<option value="open" <?php selected( $m['giveaway_status'], 'open' ); ?>>Open — accepting entries</option>
+				<option value="closed" <?php selected( $m['giveaway_status'], 'closed' ); ?>>Closed</option>
+				<option value="announced" <?php selected( $m['giveaway_status'], 'announced' ); ?>>Winners announced</option>
 			</select>
 		</div>
 		<div>
@@ -293,8 +293,11 @@ function aws_sbg_giveaway_render_settings_box( $post ) {
 			<input type="text" name="ticket_prefix" value="<?php echo esc_attr( $m['ticket_prefix'] ); ?>" style="width:100%;">
 		</div>
 		<div>
-			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Allowed Email Domains <span style="font-weight:400;color:#64748b;">(comma separated, or * for any)</span></label>
-			<input type="text" name="allowed_email_domains" value="<?php echo esc_attr( $m['allowed_email_domains'] ); ?>" style="width:100%;">
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Who can enter?</label>
+			<select name="email_restriction" style="width:100%;">
+				<option value="air_university" <?php selected( '*' !== $m['allowed_email_domains'] ); ?>>Air University — students only (@students.au.edu.pk)</option>
+				<option value="general" <?php selected( '*' === $m['allowed_email_domains'] ); ?>>General — accept any email address</option>
+			</select>
 		</div>
 		<div>
 			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Opens At (optional)</label>
@@ -470,11 +473,17 @@ function aws_sbg_giveaway_save_meta( $post_id ) {
 		return;
 	}
 
-	$text_keys = array( 'giveaway_status', 'opens_at', 'closes_at', 'allowed_email_domains', 'ticket_prefix', 'prize_title', 'prize_description' );
+	$text_keys = array( 'giveaway_status', 'opens_at', 'closes_at', 'ticket_prefix', 'prize_title', 'prize_description' );
 	foreach ( $text_keys as $key ) {
 		if ( isset( $_POST[ $key ] ) ) {
 			update_post_meta( $post_id, $key, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
 		}
+	}
+
+	// Email eligibility: map the simple choice to the stored domain rule.
+	if ( isset( $_POST['email_restriction'] ) ) {
+		$restriction = sanitize_text_field( wp_unslash( $_POST['email_restriction'] ) );
+		update_post_meta( $post_id, 'allowed_email_domains', ( 'general' === $restriction ) ? '*' : 'students.au.edu.pk' );
 	}
 
 	if ( isset( $_POST['winner_count'] ) ) {
@@ -997,12 +1006,12 @@ function aws_sbg_render_giveaway_submissions_page() {
 		<div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px 28px;margin-bottom:24px;">
 			<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;">
 				<div>
-					<h1 style="margin:0;font-size:22px;font-weight:800;color:#0f172a;">🎁 Giveaway Submissions</h1>
+					<h1 style="margin:0;font-size:22px;font-weight:800;color:#0f172a;">Giveaway Submissions</h1>
 					<p style="margin:4px 0 0;color:#64748b;font-size:13px;">Review entries per giveaway, inspect uploads, and publish winners.</p>
 				</div>
 				<div style="display:flex;gap:10px;">
 					<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=aws_giveaway' ) ); ?>" class="button button-primary">+ New Giveaway</a>
-					<a href="<?php echo esc_url( admin_url( 'admin-ajax.php?action=aws_sbg_export_giveaway_csv&giveaway_id=' . $giveaway_id ) ); ?>" class="button">📥 Export CSV</a>
+					<a href="<?php echo esc_url( admin_url( 'admin-ajax.php?action=aws_sbg_export_giveaway_csv&giveaway_id=' . $giveaway_id ) ); ?>" class="button">Export CSV</a>
 				</div>
 			</div>
 
@@ -1041,8 +1050,7 @@ function aws_sbg_render_giveaway_submissions_page() {
 
 		<?php if ( ! $giveaway_id ) : ?>
 			<div style="background:#fff;border:2px dashed #e2e8f0;border-radius:16px;padding:60px 20px;text-align:center;">
-				<div style="font-size:40px;">🎁</div>
-				<h3 style="margin:8px 0 0;color:#0f172a;">No giveaways yet</h3>
+				<h3 style="margin:0 0 6px;color:#0f172a;">No giveaways yet</h3>
 				<p style="color:#64748b;">Create your first giveaway to start collecting entries.</p>
 				<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=aws_giveaway' ) ); ?>" class="button button-primary">+ Create Giveaway</a>
 			</div>
@@ -1051,14 +1059,14 @@ function aws_sbg_render_giveaway_submissions_page() {
 			<div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px;margin-bottom:24px;">
 				<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid #e2e8f0;padding-bottom:16px;">
 					<div>
-						<h3 style="margin:0;font-size:17px;font-weight:800;color:#0f172a;">🏆 Winner Selection</h3>
+						<h3 style="margin:0;font-size:17px;font-weight:800;color:#0f172a;">Winner selection</h3>
 						<p style="margin:4px 0 0;color:#64748b;font-size:13px;">Pick <?php echo esc_html( $meta['winner_count'] ); ?> random winners, re-roll slots, then publish.</p>
 					</div>
-					<button type="button" id="aws-draw-btn" class="button button-primary">🎁 Pick <?php echo esc_html( $meta['winner_count'] ); ?> Winners</button>
+					<button type="button" id="aws-draw-btn" class="button button-primary">Pick <?php echo esc_html( $meta['winner_count'] ); ?> winners</button>
 				</div>
 				<div id="aws-draw-results" style="margin-top:18px;"></div>
 				<div id="aws-publish-section" style="display:none;margin-top:18px;padding-top:16px;border-top:1px solid #e2e8f0;text-align:right;">
-					<button type="button" id="aws-publish-btn" class="button button-primary" style="background:#10b981;border-color:#10b981;">📢 Publish Winners</button>
+					<button type="button" id="aws-publish-btn" class="button button-primary" style="background:#10b981;border-color:#10b981;">Publish winners</button>
 				</div>
 			</div>
 
@@ -1086,7 +1094,7 @@ function aws_sbg_render_giveaway_submissions_page() {
 								<td style="padding:12px 18px;color:#475569;"><?php echo esc_html( $e['email'] ); ?></td>
 								<td style="padding:12px 18px;">
 									<?php if ( $e['phone'] ) : ?>
-										<a href="https://wa.me/<?php echo esc_attr( preg_replace( '/[^0-9]/', '', $e['phone'] ) ); ?>" target="_blank" style="color:#059669;font-weight:700;text-decoration:none;">💬 <?php echo esc_html( $e['phone'] ); ?></a>
+										<a href="https://wa.me/<?php echo esc_attr( preg_replace( '/[^0-9]/', '', $e['phone'] ) ); ?>" target="_blank" style="color:#059669;font-weight:700;text-decoration:none;"><?php echo esc_html( $e['phone'] ); ?></a>
 									<?php endif; ?>
 								</td>
 								<td style="padding:12px 18px;color:#334155;font-size:12px;">
@@ -1116,7 +1124,7 @@ function aws_sbg_render_giveaway_submissions_page() {
 								</td>
 								<td style="padding:12px 18px;">
 									<?php if ( $e['is_winner'] ) : ?>
-										<span style="background:#ecfdf5;border:1px solid #a7f3d0;color:#059669;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;">🏆 WINNER</span>
+										<span style="background:#ecfdf5;border:1px solid #a7f3d0;color:#059669;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;">Winner</span>
 									<?php else : ?>
 										<span style="background:#f1f5f9;color:#64748b;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;">Participant</span>
 									<?php endif; ?>
@@ -1180,8 +1188,8 @@ function aws_sbg_render_giveaway_submissions_page() {
 					+ '<div style="font-weight:800;color:#0f172a;">' + esc(w.full_name) + '</div>'
 					+ '<div style="font-size:12px;color:#64748b;margin-bottom:10px;">' + esc(w.email) + '</div>'
 					+ '<div style="display:flex;gap:8px;">'
-					+ '<a href="https://wa.me/' + phone + '" target="_blank" class="button" style="flex:1;text-align:center;">💬 WhatsApp</a>'
-					+ '<button type="button" class="button aws-reroll-btn" data-idx="' + idx + '">🔄 Re-roll</button>'
+					+ '<a href="https://wa.me/' + phone + '" target="_blank" class="button" style="flex:1;text-align:center;">WhatsApp</a>'
+					+ '<button type="button" class="button aws-reroll-btn" data-idx="' + idx + '">Re-roll</button>'
 					+ '</div></div>';
 			});
 			html += '</div>';
@@ -1211,16 +1219,16 @@ function aws_sbg_render_giveaway_submissions_page() {
 		if (drawBtn) {
 			drawBtn.addEventListener('click', function () {
 				drawBtn.disabled = true;
-				drawBtn.innerText = '🎁 Selecting...';
+				drawBtn.innerText = 'Selecting…';
 				fetch(ajaxUrl, { method: 'POST', body: fd('aws_sbg_pick_giveaway_winners') })
 					.then(r => r.json())
 					.then(function (res) {
 						drawBtn.disabled = false;
-						drawBtn.innerText = '🎁 Re-select Winners';
+						drawBtn.innerText = 'Re-select winners';
 						if (res.success && res.data.winners) { current = res.data.winners; render(); }
 						else { alert(res.data && res.data.message ? res.data.message : 'Error selecting winners.'); }
 					})
-					.catch(function () { drawBtn.disabled = false; drawBtn.innerText = '🎁 Pick Winners'; alert('Network error.'); });
+					.catch(function () { drawBtn.disabled = false; drawBtn.innerText = 'Pick winners'; alert('Network error.'); });
 			});
 		}
 
@@ -1286,7 +1294,8 @@ function aws_sbg_giveaway_maybe_migrate() {
 		if ( $gid && ! is_wp_error( $gid ) ) {
 			update_post_meta( $gid, 'giveaway_description', $legacy['campaign_description'] ?? '' );
 			update_post_meta( $gid, 'giveaway_status', ( ( $legacy['campaign_status'] ?? 'active' ) === 'announced' ) ? 'announced' : 'open' );
-			update_post_meta( $gid, 'allowed_email_domains', $legacy['allowed_email_domains'] ?? 'students.au.edu.pk, au.edu.pk' );
+			$legacy_domains = trim( (string) ( $legacy['allowed_email_domains'] ?? 'students.au.edu.pk' ) );
+			update_post_meta( $gid, 'allowed_email_domains', ( '*' === $legacy_domains ) ? '*' : 'students.au.edu.pk' );
 			update_post_meta( $gid, 'ticket_prefix', $legacy['ticket_prefix'] ?? 'AU-AWS' );
 			update_post_meta( $gid, 'winner_count', intval( $legacy['winner_count'] ?? 5 ) );
 			update_post_meta( $gid, 'prize_title', $legacy['prize_title'] ?? '' );

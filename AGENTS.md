@@ -36,6 +36,22 @@
 
 ### 2026-10-18 - Command Code
 
+**Task**: Giveaway UX refinements — email-eligibility choice, cleaner prize UI, de-slop pass.
+
+**Files Changed**:
+- `includes/features/feature-giveaway.php` - Replaced the free-text "Allowed Email Domains" field with a "Who can enter?" select (Air University students only / General). Trimmed emoji from admin headings, buttons and winner cards.
+- `templates/pages/page-giveaway.php` - Removed the "AIR UNIVERSITY ISLAMABAD • ON-CAMPUS DROPS" badge, rebuilt the prize UI as a labelled prize block with an icon, and removed decorative emoji. Dropped the unused `$swag_kit_url`.
+
+**Key Decisions**:
+- The eligibility choice maps to the existing `allowed_email_domains` meta (`*` = general, `students.au.edu.pk` = Air University only), so `aws_sbg_validate_giveaway_domain()` needed no change. The migration normalises the legacy domain list to one of these two values.
+
+**Notes for Future Agents**:
+- There is no longer any UI to enter arbitrary email domains — it is a two-option choice by design.
+
+---
+
+### 2026-10-18 - Command Code
+
 **Task**: Build a multi-giveaway system (create giveaways with requirements, public submissions, admin winner publishing) replacing the single hardcoded campus campaign.
 
 **Files Changed**:
