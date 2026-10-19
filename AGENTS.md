@@ -36,6 +36,22 @@
 
 ### 2026-10-18 - Command Code
 
+**Task**: Replace the inline success banner with an engaging confirmation pop-up on giveaway submit.
+
+**Files Changed**:
+- `templates/pages/page-giveaway.php` - Success / already-entered now open a centred modal (blurred backdrop, gradient top bar, check mark, ticket card with the number and entrant name) instead of the inline alert. Modal closes on Done / backdrop / X / Esc, clean the query string via `history.replaceState`, and lock body scroll while open. Errors still show inline.
+
+**Key Decisions**:
+- Kept the POST → redirect flow (required for uploads) and render the modal server-side from `gw_status` / `gw_ticket` / `gw_name`, opening it on load.
+- `$modal_title` / `$modal_sub` differ for `success` vs `exists` so the same modal covers both outcomes.
+
+**Notes for Future Agents**:
+- The modal markup only renders when `$show_modal` is true; the close handler also strips `?gw_status=...` so a refresh doesn't re-open it.
+
+---
+
+### 2026-10-18 - Command Code
+
 **Task**: Make the giveaway page lead with the active giveaway, redesign the prize panel, add live email-domain validation, and improve the error state.
 
 **Files Changed**:

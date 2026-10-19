@@ -40,15 +40,13 @@ $error_messages = array(
 	'reqcheck' => 'Please confirm all required items.',
 );
 
-// Which field an error code points at (for inline highlighting).
-$error_field = array(
-	'email'    => 'email',
-	'domain'   => 'email',
-	'required' => 'fields',
-	'reqfile'  => 'reqs',
-	'reqproof' => 'reqs',
-	'reqcheck' => 'reqs',
-);
+// Success / already-entered pop-up (shown instead of an inline banner).
+$show_modal  = in_array( $gw_status, array( 'success', 'exists' ), true ) && '' !== $gw_ticket;
+$modal_title = ( 'exists' === $gw_status ) ? "You're already in" : "You're in!";
+$modal_sub   = ( 'exists' === $gw_status )
+	? 'This email is already registered for this giveaway. Your ticket is below.'
+	: 'Your entry is confirmed. Keep this ticket safe — winners are drawn from it.';
+$modal_name  = isset( $_GET['gw_name'] ) ? sanitize_text_field( $_GET['gw_name'] ) : '';
 
 /** Email rule for a giveaway. */
 $gw_email_rule = function ( $giveaway_id ) {
@@ -166,7 +164,7 @@ $render_form = function ( $giveaway, $rule ) use ( $source_tag ) {
 				$dom     = ( $is_mail && $rule['restricted'] ) ? $rule['domain'] : '';
 				$attrs   = '';
 				if ( $dom ) {
-					$attrs = ' data-domain="' . esc_attr( $dom ) . '" pattern="^[^@\\s]+@' . esc_attr( str_replace( '.', '\\.', $dom ) ) . '$" placeholder="yourname@' . esc_attr( $dom ) . '"';
+					$attrs = ' data-domain="' . esc_attr( $dom ) . '" pattern="^[^@\\s]+@' . esc_attr( str_replace( '.', '\\.', $dom ) ) . '$" placeholder="id@' . esc_attr( $dom ) . '"';
 				}
 				?>
 				<div class="sbg-field<?php echo esc_attr( $wide ); ?><?php echo $is_mail ? ' sbg-field-email' : ''; ?>" data-field="<?php echo esc_attr( $fid ); ?>">
@@ -334,6 +332,26 @@ $render_form = function ( $giveaway, $rule ) use ( $source_tag ) {
 	.sbg-giveaway-root .sbg-winner-email { font-size: 12.5px; color: #64748b; margin-top: 2px; }
 
 	.sbg-giveaway-root .sbg-empty { text-align: center; padding: 70px 24px; border: 2px dashed #e2e8f0; border-radius: 22px; }
+
+	/* Success pop-up */
+	.sbg-giveaway-root .sbg-modal { position: fixed; inset: 0; z-index: 99999; display: none; align-items: center; justify-content: center; padding: 20px; }
+	.sbg-giveaway-root .sbg-modal.is-open { display: flex; }
+	.sbg-giveaway-root .sbg-modal-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+	.sbg-giveaway-root .sbg-modal-card { position: relative; width: 100%; max-width: 400px; background: #ffffff; border-radius: 22px; overflow: hidden; box-shadow: 0 40px 90px -30px rgba(15,23,42,0.55); animation: sbgModalPop .3s cubic-bezier(.16,1,.3,1) both; text-align: center; }
+	@keyframes sbgModalPop { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
+	.sbg-giveaway-root .sbg-modal-bar { height: 5px; background: linear-gradient(90deg, #7928ca, #9353ff, #c4b5fd); }
+	.sbg-giveaway-root .sbg-modal-x { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 9px; border: none; background: #f1f5f9; color: #64748b; font-size: 13px; font-weight: 700; cursor: pointer; }
+	.sbg-giveaway-root .sbg-modal-x:hover { background: #e2e8f0; color: #0f172a; }
+	.sbg-giveaway-root .sbg-modal-body { padding: 26px 24px 24px; }
+	.sbg-giveaway-root .sbg-modal-icon { width: 56px; height: 56px; border-radius: 50%; background: #ecfdf5; border: 2px solid #a7f3d0; color: #10b981; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+	.sbg-giveaway-root .sbg-modal-title { font-size: 24px; font-weight: 900; letter-spacing: -0.02em; margin-bottom: 6px; }
+	.sbg-giveaway-root .sbg-modal-sub { font-size: 14px; line-height: 1.6; color: #64748b !important; margin-bottom: 18px; }
+	.sbg-giveaway-root .sbg-ticket { background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 16px; padding: 16px; margin-bottom: 20px; }
+	.sbg-giveaway-root .sbg-ticket-label { display: block; font-size: 10.5px; font-weight: 900; letter-spacing: 0.14em; text-transform: uppercase; color: #94a3b8; margin-bottom: 4px; }
+	.sbg-giveaway-root .sbg-ticket-num { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 26px; font-weight: 900; color: #7928ca; letter-spacing: 0.02em; }
+	.sbg-giveaway-root .sbg-ticket-name { font-size: 13px; font-weight: 700; color: #475569; margin-top: 4px; }
+	body.sbg-noscroll { overflow: hidden; }
+
 	@media (prefers-reduced-motion: reduce) { .sbg-giveaway-root * { animation: none !important; } }
 </style>
 
@@ -345,23 +363,7 @@ $render_form = function ( $giveaway, $rule ) use ( $source_tag ) {
 		<div class="sbg-grid-lines"></div>
 
 		<div class="sbg-inner">
-			<?php if ( 'success' === $gw_status ) : ?>
-				<div class="sbg-alert success">
-					<span class="sbg-alert-icon">✓</span>
-					<div>
-						<div class="sbg-alert-title">You're in</div>
-						<div class="sbg-alert-text">Your entry is confirmed with ticket <strong>#<?php echo esc_html( $gw_ticket ); ?></strong>. Keep it safe.</div>
-					</div>
-				</div>
-			<?php elseif ( 'exists' === $gw_status ) : ?>
-				<div class="sbg-alert info">
-					<span class="sbg-alert-icon">!</span>
-					<div>
-						<div class="sbg-alert-title">Already entered</div>
-						<div class="sbg-alert-text">You have already entered this giveaway — ticket <strong>#<?php echo esc_html( $gw_ticket ); ?></strong>.</div>
-					</div>
-				</div>
-			<?php elseif ( 'error' === $gw_status ) : ?>
+			<?php if ( 'error' === $gw_status ) : ?>
 				<div class="sbg-alert error">
 					<span class="sbg-alert-icon">!</span>
 					<div>
@@ -461,6 +463,31 @@ $render_form = function ( $giveaway, $rule ) use ( $source_tag ) {
 			<?php endif; ?>
 		</div>
 	</div>
+
+	<?php if ( $show_modal ) : ?>
+		<div class="sbg-modal" id="sbg-success" role="dialog" aria-modal="true" aria-labelledby="sbg-modal-title">
+			<div class="sbg-modal-backdrop" data-close></div>
+			<div class="sbg-modal-card">
+				<div class="sbg-modal-bar"></div>
+				<button type="button" class="sbg-modal-x" data-close aria-label="Close">✕</button>
+				<div class="sbg-modal-body">
+					<span class="sbg-modal-icon" aria-hidden="true">
+						<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+					</span>
+					<h3 class="sbg-modal-title" id="sbg-modal-title"><?php echo esc_html( $modal_title ); ?></h3>
+					<p class="sbg-modal-sub"><?php echo esc_html( $modal_sub ); ?></p>
+					<div class="sbg-ticket">
+						<span class="sbg-ticket-label">Your ticket</span>
+						<div class="sbg-ticket-num">#<?php echo esc_html( $gw_ticket ); ?></div>
+						<?php if ( '' !== $modal_name ) : ?>
+							<div class="sbg-ticket-name"><?php echo esc_html( $modal_name ); ?></div>
+						<?php endif; ?>
+					</div>
+					<button type="button" class="sbg-btn" data-close>Done</button>
+				</div>
+			</div>
+		</div>
+	<?php endif; ?>
 </div>
 
 <script>
@@ -615,6 +642,25 @@ $render_form = function ( $giveaway, $rule ) use ( $source_tag ) {
 		if (remove) { remove.addEventListener('click', function (e) { e.preventDefault(); reset(); }); }
 	}
 	document.querySelectorAll('.sbg-giveaway-root .sbg-drop').forEach(initDrop);
+
+	/* ---------- Success pop-up ---------- */
+	var modal = document.getElementById('sbg-success');
+	if (modal) {
+		function closeModal() {
+			modal.classList.remove('is-open');
+			document.body.classList.remove('sbg-noscroll');
+		}
+		modal.querySelectorAll('[data-close]').forEach(function (el) { el.addEventListener('click', closeModal); });
+		document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && modal.classList.contains('is-open')) { closeModal(); } });
+
+		modal.classList.add('is-open');
+		document.body.classList.add('sbg-noscroll');
+		if (window.history && window.history.replaceState) {
+			window.history.replaceState(null, '', window.location.pathname);
+		}
+		var doneBtn = modal.querySelector('.sbg-btn');
+		if (doneBtn) { setTimeout(function () { doneBtn.focus(); }, 60); }
+	}
 
 	/* ---------- Submit feedback ---------- */
 	document.querySelectorAll('.sbg-giveaway-root form').forEach(function (form) {

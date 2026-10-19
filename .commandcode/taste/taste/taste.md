@@ -8,3 +8,4 @@
 - Wants pages to be clean yet engaging, not "typical": the primary active content should be surfaced immediately on load (e.g. leading with the active giveaway) rather than buried below generic chrome. Confidence: 0.6
 - Expects robust, field-level error handling: validation feedback should mark the exact offending field/block and scroll to it inline, not just show a single page-level error notice. Confidence: 0.6
 - Prefers form behaviour that adapts dynamically to context (e.g. an email field whose accepted-domain rules change based on the selected option) over static, unconditioned fields. Confidence: 0.55
+- Prefers a polished, engaging modal/pop-up for post-submit success confirmation (with backdrop, animated card, ticket details) instead of a plain inline banner on the page. Confidence: 0.55
