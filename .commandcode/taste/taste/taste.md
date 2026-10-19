@@ -5,3 +5,6 @@
 - Prefers minimal or no decorative emoji in UI copy and headings, favoring plain text labels. Confidence: 0.55
 - Wants uploaded images optimised (resized + converted to WebP) on the client before upload so the server receives a small file and does no image processing; prioritizes keeping server load minimal. Confidence: 0.75
 - Rejects bare/generic UI elements (e.g. a plain file input) and expects them upgraded to polished, purpose-built components (e.g. a drag-and-drop dropzone with preview). Confidence: 0.6
+- Wants pages to be clean yet engaging, not "typical": the primary active content should be surfaced immediately on load (e.g. leading with the active giveaway) rather than buried below generic chrome. Confidence: 0.6
+- Expects robust, field-level error handling: validation feedback should mark the exact offending field/block and scroll to it inline, not just show a single page-level error notice. Confidence: 0.6
+- Prefers form behaviour that adapts dynamically to context (e.g. an email field whose accepted-domain rules change based on the selected option) over static, unconditioned fields. Confidence: 0.55

@@ -36,6 +36,24 @@
 
 ### 2026-10-18 - Command Code
 
+**Task**: Make the giveaway page lead with the active giveaway, redesign the prize panel, add live email-domain validation, and improve the error state.
+
+**Files Changed**:
+- `templates/pages/page-giveaway.php` - Rewritten: the first open giveaway renders as a featured hero (live pulse + entry count + prize + form); the rest are secondary cards. New premium prize panel (deep indigo→violet gradient, amber trophy mark, PRIZE label). Email fields validate the allowed domain live and block submit via `setCustomValidity`. Server errors now highlight the offending field/requirement block and scroll to it.
+
+**Key Decisions**:
+- The email rule is derived per giveaway from `allowed_email_domains`: a specific domain adds `pattern`, `data-domain`, a domain placeholder and a live hint; `*` leaves the field unrestricted.
+- Errors are surfaced on the field itself (not just a page notice). `gw_error` codes map to a target: `domain`/`email` → email field, `req*` → requirements block.
+- The prize panel is duplicated only via a `$render_prize` closure so featured and secondary cards stay identical.
+
+**Notes for Future Agents**:
+- `data-error` / `data-error-gw` on the root carry the last failure for the inline-highlight script.
+- The featured giveaway is simply `$open_giveaways[0]`; ordering comes from `aws_sbg_get_giveaways()` (newest first).
+
+---
+
+### 2026-10-18 - Command Code
+
 **Task**: Rebuild the giveaway image-upload UI as a drag-and-drop dropzone and optimise images to WebP on the client before upload.
 
 **Files Changed**:
