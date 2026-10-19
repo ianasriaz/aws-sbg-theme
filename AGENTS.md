@@ -36,6 +36,24 @@
 
 ### 2026-10-18 - Command Code
 
+**Task**: Redesign the giveaway page as a proper product page — remove the "AI gradient card" feel.
+
+**Files Changed**:
+- `templates/pages/page-giveaway.php` - Full visual redesign. Removed the aurora blobs, blueprint grid, gradient buttons and uniformly-rounded cards. Introduced a design-token system (ink/muted/line/paper/accent/gold), an editorial hero (status + display title + lead + meta line + prize band), and a two-column entry area: requirements on the left, a sticky "Your details" panel on the right holding the fields + submit. Other giveaways became hairline rows, winners a ranked list. Custom checkboxes, hairline borders, restrained single accent.
+
+**Key Decisions**:
+- One accent colour used sparingly (labels, checkboxes, ticket) plus a warm gold reserved for the prize; everything else is ink/neutral. Buttons are solid ink, not gradient.
+- The form is a single `<form>` spanning a 2-col grid (requirements | details) so the panel can be sticky while the markup order stays requirements → details.
+- Kept every class the JS depends on (`sbg-drop*`, `sbg-field*`, `sbg-reqs`, `sbg-req`, `sbg-btn`, `sbg-form-error`, `#sbg-success`) so the upload/validation/modal logic is unchanged.
+
+**Notes for Future Agents**:
+- Design tokens are CSS custom properties on `.sbg-giveaway-root` — change them there to re-theme the page.
+- `$render_meta`, `$render_prize`, `$render_form` closures are the single source for the featured and secondary giveaways.
+
+---
+
+### 2026-10-18 - Command Code
+
 **Task**: Replace the inline success banner with an engaging confirmation pop-up on giveaway submit.
 
 **Files Changed**:
