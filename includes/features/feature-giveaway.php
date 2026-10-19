@@ -691,7 +691,14 @@ function aws_sbg_handle_giveaway_submission() {
 				require_once ABSPATH . 'wp-admin/includes/file.php';
 				require_once ABSPATH . 'wp-admin/includes/media.php';
 
+				// Keep server load low: entry uploads arrive pre-optimised WebP, so skip
+				// generating intermediate thumbnail sizes (none are used for these entries).
+				$skip_sizes = function () { return array(); };
+				add_filter( 'intermediate_image_sizes_advanced', $skip_sizes );
+
 				$attach_id = media_handle_upload( $file_key, 0 );
+
+				remove_filter( 'intermediate_image_sizes_advanced', $skip_sizes );
 				if ( is_wp_error( $attach_id ) ) {
 					aws_sbg_giveaway_submission_error( $giveaway_id, 'upload' );
 				}
@@ -1109,8 +1116,10 @@ function aws_sbg_render_giveaway_submissions_page() {
 											echo '<span style="color:#cbd5e1;">◻</span> ' . esc_html( $req['label'] );
 										} elseif ( 'upload' === $req['type'] ) {
 											if ( $rv['attachment_id'] ) {
-												$thumb = wp_get_attachment_image_url( $rv['attachment_id'], 'thumbnail' );
-												echo '<a href="' . esc_url( wp_get_attachment_url( $rv['attachment_id'] ) ) . '" target="_blank"><img src="' . esc_url( $thumb ) . '" style="height:34px;width:34px;object-fit:cover;border-radius:6px;vertical-align:middle;"></a> ';
+												$url = wp_get_attachment_url( $rv['attachment_id'] );
+												if ( $url ) {
+													echo '<a href="' . esc_url( $url ) . '" target="_blank"><img src="' . esc_url( $url ) . '" loading="lazy" style="height:34px;width:34px;object-fit:cover;border-radius:6px;vertical-align:middle;"></a> ';
+												}
 											}
 											echo esc_html( $req['label'] );
 										} elseif ( 'proof' === $req['type'] ) {

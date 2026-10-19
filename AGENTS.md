@@ -36,6 +36,25 @@
 
 ### 2026-10-18 - Command Code
 
+**Task**: Rebuild the giveaway image-upload UI as a drag-and-drop dropzone and optimise images to WebP on the client before upload.
+
+**Files Changed**:
+- `templates/pages/page-giveaway.php` - Replaced the plain file input with a drag-and-drop dropzone (icon, drag state, live preview thumbnail, original→optimised size readout, remove button, busy overlay). Added JS that resizes to max 1600px and encodes to WebP (quality stepped 0.82→0.5, then a further downscale) before assigning the file back to the input via `DataTransfer`.
+- `includes/features/feature-giveaway.php` - Server skips intermediate thumbnail sizes for entry uploads (`intermediate_image_sizes_advanced` → empty), and the admin submissions table now previews the full attachment URL with `loading="lazy"`.
+
+**Key Decisions**:
+- Conversion happens entirely in the browser (canvas → `toBlob('image/webp')`), mirroring the existing pattern in `feature-event-registration.php`, so the server receives a small file and does no image processing.
+- Skipping intermediate sizes means no `thumbnail` size exists, so admin previews use `wp_get_attachment_url()` (never false) with CSS sizing + lazy loading rather than `wp_get_attachment_image_url('thumbnail')`.
+- If WebP encoding is unsupported the blob falls back to PNG; the server's MIME allow-list still accepts it.
+
+**Notes for Future Agents**:
+- The dropzone marks state on `data-state` (`idle|busy|ready`); the file input is visually hidden but keeps its original `name`/`required`, so server-side validation is unchanged.
+- Client limit is 2 MB after optimisation, matching `AWS_SBG_GIVEAWAY_MAX_UPLOAD`.
+
+---
+
+### 2026-10-18 - Command Code
+
 **Task**: Giveaway UX refinements — email-eligibility choice, cleaner prize UI, de-slop pass.
 
 **Files Changed**:

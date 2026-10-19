@@ -97,10 +97,32 @@ $error_messages = array(
 	.sbg-giveaway-root .sbg-req input[type=checkbox] { width: 18px; height: 18px; min-width: 18px; margin-top: 2px; accent-color: #10b981; cursor: pointer; }
 	.sbg-giveaway-root .sbg-req-label { font-size: 14px; font-weight: 700; color: #0f172a; line-height: 1.45; }
 	.sbg-giveaway-root .sbg-req-help { display: block; font-size: 12px; font-weight: 500; color: #64748b; margin-top: 3px; }
-	.sbg-giveaway-root .sbg-upload-box { background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 15px; margin-bottom: 10px; }
-	.sbg-giveaway-root .sbg-upload-box .sbg-req-label { margin-bottom: 8px; display: block; }
-	.sbg-giveaway-root .sbg-upload-box input[type=file] { width: 100%; font-size: 13px; color: #475569; }
-	.sbg-giveaway-root .sbg-upload-hint { display: block; font-size: 11.5px; color: #94a3b8; margin-top: 6px; }
+	.sbg-giveaway-root .sbg-req-block { margin-bottom: 14px; }
+	.sbg-giveaway-root .sbg-req-block .sbg-req-label { display: block; margin-bottom: 8px; }
+
+	.sbg-giveaway-root .sbg-drop { position: relative; border: 1.5px dashed #cbd5e1; border-radius: 14px; background: #f8fafc; transition: border-color .18s ease, background .18s ease; }
+	.sbg-giveaway-root .sbg-drop.is-drag { border-color: #9353ff; background: #faf5ff; }
+	.sbg-giveaway-root .sbg-drop[data-state="ready"] { border-style: solid; border-color: #a7f3d0; background: #ffffff; }
+	.sbg-giveaway-root .sbg-drop-input { position: absolute; width: 1px; height: 1px; padding: 0; margin: 0; opacity: 0; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
+	.sbg-giveaway-root .sbg-drop-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; padding: 26px 18px; cursor: pointer; text-align: center; }
+	.sbg-giveaway-root .sbg-drop-icon { width: 44px; height: 44px; border-radius: 12px; background: #f5f3ff; border: 1px solid #ede9fe; color: #7928ca; display: flex; align-items: center; justify-content: center; }
+	.sbg-giveaway-root .sbg-drop-title { font-size: 14px; font-weight: 700; color: #0f172a; }
+	.sbg-giveaway-root .sbg-drop-browse { color: #7928ca; text-decoration: underline; text-underline-offset: 2px; }
+	.sbg-giveaway-root .sbg-drop-hint { font-size: 12px; color: #94a3b8; }
+	.sbg-giveaway-root .sbg-drop-preview { display: none; align-items: center; gap: 14px; padding: 14px; }
+	.sbg-giveaway-root .sbg-drop[data-state="ready"] .sbg-drop-inner { display: none; }
+	.sbg-giveaway-root .sbg-drop[data-state="ready"] .sbg-drop-preview { display: flex; }
+	.sbg-giveaway-root .sbg-drop-thumb { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; border: 1px solid #e2e8f0; background: #f1f5f9; flex-shrink: 0; }
+	.sbg-giveaway-root .sbg-drop-meta { flex: 1 1 auto; min-width: 0; }
+	.sbg-giveaway-root .sbg-drop-filename { font-size: 13.5px; font-weight: 800; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.sbg-giveaway-root .sbg-drop-sizes { font-size: 12px; color: #64748b; margin-top: 3px; }
+	.sbg-giveaway-root .sbg-drop-sizes .saved { color: #059669; font-weight: 800; }
+	.sbg-giveaway-root .sbg-drop-remove { flex-shrink: 0; background: #ffffff; border: 1px solid #e2e8f0; color: #dc2626; font-size: 12px; font-weight: 700; padding: 7px 13px; border-radius: 9px; cursor: pointer; transition: all .15s ease; }
+	.sbg-giveaway-root .sbg-drop-remove:hover { background: #fef2f2; border-color: #fecaca; }
+	.sbg-giveaway-root .sbg-drop-busy { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.86); border-radius: 14px; font-size: 13px; font-weight: 800; color: #7928ca; }
+	.sbg-giveaway-root .sbg-drop[data-state="busy"] .sbg-drop-busy { display: flex; }
+	.sbg-giveaway-root .sbg-drop-spin { width: 16px; height: 16px; border: 2px solid #e9d5ff; border-top-color: #7928ca; border-radius: 50%; animation: sbgSpin .7s linear infinite; }
+	@keyframes sbgSpin { to { transform: rotate(360deg); } }
 
 	.sbg-giveaway-root .sbg-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 	.sbg-giveaway-root .sbg-field { display: flex; flex-direction: column; gap: 5px; }
@@ -210,12 +232,29 @@ $error_messages = array(
 									$reqd = ! empty( $req['required'] ) ? 'required' : '';
 									?>
 									<?php if ( 'upload' === $req['type'] ) : ?>
-										<div class="sbg-upload-box">
-											<label class="sbg-req-label"><?php echo esc_html( $req['label'] ); ?><?php echo ! empty( $req['required'] ) ? ' <span style="color:#ef4444;">*</span>' : ''; ?>
+										<div class="sbg-req-block">
+											<label class="sbg-req-label" for="gw_file_<?php echo esc_attr( $rid ); ?>"><?php echo esc_html( $req['label'] ); ?><?php echo ! empty( $req['required'] ) ? ' <span style="color:#ef4444;">*</span>' : ''; ?>
 												<?php if ( ! empty( $req['help'] ) ) : ?><span class="sbg-req-help"><?php echo esc_html( $req['help'] ); ?></span><?php endif; ?>
 											</label>
-											<input type="file" name="gw_file_<?php echo esc_attr( $rid ); ?>" accept="image/jpeg,image/png,image/webp" <?php echo esc_attr( $reqd ); ?>>
-											<span class="sbg-upload-hint">JPG, PNG or WebP • max 2 MB</span>
+											<div class="sbg-drop" data-state="idle">
+												<input type="file" id="gw_file_<?php echo esc_attr( $rid ); ?>" name="gw_file_<?php echo esc_attr( $rid ); ?>" accept="image/*" class="sbg-drop-input" <?php echo esc_attr( $reqd ); ?>>
+												<label class="sbg-drop-inner" for="gw_file_<?php echo esc_attr( $rid ); ?>">
+													<span class="sbg-drop-icon" aria-hidden="true">
+														<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4m0 0L8 8m4-4l4 4"/><path d="M20 16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2"/></svg>
+													</span>
+													<span class="sbg-drop-title">Drag an image here or <span class="sbg-drop-browse">browse</span></span>
+													<span class="sbg-drop-hint">JPG, PNG or WebP · optimised to WebP on your device · max 2 MB</span>
+												</label>
+												<div class="sbg-drop-preview">
+													<img class="sbg-drop-thumb" alt="">
+													<div class="sbg-drop-meta">
+														<div class="sbg-drop-filename"></div>
+														<div class="sbg-drop-sizes"></div>
+													</div>
+													<button type="button" class="sbg-drop-remove">Remove</button>
+												</div>
+												<div class="sbg-drop-busy"><span class="sbg-drop-spin"></span> Optimising image…</div>
+											</div>
 										</div>
 									<?php elseif ( 'proof' === $req['type'] ) : ?>
 										<div class="sbg-req" style="flex-direction:column;">
@@ -337,6 +376,128 @@ $error_messages = array(
 			if (btn) { btn.disabled = true; btn.innerHTML = 'Submitting…'; }
 		});
 	});
+
+	/* Client-side image optimisation: resize + convert to WebP before upload,
+	   so the server receives a small file and does no image processing. */
+	(function () {
+		var MAX_BYTES = 2 * 1024 * 1024;
+		var MAX_DIM   = 1600;
+
+		function fmt(bytes) {
+			return bytes >= 1048576 ? (bytes / 1048576).toFixed(2) + ' MB' : Math.round(bytes / 1024) + ' KB';
+		}
+		function readDataURL(file) {
+			return new Promise(function (res, rej) {
+				var r = new FileReader();
+				r.onload = function (e) { res(e.target.result); };
+				r.onerror = rej;
+				r.readAsDataURL(file);
+			});
+		}
+		function loadImg(src) {
+			return new Promise(function (res, rej) {
+				var i = new Image();
+				i.onload = function () { res(i); };
+				i.onerror = rej;
+				i.src = src;
+			});
+		}
+		function toWebp(canvas, q) {
+			return new Promise(function (res) { canvas.toBlob(function (b) { res(b); }, 'image/webp', q); });
+		}
+		function drawResized(source, maxDim) {
+			var w = source.naturalWidth || source.width;
+			var h = source.naturalHeight || source.height;
+			var scale = Math.min(1, maxDim / Math.max(w, h));
+			var canvas = document.createElement('canvas');
+			canvas.width = Math.round(w * scale);
+			canvas.height = Math.round(h * scale);
+			canvas.getContext('2d').drawImage(source, 0, 0, canvas.width, canvas.height);
+			return canvas;
+		}
+
+		async function compress(file) {
+			var img = await loadImg(await readDataURL(file));
+			var canvas = drawResized(img, MAX_DIM);
+			var blob = null;
+			var qualities = [0.82, 0.72, 0.62, 0.5];
+			for (var i = 0; i < qualities.length; i++) {
+				blob = await toWebp(canvas, qualities[i]);
+				if (blob && blob.size <= MAX_BYTES) break;
+			}
+			if (blob && blob.size > MAX_BYTES) {
+				var smaller = drawResized(canvas, MAX_DIM * 0.7);
+				blob = await toWebp(smaller, 0.72);
+			}
+			var isWebp = blob && blob.type === 'image/webp';
+			var base = file.name.replace(/\.[^/.]+$/, '');
+			return new File([blob], base + (isWebp ? '.webp' : '.png'), { type: blob.type || 'image/jpeg' });
+		}
+
+		function initDrop(drop) {
+			var input  = drop.querySelector('.sbg-drop-input');
+			var thumb  = drop.querySelector('.sbg-drop-thumb');
+			var fname  = drop.querySelector('.sbg-drop-filename');
+			var sizes  = drop.querySelector('.sbg-drop-sizes');
+			var remove = drop.querySelector('.sbg-drop-remove');
+
+			function reset() {
+				input.value = '';
+				thumb.removeAttribute('src');
+				drop.setAttribute('data-state', 'idle');
+			}
+
+			async function handle(file) {
+				if (!file) { return; }
+				if (!file.type || file.type.indexOf('image/') !== 0) {
+					alert('Please choose an image file (JPG, PNG or WebP).');
+					return;
+				}
+				drop.setAttribute('data-state', 'busy');
+				var original = file.size;
+				var out;
+				try {
+					out = await compress(file);
+				} catch (e) {
+					out = file;
+				}
+				if (out.size > MAX_BYTES) {
+					alert('This image is still larger than 2 MB after optimisation. Please pick a smaller one.');
+					reset();
+					return;
+				}
+
+				var dt = new DataTransfer();
+				dt.items.add(out);
+				input.files = dt.files;
+
+				thumb.src = URL.createObjectURL(out);
+				fname.textContent = out.name;
+				sizes.innerHTML = '<span style="text-decoration:line-through;opacity:.7;">' + fmt(original) + '</span> &rarr; <span class="saved">' + fmt(out.size) + '</span>' + (out.type === 'image/webp' ? ' · WebP' : '');
+				drop.setAttribute('data-state', 'ready');
+			}
+
+			input.addEventListener('change', function () { if (input.files[0]) { handle(input.files[0]); } });
+
+			['dragenter', 'dragover'].forEach(function (ev) {
+				drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('is-drag'); });
+			});
+			['dragleave', 'dragend'].forEach(function (ev) {
+				drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove('is-drag'); });
+			});
+			drop.addEventListener('dragover', function (e) { e.preventDefault(); });
+			drop.addEventListener('drop', function (e) {
+				e.preventDefault();
+				drop.classList.remove('is-drag');
+				var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+				if (f) { handle(f); }
+			});
+
+			if (remove) { remove.addEventListener('click', function (e) { e.preventDefault(); reset(); }); }
+		}
+
+		document.querySelectorAll('.sbg-giveaway-root .sbg-drop').forEach(initDrop);
+	})();
 </script>
 
 <?php
