@@ -279,7 +279,7 @@ function aws_sbg_giveaway_render_settings_box( $post ) {
 		<div>
 			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Status</label>
 			<select name="giveaway_status" style="width:100%;">
-				<option value="open" <?php selected( $m['giveaway_status'], 'open' ); ?>>Open — accepting entries</option>
+				<option value="open" <?php selected( $m['giveaway_status'], 'open' ); ?>>Open, accepting entries</option>
 				<option value="closed" <?php selected( $m['giveaway_status'], 'closed' ); ?>>Closed</option>
 				<option value="announced" <?php selected( $m['giveaway_status'], 'announced' ); ?>>Winners announced</option>
 			</select>
@@ -295,8 +295,8 @@ function aws_sbg_giveaway_render_settings_box( $post ) {
 		<div>
 			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Who can enter?</label>
 			<select name="email_restriction" style="width:100%;">
-				<option value="air_university" <?php selected( '*' !== $m['allowed_email_domains'] ); ?>>Air University — students only (@students.au.edu.pk)</option>
-				<option value="general" <?php selected( '*' === $m['allowed_email_domains'] ); ?>>General — accept any email address</option>
+				<option value="air_university" <?php selected( '*' !== $m['allowed_email_domains'] ); ?>>Air University students only (@students.au.edu.pk)</option>
+				<option value="general" <?php selected( '*' === $m['allowed_email_domains'] ); ?>>General, accept any email address</option>
 			</select>
 		</div>
 		<div>
@@ -1107,7 +1107,7 @@ function aws_sbg_render_giveaway_submissions_page() {
 								<td style="padding:12px 18px;color:#334155;font-size:12px;">
 									<?php
 									if ( empty( $reqs ) ) {
-										echo '<span style="color:#94a3b8;">—</span>';
+										echo '<span style="color:#94a3b8;">None</span>';
 									}
 									foreach ( $reqs as $req ) {
 										$rv = $responses[ $e['id'] ][ $req['id'] ] ?? null;
@@ -1337,3 +1337,65 @@ function aws_sbg_giveaway_maybe_migrate() {
 	update_option( 'aws_sbg_giveaway_db_version', AWS_SBG_GIVEAWAY_DBV );
 }
 add_action( 'admin_init', 'aws_sbg_giveaway_maybe_migrate', 20 );
+
+/* ============================================================================
+ * 9. FRESHERS WEEK GIVEAWAY SEEDER
+ * ============================================================================ */
+
+/**
+ * Create the Freshers Week giveaway once. The marker meta keeps this idempotent,
+ * and a giveaway the organiser has since edited is never overwritten.
+ */
+function aws_sbg_maybe_seed_freshers_giveaway() {
+	if ( ! post_type_exists( 'aws_giveaway' ) ) {
+		return;
+	}
+
+	$existing = get_posts( array(
+		'post_type'        => 'aws_giveaway',
+		'post_status'      => 'any',
+		'posts_per_page'   => 1,
+		'fields'           => 'ids',
+		'no_found_rows'    => true,
+		'meta_key'         => '_aws_sbg_seed',
+		'meta_value'       => 'freshers-2026',
+	) );
+	if ( ! empty( $existing ) ) {
+		return;
+	}
+
+	$giveaway_id = wp_insert_post( array(
+		'post_type'   => 'aws_giveaway',
+		'post_status' => 'publish',
+		'post_title'  => 'Freshers Week: Verify and Win AWS Swag',
+	) );
+
+	if ( ! $giveaway_id || is_wp_error( $giveaway_id ) ) {
+		return;
+	}
+
+	update_post_meta( $giveaway_id, '_aws_sbg_seed', 'freshers-2026' );
+	update_post_meta( $giveaway_id, 'giveaway_status', 'open' );
+	update_post_meta( $giveaway_id, 'allowed_email_domains', 'students.au.edu.pk' );
+	update_post_meta( $giveaway_id, 'winner_count', 3 );
+	update_post_meta( $giveaway_id, 'ticket_prefix', 'FRESH' );
+	update_post_meta( $giveaway_id, 'prize_title', 'AWS swag bundle' );
+	update_post_meta( $giveaway_id, 'prize_description', 'Three entries are picked at random and each wins an AWS swag bundle.' );
+	update_post_meta( $giveaway_id, 'giveaway_description', 'Create your AWS Builder Center account, verify that you are a student, then upload a screenshot of your verified profile to enter.' );
+
+	update_post_meta( $giveaway_id, 'giveaway_fields', array(
+		array( 'id' => 'full_name', 'label' => 'Full name', 'type' => 'text', 'required' => 1, 'options' => '' ),
+		array( 'id' => 'email', 'label' => 'Air University email', 'type' => 'email', 'required' => 1, 'options' => '' ),
+	) );
+
+	update_post_meta( $giveaway_id, 'giveaway_requirements', array(
+		array(
+			'id'       => 'builder_proof',
+			'label'    => 'Upload a screenshot of your verified Builder Center profile',
+			'type'     => 'upload',
+			'required' => 1,
+			'help'     => 'The screenshot should show your name and verified student status.',
+		),
+	) );
+}
+add_action( 'admin_init', 'aws_sbg_maybe_seed_freshers_giveaway', 25 );

@@ -2,8 +2,9 @@
 /**
  * Template Name: Community Hub & Student Rewards
  *
- * Community landing page: what the chapter is, the AWS student rewards, where the
- * chapter talks, and answers. Reached mainly by poster QR scans on phones.
+ * Community landing page: what the chapter is, the AWS student rewards, the guided
+ * giveaway entry, where the chapter talks, and answers. Reached mainly by poster QR
+ * scans on phones.
  *
  * @package AWS_SBG_Theme
  */
@@ -19,6 +20,38 @@ $giveaway_url = home_url( '/giveaway/' );
 if ( '' !== $src ) {
 	$giveaway_url = add_query_arg( 'src', $src, $giveaway_url );
 }
+
+$giveaway = null;
+if ( function_exists( 'aws_sbg_get_giveaways' ) ) {
+	$open_giveaways = aws_sbg_get_giveaways( array( 'open' ) );
+	if ( ! empty( $open_giveaways ) ) {
+		$giveaway = $open_giveaways[0];
+	}
+}
+
+$gw_status = isset( $_GET['gw_status'] ) ? sanitize_key( $_GET['gw_status'] ) : '';
+$gw_ticket = isset( $_GET['gw_ticket'] ) ? sanitize_text_field( $_GET['gw_ticket'] ) : '';
+$gw_name   = isset( $_GET['gw_name'] ) ? sanitize_text_field( $_GET['gw_name'] ) : '';
+$gw_error  = isset( $_GET['gw_error'] ) ? sanitize_key( $_GET['gw_error'] ) : '';
+
+$gw_errors = array(
+	'closed'   => 'This giveaway is no longer accepting entries.',
+	'spam'     => 'Your submission could not be processed.',
+	'required' => 'Please fill in every required field.',
+	'email'    => 'That email address does not look valid.',
+	'domain'   => 'Only Air University student emails (@students.au.edu.pk) are accepted.',
+	'db'       => 'We could not save your entry. Please try again.',
+	'filesize' => 'That screenshot is larger than 2 MB.',
+	'filetype' => 'Uploads must be a JPG, PNG or WebP image.',
+	'upload'   => 'There was a problem saving your upload. Please try again.',
+	'reqfile'  => 'Please upload the required screenshot.',
+	'reqproof' => 'Please complete the required proof field.',
+	'reqcheck' => 'Please confirm all required items.',
+);
+
+$gw_success = in_array( $gw_status, array( 'success', 'exists' ), true ) && '' !== $gw_ticket;
+$gw_failed  = ( 'error' === $gw_status );
+$gw_message = $gw_failed ? ( $gw_errors[ $gw_error ] ?? 'Something went wrong. Please try again.' ) : '';
 
 $channels = array(
 	array(
@@ -76,6 +109,7 @@ $faqs = array(
 		--surface-2: #F1F5F9;
 		--brand: #7928CA;
 		--accent: #FF9900;
+		--danger: #B91C1C;
 		--wrap: 1080px;
 
 		background: var(--paper);
@@ -109,6 +143,7 @@ $faqs = array(
 	}
 	.community-page-wrapper .cp-h2 { font-size: clamp(1.6rem, 4.2vw, 2.25rem); line-height: 1.15; }
 	.community-page-wrapper .cp-intro { margin-top: 12px; max-width: 56ch; font-size: 1rem; }
+	.community-page-wrapper .cp-note { margin-top: 12px; font-size: 0.9375rem; color: var(--muted); }
 
 	/* Hero */
 	.community-page-wrapper .cp-hero { padding: 48px 0 8px; }
@@ -151,17 +186,6 @@ $faqs = array(
 	.community-page-wrapper .cp-value-row-total .cp-value-label,
 	.community-page-wrapper .cp-value-row-total .cp-value-amount { font-size: 1.125rem; }
 	.community-page-wrapper .cp-source { margin-top: 12px; font-size: 0.8125rem; color: var(--muted); }
-	.community-page-wrapper .cp-note { margin-top: 12px; font-size: 0.9375rem; color: var(--muted); }
-
-	/* How to claim */
-	.community-page-wrapper .cp-steps { list-style: none; margin: 28px 0 0; padding: 0; display: grid; gap: 28px; }
-	.community-page-wrapper .cp-step { display: flex; gap: 18px; }
-	.community-page-wrapper .cp-step-n {
-		flex: 0 0 auto; font-size: 1.5rem; font-weight: 800; line-height: 1;
-		color: var(--brand); font-variant-numeric: tabular-nums;
-	}
-	.community-page-wrapper .cp-step h3 { font-size: 1.0625rem; }
-	.community-page-wrapper .cp-step p { margin-top: 6px; max-width: 60ch; font-size: 0.9375rem; color: var(--muted); }
 
 	/* Channels */
 	.community-page-wrapper .cp-channels { list-style: none; margin: 26px 0 0; padding: 0; border-top: 1px solid var(--line); }
@@ -195,6 +219,64 @@ $faqs = array(
 	.community-page-wrapper .cp-faq-q[aria-expanded="true"] .cp-faq-icon::after { transform: scaleY(0); }
 	.community-page-wrapper .cp-faq-a { overflow: hidden; max-height: 0; transition: max-height 0.22s ease; }
 	.community-page-wrapper .cp-faq-a p { padding: 0 6px 22px; max-width: 62ch; color: var(--muted); font-size: 0.9375rem; }
+
+	/* Giveaway popup */
+	.community-page-wrapper .cp-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+	.community-page-wrapper .cp-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
+	.community-page-wrapper .cp-modal.is-open { display: flex; }
+	.community-page-wrapper .cp-modal-backdrop { position: absolute; inset: 0; background: rgba(15, 20, 31, 0.6); }
+	.community-page-wrapper .cp-modal-card {
+		position: relative; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto;
+		background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+		padding: 26px 22px; box-shadow: 0 24px 60px -24px rgba(15, 20, 31, 0.45);
+	}
+	.community-page-wrapper .cp-modal-x {
+		position: absolute; top: 12px; right: 12px; width: 36px; height: 36px;
+		display: inline-flex; align-items: center; justify-content: center;
+		border: 1px solid var(--line); background: var(--paper); color: var(--ink-2);
+		border-radius: 8px; font: inherit; font-size: 0.875rem; font-weight: 700; cursor: pointer;
+	}
+	.community-page-wrapper .cp-modal-x:hover { background: var(--surface-2); }
+	.community-page-wrapper .cp-modal-title { font-size: 1.25rem; line-height: 1.25; padding-right: 40px; }
+	.community-page-wrapper .cp-modal-panel { margin-top: 14px; }
+	.community-page-wrapper .cp-gw-steps { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 14px; }
+	.community-page-wrapper .cp-gw-step { display: flex; gap: 12px; }
+	.community-page-wrapper .cp-gw-step-n {
+		flex: 0 0 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
+		background: var(--ink); color: #FFFFFF; font-size: 0.75rem; font-weight: 800; border-radius: 6px;
+	}
+	.community-page-wrapper .cp-gw-step h3 { font-size: 0.9375rem; }
+	.community-page-wrapper .cp-gw-step p { margin-top: 2px; font-size: 0.875rem; color: var(--muted); }
+	.community-page-wrapper .cp-gw-step a { font-weight: 700; }
+	.community-page-wrapper .cp-gw-fields { display: grid; gap: 14px; }
+	.community-page-wrapper .cp-gw-field { display: flex; flex-direction: column; gap: 6px; }
+	.community-page-wrapper .cp-gw-field label,
+	.community-page-wrapper .cp-gw-upload label { font-size: 0.875rem; font-weight: 700; color: var(--ink); }
+	.community-page-wrapper .cp-gw-input {
+		width: 100%; padding: 11px 12px; border: 1.5px solid #64748B; border-radius: 8px;
+		font: inherit; font-size: 1rem; color: var(--ink); background: var(--paper);
+	}
+	.community-page-wrapper .cp-gw-input:focus { border-color: var(--ink); }
+	.community-page-wrapper .cp-gw-upload { margin-top: 16px; }
+	.community-page-wrapper .cp-gw-help { margin-top: 4px; font-size: 0.8125rem; color: var(--muted); }
+	.community-page-wrapper .cp-gw-file {
+		display: block; width: 100%; margin-top: 8px; padding: 10px 12px;
+		border: 1.5px dashed #64748B; border-radius: 8px; background: var(--surface);
+		color: var(--ink-2); font: inherit; font-size: 0.875rem;
+	}
+	.community-page-wrapper .cp-gw-check { display: flex; align-items: flex-start; gap: 10px; margin-top: 16px; font-size: 0.9375rem; color: var(--ink-2); }
+	.community-page-wrapper .cp-gw-check input { flex: 0 0 auto; width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--brand); }
+	.community-page-wrapper .cp-star { color: var(--danger); }
+	.community-page-wrapper .cp-gw-error { margin-top: 14px; font-size: 0.875rem; font-weight: 700; color: var(--danger); }
+	.community-page-wrapper .cp-gw-submit { width: 100%; justify-content: center; margin-top: 18px; }
+	.community-page-wrapper .cp-gw-ticket {
+		margin: 16px 0; padding: 16px; text-align: center;
+		border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+	}
+	.community-page-wrapper .cp-gw-ticket-label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--muted); }
+	.community-page-wrapper .cp-gw-ticket-num { font-size: 1.5rem; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
+	.community-page-wrapper .cp-gw-ticket-name { margin-top: 4px; font-size: 0.875rem; color: var(--ink-2); }
+	body.cp-modal-open { overflow: hidden; }
 
 	@media (min-width: 768px) {
 		.community-page-wrapper .cp-section { padding: 88px 0; }
@@ -233,9 +315,6 @@ $faqs = array(
 					   href="https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI"
 					   target="_blank" rel="noopener noreferrer">
 						Join the WhatsApp group
-					</a>
-					<a class="cp-btn cp-btn-secondary" href="<?php echo esc_url( $giveaway_url ); ?>">
-						Enter the Freshers Week giveaway
 					</a>
 				</div>
 			</div>
@@ -293,52 +372,17 @@ $faqs = array(
 			</ul>
 			<p class="cp-source">Values from the AWS student rewards program.</p>
 
-			<div class="cp-actions">
-				<a class="cp-btn cp-btn-primary"
-				   href="https://builder.aws.com?inviteId=daab681a-b41c-43d0-bfcb-b21f2993b354"
-				   target="_blank" rel="noopener noreferrer">
-					<span class="cp-mark" aria-hidden="true"></span>Verify your student status on Builder Center
-				</a>
-			</div>
-		</div>
-	</section>
+			<p class="cp-note">Three entries will be picked at random. Each winner gets an AWS swag bundle.</p>
 
-	<!-- How to claim -->
-	<section class="cp-section" id="how-to-claim">
-		<div class="cp-wrap">
-			<h2 class="cp-h2">How to claim</h2>
-			<p class="cp-intro">Three steps, about five minutes.</p>
-
-			<ol class="cp-steps">
-				<li class="cp-step">
-					<span class="cp-step-n" aria-hidden="true">1</span>
-					<div>
-						<h3>Verify your student status</h3>
-						<p>Sign in with your Builder ID, then verify through SheerID with your name, college name, and school email address. Most checks finish in minutes; if documents are needed, it usually takes 24 to 48 hours.</p>
-					</div>
-				</li>
-				<li class="cp-step">
-					<span class="cp-step-n" aria-hidden="true">2</span>
-					<div>
-						<h3>Complete your profile</h3>
-						<p>Add a photo and fill in the about section on your Builder Center profile. This unlocks your first reward.</p>
-					</div>
-				</li>
-				<li class="cp-step">
-					<span class="cp-step-n" aria-hidden="true">3</span>
-					<div>
-						<h3>Earn badges</h3>
-						<p>Publish articles, join discussions, and keep your streak going. Badges unlock the AWS credits and the certification voucher.</p>
-					</div>
-				</li>
-			</ol>
-
-			<div class="cp-actions">
-				<a class="cp-btn cp-btn-primary" href="<?php echo esc_url( $giveaway_url ); ?>">
-					<span class="cp-mark" aria-hidden="true"></span>Enter the Freshers Week giveaway
-				</a>
-			</div>
-			<p class="cp-note">Paste your Builder Center profile link when you enter.</p>
+			<?php if ( $giveaway ) : ?>
+				<div class="cp-actions">
+					<a class="cp-btn cp-btn-primary" href="<?php echo esc_url( $giveaway_url ); ?>" data-cp-open>
+						<span class="cp-mark" aria-hidden="true"></span>Claim &amp; Enter Giveaway
+					</a>
+				</div>
+			<?php else : ?>
+				<p class="cp-note">Giveaway entries open soon. Check back during Freshers Week.</p>
+			<?php endif; ?>
 		</div>
 	</section>
 
@@ -393,42 +437,235 @@ $faqs = array(
 		</div>
 	</section>
 
+	<?php
+	if ( $giveaway ) :
+		$gid    = $giveaway->ID;
+		$fields = function_exists( 'aws_sbg_get_giveaway_fields' ) ? aws_sbg_get_giveaway_fields( $gid ) : array();
+		$reqs   = function_exists( 'aws_sbg_get_giveaway_requirements' ) ? aws_sbg_get_giveaway_requirements( $gid ) : array();
+		$gstart = $gw_success ? 'success' : ( $gw_failed ? 'form' : 'closed' );
+		?>
+		<div class="cp-modal" id="cp-giveaway" role="dialog" aria-modal="true" aria-labelledby="cp-giveaway-title" data-initial="<?php echo esc_attr( $gstart ); ?>">
+			<div class="cp-modal-backdrop" data-cp-close></div>
+			<div class="cp-modal-card">
+				<button type="button" class="cp-modal-x" data-cp-close aria-label="Close">&#10005;</button>
+				<h2 class="cp-modal-title" id="cp-giveaway-title"><?php echo esc_html( $gw_success ? "You're in" : 'Claim and enter the giveaway' ); ?></h2>
+
+				<div class="cp-modal-panel" data-panel="success" <?php echo $gw_success ? '' : 'hidden'; ?>>
+					<p>Your entry is confirmed. Keep this ticket, the winners are picked from it.</p>
+					<div class="cp-gw-ticket">
+						<span class="cp-gw-ticket-label">Your ticket</span>
+						<div class="cp-gw-ticket-num">#<?php echo esc_html( $gw_ticket ); ?></div>
+						<?php if ( '' !== $gw_name ) : ?>
+							<div class="cp-gw-ticket-name"><?php echo esc_html( $gw_name ); ?></div>
+						<?php endif; ?>
+					</div>
+					<button type="button" class="cp-btn cp-btn-primary cp-gw-submit" data-cp-close>Done</button>
+				</div>
+
+				<div class="cp-modal-panel" data-panel="form" <?php echo $gw_success ? 'hidden' : ''; ?>>
+					<ol class="cp-gw-steps">
+						<li class="cp-gw-step">
+							<span class="cp-gw-step-n" aria-hidden="true">1</span>
+							<div>
+								<h3>Create your Builder Center account</h3>
+								<a href="https://builder.aws.com/?inviteId=daab681a-b41c-43d0-bfcb-b21f2993b354" target="_blank" rel="noopener noreferrer">Open Builder Center<span class="cp-vh"> (opens in a new tab)</span></a>
+							</div>
+						</li>
+						<li class="cp-gw-step">
+							<span class="cp-gw-step-n" aria-hidden="true">2</span>
+							<div>
+								<h3>Verify your student status</h3>
+								<a href="https://builder.aws.com/student-rewards" target="_blank" rel="noopener noreferrer">Open student rewards<span class="cp-vh"> (opens in a new tab)</span></a>
+							</div>
+						</li>
+					</ol>
+
+					<form class="cp-gw-form" method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+						<input type="hidden" name="action" value="aws_sbg_giveaway_submit">
+						<input type="hidden" name="giveaway_id" value="<?php echo esc_attr( $gid ); ?>">
+						<input type="hidden" name="gw_source" value="<?php echo esc_attr( '' !== $src ? $src : 'community' ); ?>">
+						<input type="text" name="website_url" tabindex="-1" autocomplete="off" class="cp-hp" aria-hidden="true">
+						<?php wp_nonce_field( 'aws_sbg_giveaway_submit', 'giveaway_nonce' ); ?>
+
+						<div class="cp-gw-fields">
+							<?php foreach ( $fields as $field ) :
+								$fid  = $field['id'];
+								$type = in_array( $field['type'], array( 'text', 'email', 'tel' ), true ) ? $field['type'] : 'text';
+								?>
+								<div class="cp-gw-field">
+									<label for="cp-gw-<?php echo esc_attr( $fid ); ?>"><?php echo esc_html( $field['label'] ); ?><?php echo ! empty( $field['required'] ) ? ' <span class="cp-star">*</span>' : ''; ?></label>
+									<input class="cp-gw-input" type="<?php echo esc_attr( $type ); ?>" id="cp-gw-<?php echo esc_attr( $fid ); ?>" name="gw_field[<?php echo esc_attr( $fid ); ?>]" <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>>
+								</div>
+							<?php endforeach; ?>
+						</div>
+
+						<?php
+						foreach ( $reqs as $req ) :
+							$rid       = $req['id'];
+							$is_reqd   = ! empty( $req['required'] );
+							$star      = $is_reqd ? ' <span class="cp-star">*</span>' : '';
+							$reqd_attr = $is_reqd ? 'required' : '';
+
+							if ( 'upload' === $req['type'] ) :
+								?>
+								<div class="cp-gw-upload">
+									<label for="cp-gw-file-<?php echo esc_attr( $rid ); ?>"><?php echo esc_html( $req['label'] ) . $star; ?></label>
+									<?php if ( ! empty( $req['help'] ) ) : ?>
+										<p class="cp-gw-help"><?php echo esc_html( $req['help'] ); ?></p>
+									<?php endif; ?>
+									<input class="cp-gw-file" type="file" id="cp-gw-file-<?php echo esc_attr( $rid ); ?>" name="gw_file_<?php echo esc_attr( $rid ); ?>" accept="image/png,image/jpeg,image/webp" <?php echo esc_attr( $reqd_attr ); ?>>
+								</div>
+								<?php
+							elseif ( 'proof' === $req['type'] ) :
+								?>
+								<div class="cp-gw-upload">
+									<label class="cp-gw-check" for="cp-gw-check-<?php echo esc_attr( $rid ); ?>">
+										<input type="checkbox" id="cp-gw-check-<?php echo esc_attr( $rid ); ?>" name="gw_check[<?php echo esc_attr( $rid ); ?>]" value="1" <?php echo esc_attr( $reqd_attr ); ?>>
+										<span><?php echo esc_html( $req['label'] ) . $star; ?></span>
+									</label>
+									<?php if ( ! empty( $req['help'] ) ) : ?>
+										<p class="cp-gw-help"><?php echo esc_html( $req['help'] ); ?></p>
+									<?php endif; ?>
+									<input class="cp-gw-input" type="text" name="gw_text[<?php echo esc_attr( $rid ); ?>]" placeholder="Paste your link or proof" <?php echo esc_attr( $reqd_attr ); ?>>
+								</div>
+								<?php
+							else :
+								?>
+								<label class="cp-gw-check" for="cp-gw-check-<?php echo esc_attr( $rid ); ?>">
+									<input type="checkbox" id="cp-gw-check-<?php echo esc_attr( $rid ); ?>" name="gw_check[<?php echo esc_attr( $rid ); ?>]" value="1" <?php echo esc_attr( $reqd_attr ); ?>>
+									<span><?php echo esc_html( $req['label'] ) . $star; ?></span>
+								</label>
+								<?php
+							endif;
+						endforeach;
+						?>
+
+						<p class="cp-gw-error" role="alert" aria-live="assertive"><?php echo esc_html( $gw_message ); ?></p>
+						<button type="submit" class="cp-btn cp-btn-primary cp-gw-submit">
+							<span class="cp-mark" aria-hidden="true"></span>Enter the giveaway
+						</button>
+						<p class="cp-note">Your details are only used to contact the winners.</p>
+					</form>
+				</div>
+			</div>
+		</div>
+	<?php endif; ?>
+
 </main>
 
 <script>
 	(function () {
-		var items = document.querySelectorAll('.community-page-wrapper .cp-faq-item');
-		if (!items.length) { return; }
+		/* FAQ accordion */
+		var faqItems = document.querySelectorAll('.community-page-wrapper .cp-faq-item');
+		if (faqItems.length) {
+			function collapseFaq(item) {
+				var btn = item.querySelector('.cp-faq-q');
+				var panel = item.querySelector('.cp-faq-a');
+				if (!btn || !panel || btn.getAttribute('aria-expanded') !== 'true') { return; }
+				panel.style.maxHeight = panel.scrollHeight + 'px';
+				requestAnimationFrame(function () { panel.style.maxHeight = ''; });
+				btn.setAttribute('aria-expanded', 'false');
+			}
 
-		function collapse(item) {
-			var btn = item.querySelector('.cp-faq-q');
-			var panel = item.querySelector('.cp-faq-a');
-			if (!btn || !panel || btn.getAttribute('aria-expanded') !== 'true') { return; }
-			panel.style.maxHeight = panel.scrollHeight + 'px';
-			requestAnimationFrame(function () { panel.style.maxHeight = ''; });
-			btn.setAttribute('aria-expanded', 'false');
+			faqItems.forEach(function (item) {
+				var btn = item.querySelector('.cp-faq-q');
+				var panel = item.querySelector('.cp-faq-a');
+				if (!btn || !panel) { return; }
+
+				panel.addEventListener('transitionend', function () {
+					if (btn.getAttribute('aria-expanded') === 'true') { panel.style.maxHeight = 'none'; }
+				});
+
+				btn.addEventListener('click', function () {
+					var isOpen = btn.getAttribute('aria-expanded') === 'true';
+					faqItems.forEach(function (other) { if (other !== item) { collapseFaq(other); } });
+					if (isOpen) {
+						collapseFaq(item);
+					} else {
+						panel.style.maxHeight = panel.scrollHeight + 'px';
+						btn.setAttribute('aria-expanded', 'true');
+					}
+				});
+			});
 		}
 
-		items.forEach(function (item) {
-			var btn = item.querySelector('.cp-faq-q');
-			var panel = item.querySelector('.cp-faq-a');
-			if (!btn || !panel) { return; }
+		/* Giveaway popup */
+		var modal = document.getElementById('cp-giveaway');
+		if (!modal) { return; }
 
-			panel.addEventListener('transitionend', function () {
-				if (btn.getAttribute('aria-expanded') === 'true') { panel.style.maxHeight = 'none'; }
+		var title = document.getElementById('cp-giveaway-title');
+		var titles = { form: 'Claim and enter the giveaway', success: "You're in" };
+		var panels = modal.querySelectorAll('[data-panel]');
+		var lastFocus = null;
+		var focusables = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select, textarea';
+
+		function showPanel(name) {
+			panels.forEach(function (p) { p.hidden = (p.getAttribute('data-panel') !== name); });
+			if (title && titles[name]) { title.textContent = titles[name]; }
+		}
+
+		function visibleFocusables() {
+			return Array.prototype.filter.call(modal.querySelectorAll(focusables), function (el) {
+				return !el.closest('[hidden]');
 			});
+		}
 
-			btn.addEventListener('click', function () {
-				var isOpen = btn.getAttribute('aria-expanded') === 'true';
-				items.forEach(function (other) { if (other !== item) { collapse(other); } });
-				if (isOpen) {
-					collapse(item);
-				} else {
-					panel.style.maxHeight = panel.scrollHeight + 'px';
-					btn.setAttribute('aria-expanded', 'true');
-				}
+		function openModal(name) {
+			lastFocus = document.activeElement;
+			showPanel(name);
+			modal.classList.add('is-open');
+			document.body.classList.add('cp-modal-open');
+			var first = visibleFocusables()[0];
+			if (first) { first.focus(); }
+		}
+
+		function closeModal() {
+			modal.classList.remove('is-open');
+			document.body.classList.remove('cp-modal-open');
+			if (lastFocus && typeof lastFocus.focus === 'function') { lastFocus.focus(); }
+		}
+
+		document.querySelectorAll('[data-cp-open]').forEach(function (trigger) {
+			trigger.addEventListener('click', function (e) {
+				e.preventDefault();
+				openModal('form');
 			});
 		});
+
+		modal.querySelectorAll('[data-cp-close]').forEach(function (el) {
+			el.addEventListener('click', function () { closeModal(); });
+		});
+
+		document.addEventListener('keydown', function (e) {
+			if (!modal.classList.contains('is-open')) { return; }
+
+			if (e.key === 'Escape') {
+				closeModal();
+				return;
+			}
+
+			if (e.key === 'Tab') {
+				var list = visibleFocusables();
+				if (!list.length) { return; }
+				var first = list[0];
+				var last = list[list.length - 1];
+				if (e.shiftKey && document.activeElement === first) {
+					e.preventDefault();
+					last.focus();
+				} else if (!e.shiftKey && document.activeElement === last) {
+					e.preventDefault();
+					first.focus();
+				}
+			}
+		});
+
+		var initial = modal.getAttribute('data-initial');
+		if (initial === 'success' || initial === 'form') {
+			openModal(initial);
+			if (window.history && window.history.replaceState) {
+				window.history.replaceState(null, '', window.location.pathname);
+			}
+		}
 	})();
 </script>
 
