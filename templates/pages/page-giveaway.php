@@ -44,7 +44,7 @@ $show_modal  = in_array( $gw_status, array( 'success', 'exists' ), true ) && '' 
 $modal_title = ( 'exists' === $gw_status ) ? "You're already in" : "You're in!";
 $modal_sub   = ( 'exists' === $gw_status )
 	? 'This email is already registered for this giveaway. Your ticket is below.'
-	: 'Your entry is confirmed. Keep this ticket safe — winners are drawn from it.';
+	: 'Your entry is confirmed. Keep this ticket safe. Winners are drawn from it.';
 $modal_name  = isset( $_GET['gw_name'] ) ? sanitize_text_field( $_GET['gw_name'] ) : '';
 
 /** Email rule for a giveaway. */
@@ -508,7 +508,7 @@ $render_form = function ( $giveaway, $rule ) use ( $source_tag ) {
 		<?php if ( empty( $open_giveaways ) && empty( $announced_giveaways ) ) : ?>
 			<div class="sbg-empty">
 				<h3>No active giveaways right now</h3>
-				<p>Check back soon — new giveaways are announced regularly.</p>
+				<p>Check back soon. New giveaways are announced regularly.</p>
 			</div>
 		<?php endif; ?>
 	</div>
