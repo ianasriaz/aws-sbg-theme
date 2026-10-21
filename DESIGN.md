@@ -14,9 +14,9 @@ campus. Audience: enrolled Air University students, usually opening the page on 
 after scanning a poster QR code. Voice: a student club that is official without being
 corporate.
 
-Visual language: a printed campus notice. A serif display face carries headlines and figures,
-hairline rules carry structure, and the giveaway is one ticket-stub object with a perforation
-and punched notches.
+Visual language: a printed campus notice. A serif display face carries section headings and
+figures, hairline rules carry structure, and the giveaway is one ticket-stub object with a
+perforation and punched notches. The hero headline stays in the text sans.
 
 ## Personality
 
@@ -45,7 +45,7 @@ text and component boundaries).
 ## Typography
 
 - Display serif: `'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif`.
-  Used for H1, section headings, reward figures, the ticket number, and index numerals.
+  Used for section headings, reward figures, the ticket number, and index numerals.
   Reason: a printed, editorial voice that separates the page from default SaaS sans; Georgia
   is the guaranteed fallback and no font files are added.
 - Text sans: `'Amazon Ember', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`.
@@ -63,7 +63,7 @@ Dial: **ENERGY 3 / RHYTHM 3 / MOTION 1**
 
 - ENERGY 3 (bold): a one-week campaign has to speak loudly, through scale and type, not
   decoration.
-- RHYTHM 3 (varied): sections visibly differ: a masthead hero, a ticket object, a colophon
+- RHYTHM 3 (varied): sections visibly differ: a split hero, a ticket object, a colophon
   row, an indexed FAQ.
 - MOTION 1 (hover and focus only): nothing loops or animates on its own.
 

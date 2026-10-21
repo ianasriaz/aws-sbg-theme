@@ -115,39 +115,25 @@ $faqs = array(
 		position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
 		overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 	}
-	.community-page-wrapper .cp-display { font-family: var(--serif); font-weight: 700; letter-spacing: -0.02em; }
 	.community-page-wrapper .cp-label {
 		font-family: var(--sans); font-size: 0.6875rem; font-weight: 800;
 		letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted);
 	}
 
-	/* Masthead */
-	.community-page-wrapper .cp-masthead {
-		display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px;
-		padding: 16px 0; border-bottom: 1px solid var(--line);
-	}
-	.community-page-wrapper .cp-masthead span {
-		font-family: var(--sans); font-size: 0.6875rem; font-weight: 800;
-		letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted);
-	}
-
 	/* Hero */
-	.community-page-wrapper .cp-hero-grid {
-		display: grid; gap: 36px; padding: 40px 0 8px;
-	}
+	.community-page-wrapper .cp-hero { padding: 48px 0 8px; }
+	.community-page-wrapper .cp-hero-grid { display: grid; gap: 32px; }
+	.community-page-wrapper .cp-kicker { font-size: 0.875rem; font-weight: 700; color: var(--muted); }
 	.community-page-wrapper .cp-hero h1 {
-		font-family: var(--serif); font-weight: 700;
-		font-size: clamp(2.75rem, 9vw, 5.25rem); line-height: 0.95;
-		letter-spacing: -0.025em; color: var(--ink);
+		margin-top: 14px;
+		font-size: clamp(2rem, 6vw, 3.25rem);
+		line-height: 1.05;
+		color: var(--ink);
 	}
-	.community-page-wrapper .cp-lead {
-		margin-top: 22px; max-width: 52ch; font-size: 1.0625rem; color: var(--ink-2);
-	}
+	.community-page-wrapper .cp-lead { margin-top: 18px; max-width: 52ch; font-size: 1.0625rem; color: var(--ink-2); }
 	.community-page-wrapper .cp-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-	.community-page-wrapper .cp-hero-media {
-		margin: 0; padding: 10px; background: var(--surface); border: 1px solid var(--line);
-	}
-	.community-page-wrapper .cp-hero-media img { width: 100%; height: auto; }
+	.community-page-wrapper .cp-hero-media { margin: 0; }
+	.community-page-wrapper .cp-hero-media img { width: 100%; max-width: 460px; margin: 0 auto; }
 
 	/* Buttons */
 	.community-page-wrapper .cp-btn {
@@ -327,6 +313,7 @@ $faqs = array(
 		.community-page-wrapper .cp-figure + .cp-figure { border-left: 1px solid var(--rule-dark); padding-left: 24px; }
 	}
 	@media (min-width: 768px) {
+		.community-page-wrapper .cp-hero { padding: 88px 0 16px; }
 		.community-page-wrapper .cp-giveaway-section { padding: 64px 0 12px; }
 		.community-page-wrapper .cp-ticket-body { padding: 36px 34px 4px; }
 		.community-page-wrapper .cp-ticket-stub { padding: 26px 34px; }
@@ -334,7 +321,8 @@ $faqs = array(
 		.community-page-wrapper .cp-index { padding: 52px 0 72px; }
 	}
 	@media (min-width: 900px) {
-		.community-page-wrapper .cp-hero-grid { grid-template-columns: 1.15fr 0.85fr; align-items: end; gap: 56px; }
+		.community-page-wrapper .cp-hero-grid { grid-template-columns: 1.05fr 0.95fr; align-items: center; gap: 56px; }
+		.community-page-wrapper .cp-hero-media img { margin: 0; }
 	}
 	@media (max-width: 599px) {
 		.community-page-wrapper .cp-modal { padding: 0; align-items: stretch; }
@@ -352,18 +340,11 @@ $faqs = array(
 <main class="community-page-wrapper">
 
 	<!-- Hero -->
-	<header>
-		<div class="cp-wrap">
-			<div class="cp-masthead">
-				<span>AWS Student Builder Group</span>
-				<span>Air University Islamabad</span>
-				<span>Freshers Week</span>
-			</div>
-		</div>
-
+	<header class="cp-hero">
 		<div class="cp-wrap cp-hero-grid">
 			<div>
-				<h1>Win AWS<br>swag.</h1>
+				<p class="cp-kicker">Air University Islamabad</p>
+				<h1>Win AWS swag</h1>
 				<p class="cp-lead">
 					AWS Student Builder Group is the official student-led AWS chapter on campus. We run
 					hands-on labs, certification preparation, events, and community meetups so members
