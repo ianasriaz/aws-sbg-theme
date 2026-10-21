@@ -437,25 +437,6 @@ function aws_sbg_get_custom_styles() {
 			color: var(--green-color);
 		}
 		
-		/* Scrollbar styling */
-		::-webkit-scrollbar {
-			width: 8px;
-			height: 8px;
-		}
-		
-		::-webkit-scrollbar-track {
-			background: #1a1a1a;
-		}
-		
-		::-webkit-scrollbar-thumb {
-			background: #ad5cff;
-			border-radius: 4px;
-		}
-		
-		::-webkit-scrollbar-thumb:hover {
-			background: #00ef88;
-		}
-		
 		/* Button defaults */
 		button, [role=\"button\"] {
 			cursor: pointer;
