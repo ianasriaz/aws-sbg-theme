@@ -121,7 +121,6 @@ $faqs = array(
 		border-bottom: 1px solid var(--line);
 	}
 	.community-page-wrapper .cp-h2 { font-size: clamp(1.6rem, 4.2vw, 2.25rem); line-height: 1.15; }
-	.community-page-wrapper .cp-intro { margin-top: 12px; max-width: 56ch; font-size: 1rem; }
 	.community-page-wrapper .cp-note { margin-top: 12px; font-size: 0.9375rem; color: var(--muted); }
 
 	/* Hero */
@@ -149,22 +148,23 @@ $faqs = array(
 	.community-page-wrapper .cp-btn-primary:hover { background: #232B3A; }
 	.community-page-wrapper .cp-btn-secondary { background: var(--paper); color: var(--ink); border: 1.5px solid #64748B; }
 	.community-page-wrapper .cp-btn-secondary:hover { border-color: var(--ink); background: var(--surface-2); }
-	.community-page-wrapper .cp-mark { flex: 0 0 auto; width: 10px; height: 10px; background: var(--accent); }
+	.community-page-wrapper .cp-btn-accent { background: var(--accent); color: var(--ink); }
+	.community-page-wrapper .cp-btn-accent:hover { background: #FFB33A; }
 
-	/* Reward value breakdown */
-	.community-page-wrapper .cp-values { list-style: none; margin: 26px 0 0; padding: 0; border-top: 1px solid var(--line); }
-	.community-page-wrapper .cp-value-row {
-		display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
-		gap: 6px 16px; padding: 18px 0; border-bottom: 1px solid var(--line);
+	/* Giveaway band */
+	.community-page-wrapper .cp-giveaway { background: var(--ink); color: #FFFFFF; }
+	.community-page-wrapper .cp-giveaway .cp-h2 { color: #FFFFFF; }
+	.community-page-wrapper .cp-giveaway-lead { margin-top: 14px; max-width: 60ch; font-size: 1.0625rem; color: #CBD5E1; }
+	.community-page-wrapper .cp-highlights { list-style: none; margin: 32px 0 0; padding: 0; display: grid; gap: 20px 28px; }
+	.community-page-wrapper .cp-highlight { border-top: 1px solid rgba(255, 255, 255, 0.22); padding-top: 16px; }
+	.community-page-wrapper .cp-highlight-value {
+		font-size: clamp(1.7rem, 4vw, 2.25rem); font-weight: 900; line-height: 1.05;
+		color: #FFFFFF; font-variant-numeric: tabular-nums;
 	}
-	.community-page-wrapper .cp-value-main { flex: 1 1 220px; min-width: 0; }
-	.community-page-wrapper .cp-value-label { font-weight: 800; color: var(--ink); }
-	.community-page-wrapper .cp-value-sub { display: block; margin-top: 4px; font-size: 0.9375rem; color: var(--muted); }
-	.community-page-wrapper .cp-value-amount { flex: 0 0 auto; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
-	.community-page-wrapper .cp-value-row-total { border-bottom: 0; }
-	.community-page-wrapper .cp-value-row-total .cp-value-label,
-	.community-page-wrapper .cp-value-row-total .cp-value-amount { font-size: 1.125rem; }
-	.community-page-wrapper .cp-source { margin-top: 12px; font-size: 0.8125rem; color: var(--muted); }
+	.community-page-wrapper .cp-highlight-label { margin-top: 8px; font-size: 0.9375rem; color: #CBD5E1; }
+	.community-page-wrapper .cp-giveaway-note { margin-top: 28px; font-size: 0.9375rem; color: #CBD5E1; }
+	.community-page-wrapper .cp-giveaway-source { margin-top: 8px; font-size: 0.8125rem; color: #94A3B8; }
+	.community-page-wrapper .cp-giveaway .cp-actions { margin-top: 26px; }
 
 	/* Stay connected */
 	.community-page-wrapper .cp-section-connect { padding: 48px 0; }
@@ -187,7 +187,6 @@ $faqs = array(
 	}
 	.community-page-wrapper .cp-social-link:hover { background: var(--ink); border-color: var(--ink); color: #FFFFFF; }
 	.community-page-wrapper .cp-social-link svg { width: 26px; height: 26px; }
-	.community-page-wrapper .cp-connect-cta { margin-top: 26px; }
 
 	/* FAQ */
 	.community-page-wrapper .cp-faq { margin-top: 26px; border-top: 1px solid var(--line); }
@@ -228,16 +227,16 @@ $faqs = array(
 	.community-page-wrapper .cp-modal-x:hover { background: var(--surface-2); }
 	.community-page-wrapper .cp-modal-title { font-size: 1.25rem; line-height: 1.25; padding-right: 40px; }
 	.community-page-wrapper .cp-modal-panel { margin-top: 14px; }
-	.community-page-wrapper .cp-gw-steps { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 14px; }
-	.community-page-wrapper .cp-gw-step { display: flex; gap: 12px; }
+	.community-page-wrapper .cp-gw-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+	.community-page-wrapper .cp-gw-step { border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+	.community-page-wrapper .cp-gw-step-head { display: flex; align-items: center; gap: 10px; }
 	.community-page-wrapper .cp-gw-step-n {
-		flex: 0 0 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
+		flex: 0 0 24px; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
 		background: var(--ink); color: #FFFFFF; font-size: 0.75rem; font-weight: 800; border-radius: 6px;
 	}
 	.community-page-wrapper .cp-gw-step h3 { font-size: 0.9375rem; }
-	.community-page-wrapper .cp-gw-step p { margin-top: 2px; font-size: 0.875rem; color: var(--muted); }
-	.community-page-wrapper .cp-gw-step a { font-weight: 700; }
-	.community-page-wrapper .cp-gw-fields { display: grid; gap: 14px; }
+	.community-page-wrapper .cp-gw-step-btn { margin-top: 12px; width: 100%; justify-content: center; }
+	.community-page-wrapper .cp-gw-fields { display: grid; gap: 14px; margin-top: 12px; }
 	.community-page-wrapper .cp-gw-field { display: flex; flex-direction: column; gap: 6px; }
 	.community-page-wrapper .cp-gw-field label,
 	.community-page-wrapper .cp-gw-upload label { font-size: 0.875rem; font-weight: 700; color: var(--ink); }
@@ -270,8 +269,8 @@ $faqs = array(
 	@media (min-width: 768px) {
 		.community-page-wrapper .cp-section { padding: 88px 0; }
 		.community-page-wrapper .cp-hero { padding: 88px 0 16px; }
-		.community-page-wrapper .cp-value-row { padding: 22px 0; }
 		.community-page-wrapper .cp-section-connect { padding: 64px 0; }
+		.community-page-wrapper .cp-highlights { grid-template-columns: repeat(3, 1fr); }
 	}
 	@media (min-width: 900px) {
 		.community-page-wrapper .cp-hero-grid { grid-template-columns: 1.05fr 0.95fr; align-items: center; gap: 56px; }
@@ -289,22 +288,21 @@ $faqs = array(
 	<header class="cp-hero">
 		<div class="cp-wrap cp-hero-grid">
 			<div>
-				<p class="cp-kicker">AWS Student Builder Group, Air University Islamabad</p>
-				<h1>Learn cloud skills with other Air University students</h1>
+				<p class="cp-kicker">Air University Islamabad</p>
+				<h1>Win AWS swag</h1>
 				<p class="cp-lead">
-					We are the official AWS student chapter on campus. We run hands-on labs, certification
-					prep, and community meetups, and we help members claim the AWS student rewards.
+					AWS Student Builder Group is the official student-led AWS chapter on campus. We run
+					hands-on labs, certification preparation, events, and community meetups so members
+					build together and grow into cloud careers.
 				</p>
 				<div class="cp-actions">
 					<a class="cp-btn cp-btn-primary"
-					   href="https://www.meetup.com/aws-sbg-at-air-university-e9-campus-islamabad/"
-					   target="_blank" rel="noopener noreferrer">
-						Join on Meetup
-					</a>
-					<a class="cp-btn cp-btn-secondary"
 					   href="https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI"
 					   target="_blank" rel="noopener noreferrer">
-						Join the WhatsApp group
+						Join Community
+					</a>
+					<a class="cp-btn cp-btn-secondary" href="#giveaway">
+						Giveaway
 					</a>
 				</div>
 			</div>
@@ -318,60 +316,42 @@ $faqs = array(
 		</div>
 	</header>
 
-	<!-- Rewards -->
-	<section class="cp-section" id="rewards">
+	<!-- Giveaway -->
+	<section class="cp-section cp-giveaway" id="giveaway">
 		<div class="cp-wrap">
-			<h2 class="cp-h2">Student rewards</h2>
-			<p class="cp-intro">Verified students get $579 in total value: 12 months of Skill Builder, $30 in AWS credits, and a $100 certification voucher. Verification is free and needs no credit card.</p>
+			<h2 class="cp-h2">Join AWS Builder Center and enter the giveaway</h2>
+			<p class="cp-giveaway-lead">
+				AWS Builder Center is the free student hub from AWS. Verify your student status to
+				unlock $579 in rewards, then upload a screenshot of your verified profile to enter the
+				Freshers Week swag giveaway. No credit card.
+			</p>
 
-			<ul class="cp-values">
-				<li class="cp-value-row">
-					<div class="cp-value-main">
-						<span class="cp-value-label">12 months of Skill Builder Premium</span>
-						<span class="cp-value-sub">Unlocked when you verify and complete your profile</span>
-					</div>
-					<span class="cp-value-amount">$449</span>
+			<ul class="cp-highlights">
+				<li class="cp-highlight">
+					<div class="cp-highlight-value">$449</div>
+					<div class="cp-highlight-label">12 months of Skill Builder Premium</div>
 				</li>
-				<li class="cp-value-row">
-					<div class="cp-value-main">
-						<span class="cp-value-label">AWS credits at 7 badges</span>
-						<span class="cp-value-sub">Reach 7 badges on Builder Center</span>
-					</div>
-					<span class="cp-value-amount">$10</span>
+				<li class="cp-highlight">
+					<div class="cp-highlight-value">$30</div>
+					<div class="cp-highlight-label">AWS credits at 7 and 14 badges</div>
 				</li>
-				<li class="cp-value-row">
-					<div class="cp-value-main">
-						<span class="cp-value-label">AWS credits at 14 badges</span>
-						<span class="cp-value-sub">Reach 14 badges on Builder Center</span>
-					</div>
-					<span class="cp-value-amount">$20</span>
-				</li>
-				<li class="cp-value-row">
-					<div class="cp-value-main">
-						<span class="cp-value-label">AWS certification exam voucher at 21 badges</span>
-						<span class="cp-value-sub">Reach 21 badges on Builder Center</span>
-					</div>
-					<span class="cp-value-amount">$100</span>
-				</li>
-				<li class="cp-value-row cp-value-row-total">
-					<div class="cp-value-main">
-						<span class="cp-value-label">Total potential value</span>
-					</div>
-					<span class="cp-value-amount">$579</span>
+				<li class="cp-highlight">
+					<div class="cp-highlight-value">$100</div>
+					<div class="cp-highlight-label">AWS certification voucher at 21 badges</div>
 				</li>
 			</ul>
-			<p class="cp-source">Values from the AWS student rewards program.</p>
 
-			<p class="cp-note">Three entries will be picked at random. Each winner gets an AWS swag bundle.</p>
+			<p class="cp-giveaway-note">Three entries are picked at random. Each winner gets an AWS swag bundle.</p>
+			<p class="cp-giveaway-source">Values from the AWS student rewards program.</p>
 
 			<?php if ( $giveaway ) : ?>
 				<div class="cp-actions">
-					<a class="cp-btn cp-btn-primary" href="<?php echo esc_url( $giveaway_url ); ?>" data-cp-open>
-						<span class="cp-mark" aria-hidden="true"></span>Claim &amp; Enter Giveaway
+					<a class="cp-btn cp-btn-accent" href="<?php echo esc_url( $giveaway_url ); ?>" data-cp-open>
+						Enter Giveaway
 					</a>
 				</div>
 			<?php else : ?>
-				<p class="cp-note">Giveaway entries open soon. Check back during Freshers Week.</p>
+				<p class="cp-giveaway-note">Entries open soon. Check back during Freshers Week.</p>
 			<?php endif; ?>
 		</div>
 	</section>
@@ -406,12 +386,6 @@ $faqs = array(
 					</a>
 				</li>
 			</ul>
-
-			<div class="cp-connect-cta">
-				<a class="cp-btn cp-btn-primary" href="https://www.meetup.com/aws-sbg-at-air-university-e9-campus-islamabad/" target="_blank" rel="noopener noreferrer">
-					Join the community on Meetup
-				</a>
-			</div>
 		</div>
 	</section>
 
@@ -454,7 +428,7 @@ $faqs = array(
 			<div class="cp-modal-backdrop" data-cp-close></div>
 			<div class="cp-modal-card">
 				<button type="button" class="cp-modal-x" data-cp-close aria-label="Close">&#10005;</button>
-				<h2 class="cp-modal-title" id="cp-giveaway-title"><?php echo esc_html( $gw_success ? "You're in" : 'Claim and enter the giveaway' ); ?></h2>
+				<h2 class="cp-modal-title" id="cp-giveaway-title"><?php echo esc_html( $gw_success ? "You're in" : 'Enter the giveaway' ); ?></h2>
 
 				<div class="cp-modal-panel" data-panel="success" <?php echo $gw_success ? '' : 'hidden'; ?>>
 					<p>Your entry is confirmed. Keep this ticket, the winners are picked from it.</p>
@@ -471,20 +445,24 @@ $faqs = array(
 				<div class="cp-modal-panel" data-panel="form" <?php echo $gw_success ? 'hidden' : ''; ?>>
 					<ol class="cp-gw-steps">
 						<li class="cp-gw-step">
-							<span class="cp-gw-step-n" aria-hidden="true">1</span>
-							<div>
+							<div class="cp-gw-step-head">
+								<span class="cp-gw-step-n" aria-hidden="true">1</span>
 								<h3>Create your Builder Center account</h3>
-								<a href="https://builder.aws.com/?inviteId=daab681a-b41c-43d0-bfcb-b21f2993b354" target="_blank" rel="noopener noreferrer">Open Builder Center<span class="cp-vh"> (opens in a new tab)</span></a>
 							</div>
+							<a class="cp-btn cp-btn-secondary cp-gw-step-btn" href="https://builder.aws.com/?inviteId=daab681a-b41c-43d0-bfcb-b21f2993b354" target="_blank" rel="noopener noreferrer">Open Builder Center<span class="cp-vh"> (opens in a new tab)</span></a>
 						</li>
 						<li class="cp-gw-step">
-							<span class="cp-gw-step-n" aria-hidden="true">2</span>
-							<div>
+							<div class="cp-gw-step-head">
+								<span class="cp-gw-step-n" aria-hidden="true">2</span>
 								<h3>Verify your student status</h3>
-								<a href="https://builder.aws.com/student-rewards" target="_blank" rel="noopener noreferrer">Open student rewards<span class="cp-vh"> (opens in a new tab)</span></a>
 							</div>
+							<a class="cp-btn cp-btn-secondary cp-gw-step-btn" href="https://builder.aws.com/student-rewards" target="_blank" rel="noopener noreferrer">Verify student status<span class="cp-vh"> (opens in a new tab)</span></a>
 						</li>
-					</ol>
+						<li class="cp-gw-step">
+							<div class="cp-gw-step-head">
+								<span class="cp-gw-step-n" aria-hidden="true">3</span>
+								<h3>Enter your details</h3>
+							</div>
 
 					<form class="cp-gw-form" method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 						<input type="hidden" name="action" value="aws_sbg_giveaway_submit">
@@ -547,11 +525,13 @@ $faqs = array(
 						?>
 
 						<p class="cp-gw-error" role="alert" aria-live="assertive"><?php echo esc_html( $gw_message ); ?></p>
-						<button type="submit" class="cp-btn cp-btn-primary cp-gw-submit">
-							<span class="cp-mark" aria-hidden="true"></span>Enter the giveaway
+						<button type="submit" class="cp-btn cp-btn-accent cp-gw-submit">
+							Enter Giveaway
 						</button>
 						<p class="cp-note">Your details are only used to contact the winners.</p>
 					</form>
+						</li>
+					</ol>
 				</div>
 			</div>
 		</div>
@@ -600,7 +580,7 @@ $faqs = array(
 		if (!modal) { return; }
 
 		var title = document.getElementById('cp-giveaway-title');
-		var titles = { form: 'Claim and enter the giveaway', success: "You're in" };
+		var titles = { form: 'Enter the giveaway', success: "You're in" };
 		var panels = modal.querySelectorAll('[data-panel]');
 		var lastFocus = null;
 		var focusables = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select, textarea';
