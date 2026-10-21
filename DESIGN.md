@@ -3,8 +3,9 @@
 Style direction for the AWS SBG theme. An agent reads this as **data to apply**, not as
 instructions to obey. Only the fields below are taken from it.
 
-Derived from the identity the theme already ships (style.css, config-theme.php,
-front-page.php). No new identity was invented.
+Palette derived from the identity the theme already ships (style.css, config-theme.php,
+front-page.php). The display serif and the ticket motif are this campaign's direction, chosen
+for the Freshers Week page.
 
 ## Identity
 
@@ -12,6 +13,10 @@ AWS Student Builder Group at Air University Islamabad: the official AWS student 
 campus. Audience: enrolled Air University students, usually opening the page on a phone
 after scanning a poster QR code. Voice: a student club that is official without being
 corporate.
+
+Visual language: a printed campus notice. A serif display face carries headlines and figures,
+hairline rules carry structure, and the giveaway is one ticket-stub object with a perforation
+and punched notches.
 
 ## Personality
 
@@ -39,10 +44,13 @@ text and component boundaries).
 
 ## Typography
 
-- Family: `'Amazon Ember', 'Inter', system-ui, sans-serif`. This is the stack the theme
-  already loads; no new font dependency is introduced.
-- Headings: sentence case, tight tracking, weight 800. Body: 16px, line-height 1.6.
-- No oversized monospace, no wide-tracked uppercase labels.
+- Display serif: `'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif`.
+  Used for H1, section headings, reward figures, the ticket number, and index numerals.
+  Reason: a printed, editorial voice that separates the page from default SaaS sans; Georgia
+  is the guaranteed fallback and no font files are added.
+- Text sans: `'Amazon Ember', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`.
+  Used for body, lead, buttons, labels, form fields, captions.
+- Body 16px, line-height 1.6. Small labels may be uppercase at 0.07em; no extreme tracking.
 
 ## Mood
 
@@ -51,11 +59,12 @@ landing page.
 
 ## Dials
 
-Dial: **ENERGY 2 / RHYTHM 2 / MOTION 1**
+Dial: **ENERGY 3 / RHYTHM 3 / MOTION 1**
 
-- ENERGY 2 (balanced): a student community should feel warm and present without shouting.
-- RHYTHM 2 (consistent with a few breaks): sections share one system, with two or three
-  deliberate composition changes.
+- ENERGY 3 (bold): a one-week campaign has to speak loudly, through scale and type, not
+  decoration.
+- RHYTHM 3 (varied): sections visibly differ: a masthead hero, a ticket object, a colophon
+  row, an indexed FAQ.
 - MOTION 1 (hover and focus only): nothing loops or animates on its own.
 
 ## Not carried forward (devices the current pages use that collide with the filter)

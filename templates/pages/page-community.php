@@ -2,9 +2,9 @@
 /**
  * Template Name: Community Hub & Student Rewards
  *
- * Community landing page: what the chapter is, the AWS student rewards, the guided
- * giveaway entry, where the chapter talks, and answers. Reached mainly by poster QR
- * scans on phones.
+ * Freshers Week campaign page in a printed campus-notice voice: a masthead hero, the
+ * giveaway as a ticket stub, a colophon of channels, and an indexed FAQ. Reached mainly
+ * by poster QR scans on phones.
  *
  * @package AWS_SBG_Theme
  */
@@ -89,11 +89,14 @@ $faqs = array(
 		--brand: #7928CA;
 		--accent: #FF9900;
 		--danger: #B91C1C;
+		--rule-dark: rgba(255, 255, 255, 0.22);
 		--wrap: 1080px;
+		--serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+		--sans: 'Amazon Ember', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
 		background: var(--paper);
 		color: var(--ink-2);
-		font-family: 'Amazon Ember', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+		font-family: var(--sans);
 		line-height: 1.6;
 		min-height: 100vh;
 		overflow-x: hidden;
@@ -103,8 +106,8 @@ $faqs = array(
 	.community-page-wrapper .cp-wrap { width: 100%; max-width: var(--wrap); margin: 0 auto; padding: 0 20px; }
 	.community-page-wrapper h1,
 	.community-page-wrapper h2,
-	.community-page-wrapper h3 { margin: 0; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
-	.community-page-wrapper p { margin: 0; color: var(--ink-2); }
+	.community-page-wrapper h3 { margin: 0; color: var(--ink); }
+	.community-page-wrapper p { margin: 0; }
 	.community-page-wrapper a { color: var(--brand); text-decoration: none; }
 	.community-page-wrapper img { display: block; max-width: 100%; height: auto; }
 	.community-page-wrapper :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 2px; }
@@ -112,93 +115,130 @@ $faqs = array(
 		position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
 		overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 	}
-
-	/* Section frame */
-	.community-page-wrapper .cp-section { padding: 56px 0; }
-	.community-page-wrapper .cp-section-alt {
-		background: var(--surface);
-		border-top: 1px solid var(--line);
-		border-bottom: 1px solid var(--line);
+	.community-page-wrapper .cp-display { font-family: var(--serif); font-weight: 700; letter-spacing: -0.02em; }
+	.community-page-wrapper .cp-label {
+		font-family: var(--sans); font-size: 0.6875rem; font-weight: 800;
+		letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted);
 	}
-	.community-page-wrapper .cp-h2 { font-size: clamp(1.6rem, 4.2vw, 2.25rem); line-height: 1.15; }
-	.community-page-wrapper .cp-note { margin-top: 12px; font-size: 0.9375rem; color: var(--muted); }
+
+	/* Masthead */
+	.community-page-wrapper .cp-masthead {
+		display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px;
+		padding: 16px 0; border-bottom: 1px solid var(--line);
+	}
+	.community-page-wrapper .cp-masthead span {
+		font-family: var(--sans); font-size: 0.6875rem; font-weight: 800;
+		letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted);
+	}
 
 	/* Hero */
-	.community-page-wrapper .cp-hero { padding: 48px 0 8px; }
-	.community-page-wrapper .cp-hero-grid { display: grid; gap: 32px; }
-	.community-page-wrapper .cp-kicker { font-size: 0.875rem; font-weight: 700; color: var(--muted); }
-	.community-page-wrapper .cp-hero h1 {
-		margin-top: 14px;
-		font-size: clamp(2rem, 6vw, 3.25rem);
-		line-height: 1.05;
+	.community-page-wrapper .cp-hero-grid {
+		display: grid; gap: 36px; padding: 40px 0 8px;
 	}
-	.community-page-wrapper .cp-lead { margin-top: 18px; max-width: 52ch; font-size: 1.0625rem; }
+	.community-page-wrapper .cp-hero h1 {
+		font-family: var(--serif); font-weight: 700;
+		font-size: clamp(2.75rem, 9vw, 5.25rem); line-height: 0.95;
+		letter-spacing: -0.025em; color: var(--ink);
+	}
+	.community-page-wrapper .cp-lead {
+		margin-top: 22px; max-width: 52ch; font-size: 1.0625rem; color: var(--ink-2);
+	}
 	.community-page-wrapper .cp-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-	.community-page-wrapper .cp-hero-media { margin: 0; }
-	.community-page-wrapper .cp-hero-media img { width: 100%; max-width: 460px; margin: 0 auto; }
+	.community-page-wrapper .cp-hero-media {
+		margin: 0; padding: 10px; background: var(--surface); border: 1px solid var(--line);
+	}
+	.community-page-wrapper .cp-hero-media img { width: 100%; height: auto; }
 
 	/* Buttons */
 	.community-page-wrapper .cp-btn {
-		display: inline-flex; align-items: center; gap: 10px;
-		min-height: 48px; padding: 13px 22px; border-radius: 10px;
-		font-weight: 700; font-size: 0.9375rem; line-height: 1.2;
+		display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+		min-height: 48px; padding: 13px 22px; border-radius: 8px;
+		font-family: var(--sans); font-weight: 700; font-size: 0.9375rem; line-height: 1.2;
 		transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 	}
 	.community-page-wrapper .cp-btn-primary { background: var(--ink); color: #FFFFFF; }
 	.community-page-wrapper .cp-btn-primary:hover { background: #232B3A; }
-	.community-page-wrapper .cp-btn-secondary { background: var(--paper); color: var(--ink); border: 1.5px solid #64748B; }
+	.community-page-wrapper .cp-btn-secondary { background: transparent; color: var(--ink); border: 1.5px solid #64748B; }
 	.community-page-wrapper .cp-btn-secondary:hover { border-color: var(--ink); background: var(--surface-2); }
 	.community-page-wrapper .cp-btn-accent { background: var(--accent); color: var(--ink); }
 	.community-page-wrapper .cp-btn-accent:hover { background: #FFB33A; }
 
-	/* Giveaway band */
-	.community-page-wrapper .cp-giveaway { background: var(--ink); color: #FFFFFF; }
-	.community-page-wrapper .cp-giveaway .cp-h2 { color: #FFFFFF; }
-	.community-page-wrapper .cp-giveaway-lead { margin-top: 14px; max-width: 60ch; font-size: 1.0625rem; color: #CBD5E1; }
-	.community-page-wrapper .cp-highlights { list-style: none; margin: 32px 0 0; padding: 0; display: grid; gap: 20px 28px; }
-	.community-page-wrapper .cp-highlight { border-top: 1px solid rgba(255, 255, 255, 0.22); padding-top: 16px; }
-	.community-page-wrapper .cp-highlight-value {
-		font-size: clamp(1.7rem, 4vw, 2.25rem); font-weight: 900; line-height: 1.05;
-		color: #FFFFFF; font-variant-numeric: tabular-nums;
+	/* Giveaway ticket */
+	.community-page-wrapper .cp-giveaway-section { padding: 48px 0 8px; }
+	.community-page-wrapper .cp-ticket {
+		position: relative; overflow: hidden;
+		background: var(--ink); color: #FFFFFF; border-radius: 16px;
+		box-shadow: 0 26px 60px -32px rgba(15, 20, 31, 0.6);
 	}
-	.community-page-wrapper .cp-highlight-label { margin-top: 8px; font-size: 0.9375rem; color: #CBD5E1; }
-	.community-page-wrapper .cp-giveaway-note { margin-top: 28px; font-size: 0.9375rem; color: #CBD5E1; }
-	.community-page-wrapper .cp-giveaway-source { margin-top: 8px; font-size: 0.8125rem; color: #94A3B8; }
-	.community-page-wrapper .cp-giveaway .cp-actions { margin-top: 26px; }
+	.community-page-wrapper .cp-ticket-body { padding: 30px 24px 4px; }
+	.community-page-wrapper .cp-label-dark { color: #94A3B8; }
+	.community-page-wrapper .cp-ticket-title {
+		margin-top: 12px; font-family: var(--serif); font-weight: 700;
+		font-size: clamp(1.6rem, 4.2vw, 2.4rem); line-height: 1.1;
+		letter-spacing: -0.02em; color: #FFFFFF;
+	}
+	.community-page-wrapper .cp-ticket-lead { margin-top: 14px; max-width: 62ch; font-size: 1rem; color: #CBD5E1; }
+	.community-page-wrapper .cp-figures {
+		list-style: none; margin: 0; padding: 22px 0 24px;
+		display: grid; gap: 22px; border-top: 1px solid var(--rule-dark); margin-top: 26px;
+	}
+	.community-page-wrapper .cp-figure-value {
+		font-family: var(--serif); font-weight: 700; font-size: clamp(2rem, 5vw, 2.75rem);
+		line-height: 1; color: #FFFFFF; font-variant-numeric: tabular-nums;
+	}
+	.community-page-wrapper .cp-figure-label { margin-top: 10px; font-size: 0.875rem; color: #CBD5E1; }
+	.community-page-wrapper .cp-ticket-source { padding-bottom: 24px; font-size: 0.8125rem; color: #94A3B8; }
 
-	/* Stay connected */
-	.community-page-wrapper .cp-section-connect { padding: 48px 0; }
-	.community-page-wrapper .cp-connect { text-align: center; }
-	.community-page-wrapper .cp-connect-title {
-		font-size: clamp(1.35rem, 3.2vw, 1.85rem);
-		font-weight: 900;
-		letter-spacing: 0.02em;
-		text-transform: uppercase;
+	/* Perforation with punched notches */
+	.community-page-wrapper .cp-perf { position: relative; height: 0; border-top: 2px dashed var(--rule-dark); }
+	.community-page-wrapper .cp-perf::before,
+	.community-page-wrapper .cp-perf::after {
+		content: ""; position: absolute; top: -15px; width: 30px; height: 30px;
+		border-radius: 50%; background: var(--paper);
 	}
-	.community-page-wrapper .cp-social {
-		list-style: none; margin: 24px 0 0; padding: 0;
-		display: flex; flex-wrap: wrap; justify-content: center; gap: 14px;
+	.community-page-wrapper .cp-perf::before { left: -15px; }
+	.community-page-wrapper .cp-perf::after { right: -15px; }
+
+	/* Stub */
+	.community-page-wrapper .cp-ticket-stub {
+		display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+		gap: 16px; padding: 24px;
 	}
+	.community-page-wrapper .cp-ticket-stub p { max-width: 46ch; font-size: 0.9375rem; color: #CBD5E1; }
+	.community-page-wrapper .cp-ticket-cta { flex: 0 0 auto; }
+
+	/* Colophon */
+	.community-page-wrapper .cp-colophon { padding: 44px 0; border-top: 1px solid var(--line); }
+	.community-page-wrapper .cp-colophon-title { color: var(--muted); }
+	.community-page-wrapper .cp-social { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 12px; }
 	.community-page-wrapper .cp-social-link {
 		display: inline-flex; align-items: center; justify-content: center;
-		width: 56px; height: 56px; border-radius: 12px;
-		border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+		width: 52px; height: 52px; border: 1px solid var(--line); border-radius: 10px;
+		background: var(--paper); color: var(--ink);
 		transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
 	}
 	.community-page-wrapper .cp-social-link:hover { background: var(--ink); border-color: var(--ink); color: #FFFFFF; }
-	.community-page-wrapper .cp-social-link svg { width: 26px; height: 26px; }
+	.community-page-wrapper .cp-social-link svg { width: 24px; height: 24px; }
 
-	/* FAQ */
-	.community-page-wrapper .cp-faq { margin-top: 26px; border-top: 1px solid var(--line); }
+	/* Indexed FAQ */
+	.community-page-wrapper .cp-index { padding: 44px 0 56px; border-top: 1px solid var(--line); }
+	.community-page-wrapper .cp-index-title {
+		font-family: var(--serif); font-weight: 700; font-size: clamp(1.6rem, 4vw, 2.1rem);
+		line-height: 1.1; letter-spacing: -0.02em;
+	}
+	.community-page-wrapper .cp-faq { margin-top: 22px; border-top: 1px solid var(--line); }
 	.community-page-wrapper .cp-faq-item { border-bottom: 1px solid var(--line); }
 	.community-page-wrapper .cp-faq-q {
-		display: flex; align-items: center; justify-content: space-between; gap: 16px;
-		width: 100%; min-height: 56px; padding: 20px 6px;
-		background: none; border: 0; cursor: pointer; text-align: left;
-		font: inherit; font-weight: 700; font-size: 1.0625rem; color: var(--ink);
-		transition: color 0.18s ease;
+		display: flex; align-items: center; gap: 14px; width: 100%; min-height: 56px;
+		padding: 18px 0; background: none; border: 0; cursor: pointer; text-align: left;
+		font: inherit; color: var(--ink);
 	}
-	.community-page-wrapper .cp-faq-q:hover { color: var(--brand); }
+	.community-page-wrapper .cp-faq-n {
+		flex: 0 0 30px; font-family: var(--serif); font-size: 0.875rem; font-weight: 700;
+		color: var(--muted); font-variant-numeric: tabular-nums;
+	}
+	.community-page-wrapper .cp-faq-q-text { flex: 1 1 auto; font-family: var(--sans); font-weight: 700; font-size: 1.0625rem; }
+	.community-page-wrapper .cp-faq-q:hover .cp-faq-q-text { color: var(--brand); }
 	.community-page-wrapper .cp-faq-icon { position: relative; flex: 0 0 auto; width: 18px; height: 18px; }
 	.community-page-wrapper .cp-faq-icon::before,
 	.community-page-wrapper .cp-faq-icon::after { content: ""; position: absolute; background: var(--muted); }
@@ -206,7 +246,9 @@ $faqs = array(
 	.community-page-wrapper .cp-faq-icon::after { top: 0; bottom: 0; left: 8px; width: 2px; transition: transform 0.18s ease; }
 	.community-page-wrapper .cp-faq-q[aria-expanded="true"] .cp-faq-icon::after { transform: scaleY(0); }
 	.community-page-wrapper .cp-faq-a { overflow: hidden; max-height: 0; transition: max-height 0.22s ease; }
-	.community-page-wrapper .cp-faq-a p { padding: 0 6px 22px; max-width: 62ch; color: var(--muted); font-size: 0.9375rem; }
+	.community-page-wrapper .cp-faq-a p {
+		padding: 0 0 22px 44px; max-width: 62ch; color: var(--muted); font-size: 0.9375rem;
+	}
 
 	/* Giveaway popup */
 	.community-page-wrapper .cp-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
@@ -214,27 +256,39 @@ $faqs = array(
 	.community-page-wrapper .cp-modal.is-open { display: flex; }
 	.community-page-wrapper .cp-modal-backdrop { position: absolute; inset: 0; background: rgba(15, 20, 31, 0.6); }
 	.community-page-wrapper .cp-modal-card {
-		position: relative; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto;
+		position: relative; display: flex; flex-direction: column;
+		width: 100%; max-width: 440px; max-height: 90vh; overflow: hidden;
 		background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
-		padding: 26px 22px; box-shadow: 0 24px 60px -24px rgba(15, 20, 31, 0.45);
+		box-shadow: 0 24px 60px -24px rgba(15, 20, 31, 0.45);
+	}
+	.community-page-wrapper .cp-modal-head {
+		display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+		padding: 20px 18px 14px; border-bottom: 1px solid var(--line); flex-shrink: 0;
+	}
+	.community-page-wrapper .cp-modal-title {
+		font-family: var(--serif); font-weight: 700; font-size: 1.375rem;
+		line-height: 1.2; letter-spacing: -0.02em; margin: 0;
 	}
 	.community-page-wrapper .cp-modal-x {
-		position: absolute; top: 12px; right: 12px; width: 36px; height: 36px;
+		flex: 0 0 auto; width: 44px; height: 44px;
 		display: inline-flex; align-items: center; justify-content: center;
 		border: 1px solid var(--line); background: var(--paper); color: var(--ink-2);
 		border-radius: 8px; font: inherit; font-size: 0.875rem; font-weight: 700; cursor: pointer;
 	}
 	.community-page-wrapper .cp-modal-x:hover { background: var(--surface-2); }
-	.community-page-wrapper .cp-modal-title { font-size: 1.25rem; line-height: 1.25; padding-right: 40px; }
-	.community-page-wrapper .cp-modal-panel { margin-top: 14px; }
+	.community-page-wrapper .cp-modal-body {
+		padding: 16px 18px 22px;
+		overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+	}
+	.community-page-wrapper .cp-modal-panel { margin-top: 0; }
 	.community-page-wrapper .cp-gw-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
 	.community-page-wrapper .cp-gw-step { border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
 	.community-page-wrapper .cp-gw-step-head { display: flex; align-items: center; gap: 10px; }
 	.community-page-wrapper .cp-gw-step-n {
 		flex: 0 0 24px; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
-		background: var(--ink); color: #FFFFFF; font-size: 0.75rem; font-weight: 800; border-radius: 6px;
+		background: var(--ink); color: #FFFFFF; font-family: var(--sans); font-size: 0.75rem; font-weight: 800; border-radius: 6px;
 	}
-	.community-page-wrapper .cp-gw-step h3 { font-size: 0.9375rem; }
+	.community-page-wrapper .cp-gw-step h3 { font-family: var(--serif); font-size: 1rem; font-weight: 700; }
 	.community-page-wrapper .cp-gw-step-btn { margin-top: 12px; width: 100%; justify-content: center; }
 	.community-page-wrapper .cp-gw-fields { display: grid; gap: 14px; margin-top: 12px; }
 	.community-page-wrapper .cp-gw-field { display: flex; flex-direction: column; gap: 6px; }
@@ -258,23 +312,36 @@ $faqs = array(
 	.community-page-wrapper .cp-gw-error { margin-top: 14px; font-size: 0.875rem; font-weight: 700; color: var(--danger); }
 	.community-page-wrapper .cp-gw-submit { width: 100%; justify-content: center; margin-top: 18px; }
 	.community-page-wrapper .cp-gw-ticket {
-		margin: 16px 0; padding: 16px; text-align: center;
-		border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+		margin: 16px 0; padding: 18px; text-align: center;
+		border: 1px solid var(--line); border-top: 2px dashed var(--line);
+		border-radius: 0 0 10px 10px; background: var(--surface);
 	}
-	.community-page-wrapper .cp-gw-ticket-label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--muted); }
-	.community-page-wrapper .cp-gw-ticket-num { font-size: 1.5rem; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
+	.community-page-wrapper .cp-gw-ticket-label { display: block; font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+	.community-page-wrapper .cp-gw-ticket-num { font-family: var(--serif); font-size: 1.75rem; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
 	.community-page-wrapper .cp-gw-ticket-name { margin-top: 4px; font-size: 0.875rem; color: var(--ink-2); }
+	.community-page-wrapper .cp-note { margin-top: 12px; font-size: 0.9375rem; color: var(--muted); }
 	body.cp-modal-open { overflow: hidden; }
 
+	@media (min-width: 640px) {
+		.community-page-wrapper .cp-figures { grid-template-columns: repeat(3, 1fr); }
+		.community-page-wrapper .cp-figure + .cp-figure { border-left: 1px solid var(--rule-dark); padding-left: 24px; }
+	}
 	@media (min-width: 768px) {
-		.community-page-wrapper .cp-section { padding: 88px 0; }
-		.community-page-wrapper .cp-hero { padding: 88px 0 16px; }
-		.community-page-wrapper .cp-section-connect { padding: 64px 0; }
-		.community-page-wrapper .cp-highlights { grid-template-columns: repeat(3, 1fr); }
+		.community-page-wrapper .cp-giveaway-section { padding: 64px 0 12px; }
+		.community-page-wrapper .cp-ticket-body { padding: 36px 34px 4px; }
+		.community-page-wrapper .cp-ticket-stub { padding: 26px 34px; }
+		.community-page-wrapper .cp-colophon { padding: 52px 0; }
+		.community-page-wrapper .cp-index { padding: 52px 0 72px; }
 	}
 	@media (min-width: 900px) {
-		.community-page-wrapper .cp-hero-grid { grid-template-columns: 1.05fr 0.95fr; align-items: center; gap: 56px; }
-		.community-page-wrapper .cp-hero-media img { margin: 0; }
+		.community-page-wrapper .cp-hero-grid { grid-template-columns: 1.15fr 0.85fr; align-items: end; gap: 56px; }
+	}
+	@media (max-width: 599px) {
+		.community-page-wrapper .cp-modal { padding: 0; align-items: stretch; }
+		.community-page-wrapper .cp-modal-card { max-width: none; max-height: none; height: 100%; border: 0; border-radius: 0; }
+		.community-page-wrapper .cp-modal-head { padding-top: calc(16px + env(safe-area-inset-top)); }
+		.community-page-wrapper .cp-modal-body { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+		.community-page-wrapper .cp-ticket-stub .cp-ticket-cta { width: 100%; }
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.community-page-wrapper .cp-faq-a,
@@ -285,11 +352,18 @@ $faqs = array(
 <main class="community-page-wrapper">
 
 	<!-- Hero -->
-	<header class="cp-hero">
+	<header>
+		<div class="cp-wrap">
+			<div class="cp-masthead">
+				<span>AWS Student Builder Group</span>
+				<span>Air University Islamabad</span>
+				<span>Freshers Week</span>
+			</div>
+		</div>
+
 		<div class="cp-wrap cp-hero-grid">
 			<div>
-				<p class="cp-kicker">Air University Islamabad</p>
-				<h1>Win AWS swag</h1>
+				<h1>Win AWS<br>swag.</h1>
 				<p class="cp-lead">
 					AWS Student Builder Group is the official student-led AWS chapter on campus. We run
 					hands-on labs, certification preparation, events, and community meetups so members
@@ -316,51 +390,56 @@ $faqs = array(
 		</div>
 	</header>
 
-	<!-- Giveaway -->
-	<section class="cp-section cp-giveaway" id="giveaway">
+	<!-- Giveaway ticket -->
+	<section class="cp-giveaway-section" id="giveaway">
 		<div class="cp-wrap">
-			<h2 class="cp-h2">Join AWS Builder Center and enter the giveaway</h2>
-			<p class="cp-giveaway-lead">
-				AWS Builder Center is the free student hub from AWS. Verify your student status to
-				unlock $579 in rewards, then upload a screenshot of your verified profile to enter the
-				Freshers Week swag giveaway. No credit card.
-			</p>
+			<div class="cp-ticket">
+				<div class="cp-ticket-body">
+					<span class="cp-label cp-label-dark">Freshers Week giveaway</span>
+					<h2 class="cp-ticket-title">Join AWS Builder Center and enter the giveaway</h2>
+					<p class="cp-ticket-lead">
+						AWS Builder Center is the free student hub from AWS. Verify your student status to
+						unlock $579 in rewards, then upload a screenshot of your verified profile to enter.
+						No credit card.
+					</p>
 
-			<ul class="cp-highlights">
-				<li class="cp-highlight">
-					<div class="cp-highlight-value">$449</div>
-					<div class="cp-highlight-label">12 months of Skill Builder Premium</div>
-				</li>
-				<li class="cp-highlight">
-					<div class="cp-highlight-value">$30</div>
-					<div class="cp-highlight-label">AWS credits at 7 and 14 badges</div>
-				</li>
-				<li class="cp-highlight">
-					<div class="cp-highlight-value">$100</div>
-					<div class="cp-highlight-label">AWS certification voucher at 21 badges</div>
-				</li>
-			</ul>
-
-			<p class="cp-giveaway-note">Three entries are picked at random. Each winner gets an AWS swag bundle.</p>
-			<p class="cp-giveaway-source">Values from the AWS student rewards program.</p>
-
-			<?php if ( $giveaway ) : ?>
-				<div class="cp-actions">
-					<a class="cp-btn cp-btn-accent" href="<?php echo esc_url( $giveaway_url ); ?>" data-cp-open>
-						Enter Giveaway
-					</a>
+					<ul class="cp-figures">
+						<li class="cp-figure">
+							<div class="cp-figure-value">$449</div>
+							<div class="cp-figure-label">12 months of Skill Builder Premium</div>
+						</li>
+						<li class="cp-figure">
+							<div class="cp-figure-value">$30</div>
+							<div class="cp-figure-label">AWS credits at 7 and 14 badges</div>
+						</li>
+						<li class="cp-figure">
+							<div class="cp-figure-value">$100</div>
+							<div class="cp-figure-label">AWS certification voucher at 21 badges</div>
+						</li>
+					</ul>
+					<p class="cp-ticket-source">Values from the AWS student rewards program.</p>
 				</div>
-			<?php else : ?>
-				<p class="cp-giveaway-note">Entries open soon. Check back during Freshers Week.</p>
-			<?php endif; ?>
+
+				<div class="cp-perf" aria-hidden="true"></div>
+
+				<div class="cp-ticket-stub">
+					<p>Three entries picked at random. Each winner gets an AWS swag bundle.</p>
+					<?php if ( $giveaway ) : ?>
+						<a class="cp-btn cp-btn-accent cp-ticket-cta" href="<?php echo esc_url( $giveaway_url ); ?>" data-cp-open>
+							Enter Giveaway
+						</a>
+					<?php else : ?>
+						<p class="cp-ticket-cta">Entries open soon.</p>
+					<?php endif; ?>
+				</div>
+			</div>
 		</div>
 	</section>
 
 	<!-- Stay connected -->
-	<section class="cp-section cp-section-alt cp-section-connect" id="channels">
-		<div class="cp-wrap cp-connect">
-			<h2 class="cp-connect-title">Stay connected</h2>
-
+	<section class="cp-colophon" id="channels">
+		<div class="cp-wrap">
+			<h2 class="cp-label cp-colophon-title">Stay connected</h2>
 			<ul class="cp-social">
 				<li>
 					<a class="cp-social-link" href="https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp community (opens in a new tab)" title="WhatsApp">
@@ -389,10 +468,10 @@ $faqs = array(
 		</div>
 	</section>
 
-	<!-- FAQ -->
-	<section class="cp-section" id="faq">
+	<!-- Questions index -->
+	<section class="cp-index" id="faq">
 		<div class="cp-wrap">
-			<h2 class="cp-h2">Questions</h2>
+			<h2 class="cp-index-title">Questions</h2>
 
 			<div class="cp-faq">
 				<?php foreach ( $faqs as $i => $faq ) :
@@ -403,7 +482,8 @@ $faqs = array(
 						<h3>
 							<button type="button" class="cp-faq-q" id="<?php echo esc_attr( $qid ); ?>"
 							        aria-expanded="false" aria-controls="<?php echo esc_attr( $aid ); ?>">
-								<?php echo esc_html( $faq['q'] ); ?>
+								<span class="cp-faq-n" aria-hidden="true"><?php echo esc_html( str_pad( $i + 1, 2, '0', STR_PAD_LEFT ) ); ?></span>
+								<span class="cp-faq-q-text"><?php echo esc_html( $faq['q'] ); ?></span>
 								<span class="cp-faq-icon" aria-hidden="true"></span>
 							</button>
 						</h3>
@@ -427,111 +507,114 @@ $faqs = array(
 		<div class="cp-modal" id="cp-giveaway" role="dialog" aria-modal="true" aria-labelledby="cp-giveaway-title" data-initial="<?php echo esc_attr( $gstart ); ?>">
 			<div class="cp-modal-backdrop" data-cp-close></div>
 			<div class="cp-modal-card">
-				<button type="button" class="cp-modal-x" data-cp-close aria-label="Close">&#10005;</button>
-				<h2 class="cp-modal-title" id="cp-giveaway-title"><?php echo esc_html( $gw_success ? "You're in" : 'Enter the giveaway' ); ?></h2>
-
-				<div class="cp-modal-panel" data-panel="success" <?php echo $gw_success ? '' : 'hidden'; ?>>
-					<p>Your entry is confirmed. Keep this ticket, the winners are picked from it.</p>
-					<div class="cp-gw-ticket">
-						<span class="cp-gw-ticket-label">Your ticket</span>
-						<div class="cp-gw-ticket-num">#<?php echo esc_html( $gw_ticket ); ?></div>
-						<?php if ( '' !== $gw_name ) : ?>
-							<div class="cp-gw-ticket-name"><?php echo esc_html( $gw_name ); ?></div>
-						<?php endif; ?>
-					</div>
-					<button type="button" class="cp-btn cp-btn-primary cp-gw-submit" data-cp-close>Done</button>
+				<div class="cp-modal-head">
+					<h2 class="cp-modal-title" id="cp-giveaway-title"><?php echo esc_html( $gw_success ? "You're in" : 'Enter the giveaway' ); ?></h2>
+					<button type="button" class="cp-modal-x" data-cp-close aria-label="Close">&#10005;</button>
 				</div>
-
-				<div class="cp-modal-panel" data-panel="form" <?php echo $gw_success ? 'hidden' : ''; ?>>
-					<ol class="cp-gw-steps">
-						<li class="cp-gw-step">
-							<div class="cp-gw-step-head">
-								<span class="cp-gw-step-n" aria-hidden="true">1</span>
-								<h3>Create your Builder Center account</h3>
-							</div>
-							<a class="cp-btn cp-btn-secondary cp-gw-step-btn" href="https://builder.aws.com/?inviteId=daab681a-b41c-43d0-bfcb-b21f2993b354" target="_blank" rel="noopener noreferrer">Open Builder Center<span class="cp-vh"> (opens in a new tab)</span></a>
-						</li>
-						<li class="cp-gw-step">
-							<div class="cp-gw-step-head">
-								<span class="cp-gw-step-n" aria-hidden="true">2</span>
-								<h3>Verify your student status</h3>
-							</div>
-							<a class="cp-btn cp-btn-secondary cp-gw-step-btn" href="https://builder.aws.com/student-rewards" target="_blank" rel="noopener noreferrer">Verify student status<span class="cp-vh"> (opens in a new tab)</span></a>
-						</li>
-						<li class="cp-gw-step">
-							<div class="cp-gw-step-head">
-								<span class="cp-gw-step-n" aria-hidden="true">3</span>
-								<h3>Enter your details</h3>
-							</div>
-
-					<form class="cp-gw-form" method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-						<input type="hidden" name="action" value="aws_sbg_giveaway_submit">
-						<input type="hidden" name="giveaway_id" value="<?php echo esc_attr( $gid ); ?>">
-						<input type="hidden" name="gw_source" value="<?php echo esc_attr( '' !== $src ? $src : 'community' ); ?>">
-						<input type="text" name="website_url" tabindex="-1" autocomplete="off" class="cp-hp" aria-hidden="true">
-						<?php wp_nonce_field( 'aws_sbg_giveaway_submit', 'giveaway_nonce' ); ?>
-
-						<div class="cp-gw-fields">
-							<?php foreach ( $fields as $field ) :
-								$fid  = $field['id'];
-								$type = in_array( $field['type'], array( 'text', 'email', 'tel' ), true ) ? $field['type'] : 'text';
-								?>
-								<div class="cp-gw-field">
-									<label for="cp-gw-<?php echo esc_attr( $fid ); ?>"><?php echo esc_html( $field['label'] ); ?><?php echo ! empty( $field['required'] ) ? ' <span class="cp-star">*</span>' : ''; ?></label>
-									<input class="cp-gw-input" type="<?php echo esc_attr( $type ); ?>" id="cp-gw-<?php echo esc_attr( $fid ); ?>" name="gw_field[<?php echo esc_attr( $fid ); ?>]" <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>>
-								</div>
-							<?php endforeach; ?>
+				<div class="cp-modal-body">
+					<div class="cp-modal-panel" data-panel="success" <?php echo $gw_success ? '' : 'hidden'; ?>>
+						<p>Your entry is confirmed. Keep this ticket, the winners are picked from it.</p>
+						<div class="cp-gw-ticket">
+							<span class="cp-gw-ticket-label">Your ticket</span>
+							<div class="cp-gw-ticket-num">#<?php echo esc_html( $gw_ticket ); ?></div>
+							<?php if ( '' !== $gw_name ) : ?>
+								<div class="cp-gw-ticket-name"><?php echo esc_html( $gw_name ); ?></div>
+							<?php endif; ?>
 						</div>
+						<button type="button" class="cp-btn cp-btn-primary cp-gw-submit" data-cp-close>Done</button>
+					</div>
 
-						<?php
-						foreach ( $reqs as $req ) :
-							$rid       = $req['id'];
-							$is_reqd   = ! empty( $req['required'] );
-							$star      = $is_reqd ? ' <span class="cp-star">*</span>' : '';
-							$reqd_attr = $is_reqd ? 'required' : '';
-
-							if ( 'upload' === $req['type'] ) :
-								?>
-								<div class="cp-gw-upload">
-									<label for="cp-gw-file-<?php echo esc_attr( $rid ); ?>"><?php echo esc_html( $req['label'] ) . $star; ?></label>
-									<?php if ( ! empty( $req['help'] ) ) : ?>
-										<p class="cp-gw-help"><?php echo esc_html( $req['help'] ); ?></p>
-									<?php endif; ?>
-									<input class="cp-gw-file" type="file" id="cp-gw-file-<?php echo esc_attr( $rid ); ?>" name="gw_file_<?php echo esc_attr( $rid ); ?>" accept="image/png,image/jpeg,image/webp" <?php echo esc_attr( $reqd_attr ); ?>>
+					<div class="cp-modal-panel" data-panel="form" <?php echo $gw_success ? 'hidden' : ''; ?>>
+						<ol class="cp-gw-steps">
+							<li class="cp-gw-step">
+								<div class="cp-gw-step-head">
+									<span class="cp-gw-step-n" aria-hidden="true">1</span>
+									<h3>Create your Builder Center account</h3>
 								</div>
-								<?php
-							elseif ( 'proof' === $req['type'] ) :
-								?>
-								<div class="cp-gw-upload">
-									<label class="cp-gw-check" for="cp-gw-check-<?php echo esc_attr( $rid ); ?>">
-										<input type="checkbox" id="cp-gw-check-<?php echo esc_attr( $rid ); ?>" name="gw_check[<?php echo esc_attr( $rid ); ?>]" value="1" <?php echo esc_attr( $reqd_attr ); ?>>
-										<span><?php echo esc_html( $req['label'] ) . $star; ?></span>
-									</label>
-									<?php if ( ! empty( $req['help'] ) ) : ?>
-										<p class="cp-gw-help"><?php echo esc_html( $req['help'] ); ?></p>
-									<?php endif; ?>
-									<input class="cp-gw-input" type="text" name="gw_text[<?php echo esc_attr( $rid ); ?>]" placeholder="Paste your link or proof" <?php echo esc_attr( $reqd_attr ); ?>>
+								<a class="cp-btn cp-btn-secondary cp-gw-step-btn" href="https://builder.aws.com/?inviteId=daab681a-b41c-43d0-bfcb-b21f2993b354" target="_blank" rel="noopener noreferrer">Open Builder Center<span class="cp-vh"> (opens in a new tab)</span></a>
+							</li>
+							<li class="cp-gw-step">
+								<div class="cp-gw-step-head">
+									<span class="cp-gw-step-n" aria-hidden="true">2</span>
+									<h3>Verify your student status</h3>
 								</div>
-								<?php
-							else :
-								?>
-								<label class="cp-gw-check" for="cp-gw-check-<?php echo esc_attr( $rid ); ?>">
-									<input type="checkbox" id="cp-gw-check-<?php echo esc_attr( $rid ); ?>" name="gw_check[<?php echo esc_attr( $rid ); ?>]" value="1" <?php echo esc_attr( $reqd_attr ); ?>>
-									<span><?php echo esc_html( $req['label'] ) . $star; ?></span>
-								</label>
-								<?php
-							endif;
-						endforeach;
-						?>
+								<a class="cp-btn cp-btn-secondary cp-gw-step-btn" href="https://builder.aws.com/student-rewards" target="_blank" rel="noopener noreferrer">Verify student status<span class="cp-vh"> (opens in a new tab)</span></a>
+							</li>
+							<li class="cp-gw-step">
+								<div class="cp-gw-step-head">
+									<span class="cp-gw-step-n" aria-hidden="true">3</span>
+									<h3>Enter your details</h3>
+								</div>
 
-						<p class="cp-gw-error" role="alert" aria-live="assertive"><?php echo esc_html( $gw_message ); ?></p>
-						<button type="submit" class="cp-btn cp-btn-accent cp-gw-submit">
-							Enter Giveaway
-						</button>
-						<p class="cp-note">Your details are only used to contact the winners.</p>
-					</form>
-						</li>
-					</ol>
+								<form class="cp-gw-form" method="post" enctype="multipart/form-data" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+									<input type="hidden" name="action" value="aws_sbg_giveaway_submit">
+									<input type="hidden" name="giveaway_id" value="<?php echo esc_attr( $gid ); ?>">
+									<input type="hidden" name="gw_source" value="<?php echo esc_attr( '' !== $src ? $src : 'community' ); ?>">
+									<input type="text" name="website_url" tabindex="-1" autocomplete="off" class="cp-hp" aria-hidden="true">
+									<?php wp_nonce_field( 'aws_sbg_giveaway_submit', 'giveaway_nonce' ); ?>
+
+									<div class="cp-gw-fields">
+										<?php foreach ( $fields as $field ) :
+											$fid  = $field['id'];
+											$type = in_array( $field['type'], array( 'text', 'email', 'tel' ), true ) ? $field['type'] : 'text';
+											?>
+											<div class="cp-gw-field">
+												<label for="cp-gw-<?php echo esc_attr( $fid ); ?>"><?php echo esc_html( $field['label'] ); ?><?php echo ! empty( $field['required'] ) ? ' <span class="cp-star">*</span>' : ''; ?></label>
+												<input class="cp-gw-input" type="<?php echo esc_attr( $type ); ?>" id="cp-gw-<?php echo esc_attr( $fid ); ?>" name="gw_field[<?php echo esc_attr( $fid ); ?>]" <?php echo ! empty( $field['required'] ) ? 'required' : ''; ?>>
+											</div>
+										<?php endforeach; ?>
+									</div>
+
+									<?php
+									foreach ( $reqs as $req ) :
+										$rid       = $req['id'];
+										$is_reqd   = ! empty( $req['required'] );
+										$star      = $is_reqd ? ' <span class="cp-star">*</span>' : '';
+										$reqd_attr = $is_reqd ? 'required' : '';
+
+										if ( 'upload' === $req['type'] ) :
+											?>
+											<div class="cp-gw-upload">
+												<label for="cp-gw-file-<?php echo esc_attr( $rid ); ?>"><?php echo esc_html( $req['label'] ) . $star; ?></label>
+												<?php if ( ! empty( $req['help'] ) ) : ?>
+													<p class="cp-gw-help"><?php echo esc_html( $req['help'] ); ?></p>
+												<?php endif; ?>
+												<input class="cp-gw-file" type="file" id="cp-gw-file-<?php echo esc_attr( $rid ); ?>" name="gw_file_<?php echo esc_attr( $rid ); ?>" accept="image/png,image/jpeg,image/webp" <?php echo esc_attr( $reqd_attr ); ?>>
+											</div>
+											<?php
+										elseif ( 'proof' === $req['type'] ) :
+											?>
+											<div class="cp-gw-upload">
+												<label class="cp-gw-check" for="cp-gw-check-<?php echo esc_attr( $rid ); ?>">
+													<input type="checkbox" id="cp-gw-check-<?php echo esc_attr( $rid ); ?>" name="gw_check[<?php echo esc_attr( $rid ); ?>]" value="1" <?php echo esc_attr( $reqd_attr ); ?>>
+													<span><?php echo esc_html( $req['label'] ) . $star; ?></span>
+												</label>
+												<?php if ( ! empty( $req['help'] ) ) : ?>
+													<p class="cp-gw-help"><?php echo esc_html( $req['help'] ); ?></p>
+												<?php endif; ?>
+												<input class="cp-gw-input" type="text" name="gw_text[<?php echo esc_attr( $rid ); ?>]" placeholder="Paste your link or proof" <?php echo esc_attr( $reqd_attr ); ?>>
+											</div>
+											<?php
+										else :
+											?>
+											<label class="cp-gw-check" for="cp-gw-check-<?php echo esc_attr( $rid ); ?>">
+												<input type="checkbox" id="cp-gw-check-<?php echo esc_attr( $rid ); ?>" name="gw_check[<?php echo esc_attr( $rid ); ?>]" value="1" <?php echo esc_attr( $reqd_attr ); ?>>
+												<span><?php echo esc_html( $req['label'] ) . $star; ?></span>
+											</label>
+											<?php
+										endif;
+									endforeach;
+									?>
+
+									<p class="cp-gw-error" role="alert" aria-live="assertive"><?php echo esc_html( $gw_message ); ?></p>
+									<button type="submit" class="cp-btn cp-btn-accent cp-gw-submit">
+										Enter Giveaway
+									</button>
+									<p class="cp-note">Your details are only used to contact the winners.</p>
+								</form>
+							</li>
+						</ol>
+					</div>
 				</div>
 			</div>
 		</div>
