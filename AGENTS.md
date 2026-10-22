@@ -34,6 +34,23 @@
 
 ## Change Log (Newest First)
 
+### 2026-10-22 - Command Code
+
+**Task**: Add swag winner details to the community page giveaway ticket.
+
+**Files Changed**:
+- `templates/pages/page-community.php` - The ticket stub now carries a "Swag for 3 winners" label, the "three entries picked at random" lead, and a `.cp-prizes` list spelling out each bundle: 1) AWS bottle, pen; 2) pouch, stickers sheet, pen; 3) mobile holder, pen. Added CSS for `.cp-stub`, `.cp-prizes`, `.cp-prize`, `.cp-prize-n`, `.cp-prize-name` and `.cp-prize-items` in the dark ticket style (amber number chip, hairline `--rule-dark` borders, white serif names on `#CBD5E1` item text). Stub alignment changed from `center` to `flex-start` so the CTA sits with the label row.
+
+**Key Decisions**:
+- Reused the existing ticket-stub slot instead of adding a new section, so the page keeps its single-ticket composition and the CTA stays adjacent to the prize list.
+- Numbered chips use `--accent` (the only warm colour on the dark ticket) and serif names mirror the ticket title, matching the printed-notice voice.
+
+**Notes for Future Agents**:
+- The numbers denote the pick order, not prize tiers — Winner 1 takes bundle 1, etc. If the copy changes, update both the `.cp-stub-lead` sentence and the list.
+- `.cp-ticket-cta` fills full width under 600px via the existing media query, so the list stays above the button on phones.
+
+---
+
 ### 2026-10-18 - Command Code
 
 **Task**: Redesign the giveaway page as a proper product page — remove the "AI gradient card" feel.

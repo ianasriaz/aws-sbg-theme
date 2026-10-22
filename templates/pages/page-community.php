@@ -187,11 +187,31 @@ $faqs = array(
 
 	/* Stub */
 	.community-page-wrapper .cp-ticket-stub {
-		display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+		display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
 		gap: 16px; padding: 24px;
 	}
 	.community-page-wrapper .cp-ticket-stub p { max-width: 46ch; font-size: 0.9375rem; color: #CBD5E1; }
 	.community-page-wrapper .cp-ticket-cta { flex: 0 0 auto; }
+
+	/* Swag prizes */
+	.community-page-wrapper .cp-stub { flex: 1 1 320px; }
+	.community-page-wrapper .cp-stub-lead { margin-top: 10px; }
+	.community-page-wrapper .cp-prizes { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 10px; }
+	.community-page-wrapper .cp-prize {
+		display: flex; align-items: flex-start; gap: 12px;
+		padding: 13px 15px; border: 1px solid var(--rule-dark); border-radius: 10px;
+		background: rgba(255, 255, 255, 0.04);
+	}
+	.community-page-wrapper .cp-prize-n {
+		flex: 0 0 26px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center;
+		border-radius: 6px; background: var(--accent); color: var(--ink);
+		font-family: var(--sans); font-size: 0.75rem; font-weight: 800; font-variant-numeric: tabular-nums;
+	}
+	.community-page-wrapper .cp-prize-name {
+		display: block; font-family: var(--serif); font-size: 1rem; font-weight: 700;
+		line-height: 1.2; color: #FFFFFF;
+	}
+	.community-page-wrapper .cp-prize-items { display: block; margin-top: 3px; font-size: 0.875rem; color: #CBD5E1; }
 
 	/* Colophon */
 	.community-page-wrapper .cp-colophon { padding: 44px 0; border-top: 1px solid var(--line); }
@@ -404,7 +424,33 @@ $faqs = array(
 				<div class="cp-perf" aria-hidden="true"></div>
 
 				<div class="cp-ticket-stub">
-					<p>Three entries picked at random. Each winner gets an AWS swag bundle.</p>
+					<div class="cp-stub">
+						<span class="cp-label cp-label-dark">Swag for 3 winners</span>
+						<p class="cp-stub-lead">Three entries picked at random. Each winner gets an AWS swag bundle.</p>
+						<ul class="cp-prizes">
+							<li class="cp-prize">
+								<span class="cp-prize-n" aria-hidden="true">1</span>
+								<span>
+									<span class="cp-prize-name">Winner 1</span>
+									<span class="cp-prize-items">AWS bottle, pen</span>
+								</span>
+							</li>
+							<li class="cp-prize">
+								<span class="cp-prize-n" aria-hidden="true">2</span>
+								<span>
+									<span class="cp-prize-name">Winner 2</span>
+									<span class="cp-prize-items">Pouch, stickers sheet, pen</span>
+								</span>
+							</li>
+							<li class="cp-prize">
+								<span class="cp-prize-n" aria-hidden="true">3</span>
+								<span>
+									<span class="cp-prize-name">Winner 3</span>
+									<span class="cp-prize-items">Mobile holder, pen</span>
+								</span>
+							</li>
+						</ul>
+					</div>
 					<?php if ( $giveaway ) : ?>
 						<a class="cp-btn cp-btn-accent cp-ticket-cta" href="<?php echo esc_url( $giveaway_url ); ?>" data-cp-open>
 							Enter Giveaway
