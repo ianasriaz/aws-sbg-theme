@@ -36,6 +36,24 @@
 
 ### 2026-10-22 - Command Code
 
+**Task**: Rework the giveaway popup for mobile (it read as a full-screen page with its header jammed to the top).
+
+**Files Changed**:
+- `templates/pages/page-community.php` - The modal is now a bottom sheet under 600px instead of a full-bleed screen: content-hugging height capped at `92dvh`, 18px top radius, upward shadow, stronger scrim, and a new tap-to-dismiss `.cp-modal-grab` handle button above the head. Open/close is animated instead of hard `display:none` toggling — `.cp-modal` keeps `visibility/opacity` (+ delayed visibility so the fade finishes) and the card slides from `translateY(100%)` on mobile / `translateY(14px)` on desktop. Card gets `tabindex="-1"` and is focused on open, `visibleFocusables()` now filters out non-rendered elements (the desktop-hidden handle), and the Tab trap treats the card as the first stop.
+
+**Key Decisions**:
+- The site header was never above the popup — it is `position: sticky; z-index: 50` in `header.php` versus the modal's `9999`; it only showed through the scrim. The real problem was the popup pretending to be a page, so the fix is shape and motion, not z-index.
+- Dropped `height: 100%` from the mobile card: the sheet now sizes to its content, so the short success ticket is a small sheet and only the long form reaches the height cap and scrolls internally. Uses `dvh` so mobile browser chrome can't hide the submit button.
+- The grab handle is a real `data-cp-close` button (real behavior, 22px tap strip) rather than a decorative bar pretending to be draggable; it is `tabindex="-1"` because X and Esc already serve keyboard users.
+
+**Notes for Future Agents**:
+- `:focus-visible` outline is suppressed on `.cp-modal-card` only, because it is a programmatically focused dialog container, not a control.
+- If the popup ever needs true drag-to-dismiss, the handle is the anchor point, but wire it through pointer events on the card and leave `.cp-modal-body` scrolling alone.
+
+---
+
+### 2026-10-22 - Command Code
+
 **Task**: Retitle the community hero to "Unlock rewards" and make the swag prizes more interactive.
 
 **Files Changed**:

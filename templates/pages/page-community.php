@@ -287,15 +287,25 @@ $faqs = array(
 
 	/* Giveaway popup */
 	.community-page-wrapper .cp-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
-	.community-page-wrapper .cp-modal { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
-	.community-page-wrapper .cp-modal.is-open { display: flex; }
-	.community-page-wrapper .cp-modal-backdrop { position: absolute; inset: 0; background: rgba(15, 20, 31, 0.6); }
+	.community-page-wrapper .cp-modal {
+		position: fixed; inset: 0; z-index: 9999;
+		display: flex; align-items: center; justify-content: center; padding: 20px;
+		visibility: hidden; opacity: 0;
+		transition: opacity 0.22s ease, visibility 0s linear 0.22s;
+	}
+	.community-page-wrapper .cp-modal.is-open { visibility: visible; opacity: 1; transition-delay: 0s; }
+	.community-page-wrapper .cp-modal-backdrop { position: absolute; inset: 0; background: rgba(15, 20, 31, 0.62); }
+	.community-page-wrapper .cp-modal-grab { display: none; }
 	.community-page-wrapper .cp-modal-card {
 		position: relative; display: flex; flex-direction: column;
-		width: 100%; max-width: 440px; max-height: 90vh; overflow: hidden;
+		width: 100%; max-width: 440px; max-height: 90vh; max-height: 90dvh; overflow: hidden;
 		background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
 		box-shadow: 0 24px 60px -24px rgba(15, 20, 31, 0.45);
+		transform: translateY(14px);
+		transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 	}
+	.community-page-wrapper .cp-modal.is-open .cp-modal-card { transform: none; }
+	.community-page-wrapper .cp-modal-card:focus-visible { outline: none; }
 	.community-page-wrapper .cp-modal-head {
 		display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
 		padding: 20px 18px 14px; border-bottom: 1px solid var(--line); flex-shrink: 0;
@@ -374,15 +384,32 @@ $faqs = array(
 		.community-page-wrapper .cp-hero-media img { margin: 0; }
 	}
 	@media (max-width: 599px) {
-		.community-page-wrapper .cp-modal { padding: 0; align-items: stretch; }
-		.community-page-wrapper .cp-modal-card { max-width: none; max-height: none; height: 100%; border: 0; border-radius: 0; }
-		.community-page-wrapper .cp-modal-head { padding-top: calc(16px + env(safe-area-inset-top)); }
-		.community-page-wrapper .cp-modal-body { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+		.community-page-wrapper .cp-modal { padding: 0; align-items: flex-end; }
+		.community-page-wrapper .cp-modal-backdrop { background: rgba(15, 20, 31, 0.7); }
+		.community-page-wrapper .cp-modal-card {
+			width: 100%; max-width: none;
+			max-height: 92vh; max-height: 92dvh;
+			border: 0; border-radius: 18px 18px 0 0;
+			box-shadow: 0 -24px 56px -30px rgba(15, 20, 31, 0.65);
+			transform: translateY(100%);
+		}
+		.community-page-wrapper .cp-modal-grab {
+			display: flex; align-items: center; justify-content: center;
+			flex: 0 0 auto; width: 100%; height: 22px; padding: 0; margin: 0;
+			border: 0; background: none; cursor: pointer;
+		}
+		.community-page-wrapper .cp-modal-grab span {
+			width: 42px; height: 4px; border-radius: 999px; background: #CBD5E1;
+		}
+		.community-page-wrapper .cp-modal-head { padding: 12px 18px 14px; }
+		.community-page-wrapper .cp-modal-body { padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
 		.community-page-wrapper .cp-ticket-stub .cp-ticket-cta { width: 100%; }
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.community-page-wrapper .cp-faq-a,
 		.community-page-wrapper .cp-faq-icon::after,
+		.community-page-wrapper .cp-modal,
+		.community-page-wrapper .cp-modal-card,
 		.community-page-wrapper .cp-prize,
 		.community-page-wrapper .cp-prize-body,
 		.community-page-wrapper .cp-prize-n,
@@ -576,7 +603,10 @@ $faqs = array(
 		?>
 		<div class="cp-modal" id="cp-giveaway" role="dialog" aria-modal="true" aria-labelledby="cp-giveaway-title" data-initial="<?php echo esc_attr( $gstart ); ?>">
 			<div class="cp-modal-backdrop" data-cp-close></div>
-			<div class="cp-modal-card">
+			<div class="cp-modal-card" tabindex="-1">
+				<button type="button" class="cp-modal-grab" data-cp-close tabindex="-1" aria-label="Close">
+					<span aria-hidden="true"></span>
+				</button>
 				<div class="cp-modal-head">
 					<h2 class="cp-modal-title" id="cp-giveaway-title"><?php echo esc_html( $gw_success ? "You're in" : 'Enter the giveaway' ); ?></h2>
 					<button type="button" class="cp-modal-x" data-cp-close aria-label="Close">&#10005;</button>
@@ -733,6 +763,7 @@ $faqs = array(
 		if (!modal) { return; }
 
 		var title = document.getElementById('cp-giveaway-title');
+		var card = modal.querySelector('.cp-modal-card');
 		var titles = { form: 'Enter the giveaway', success: "You're in" };
 		var panels = modal.querySelectorAll('[data-panel]');
 		var lastFocus = null;
@@ -745,7 +776,7 @@ $faqs = array(
 
 		function visibleFocusables() {
 			return Array.prototype.filter.call(modal.querySelectorAll(focusables), function (el) {
-				return !el.closest('[hidden]');
+				return !el.closest('[hidden]') && el.getClientRects().length > 0;
 			});
 		}
 
@@ -754,8 +785,7 @@ $faqs = array(
 			showPanel(name);
 			modal.classList.add('is-open');
 			document.body.classList.add('cp-modal-open');
-			var first = visibleFocusables()[0];
-			if (first) { first.focus(); }
+			if (card) { card.focus(); }
 		}
 
 		function closeModal() {
@@ -788,7 +818,8 @@ $faqs = array(
 				if (!list.length) { return; }
 				var first = list[0];
 				var last = list[list.length - 1];
-				if (e.shiftKey && document.activeElement === first) {
+				var atStart = document.activeElement === first || document.activeElement === card;
+				if (e.shiftKey && atStart) {
 					e.preventDefault();
 					last.focus();
 				} else if (!e.shiftKey && document.activeElement === last) {
