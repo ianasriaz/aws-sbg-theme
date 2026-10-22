@@ -36,6 +36,24 @@
 
 ### 2026-10-22 - Command Code
 
+**Task**: Add social links to the giveaway success popup ("Follow our socials to keep updated").
+
+**Files Changed**:
+- `templates/pages/page-community.php` - The three social links (WhatsApp, LinkedIn, Instagram) moved out of the colophon markup into a `$socials` array plus a `$render_social` closure at the top of the template; the colophon now calls the closure and renders identically. The success panel gained a `.cp-social-block` below the ticket: a hairline divider, the note "Follow our socials to keep updated." and the same `.cp-social` row, sized 46px there instead of 52px.
+
+**Key Decisions**:
+- Reused the exact colophon component (same classes, border, radius and ink-on-hover invert) rather than new markup, so the popup and the page speak the same language; only the icon size drops for the narrower panel.
+- Links come from one array now, so the destinations can't drift apart between the colophon and the popup.
+- Socials sit above the Done button so they are read before the panel closes.
+
+**Notes for Future Agents**:
+- `$render_social()` must stay defined before its call sites (top of the template); it prints nothing back, it echoes the `<ul>`.
+- The icon SVG strings are trusted literals stored in `$socials` and are echoed unescaped on purpose — do not put anything user-supplied in that array.
+
+---
+
+### 2026-10-22 - Command Code
+
 **Task**: Rework the giveaway popup for mobile (it read as a full-screen page with its header jammed to the top).
 
 **Files Changed**:
