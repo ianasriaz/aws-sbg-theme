@@ -127,7 +127,10 @@ $faqs = array(
 	.community-page-wrapper .cp-hero h1 {
 		margin-top: 14px;
 		font-size: clamp(2rem, 6vw, 3.25rem);
-		line-height: 1.05;
+		font-weight: 800;
+		line-height: 1.02;
+		letter-spacing: -0.015em;
+		text-transform: uppercase;
 		color: var(--ink);
 	}
 	.community-page-wrapper .cp-lead { margin-top: 18px; max-width: 52ch; font-size: 1.0625rem; color: var(--ink-2); }
@@ -198,20 +201,46 @@ $faqs = array(
 	.community-page-wrapper .cp-stub-lead { margin-top: 10px; }
 	.community-page-wrapper .cp-prizes { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 10px; }
 	.community-page-wrapper .cp-prize {
-		display: flex; align-items: flex-start; gap: 12px;
-		padding: 13px 15px; border: 1px solid var(--rule-dark); border-radius: 10px;
-		background: rgba(255, 255, 255, 0.04);
+		display: flex; align-items: flex-start; gap: 14px;
+		padding: 14px 16px; border: 1px solid var(--rule-dark); border-radius: 10px;
+		background: rgba(255, 255, 255, 0.03);
+		transition: border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+	}
+	.community-page-wrapper .cp-prize:hover {
+		border-color: var(--accent);
+		background: rgba(255, 153, 0, 0.08);
+		box-shadow: 0 16px 32px -24px rgba(0, 0, 0, 0.95);
 	}
 	.community-page-wrapper .cp-prize-n {
 		flex: 0 0 26px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center;
-		border-radius: 6px; background: var(--accent); color: var(--ink);
+		border: 1px solid var(--accent); border-radius: 6px; color: var(--accent);
 		font-family: var(--sans); font-size: 0.75rem; font-weight: 800; font-variant-numeric: tabular-nums;
+		transition: background-color 0.18s ease, color 0.18s ease;
 	}
+	.community-page-wrapper .cp-prize:hover .cp-prize-n { background: var(--accent); color: var(--ink); }
+	.community-page-wrapper .cp-prize-body { transition: transform 0.18s ease; }
+	.community-page-wrapper .cp-prize:hover .cp-prize-body { transform: translateX(3px); }
 	.community-page-wrapper .cp-prize-name {
 		display: block; font-family: var(--serif); font-size: 1rem; font-weight: 700;
 		line-height: 1.2; color: #FFFFFF;
 	}
-	.community-page-wrapper .cp-prize-items { display: block; margin-top: 3px; font-size: 0.875rem; color: #CBD5E1; }
+	.community-page-wrapper .cp-prize-items { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; padding: 0; }
+	.community-page-wrapper .cp-prize-items li {
+		padding: 3px 10px; border: 1px solid var(--rule-dark); border-radius: 999px;
+		font-size: 0.8125rem; color: #CBD5E1; white-space: nowrap;
+		transition: border-color 0.18s ease, color 0.18s ease;
+	}
+	.community-page-wrapper .cp-prize:hover .cp-prize-items li { border-color: rgba(255, 153, 0, 0.55); color: #FFFFFF; }
+
+	/* Prizes reveal as the ticket scrolls into view */
+	.community-page-wrapper .cp-prizes.is-anim .cp-prize {
+		opacity: 0; transform: translateY(12px);
+		transition: opacity 0.45s ease, transform 0.45s ease,
+			border-color 0.18s ease, background-color 0.18s ease, box-shadow 0.18s ease;
+	}
+	.community-page-wrapper .cp-prizes.is-anim.is-in .cp-prize { opacity: 1; transform: none; }
+	.community-page-wrapper .cp-prizes.is-anim.is-in .cp-prize:nth-child(2) { transition-delay: 0.08s; }
+	.community-page-wrapper .cp-prizes.is-anim.is-in .cp-prize:nth-child(3) { transition-delay: 0.16s; }
 
 	/* Colophon */
 	.community-page-wrapper .cp-colophon { padding: 44px 0; border-top: 1px solid var(--line); }
@@ -353,7 +382,11 @@ $faqs = array(
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.community-page-wrapper .cp-faq-a,
-		.community-page-wrapper .cp-faq-icon::after { transition: none; }
+		.community-page-wrapper .cp-faq-icon::after,
+		.community-page-wrapper .cp-prize,
+		.community-page-wrapper .cp-prize-body,
+		.community-page-wrapper .cp-prize-n,
+		.community-page-wrapper .cp-prize-items li { transition: none; }
 	}
 </style>
 
@@ -364,7 +397,7 @@ $faqs = array(
 		<div class="cp-wrap cp-hero-grid">
 			<div>
 				<p class="cp-kicker">Air University Islamabad</p>
-				<h1>Win AWS swag</h1>
+				<h1>Unlock rewards</h1>
 				<p class="cp-lead">
 					AWS Student Builder Group is the official student-led AWS chapter on campus. We run
 					hands-on labs, certification preparation, events, and community meetups so members
@@ -430,24 +463,34 @@ $faqs = array(
 						<ul class="cp-prizes">
 							<li class="cp-prize">
 								<span class="cp-prize-n" aria-hidden="true">1</span>
-								<span>
+								<div class="cp-prize-body">
 									<span class="cp-prize-name">Winner 1</span>
-									<span class="cp-prize-items">AWS bottle, pen</span>
-								</span>
+									<ul class="cp-prize-items">
+										<li>AWS bottle</li>
+										<li>Pen</li>
+									</ul>
+								</div>
 							</li>
 							<li class="cp-prize">
 								<span class="cp-prize-n" aria-hidden="true">2</span>
-								<span>
+								<div class="cp-prize-body">
 									<span class="cp-prize-name">Winner 2</span>
-									<span class="cp-prize-items">Pouch, stickers sheet, pen</span>
-								</span>
+									<ul class="cp-prize-items">
+										<li>Pouch</li>
+										<li>Stickers sheet</li>
+										<li>Pen</li>
+									</ul>
+								</div>
 							</li>
 							<li class="cp-prize">
 								<span class="cp-prize-n" aria-hidden="true">3</span>
-								<span>
+								<div class="cp-prize-body">
 									<span class="cp-prize-name">Winner 3</span>
-									<span class="cp-prize-items">Mobile holder, pen</span>
-								</span>
+									<ul class="cp-prize-items">
+										<li>Mobile holder</li>
+										<li>Pen</li>
+									</ul>
+								</div>
 							</li>
 						</ul>
 					</div>
@@ -762,6 +805,30 @@ $faqs = array(
 				window.history.replaceState(null, '', window.location.pathname);
 			}
 		}
+	})();
+</script>
+
+<script>
+	(function () {
+		/* Prize list reveal */
+		var lists = document.querySelectorAll('.community-page-wrapper .cp-prizes');
+		var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (!lists.length || calm || !('IntersectionObserver' in window)) { return; }
+
+		Array.prototype.forEach.call(lists, function (list) {
+			list.classList.add('is-anim');
+
+			var observer = new IntersectionObserver(function (entries) {
+				entries.forEach(function (entry) {
+					if (!entry.isIntersecting) { return; }
+					entry.target.classList.add('is-in');
+					observer.unobserve(entry.target);
+					window.setTimeout(function () { entry.target.classList.remove('is-anim'); }, 900);
+				});
+			}, { threshold: 0.25 });
+
+			observer.observe(list);
+		});
 	})();
 </script>
 

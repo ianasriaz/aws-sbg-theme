@@ -36,6 +36,24 @@
 
 ### 2026-10-22 - Command Code
 
+**Task**: Retitle the community hero to "Unlock rewards" and make the swag prizes more interactive.
+
+**Files Changed**:
+- `templates/pages/page-community.php` - Hero `<h1>` is now "Unlock rewards" rendered bold/uppercase (`font-weight: 800`, `text-transform: uppercase`, `line-height: 1.02`, slight negative tracking). Prize rows rebuilt as interactive cards: outlined amber number badge that fills on hover, `.cp-prize-body` nudging 3px right, accent border + amber-tinted background + depth shadow, and each bundle's contents turned into hairline tag pills that brighten on hover. Added a scroll-in staggered reveal (`.cp-prizes.is-anim` → `.is-in`, 80ms/160ms per-child delay) driven by a small IntersectionObserver in its own `<script>` block. Extended the `prefers-reduced-motion` block to the prize transitions.
+
+**Key Decisions**:
+- Reveal is JS-opt-in: `is-anim` is only added by the observer, so without JS (or with reduced motion) the prizes simply render at rest instead of staying invisible.
+- `is-anim` is dropped 900ms after reveal so the per-child `transition-delay` stops leaking into the hover transitions.
+- Hover feedback deliberately avoids a transform on the card itself (so it can't fight the reveal transform); the lift reads through border, tint, shadow and the badge instead. Badges are decorative `aria-hidden` spans, not controls, so nothing pretends to be clickable.
+
+**Notes for Future Agents**:
+- The prize reveal lives in its own IIFE because the giveaway modal IIFE returns early when there is no open giveaway.
+- `cp-prize-n` is now an outlined badge, not the solid amber chip it started as — hover inverts it.
+
+---
+
+### 2026-10-22 - Command Code
+
 **Task**: Add swag winner details to the community page giveaway ticket.
 
 **Files Changed**:
