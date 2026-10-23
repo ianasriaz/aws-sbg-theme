@@ -36,18 +36,20 @@
 
 ### 2026-10-22 - Command Code
 
-**Task**: Retitle the giveaway ticket to lead with the reward value.
+**Task**: Retitle the giveaway ticket to lead with the reward value and rewrite its description around claiming rewards.
 
 **Files Changed**:
-- `templates/pages/page-community.php` - `.cp-ticket-title` copy is now "Claim upto $579 of AWS rewards" (was "Join AWS Builder Center and enter the giveaway"), rendered uppercased via `text-transform` with tracking eased from -0.02em to -0.01em so the caps do not collide.
+- `templates/pages/page-community.php` - `.cp-ticket-title` copy is now "Claim upto $579 of AWS rewards" (was "Join AWS Builder Center and enter the giveaway"), rendered uppercased via `text-transform` with tracking eased from -0.02em to -0.01em so the caps do not collide. `.cp-ticket-lead` is now "Create your AWS Builder account, verify with your student email or documents, and claim AWS student rewards. No credit card." — the giveaway mechanics ("upload a screenshot of your verified profile to enter") are gone from the description.
 
 **Key Decisions**:
-- Value first: the headline states the reward and the lead paragraph keeps the how ("verify your student status..."), so the Builder Center steps stay in the popup where they are actionable.
+- Value first: the headline states the reward and the lead paragraph keeps the how-to (create → verify → claim), so the Builder Center steps stay in the popup where they are actionable.
+- The description no longer mentions the giveaway, per request; the "Freshers Week giveaway" kicker above it and the "Enter Giveaway" button in the stub still carry the entry action.
 - Uppercase is a `text-transform` on the heading, so the source copy stays readable and future edits do not have to be typed in caps.
 - Kept the user's "upto" spelling rather than correcting it to "up to".
 
 **Notes for Future Agents**:
 - `.cp-ticket-title` is the only uppercase heading outside the hero `<h1>`; the `$579` figure is the sum of the three `.cp-figures` values, so update both if the reward changes.
+- The lead is deliberately entry-free copy — the popup is the only place that explains the upload requirement now.
 
 ---
 
