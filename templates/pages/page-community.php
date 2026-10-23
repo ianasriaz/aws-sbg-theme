@@ -198,8 +198,8 @@ $render_social = function () use ( $socials ) {
 	.community-page-wrapper .cp-label-dark { color: #94A3B8; }
 	.community-page-wrapper .cp-ticket-title {
 		margin-top: 12px; font-family: var(--serif); font-weight: 700;
-		font-size: clamp(1.6rem, 4.2vw, 2.4rem); line-height: 1.1;
-		letter-spacing: -0.02em; color: #FFFFFF;
+		font-size: clamp(1.6rem, 4.2vw, 2.4rem); line-height: 1.08;
+		letter-spacing: -0.01em; text-transform: uppercase; color: #FFFFFF;
 	}
 	.community-page-wrapper .cp-ticket-lead { margin-top: 14px; max-width: 62ch; font-size: 1rem; color: #CBD5E1; }
 	.community-page-wrapper .cp-figures {
@@ -496,7 +496,7 @@ $render_social = function () use ( $socials ) {
 			<div class="cp-ticket">
 				<div class="cp-ticket-body">
 					<span class="cp-label cp-label-dark">Freshers Week giveaway</span>
-					<h2 class="cp-ticket-title">Join AWS Builder Center and enter the giveaway</h2>
+					<h2 class="cp-ticket-title">Claim upto $579 of AWS rewards</h2>
 					<p class="cp-ticket-lead">
 						AWS Builder Center is the free student hub from AWS. Verify your student status to
 						unlock $579 in rewards, then upload a screenshot of your verified profile to enter.
