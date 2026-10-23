@@ -476,7 +476,7 @@ $render_social = function () use ( $socials ) {
 					<a class="cp-btn cp-btn-primary"
 					   href="https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI"
 					   target="_blank" rel="noopener noreferrer">
-						Join WhatsApp Community<span class="cp-vh"> (opens in a new tab)</span>
+						Join Community<span class="cp-vh"> (opens in a new tab)</span>
 					</a>
 				</div>
 			</div>

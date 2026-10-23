@@ -39,9 +39,10 @@
 **Task**: Trim the community hero actions to a single WhatsApp CTA.
 
 **Files Changed**:
-- `templates/pages/page-community.php` - Hero CTA label is now "Join WhatsApp Community" (same invite URL, still `target="_blank"` with a `.cp-vh` "(opens in a new tab)" hint) and the secondary "Giveaway" button pointing at `#giveaway` is gone.
+- `templates/pages/page-community.php` - The "Giveaway" button pointing at `#giveaway` is gone; the hero keeps one button, "Join Community", on the WhatsApp invite URL (`target="_blank"`, now with a `.cp-vh` "(opens in a new tab)" hint).
 
 **Key Decisions**:
+- Kept the original "Join Community" label rather than naming WhatsApp in the button; the destination is obvious once tapped and the shorter label keeps the hero headline dominant.
 - Removed only the hero button, not the `id="giveaway"` section or the ticket stub's "Enter Giveaway" trigger, so the giveaway is still reachable — just no longer competing with the primary action above the fold.
 - `.cp-btn-secondary` stays in the stylesheet because the popup's step buttons still use it.
 
