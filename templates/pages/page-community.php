@@ -11,7 +11,7 @@
 
 get_header();
 
-$swag_kit_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.webp' ) )
+$hero_image_url = file_exists( get_theme_file_path( 'assets/images/AWS-Swags-Kit.webp' ) )
 	? get_theme_file_uri( 'assets/images/AWS-Swags-Kit.webp' )
 	: 'https://awsairuniversity.com/wp-content/uploads/2026/09/AWS-Swags-Kit.webp';
 
@@ -284,7 +284,7 @@ $render_social = function () use ( $socials ) {
 				</div>
 			</div>
 			<figure class="cp-hero-media">
-				<img src="<?php echo esc_url( $swag_kit_url ); ?>"
+				<img src="<?php echo esc_url( $hero_image_url ); ?>"
 				     onerror="this.onerror=null;this.src='https://awsairuniversity.com/wp-content/uploads/2026/09/AWS-Swags-Kit.webp';"
 				     alt="AWS swag kit"
 				     loading="eager"

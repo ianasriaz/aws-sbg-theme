@@ -36,6 +36,25 @@
 
 ### 2026-10-22 - Command Code
 
+**Task**: Remove the giveaway and swag prizes from the community page — rewards only — and retire the entry popup.
+
+**Files Changed**:
+- `templates/pages/page-community.php` - Cut from 886 to 423 lines. Removed the answer-form popup (`.cp-modal*`, all `.cp-gw-*`, `.cp-hp`, `.cp-star`, `.cp-note`, `body.cp-modal-open`), the swag-prize list and its reveal, and the PHP that fed them (`$src`, `$giveaway_url`, `$giveaway` lookup, every `$gw_*` variable and the error map). The ticket is now the "Student rewards" section (`id="rewards"`, class `cp-rewards-section`): same three `.cp-figures` values, no prizes, kicker "AWS student rewards", and a stub that reads "Giveaway ended — join our WhatsApp community for updates" (inline WhatsApp link) with a "Claim Rewards" button in place of "Enter Giveaway" pointing at the Builder Center invite. Also dropped the now-unused `--surface`, `--surface-2`, `--danger` tokens and the `.cp-btn-secondary` button, renamed `$swag_kit_url` to `$hero_image_url`, and deleted both scripts except the FAQ accordion.
+
+**Key Decisions**:
+- The popup was the entry form; once the CTA became an external "Claim Rewards" link nothing opened it, so leaving it would have been an orphan form — removed rather than left dormant (recoverable from git if a future giveaway needs it).
+- Kept the ticket-stub composition (perforation, label, button) so the page keeps its shape; only the contents changed.
+- Hero `<h1>` "Unlock rewards", the rewards figures, the FAQ, the colophon socials and the hero image are untouched. Both hero assets in `assets/` (the swag-bundle and the lanyard sticker) are merch art, so there is no rewards-specific visual to swap in.
+
+**Notes for Future Agents**:
+- The `aws_sbg_giveaway_*` engine and the `/giveaway/` page are untouched and still work; only this page's second entry point is gone. `functions.php` still redirects `/win` and `/swag` to `/giveaway/`.
+- The community page no longer reads `?gw_status` / `?gw_ticket` / `?src`; if a popup returns, reinstate the button with `data-cp-open` and the modal markup together.
+- FAQ copy is now the only place explaining SheerID verification, so keep it in sync with the Claim Rewards flow.
+
+---
+
+### 2026-10-22 - Command Code
+
 **Task**: Retitle the giveaway ticket to lead with the reward value and rewrite its description around claiming rewards.
 
 **Files Changed**:
