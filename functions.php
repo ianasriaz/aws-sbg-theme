@@ -43,6 +43,17 @@ function aws_sbg_template_include( $template ) {
 		return $template;
 	}
 	
+	// Handle custom page templates stored in templates/pages/
+	if ( is_page() ) {
+		$template_slug = get_page_template_slug();
+		if ( $template_slug ) {
+			$subdir_template = get_template_directory() . '/templates/pages/' . $template_slug;
+			if ( file_exists( $subdir_template ) ) {
+				return $subdir_template;
+			}
+		}
+	}
+	
 	// Get template basename
 	$basename = basename( $template );
 	
@@ -213,6 +224,22 @@ function aws_sbg_auto_create_exam_page() {
 		) );
 		if ( $giveaway_id && ! is_wp_error( $giveaway_id ) ) {
 			update_post_meta( $giveaway_id, '_wp_page_template', 'page-giveaway.php' );
+		}
+	}
+
+	// 6. Dedicated AWS re:Invent Watch & Build Party Registration Page (/aws-reinvent/)
+	$reinvent_slug = 'aws-reinvent';
+	$reinvent_check = get_page_by_path( $reinvent_slug );
+	if ( ! isset( $reinvent_check->ID ) ) {
+		$reinvent_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'AWS re:Invent Watch & Build Party',
+			'post_content' => '<!-- AWS re:Invent Registration -->',
+			'post_status'  => 'publish',
+			'post_name'    => $reinvent_slug,
+		) );
+		if ( $reinvent_id && ! is_wp_error( $reinvent_id ) ) {
+			update_post_meta( $reinvent_id, '_wp_page_template', 'page-reinvent.php' );
 		}
 	}
 

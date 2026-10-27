@@ -47,14 +47,7 @@ function aws_sbg_generate_reinvent_registration_number() {
  * 3. FRONT-END FORM SHORTCODE
  * ======================================================================== */
 
-function aws_sbg_reinvent_form_shortcode( $atts ) {
-	$atts = shortcode_atts( array(
-		'title'    => 'AWS re:Invent Watch & Build Party Islamabad 2026',
-		'subtitle' => 'An invite-only evening for builders, dreamers, and cloud enthusiasts. Apply below and we will notify you once your seat is approved.',
-		'date'     => '',
-		'location' => 'Islamabad, Pakistan',
-	), $atts, 'aws_reinvent_form' );
-
+function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 	$success = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'success';
 	$reg_id  = isset( $_GET['reg_id'] ) ? sanitize_text_field( wp_unslash( $_GET['reg_id'] ) ) : '';
 
@@ -104,18 +97,18 @@ function aws_sbg_reinvent_form_shortcode( $atts ) {
 						<span class="reinvent-pulse" style="width:8px; height:8px; background:#ad5cff; border-radius:50%; display:inline-block;"></span>
 						Invite-Only Event
 					</div>
-					<h2 style="font-size:26px; font-weight:900; margin:0 0 10px; line-height:1.2;"><?php echo esc_html( $atts['title'] ); ?></h2>
-					<p style="font-size:14px; color:#cbd5e1; margin:0 0 18px; line-height:1.5;"><?php echo esc_html( $atts['subtitle'] ); ?></p>
+					<h2 style="font-size:26px; font-weight:900; margin:0 0 10px; line-height:1.2;"><?php echo esc_html( $title ); ?></h2>
+					<p style="font-size:14px; color:#cbd5e1; margin:0 0 18px; line-height:1.5;"><?php echo esc_html( $subtitle ); ?></p>
 					<div style="display:flex; flex-wrap:wrap; gap:12px; font-size:13px; color:#e2e8f0;">
-						<?php if ( $atts['date'] ) : ?>
+						<?php if ( $date ) : ?>
 							<div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1); padding:8px 14px; border-radius:10px;">
 								<svg style="width:16px; height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-								<span><?php echo esc_html( $atts['date'] ); ?></span>
+								<span><?php echo esc_html( $date ); ?></span>
 							</div>
 						<?php endif; ?>
 						<div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1); padding:8px 14px; border-radius:10px;">
 							<svg style="width:16px; height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-							<span><?php echo esc_html( $atts['location'] ); ?></span>
+							<span><?php echo esc_html( $location ); ?></span>
 						</div>
 					</div>
 				</div>
@@ -197,6 +190,17 @@ function aws_sbg_reinvent_form_shortcode( $atts ) {
 	</script>
 	<?php
 	return ob_get_clean();
+}
+
+function aws_sbg_reinvent_form_shortcode( $atts ) {
+	$atts = shortcode_atts( array(
+		'title'    => 'AWS re:Invent Watch & Build Party Islamabad 2026',
+		'subtitle' => 'An invite-only evening for builders, dreamers, and cloud enthusiasts. Apply below and we will notify you once your seat is approved.',
+		'date'     => '',
+		'location' => 'Islamabad, Pakistan',
+	), $atts, 'aws_reinvent_form' );
+
+	return aws_sbg_render_reinvent_form( $atts['title'], $atts['subtitle'], $atts['date'], $atts['location'] );
 }
 add_shortcode( 'aws_reinvent_form', 'aws_sbg_reinvent_form_shortcode' );
 
