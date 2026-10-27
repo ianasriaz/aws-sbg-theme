@@ -17,8 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 function aws_sbg_register_swag_wheel_menu() {
 	add_submenu_page(
 		'aws-sbg-suite',
-		'🎡 Swag Picker Wheel',
-		'🎡 Swag Picker',
+		'Swag Picker Wheel',
+		'Swag Picker',
 		'manage_options',
 		'aws-swag-wheel',
 		'aws_sbg_render_swag_wheel_admin_page'

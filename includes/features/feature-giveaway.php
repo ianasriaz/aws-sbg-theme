@@ -113,7 +113,7 @@ function aws_sbg_register_giveaway_cpt() {
 			'add_new_item'  => 'Add New Giveaway',
 			'edit_item'     => 'Edit Giveaway',
 			'all_items'     => 'All Giveaways',
-			'menu_name'     => '🎁 Giveaways',
+			'menu_name'     => 'Giveaways',
 		),
 		'public'          => false,
 		'show_ui'         => true,

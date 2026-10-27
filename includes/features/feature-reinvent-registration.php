@@ -275,17 +275,7 @@ add_action( 'admin_post_submit_aws_reinvent_registration', 'aws_sbg_handle_reinv
  * 5. ADMIN: SEPARATE REGISTRATIONS TABLE
  * ======================================================================== */
 
-function aws_sbg_register_reinvent_admin_menu() {
-	add_submenu_page(
-		'aws-sbg-suite',
-		're:Invent Registrations',
-		'🎉 re:Invent Regs',
-		'manage_options',
-		'aws-reinvent-registrations',
-		'aws_sbg_render_reinvent_admin_page'
-	);
-}
-add_action( 'admin_menu', 'aws_sbg_register_reinvent_admin_menu', 12 );
+// Admin page is registered in admin-dashboard.php to keep the suite menu organized.
 
 function aws_sbg_render_reinvent_admin_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {

@@ -66,26 +66,7 @@ add_action( 'admin_init', 'aws_sbg_events_init_db' );
 /**
  * 2. ADMIN MENU FOR EVENT MANAGEMENT & CERTIFIED MEMBERS
  */
-function aws_sbg_events_admin_menu() {
-	add_submenu_page(
-		'aws-mock-exam',
-		'Event Certificates',
-		'📜 Event Certificates',
-		'manage_options',
-		'aws-sbg-events',
-		'aws_sbg_render_events_admin_page'
-	);
-
-	add_submenu_page(
-		'aws-mock-exam',
-		'Certified Members',
-		'👥 Certified Members',
-		'manage_options',
-		'aws-sbg-members',
-		'aws_sbg_render_members_admin_page'
-	);
-}
-add_action( 'admin_menu', 'aws_sbg_events_admin_menu', 11 );
+// Admin pages are registered in admin-dashboard.php to keep the suite menu organized.
 
 /**
  * 3. ADMIN PAGE RENDERER & ACTIONS

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * AWS SBG Admin Control Center & Dashboard Suite
  * Centralized Management for Registrations, Events, Certificates, Referrals, and Mock Exams.
@@ -19,55 +19,65 @@ function aws_sbg_register_admin_dashboard() {
 		'manage_options',
 		'aws-sbg-suite',
 		'aws_sbg_render_overview_dashboard',
-		'dashicons-cloud',
+		'dashicons-admin-generic',
 		2
 	);
 
-	// Submenu 1: Command Center Overview
+	// Dashboard
 	add_submenu_page(
 		'aws-sbg-suite',
 		'Command Center Overview',
-		'📊 Overview',
+		'Overview',
 		'manage_options',
 		'aws-sbg-suite',
 		'aws_sbg_render_overview_dashboard'
 	);
 
-	// Submenu 2: Event Registrations
+	// Registrations
 	add_submenu_page(
 		'aws-sbg-suite',
 		'Event Registrations',
-		'🎫 Registrations',
+		'Event Registrations',
 		'manage_options',
 		'aws-sbg-registrations',
 		'aws_sbg_render_admin_dashboard'
 	);
 
-	// Submenu 3: Events & Certificates Setup
+	// re:Invent
+	add_submenu_page(
+		'aws-sbg-suite',
+		're:Invent Registrations',
+		're:Invent Registrations',
+		'manage_options',
+		'aws-reinvent-registrations',
+		'aws_sbg_render_reinvent_admin_page'
+	);
+
+	// Events & Certificates
 	add_submenu_page(
 		'aws-sbg-suite',
 		'Events & Certificate Setup',
-		'📜 Events & Cert Setup',
+		'Events & Certificates',
 		'manage_options',
 		'aws-sbg-events',
 		'aws_sbg_render_events_admin_page'
 	);
 
-	// Submenu 4: Certified Roster & Referrals
+	// Certified Roster
 	add_submenu_page(
 		'aws-sbg-suite',
 		'Certified Roster & Referrals',
-		'👥 Certified Roster & Referrals',
+		'Certified Roster',
 		'manage_options',
 		'aws-sbg-members',
 		'aws_sbg_render_members_admin_page'
 	);
 
-	// Submenu 5: Mock Exam Portal Manager
+	// Mock Exams
 	add_submenu_page(
 		'aws-sbg-suite',
 		'Mock Exam Manager',
-		'📝 Mock Exams',
+		'Mock Exams',
 		'manage_options',
 		'aws-mock-exam',
 		'aws_sbg_render_exam_admin_page'
@@ -80,22 +90,22 @@ add_action( 'admin_menu', 'aws_sbg_register_admin_dashboard', 9 );
  */
 function aws_sbg_render_admin_nav_tabs( $active_tab = 'overview' ) {
 	$tabs = array(
-		'overview'      => array( 'title' => '📊 Overview', 'url' => admin_url( 'admin.php?page=aws-sbg-suite' ) ),
-		'registrations' => array( 'title' => '🎫 Registrations', 'url' => admin_url( 'admin.php?page=aws-sbg-registrations' ) ),
-		'reinvent'      => array( 'title' => '🎉 re:Invent', 'url' => admin_url( 'admin.php?page=aws-reinvent-registrations' ) ),
-		'events'        => array( 'title' => '📜 Events & Cert Setup', 'url' => admin_url( 'admin.php?page=aws-sbg-events' ) ),
-		'members'       => array( 'title' => '👥 Certified Roster', 'url' => admin_url( 'admin.php?page=aws-sbg-members' ) ),
-		'mock_exam'     => array( 'title' => '📝 Mock Exams', 'url' => admin_url( 'admin.php?page=aws-mock-exam' ) ),
-		'swag_wheel'    => array( 'title' => '🎡 Swag Picker', 'url' => admin_url( 'admin.php?page=aws-swag-wheel' ) ),
-		'giveaways'     => array( 'title' => '🎁 Giveaways', 'url' => admin_url( 'admin.php?page=aws-giveaway-submissions' ) ),
+		'overview'      => array( 'title' => 'Overview', 'url' => admin_url( 'admin.php?page=aws-sbg-suite' ) ),
+		'registrations' => array( 'title' => 'Registrations', 'url' => admin_url( 'admin.php?page=aws-sbg-registrations' ) ),
+		'reinvent'      => array( 'title' => 're:Invent', 'url' => admin_url( 'admin.php?page=aws-reinvent-registrations' ) ),
+		'events'        => array( 'title' => 'Events & Certificates', 'url' => admin_url( 'admin.php?page=aws-sbg-events' ) ),
+		'members'       => array( 'title' => 'Certified Roster', 'url' => admin_url( 'admin.php?page=aws-sbg-members' ) ),
+		'mock_exam'     => array( 'title' => 'Mock Exams', 'url' => admin_url( 'admin.php?page=aws-mock-exam' ) ),
+		'swag_wheel'    => array( 'title' => 'Swag Picker', 'url' => admin_url( 'admin.php?page=aws-swag-wheel' ) ),
+		'giveaways'     => array( 'title' => 'Giveaways', 'url' => admin_url( 'admin.php?page=aws-giveaway-submissions' ) ),
 	);
 	?>
 	<div style="background:#ffffff; border-bottom:1px solid #e2e8f0; margin:-10px -20px 25px -20px; padding:15px 25px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 4px rgba(0,0,0,0.02); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 		<div style="display:flex; align-items:center; gap:12px;">
-			<div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #ad5cff, #7000ff); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px; box-shadow:0 4px 10px rgba(173,92,255,0.3);">☁️</div>
+			<div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #ad5cff, #7000ff); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px; box-shadow:0 4px 10px rgba(173,92,255,0.3);">SBG</div>
 			<div>
 				<h2 style="margin:0; font-size:18px; font-weight:800; color:#0f172a; line-height:1.2;">AWS SBG Control Center</h2>
-				<span style="font-size:11px; color:#64748b; font-weight:600;">Air University Community Platform • Unified Suite</span>
+				<span style="font-size:11px; color:#64748b; font-weight:600;">Air University Community Platform â€¢ Unified Suite</span>
 			</div>
 		</div>
 		<div style="display:flex; items-center; gap:6px; background:#f8fafc; padding:4px; border-radius:12px; border:1px solid #e2e8f0;">
@@ -145,7 +155,7 @@ function aws_sbg_render_overview_dashboard() {
 		<div style="background:linear-gradient(135deg, #0f172a, #1e293b); color:#ffffff; padding:25px; border-radius:16px; margin-bottom:25px; box-shadow:0 10px 25px rgba(0,0,0,0.1); position:relative; overflow:hidden;">
 			<div style="position:absolute; right:-20px; top:-20px; width:200px; height:200px; background:rgba(173,92,255,0.15); border-radius:100px; blur:40px; pointer-events:none;"></div>
 			<span style="background:rgba(173,92,255,0.2); color:#ad5cff; border:1px solid rgba(173,92,255,0.4); font-size:10px; font-weight:800; text-transform:uppercase; padding:4px 10px; border-radius:20px;">AWS SBG Command Center</span>
-			<h1 style="margin:10px 0 6px 0; font-size:24px; font-weight:900; color:#ffffff;">Welcome back, Administrator 👋</h1>
+			<h1 style="margin:10px 0 6px 0; font-size:24px; font-weight:900; color:#ffffff;">Welcome back, Administrator</h1>
 			<p style="margin:0; font-size:13px; color:#94a3b8; max-width:600px;">Manage active workshop registrations, issue verified certificates, track community referral signups, and monitor exam performance from a single dashboard.</p>
 		</div>
 
@@ -154,44 +164,44 @@ function aws_sbg_render_overview_dashboard() {
 			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
 				<div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#64748b;">Event Registrations</div>
 				<div style="font-size:32px; font-weight:900; color:#0f172a; margin-top:4px;"><?php echo intval( $total_registrations ); ?></div>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-registrations' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none; margin-top:8px; display:inline-block;">Manage Registrations ➔</a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-registrations' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none; margin-top:8px; display:inline-block;">Manage Registrations</a>
 			</div>
 			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
 				<div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#64748b;">Certificates Issued</div>
 				<div style="font-size:32px; font-weight:900; color:#ad5cff; margin-top:4px;"><?php echo intval( $total_certs ); ?></div>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-members' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none; margin-top:8px; display:inline-block;">View Certified Roster ➔</a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-members' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none; margin-top:8px; display:inline-block;">View Certified Roster</a>
 			</div>
 			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
-				<div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#64748b;">Referral Signups 🌟</div>
+				<div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#64748b;">Referral Signups</div>
 				<div style="font-size:32px; font-weight:900; color:#10b981; margin-top:4px;"><?php echo intval( $total_referrals ); ?></div>
 				<span style="font-size:11px; color:#059669; font-weight:700; margin-top:8px; display:inline-block;">Community Supporters</span>
 			</div>
 			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.03);">
 				<div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#64748b;">Active Workshops</div>
 				<div style="font-size:32px; font-weight:900; color:#0284c7; margin-top:4px;"><?php echo intval( $total_events ); ?></div>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-events' ) ); ?>" style="font-size:11px; color:#0284c7; font-weight:700; text-decoration:none; margin-top:8px; display:inline-block;">Manage Setup ➔</a>
+				<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-events' ) ); ?>" style="font-size:11px; color:#0284c7; font-weight:700; text-decoration:none; margin-top:8px; display:inline-block;">Manage Setup âž”</a>
 			</div>
 		</div>
 
 		<!-- QUICK MANAGEMENT ACTIONS -->
 		<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom:30px;">
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-registrations' ) ); ?>" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:15px; text-decoration:none; color:#0f172a; transition:all 0.15s ease; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-				<div style="font-size:20px; mb-2">🎫</div>
+				<div style="font-size:20px; mb-2">ðŸŽ«</div>
 				<div style="font-weight:800; font-size:13px;">Registrations Hub</div>
 				<div style="font-size:11px; color:#64748b; margin-top:2px;">Filter attendees &amp; payments</div>
 			</a>
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-events' ) ); ?>" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:15px; text-decoration:none; color:#0f172a; transition:all 0.15s ease; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-				<div style="font-size:20px; mb-2">📜</div>
+				<div style="font-size:20px; mb-2">ðŸ“œ</div>
 				<div style="font-weight:800; font-size:13px;">Active Events &amp; Certs</div>
 				<div style="font-size:11px; color:#64748b; margin-top:2px;">Configure survey &amp; referral links</div>
 			</a>
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-members' ) ); ?>" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:15px; text-decoration:none; color:#0f172a; transition:all 0.15s ease; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-				<div style="font-size:20px; mb-2">👥</div>
+				<div style="font-size:20px; mb-2">ðŸ‘¥</div>
 				<div style="font-weight:800; font-size:13px;">Certified Roster</div>
 				<div style="font-size:11px; color:#64748b; margin-top:2px;">Track screenshots &amp; referral badges</div>
 			</a>
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-mock-exam' ) ); ?>" style="background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:15px; text-decoration:none; color:#0f172a; transition:all 0.15s ease; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
-				<div style="font-size:20px; mb-2">📝</div>
+				<div style="font-size:20px; mb-2">ðŸ“</div>
 				<div style="font-weight:800; font-size:13px;">Mock Exam Manager</div>
 				<div style="font-size:11px; color:#64748b; margin-top:2px;">Question banks &amp; student scores</div>
 			</a>
@@ -204,7 +214,7 @@ function aws_sbg_render_overview_dashboard() {
 			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
 				<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
 					<h3 style="margin:0; font-size:14px; font-weight:800; color:#0f172a;">Recent Event Registrations</h3>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-registrations' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none;">View All ➔</a>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-registrations' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none;">View All âž”</a>
 				</div>
 				<?php if ( empty( $recent_regs ) ) : ?>
 					<div style="font-size:12px; color:#64748b;">No recent registrations found.</div>
@@ -224,7 +234,7 @@ function aws_sbg_render_overview_dashboard() {
 								<div style="text-align:right;">
 									<span style="background:#e2e8f0; color:#334155; font-weight:800; padding:2px 8px; border-radius:12px; font-size:10px;">#<?php echo esc_html( $reg_no ); ?></span>
 									<?php if ( $supporter ) : ?>
-										<span style="background:#fef3c7; color:#d97706; font-weight:800; padding:2px 6px; border-radius:12px; font-size:10px; margin-left:4px;">⭐ SUPPORTER</span>
+										<span style="background:#fef3c7; color:#d97706; font-weight:800; padding:2px 6px; border-radius:12px; font-size:10px; margin-left:4px;">â­ SUPPORTER</span>
 									<?php endif; ?>
 								</div>
 							</div>
@@ -237,7 +247,7 @@ function aws_sbg_render_overview_dashboard() {
 			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; box-shadow:0 2px 4px rgba(0,0,0,0.02);">
 				<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
 					<h3 style="margin:0; font-size:14px; font-weight:800; color:#0f172a;">Recent Issued Certificates</h3>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-members' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none;">View Roster ➔</a>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-sbg-members' ) ); ?>" style="font-size:11px; color:#ad5cff; font-weight:700; text-decoration:none;">View Roster âž”</a>
 				</div>
 				<?php if ( empty( $recent_certs ) ) : ?>
 					<div style="font-size:12px; color:#64748b;">No certificates issued yet.</div>
@@ -251,9 +261,9 @@ function aws_sbg_render_overview_dashboard() {
 								</div>
 								<div style="text-align:right;">
 									<?php if ( ! empty( $cert->is_new_builder ) ) : ?>
-										<span style="background:#f3e8ff; color:#7e22ce; font-weight:800; padding:2px 8px; border-radius:12px; font-size:10px;">🌟 SUPPORTER</span>
+										<span style="background:#f3e8ff; color:#7e22ce; font-weight:800; padding:2px 8px; border-radius:12px; font-size:10px;">ðŸŒŸ SUPPORTER</span>
 									<?php else : ?>
-										<span style="background:#f1f5f9; color:#64748b; font-weight:700; padding:2px 8px; border-radius:12px; font-size:10px;">⚡ EXISTING</span>
+										<span style="background:#f1f5f9; color:#64748b; font-weight:700; padding:2px 8px; border-radius:12px; font-size:10px;">âš¡ EXISTING</span>
 									<?php endif; ?>
 								</div>
 							</div>
@@ -349,10 +359,10 @@ function aws_sbg_render_admin_dashboard() {
 		$m_is_supporter = ( $m_tier === 'supporter' ) ? 'yes' : 'no';
 
 		if ( empty( $m_name ) || empty( $m_email ) || empty( $m_phone ) || empty( $m_uni ) || empty( $m_event_id ) ) {
-			$message = '⚠️ Please fill in all required fields (Name, Email, Phone, University, and Event).';
+			$message = 'âš ï¸ Please fill in all required fields (Name, Email, Phone, University, and Event).';
 		} else {
 			$reg_number = function_exists( 'aws_sbg_generate_next_registration_number' ) ? aws_sbg_generate_next_registration_number() : '#' . ( wp_count_posts( 'aws_event_reg' )->publish + 1001 );
-			$title_suffix = ( $m_is_supporter === 'yes' ) ? ' ⭐ Super Supporter' : '';
+			$title_suffix = ( $m_is_supporter === 'yes' ) ? ' â­ Super Supporter' : '';
 
 			$post_id = wp_insert_post( array(
 				'post_type'   => 'aws_event_reg',
@@ -381,9 +391,9 @@ function aws_sbg_render_admin_dashboard() {
 				$event_obj = get_post( $m_event_id );
 				$event_title = $event_obj ? $event_obj->post_title : 'Event #' . $m_event_id;
 
-				$message = "✅ Successfully registered {$m_name} ({$m_email}) for {$event_title} with Registration {$reg_number}!";
+				$message = "âœ… Successfully registered {$m_name} ({$m_email}) for {$event_title} with Registration {$reg_number}!";
 			} else {
-				$message = '⚠️ Error creating manual registration.';
+				$message = 'âš ï¸ Error creating manual registration.';
 			}
 		}
 	}
@@ -472,7 +482,7 @@ function aws_sbg_render_admin_dashboard() {
 		</style>
 
 		<?php if ( $message ) : ?>
-			<div class="mb-6 p-4 rounded-2xl <?php echo strpos($message, '✅') !== false ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-amber-50 border border-amber-200 text-amber-900'; ?> font-bold text-xs">
+			<div class="mb-6 p-4 rounded-2xl <?php echo strpos($message, 'âœ…') !== false ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-amber-50 border border-amber-200 text-amber-900'; ?> font-bold text-xs">
 				<?php echo esc_html( $message ); ?>
 			</div>
 		<?php endif; ?>
@@ -481,14 +491,14 @@ function aws_sbg_render_admin_dashboard() {
 		<div class="flex flex-wrap justify-between items-center gap-4 mb-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
 			<div>
 				<h1 class="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-					<span>🎫 Event Registrations</span>
+					<span>ðŸŽ« Event Registrations</span>
 				</h1>
 				<p class="text-slate-500 text-xs mt-1 font-medium">Verify attendee registrations, ticket tiers, payment proofs, and assign Leaderboard Eligibility (Paying vs General).</p>
 			</div>
 
 			<div class="flex items-center gap-2.5 flex-wrap">
 				<button type="button" onclick="document.getElementById('manual-reg-card').classList.toggle('hidden');" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-xs transition-all flex items-center gap-1.5 cursor-pointer">
-					➕ Manually Register Attendee
+					âž• Manually Register Attendee
 				</button>
 
 				<form method="GET" class="flex items-center gap-2 flex-wrap">
@@ -505,8 +515,8 @@ function aws_sbg_render_admin_dashboard() {
 
 					<select name="filter_member_type" onchange="this.form.submit()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none">
 						<option value="">-- All Categories --</option>
-						<option value="paying" <?php selected( $selected_member_type, 'paying' ); ?>>💳 Paying (Prize Eligible)</option>
-						<option value="general" <?php selected( $selected_member_type, 'general' ); ?>>🎟️ General (Aid / Pro)</option>
+						<option value="paying" <?php selected( $selected_member_type, 'paying' ); ?>>ðŸ’³ Paying (Prize Eligible)</option>
+						<option value="general" <?php selected( $selected_member_type, 'general' ); ?>>ðŸŽŸï¸ General (Aid / Pro)</option>
 					</select>
 
 					<input type="text" name="search_reg" value="<?php echo esc_attr( $search_reg ); ?>" placeholder="Reg # (e.g. 1004)" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none w-36">
@@ -517,17 +527,17 @@ function aws_sbg_render_admin_dashboard() {
 		</div>
 
 		<!-- COLLAPSIBLE MANUAL REGISTRATION FORM CARD -->
-		<div id="manual-reg-card" class="<?php echo ( $message && strpos($message, '⚠️') !== false ) ? '' : 'hidden'; ?> mb-6 bg-slate-900 text-white p-6 rounded-2xl border border-slate-800 shadow-xl transition-all">
+		<div id="manual-reg-card" class="<?php echo ( $message && strpos($message, 'âš ï¸') !== false ) ? '' : 'hidden'; ?> mb-6 bg-slate-900 text-white p-6 rounded-2xl border border-slate-800 shadow-xl transition-all">
 			<div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
 				<div>
 					<h3 class="text-base font-extrabold text-white flex items-center gap-2">
-						<span>➕ Manual Attendee Registration</span>
+						<span>âž• Manual Attendee Registration</span>
 						<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase">Offline / Closed Events</span>
 					</h3>
 					<p class="text-slate-400 text-xs mt-0.5">Register a participant manually for any event (including closed/ended events) to grant them an official Registration ID.</p>
 				</div>
 				<button type="button" onclick="document.getElementById('manual-reg-card').classList.add('hidden');" class="text-slate-400 hover:text-white text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700">
-					✕ Close
+					âœ• Close
 				</button>
 			</div>
 
@@ -581,7 +591,7 @@ function aws_sbg_render_admin_dashboard() {
 						<select name="manual_tier" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-purple-500">
 							<option value="regular">Regular Pass (In-Person)</option>
 							<option value="earlybird">Earlybird Pass</option>
-							<option value="supporter">⭐ Super Supporter (VIP)</option>
+							<option value="supporter">â­ Super Supporter (VIP)</option>
 							<option value="free">Free Pass</option>
 						</select>
 					</div>
@@ -590,8 +600,8 @@ function aws_sbg_render_admin_dashboard() {
 					<div>
 						<label class="block text-xs font-bold text-slate-300 mb-1">Leaderboard Category</label>
 						<select name="manual_member_type" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-purple-500">
-							<option value="paying">💳 Paying (Prize Eligible)</option>
-							<option value="general">🎟️ General (Aid / Pro)</option>
+							<option value="paying">ðŸ’³ Paying (Prize Eligible)</option>
+							<option value="general">ðŸŽŸï¸ General (Aid / Pro)</option>
 						</select>
 					</div>
 
@@ -613,7 +623,7 @@ function aws_sbg_render_admin_dashboard() {
 						Cancel
 					</button>
 					<button type="submit" class="px-6 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition-all">
-						✓ Confirm & Register Attendee
+						âœ“ Confirm & Register Attendee
 					</button>
 				</div>
 			</form>
@@ -649,7 +659,7 @@ function aws_sbg_render_admin_dashboard() {
 							// Strip #1047 - and Supporter tags to keep name clean
 							$raw_title     = get_the_title();
 							$clean_name    = preg_replace( '/^#\d+\s*-\s*/', '', $raw_title );
-							$clean_name    = trim( str_replace( array( '⭐ Super Supporter', 'Super Supporter', '⭐' ), '', $clean_name ) );
+							$clean_name    = trim( str_replace( array( 'â­ Super Supporter', 'Super Supporter', 'â­' ), '', $clean_name ) );
 
 							$email         = get_post_meta( $reg_id, 'email', true );
 							$phone         = get_post_meta( $reg_id, 'whatsapp_number', true );
@@ -696,7 +706,7 @@ function aws_sbg_render_admin_dashboard() {
 								<td class="py-3.5 px-4 font-mono text-slate-500"><?php echo esc_html( $email ); ?></td>
 								<td class="py-3.5 px-4">
 									<?php if ( $is_supporter ) : ?>
-										<span class="bg-amber-100 text-amber-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">⭐ SUPPORTER</span>
+										<span class="bg-amber-100 text-amber-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">â­ SUPPORTER</span>
 									<?php elseif ( $ticket_tier === 'earlybird' ) : ?>
 										<span class="bg-purple-100 text-purple-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">PAID (EARLY)</span>
 									<?php elseif ( $ticket_tier === 'regular' || $event_type === 'paid' || $event_type === 'paid_single' || $event_type === 'paid_tiered' || ! empty( $payment_txn ) ) : ?>
@@ -707,13 +717,13 @@ function aws_sbg_render_admin_dashboard() {
 								</td>
 								<td class="py-3.5 px-4 text-center">
 									<button type="button" onclick="awsToggleMemberType(<?php echo $reg_id; ?>, this)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black cursor-pointer transition-all border <?php echo $is_paying ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'; ?>" title="Click to toggle between Paying (Prize Eligible) and General (Voucher Only)">
-										<span><?php echo $is_paying ? '💳 Paying (Prize)' : '🎟️ General (Aid/Pro)'; ?></span>
+										<span><?php echo $is_paying ? 'ðŸ’³ Paying (Prize)' : 'ðŸŽŸï¸ General (Aid/Pro)'; ?></span>
 									</button>
 								</td>
 								<td class="py-3.5 px-4 text-center">
 									<?php if ( ! empty( $proof_url ) ) : ?>
 										<a href="<?php echo esc_url( $proof_url ); ?>" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-extrabold bg-[#f3e8ff] text-[#7e22ce] hover:bg-[#e9d5ff] transition-all border border-[#ad5cff]/30 shadow-xs">
-											<span>🖼 View Receipt</span>
+											<span>ðŸ–¼ View Receipt</span>
 										</a>
 									<?php else : ?>
 										<span class="text-slate-400 font-semibold text-[11px]">No Screenshot</span>
@@ -743,8 +753,8 @@ function aws_sbg_render_admin_dashboard() {
 					'format'    => '',
 					'current'   => $paged,
 					'total'     => $registrations->max_num_pages,
-					'prev_text' => '« Prev',
-					'next_text' => 'Next »',
+					'prev_text' => 'Â« Prev',
+					'next_text' => 'Next Â»',
 				) );
 				?>
 			</div>
@@ -765,10 +775,10 @@ function aws_sbg_render_admin_dashboard() {
 					const isPaying = (response.data.new_val === 'paying');
 					if (isPaying) {
 						btn.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black cursor-pointer transition-all border bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100';
-						btn.innerHTML = '<span>💳 Paying (Prize)</span>';
+						btn.innerHTML = '<span>ðŸ’³ Paying (Prize)</span>';
 					} else {
 						btn.className = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-black cursor-pointer transition-all border bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200';
-						btn.innerHTML = '<span>🎟️ General (Aid/Pro)</span>';
+						btn.innerHTML = '<span>ðŸŽŸï¸ General (Aid/Pro)</span>';
 					}
 				} else {
 					alert(response.data || 'Failed to update category');
@@ -793,3 +803,47 @@ function aws_sbg_render_admin_dashboard() {
 	</div>
 	<?php
 }
+
+/**
+ * Reorder and clean up the AWS SBG Suite submenu for a tidy, icon-free look.
+ */
+function aws_sbg_cleanup_suite_menu() {
+	global $submenu;
+
+	if ( ! isset( $submenu['aws-sbg-suite'] ) ) {
+		return;
+	}
+
+	$items =& $submenu['aws-sbg-suite'];
+
+	// Desired order by slug.
+	$order = array(
+		'aws-sbg-suite'              => 0,
+		'aws-sbg-registrations'      => 1,
+		'aws-reinvent-registrations' => 2,
+		'aws-sbg-events'             => 3,
+		'aws-sbg-members'            => 4,
+		'aws-mock-exam'              => 5,
+		'edit.php?post_type=aws_event'      => 6,
+		'edit.php?post_type=aws_event_reg'  => 7,
+		'edit.php?post_type=rsvp'           => 8,
+		'edit.php?post_type=contact_submission' => 9,
+		'edit.php?post_type=aws_giveaway'   => 10,
+		'aws-giveaway-submissions'   => 11,
+		'aws-swag-wheel'             => 12,
+	);
+
+	foreach ( $items as &$item ) {
+		// Strip emoji and normalize whitespace.
+		$item[0] = preg_replace( '/[\x{1F600}-\x{1F64F}]|[\x{1F300}-\x{1F5FF}]|[\x{1F680}-\x{1F6FF}]|[\x{1F1E0}-\x{1F1FF}]|[\x{2600}-\x{26FF}]|[\x{2700}-\x{27BF}]/u', '', $item[0] );
+		$item[0] = trim( preg_replace( '/\s+/', ' ', $item[0] ) );
+	}
+	unset( $item );
+
+	usort( $items, function( $a, $b ) use ( $order ) {
+		$pos_a = isset( $order[ $a[2] ] ) ? $order[ $a[2] ] : 99;
+		$pos_b = isset( $order[ $b[2] ] ) ? $order[ $b[2] ] : 99;
+		return $pos_a <=> $pos_b;
+	} );
+}
+add_action( 'admin_menu', 'aws_sbg_cleanup_suite_menu', 999 );
