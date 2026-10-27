@@ -200,6 +200,14 @@ function aws_sbg_reinvent_form_shortcode( $atts ) {
 }
 add_shortcode( 'aws_reinvent_form', 'aws_sbg_reinvent_form_shortcode' );
 
+/**
+ * Simple test shortcode to verify the file is loaded.
+ */
+function aws_sbg_reinvent_test_shortcode() {
+	return '<p style="padding:10px; background:#dcfce7; border-radius:8px; color:#166534; font-weight:bold;">re:Invent feature file is loaded and shortcodes are working.</p>';
+}
+add_shortcode( 'aws_reinvent_test', 'aws_sbg_reinvent_test_shortcode' );
+
 /* ========================================================================
  * 4. SUBMISSION HANDLER
  * ======================================================================== */
