@@ -82,6 +82,7 @@ function aws_sbg_render_admin_nav_tabs( $active_tab = 'overview' ) {
 	$tabs = array(
 		'overview'      => array( 'title' => '📊 Overview', 'url' => admin_url( 'admin.php?page=aws-sbg-suite' ) ),
 		'registrations' => array( 'title' => '🎫 Registrations', 'url' => admin_url( 'admin.php?page=aws-sbg-registrations' ) ),
+		'reinvent'      => array( 'title' => '🎉 re:Invent', 'url' => admin_url( 'admin.php?page=aws-reinvent-registrations' ) ),
 		'events'        => array( 'title' => '📜 Events & Cert Setup', 'url' => admin_url( 'admin.php?page=aws-sbg-events' ) ),
 		'members'       => array( 'title' => '👥 Certified Roster', 'url' => admin_url( 'admin.php?page=aws-sbg-members' ) ),
 		'mock_exam'     => array( 'title' => '📝 Mock Exams', 'url' => admin_url( 'admin.php?page=aws-mock-exam' ) ),

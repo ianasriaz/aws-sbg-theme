@@ -17,6 +17,7 @@ require_once get_template_directory() . '/includes/helpers/helpers-fonts.php';
 
 // Load universal event registration system & dashboard
 require_once get_template_directory() . '/includes/features/feature-event-registration.php';
+require_once get_template_directory() . '/includes/features/feature-reinvent-registration.php';
 require_once get_template_directory() . '/includes/admin/admin-dashboard.php';
 
 // Load AWS Foundational Certification Mock Exam Feature
