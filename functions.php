@@ -14,12 +14,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Load color and font helper functions
 require_once get_template_directory() . '/includes/helpers/helpers-colors.php';
 require_once get_template_directory() . '/includes/helpers/helpers-fonts.php';
+require_once get_template_directory() . '/includes/emails/aws-emails.php';
 
 // Load universal event registration system & dashboard
 require_once get_template_directory() . '/includes/features/feature-event-registration.php';
 require_once get_template_directory() . '/includes/features/feature-reinvent-registration.php';
 require_once get_template_directory() . '/includes/admin/admin-dashboard.php';
 require_once get_template_directory() . '/includes/admin/admin-design-kit.php';
+require_once get_template_directory() . '/includes/admin/admin-email-center.php';
 
 // Load AWS Foundational Certification Mock Exam Feature
 require_once get_template_directory() . '/includes/features/feature-mock-exam.php';

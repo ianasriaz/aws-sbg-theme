@@ -466,6 +466,29 @@ function aws_sbg_handle_reinvent_registration() {
 	update_post_meta( $post_id, 'will_attend', $will_attend );
 	update_post_meta( $post_id, 'approval_status', 'pending' );
 	update_post_meta( $post_id, 'notified', 'no' );
+	update_post_meta( $post_id, 'notified_status', '' );
+
+	/* Applicant confirmation */
+	if ( function_exists( 'aws_sbg_mail_send' ) ) {
+		$confirm_body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $full_name ) . '</strong>,</p>'
+			. '<p style="margin:0 0 12px 0;">Your RSVP for <strong style="color:#FFFFFF;">AWS re:Invent Watch &amp; Build Party Islamabad 2026</strong> has been received.</p>'
+			. '<p style="margin:0 0 12px 0;">Your registration number is <strong style="color:#00DFD8;">' . esc_html( $reg_number ) . '</strong>.</p>'
+			. '<p style="margin:0;">Our team is reviewing applications and we will email you if your seat is approved.</p>';
+		aws_sbg_mail_send( 'reinvent', $email, 'RSVP received — ' . $reg_number, 'RSVP Received', 'You\'re on the list', $confirm_body, home_url( '/aws-reinvent/' ), 'View event' );
+
+		/* Admin notification (optional) */
+		$mail_settings = aws_sbg_mail_get_settings();
+		if ( 'yes' === ( $mail_settings['notify_admin_rsvp'] ?? 'yes' ) ) {
+			$admin_to   = ! empty( $mail_settings['admin_email'] ) ? $mail_settings['admin_email'] : get_option( 'admin_email' );
+			$admin_body = '<p style="margin:0 0 12px 0;">New re:Invent RSVP:</p>'
+				. '<p style="margin:0 0 6px 0;"><strong style="color:#FFFFFF;">' . esc_html( $full_name ) . '</strong> — ' . esc_html( ucfirst( str_replace( '_', ' ', $audience ) ) ) . '</p>'
+				. '<p style="margin:0 0 6px 0;">Reg #: ' . esc_html( $reg_number ) . '</p>'
+				. '<p style="margin:0 0 6px 0;">' . esc_html( $university ) . ' · ' . esc_html( $city ) . '</p>'
+				. '<p style="margin:0 0 6px 0;">Attended before: ' . esc_html( ucfirst( $attended ) ) . '</p>'
+				. '<p style="margin:0;">Why: ' . esc_html( wp_trim_words( $why, 40, '…' ) ) . '</p>';
+			aws_sbg_mail_send( 'reinvent', $admin_to, 'New re:Invent RSVP — ' . $reg_number, 'New RSVP', 'Review needed', $admin_body, admin_url( 'admin.php?page=aws-reinvent-registrations' ), 'Open registrations' );
+		}
+	}
 
 	$redirect = wp_get_referer() ? wp_get_referer() : home_url();
 	$redirect = add_query_arg( array(
@@ -490,13 +513,37 @@ function aws_sbg_render_reinvent_admin_page() {
 		wp_die( 'Unauthorized access.' );
 	}
 
-	if ( isset( $_GET['action'], $_GET['reg_id'] ) && $_GET['action'] === 'approve' ) {
+	if ( isset( $_GET['action'], $_GET['reg_id'], $_GET['_wpnonce'] ) && in_array( $_GET['action'], array( 'approve', 'reject' ), true ) ) {
 		$reg_id = intval( $_GET['reg_id'] );
-		update_post_meta( $reg_id, 'approval_status', 'approved' );
-	}
-	if ( isset( $_GET['action'], $_GET['reg_id'] ) && $_GET['action'] === 'reject' ) {
-		$reg_id = intval( $_GET['reg_id'] );
-		update_post_meta( $reg_id, 'approval_status', 'rejected' );
+		if ( wp_verify_nonce( $_GET['_wpnonce'], 'aws_reinvent_review_' . $reg_id ) ) {
+			$status = 'approve' === $_GET['action'] ? 'approved' : 'rejected';
+			update_post_meta( $reg_id, 'approval_status', $status );
+
+			/* Send the matching email once per status change */
+			$prev_status = get_post_meta( $reg_id, 'notified_status', true );
+			if ( $prev_status !== $status && function_exists( 'aws_sbg_mail_send' ) ) {
+				$to_email = get_post_meta( $reg_id, 'email', true );
+				$name     = preg_replace( '/^reinvent-#\d+\s*-\s*/', '', get_the_title( $reg_id ) );
+				$reg_no   = get_post_meta( $reg_id, 'registration_number', true );
+
+				if ( $to_email ) {
+					if ( 'approved' === $status ) {
+						$body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
+							. '<p style="margin:0 0 12px 0;">Great news — your application for <strong style="color:#FFFFFF;">AWS re:Invent Watch &amp; Build Party Islamabad 2026</strong> has been <strong style="color:#00DFD8;">approved</strong>.</p>'
+							. '<p style="margin:0 0 12px 0;">Venue: Air University, Islamabad. Date and timings will be shared closer to the event.</p>'
+							. '<p style="margin:0;">Your registration number is <strong style="color:#00DFD8;">' . esc_html( $reg_no ) . '</strong>. Please bring your CNIC / B-Form for gate verification.</p>';
+						aws_sbg_mail_send( 'reinvent', $to_email, 'You\'re invited — AWS re:Invent Watch & Build Party', 'Application Approved', 'You\'re invited', $body );
+					} else {
+						$body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
+							. '<p style="margin:0 0 12px 0;">Thank you for applying to <strong style="color:#FFFFFF;">AWS re:Invent Watch &amp; Build Party Islamabad 2026</strong>. This time we were unable to approve your application — seats were extremely limited.</p>'
+							. '<p style="margin:0;">We\'d love to see you at our upcoming events. Keep building.</p>';
+						aws_sbg_mail_send( 'reinvent', $to_email, 'Update on your AWS re:Invent application', 'Application Update', 'Thank you for applying', $body );
+					}
+					update_post_meta( $reg_id, 'notified', 'yes' );
+				}
+			}
+			update_post_meta( $reg_id, 'notified_status', $status );
+		}
 	}
 
 	$search   = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
@@ -657,8 +704,8 @@ function aws_sbg_render_reinvent_admin_page() {
 								</td>
 								<td class="py-3.5 px-4 text-center">
 									<div class="flex items-center justify-center gap-2">
-										<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'action' => 'approve', 'reg_id' => $reg_id ) ) ); ?>" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all">Approve</a>
-										<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'action' => 'reject', 'reg_id' => $reg_id ) ) ); ?>" class="bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all">Reject</a>
+										<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'action' => 'approve', 'reg_id' => $reg_id ) ), 'aws_reinvent_review_' . $reg_id ) ); ?>" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all">Approve</a>
+										<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'action' => 'reject', 'reg_id' => $reg_id ) ), 'aws_reinvent_review_' . $reg_id ) ); ?>" class="bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all">Reject</a>
 									</div>
 								</td>
 							</tr>

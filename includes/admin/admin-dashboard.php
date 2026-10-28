@@ -92,6 +92,16 @@ function aws_sbg_register_admin_dashboard() {
 		'aws-brand-kit',
 		'aws_sbg_render_design_kit_page'
 	);
+
+	// Email Center
+	add_submenu_page(
+		'aws-sbg-suite',
+		'Email Center',
+		'Email Center',
+		'manage_options',
+		'aws-email-center',
+		'aws_sbg_render_email_center_page'
+	);
 }
 add_action( 'admin_menu', 'aws_sbg_register_admin_dashboard', 9 );
 
@@ -842,6 +852,7 @@ function aws_sbg_cleanup_suite_menu() {
 		'aws-giveaway-submissions'   => 11,
 		'aws-swag-wheel'             => 12,
 		'aws-brand-kit'              => 13,
+		'aws-email-center'           => 14,
 	);
 
 	foreach ( $items as &$item ) {

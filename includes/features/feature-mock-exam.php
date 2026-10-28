@@ -92,119 +92,49 @@ function aws_sbg_send_member_exam_email( $code_id ) {
 			$start_f    = date( 'l, j M Y — g:i A', strtotime( $slot_row->start_time ) );
 			$end_f      = date( 'g:i A', strtotime( $slot_row->end_time ) );
 			$tz_str     = wp_timezone_string();
-			$slot_schedule_html = '<div style="background-color: #111827; border: 1px solid #1e293b; border-left: 3px solid #7c3aed; border-radius: 10px; padding: 12px 14px; margin-bottom: 18px;">'
-				. '<div style="font-size: 10px; font-weight: 800; color: #8b5cf6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">⏱️ ASSIGNED EXAM TIME SLOT (' . $slot_title . ')</div>'
+			$slot_schedule_html = '<div style="background-color: #111827; border: 1px solid #1e293b; border-left: 3px solid #00DFD8; border-radius: 10px; padding: 12px 14px; margin-bottom: 18px;">'
+				. '<div style="font-size: 10px; font-weight: 800; color: #00DFD8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">Assigned exam time slot (' . $slot_title . ')</div>'
 				. '<div style="font-size: 13px; font-weight: 700; color: #ffffff; line-height: 1.4;">' . $start_f . ' to ' . $end_f . ' (' . $tz_str . ')</div>'
 				. '</div>';
 		}
 	}
 
-	$subject = '⚡ Your AWS Certification Preparation Exam Access Code: ' . $access_code . ' — AWS Air University';
+	$subject = 'AWS Certification Preparation Exam — Access Code ' . $access_code . ' — AWS Air University';
 
-	ob_start();
-	?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="color-scheme" content="dark">
-	<title>Your AWS Certification Preparation Exam Access Code</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #070a12; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #cbd5e1; -webkit-text-size-adjust: 100%;">
-	<table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #070a12; padding: 20px 10px;">
-		<tr>
-			<td align="center">
-				<table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0d1322; border: 1px solid #1e293b; border-radius: 16px; max-width: 480px; width: 100%; box-sizing: border-box;">
-					<tr>
-						<td style="padding: 24px 20px;">
-							
-							<!-- GREETING & INTRO -->
-							<div style="font-size: 15px; color: #cbd5e1; margin-bottom: 12px;">
-								Hi, <strong style="color: #ffffff;"><?php echo $member_name; ?></strong> 👋
-							</div>
-							<p style="margin: 0 0 18px 0; font-size: 13px; color: #cbd5e1; line-height: 1.6;">
-								Your <strong>AWS Certification Preparation Exam</strong> organized by <strong>AWS Student Builder Group at Air University Islamabad</strong> has been successfully scheduled.
-							</p>
+	$code_box = '<div style="background-color: #060911; border: 1.5px dashed #00DFD8; border-radius: 14px; padding: 18px 14px; text-align: center; margin-bottom: 18px;">'
+		. '<div style="font-size: 10px; font-weight: 800; color: #00DFD8; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px;">Your personal access code</div>'
+		. '<div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 26px; font-weight: 900; color: #00DFD8; letter-spacing: 3px; margin: 4px 0;">' . $access_code . '</div>'
+		. '<div style="font-size: 11px; color: #64748b; margin-top: 4px;">Single-use personal code · Registered to ' . $member_email . '</div>'
+		. '</div>';
 
-							<!-- TIME SLOT (IF CONFIGURED) -->
-							<?php echo $slot_schedule_html; ?>
+	$guidelines = '<div style="background-color: #090e1a; border: 1px solid #1e293b; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px;">'
+		. '<div style="font-size: 11px; font-weight: 800; color: #00DFD8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Important guidelines</div>'
+		. '<div style="font-size: 12px; color: #94a3b8; line-height: 1.6;">'
+		. '<div style="margin-bottom: 6px;"><strong style="color: #e2e8f0;">' . $per_q_sec . 's per question:</strong> single-pass mode; timer auto-advances at 0s.</div>'
+		. '<div style="margin-bottom: 6px;"><strong style="color: #e2e8f0;">Single device lock:</strong> access code binds to your device on entry.</div>'
+		. '<div style="margin-bottom: 6px;"><strong style="color: #e2e8f0;">Fullscreen required:</strong> attempt on laptop/desktop in fullscreen.</div>'
+		. '<div style="margin-bottom: 6px;"><strong style="color: #e2e8f0;">Active presence:</strong> screen blurs on 3s idle to protect questions.</div>'
+		. '<div><strong style="color: #e2e8f0;">Voucher reward:</strong> score 700+ (70%) to qualify for an official AWS Exam Voucher ($100–$150 USD).</div>'
+		. '</div></div>';
 
-							<!-- ACCESS CODE BOX (SINGLE CENTERED) -->
-							<div style="background-color: #060911; border: 1.5px dashed #7c3aed; border-radius: 14px; padding: 18px 14px; text-align: center; margin-bottom: 18px;">
-								<div style="font-size: 10px; font-weight: 800; color: #8b5cf6; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px;">
-									YOUR PERSONAL ACCESS CODE
-								</div>
-								<div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 26px; font-weight: 900; color: #38bdf8; letter-spacing: 3px; margin: 4px 0;">
-									<?php echo $access_code; ?>
-								</div>
-								<div style="font-size: 11px; color: #64748b; margin-top: 4px;">
-									Single-use personal code • Registered to <?php echo $member_email; ?>
-								</div>
-							</div>
+	$rewards_note = '<div style="background-color: #0b1220; border: 1px solid #1e293b; border-radius: 12px; padding: 13px 15px; margin-bottom: 18px;">'
+		. '<div style="font-size: 11px; font-weight: 800; color: #00DFD8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">Rewards and eligibility note</div>'
+		. '<div style="font-size: 12px; color: #94a3b8; line-height: 1.55;">Physical <strong>swag kits and top scorer prizes</strong> are exclusively designated for student participants. Working professionals and financial aid candidates are eligible for the <strong>official AWS Certification Exam Voucher</strong> (score 70%+) and an official <strong>Exam Passing Certificate</strong>.</div>'
+		. '</div>';
 
-							<!-- PRIMARY CTA BUTTON -->
-							<div style="margin-bottom: 22px;">
-								<a href="<?php echo esc_url( $portal_url ); ?>" target="_blank" style="background-color: #7c3aed; color: #ffffff; text-decoration: none; display: block; width: 100%; box-sizing: border-box; text-align: center; padding: 14px 18px; border-radius: 12px; font-weight: 800; font-size: 15px; letter-spacing: 0.3px;">
-									Open Exam Portal &rarr;
-								</a>
-							</div>
+	$body = '<p style="margin: 0 0 14px 0;">Hi <strong style="color: #FFFFFF;">' . $member_name . '</strong>,</p>'
+		. '<p style="margin: 0 0 16px 0;">Your <strong style="color: #FFFFFF;">AWS Certification Preparation Exam</strong> organized by <strong>AWS Student Builder Group at Air University Islamabad</strong> has been successfully scheduled.</p>'
+		. $slot_schedule_html
+		. $code_box
+		. $guidelines
+		. $rewards_note
+		. '<div style="border: 1px solid rgba(0,223,216,0.25); border-radius: 12px; padding: 14px 16px; margin-bottom: 6px;">'
+		. '<div style="font-size: 12px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">We believe in you</div>'
+		. '<div style="font-size: 12px; color: #cbd5e1; line-height: 1.55;">Attempt this exam with confidence, focus, and honesty. Trust the knowledge you have gained through your own effort. A score is only one part of your learning journey — what truly matters is staying true to yourself and growing from every attempt.</div>'
+		. '</div>'
+		. '<p style="margin: 14px 0 0 0; color: #e2e8f0; font-weight: 700;">Best of luck,<br><span style="color: #00DFD8;">Team AWS Student Builder Group</span></p>';
 
-							<!-- EXAM GUIDELINES -->
-							<div style="background-color: #090e1a; border: 1px solid #1e293b; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px;">
-								<div style="font-size: 11px; font-weight: 800; color: #8b5cf6; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">
-									📌 Important Guidelines:
-								</div>
-								<div style="font-size: 12px; color: #94a3b8; line-height: 1.6;">
-									<div style="margin-bottom: 6px;">⏱️ <strong style="color: #e2e8f0;"><?php echo $per_q_sec; ?>s Per Question:</strong> Single-pass mode; timer auto-advances at 0s.</div>
-									<div style="margin-bottom: 6px;">🔒 <strong style="color: #e2e8f0;">Single Device Lock:</strong> Access code binds to your device on entry.</div>
-									<div style="margin-bottom: 6px;">💻 <strong style="color: #e2e8f0;">Fullscreen Required:</strong> Attempt on laptop/desktop in fullscreen.</div>
-									<div style="margin-bottom: 6px;">👁️ <strong style="color: #e2e8f0;">Active Presence:</strong> Screen blurs on 3s idle to protect questions.</div>
-									<div>🏆 <strong style="color: #e2e8f0;">Voucher Reward:</strong> Score 700+ (70%) to qualify for an official AWS Exam Voucher ($100–$150 USD)!</div>
-								</div>
-							</div>
-
-							<!-- ELIGIBILITY & REWARDS POLICY NOTE -->
-							<div style="background-color: #0b1220; border: 1px solid #1e293b; border-radius: 12px; padding: 13px 15px; margin-bottom: 18px;">
-								<div style="font-size: 11px; font-weight: 800; color: #38bdf8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px;">
-									🎁 Rewards & Eligibility Note:
-								</div>
-								<div style="font-size: 12px; color: #94a3b8; line-height: 1.55;">
-									Please note that physical <strong>swag kits and top scorer prizes</strong> are exclusively designated for student participants. Working professionals and financial aid candidates are eligible for the <strong>official AWS Certification Exam Voucher</strong> (score 70%+) and an official <strong>Exam Passing Certificate</strong>.
-								</div>
-							</div>
-
-							<!-- INSPIRATIONAL PRE-EXAM MOTIVATION CARD -->
-							<div style="background: linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(16,185,129,0.08) 100%); border: 1px solid rgba(124,58,237,0.3); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;">
-								<div style="font-size: 12px; font-weight: 800; color: #ffffff; margin-bottom: 4px;">
-									🌟 We Believe in You!
-								</div>
-								<div style="font-size: 12px; color: #cbd5e1; line-height: 1.55;">
-									Attempt this exam with confidence, focus, and honesty. Trust the knowledge you have gained through your own effort. A score is only one part of your learning journey—what truly matters is staying true to yourself and growing from every attempt.
-								</div>
-							</div>
-
-							<!-- SIGN-OFF FOOTER -->
-							<div style="border-top: 1px solid #1a2236; padding-top: 16px; font-size: 12px; color: #64748b;">
-								<div style="color: #cbd5e1; font-weight: 700;">Best of luck,</div>
-								<div style="color: #ad5cff; font-weight: 800; margin-top: 2px;">Team AWS Student Builder Group</div>
-								<div style="font-size: 11px; margin-top: 1px;">Air University Islamabad Campus</div>
-							</div>
-
-						</td>
-					</tr>
-				</table>
-			</td>
-		</tr>
-	</table>
-</body>
-</html>
-	<?php
-	$html_body = ob_get_clean();
-
-	$headers = array( 'Content-Type: text/html; charset=UTF-8' );
-
-	return wp_mail( $code_row->member_email, $subject, $html_body, $headers );
+	return aws_sbg_mail_send( 'exam', $code_row->member_email, $subject, 'Exam Access Code', 'Your exam access code is ready', $body, $portal_url, 'Open Exam Portal' );
 }
 
 /**
