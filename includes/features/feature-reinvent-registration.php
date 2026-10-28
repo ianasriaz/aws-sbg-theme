@@ -10,6 +10,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! defined( 'AWS_REINVENT_WHATSAPP_URL' ) ) {
+	define( 'AWS_REINVENT_WHATSAPP_URL', 'https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI' );
+}
+
 /* ========================================================================
  * 1. CUSTOM POST TYPE FOR RE:INVENT REGISTRATIONS
  * ======================================================================== */
@@ -191,7 +195,11 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					<span class="rv-code-label">Registration number</span>
 					<span class="rv-code-value"><?php echo esc_html( $reg_id ); ?></span>
 				</div>
-				<p style="margin:6px 0 0;"><a class="rv-success-link" href="<?php echo esc_url( home_url() ); ?>">Back to home</a></p>
+				<div style="margin-top:26px;">
+					<a href="<?php echo esc_url( AWS_REINVENT_WHATSAPP_URL ); ?>" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; justify-content:center; gap:10px; background:#00DFD8; color:#06040C; font-family:'Amazon Ember Mono',monospace; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; text-decoration:none; padding:14px 26px; border-radius:10px;">Join WhatsApp community</a>
+					<p style="font-size:12.5px; color:rgba(255,255,255,0.45); margin:10px 0 0; line-height:1.6;">Event updates, ticket details, and announcements are shared there.</p>
+				</div>
+				<p style="margin:22px 0 0;"><a class="rv-success-link" href="<?php echo esc_url( home_url() ); ?>">Back to home</a></p>
 			</div>
 		</div>
 		<?php else : ?>
@@ -473,7 +481,13 @@ function aws_sbg_handle_reinvent_registration() {
 		$confirm_body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $full_name ) . '</strong>,</p>'
 			. '<p style="margin:0 0 12px 0;">Your RSVP for <strong style="color:#FFFFFF;">AWS re:Invent Watch &amp; Build Party Islamabad 2026</strong> has been received.</p>'
 			. '<p style="margin:0 0 12px 0;">Your registration number is <strong style="color:#00DFD8;">' . esc_html( $reg_number ) . '</strong>.</p>'
-			. '<p style="margin:0;">Our team is reviewing applications and we will email you if your seat is approved.</p>';
+			. '<p style="margin:0 0 8px 0;">What happens next:</p>'
+			. '<ul style="margin:0 0 12px 20px; padding:0;">'
+			. '<li style="margin:0 0 7px 0;">Our team reviews every application.</li>'
+			. '<li style="margin:0 0 7px 0;">You will be informed by email if your seat is approved.</li>'
+			. '<li style="margin:0;">Once approved, your event ticket and further details will be shared with you.</li>'
+			. '</ul>'
+			. '<p style="margin:0;">In the meantime, join our WhatsApp community for event updates: <a href="' . esc_url( AWS_REINVENT_WHATSAPP_URL ) . '" target="_blank" rel="noopener" style="color:#00DFD8; text-decoration:underline;">chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI</a></p>';
 		aws_sbg_mail_send( 'reinvent', $email, 'RSVP received — ' . $reg_number, 'RSVP Received', 'You\'re on the list', $confirm_body, home_url( '/aws-reinvent/' ), 'View event' );
 
 		/* Admin notification (optional) */
