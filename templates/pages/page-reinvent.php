@@ -20,7 +20,7 @@ add_filter( 'show_admin_bar', '__return_false' );
 <body <?php body_class(); ?> style="margin:0; background:#06040c; color:#ffffff;">
 <?php
 $title    = 'AWS re:Invent Watch & Build Party Islamabad 2026';
-$subtitle = 'An invite-only evening for builders, dreamers, and cloud enthusiasts. Apply below and we will notify you once your seat is approved.';
+$subtitle = 'Experience AWS re:Invent in Islamabad. Join fellow builders, cloud enthusiasts, and AI innovators for a day of learning, networking, community activities, refreshments, and AWS swag.';
 $date     = '';
 $location = 'Islamabad, Pakistan';
 

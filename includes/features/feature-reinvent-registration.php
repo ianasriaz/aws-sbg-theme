@@ -92,11 +92,13 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-intro-inner { position:relative; z-index:1; max-width:700px; }
 			.rv-kicker { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#00DFD8; margin:0 0 22px; }
 			.rv-title { font-weight:700; font-size:clamp(34px,5.2vw,58px); line-height:1.06; letter-spacing:-0.02em; margin:0 0 22px; }
-			.rv-lede { font-size:17px; line-height:1.7; color:rgba(255,255,255,0.66); max-width:52ch; margin:0 0 16px; }
+			.rv-lede { font-size:17px; line-height:1.7; color:rgba(255,255,255,0.66); max-width:52ch; margin:0 0 14px; }
+			.rv-lede-cta { font-size:16px; line-height:1.65; font-weight:700; color:rgba(255,255,255,0.9); max-width:52ch; margin:0 0 8px; }
 			.rv-perks { display:grid; grid-template-columns:1fr 1fr; gap:0 clamp(28px,5vw,64px); margin:0 0 clamp(36px,5vh,52px); }
 			.rv-perk { border-top:1px solid rgba(255,255,255,0.14); padding:18px 0 24px; }
 			.rv-perk-idx { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.15em; color:#00DFD8; display:block; margin:0 0 10px; }
-			.rv-perk h3 { font-size:17px; font-weight:500; margin:0 0 6px; }
+			.rv-perk h3 { font-size:17px; font-weight:500; margin:0 0 6px; display:flex; align-items:center; gap:9px; }
+			.rv-perk h3 svg { width:18px; height:18px; color:#00DFD8; flex-shrink:0; }
 			.rv-perk p { font-size:14px; line-height:1.6; color:rgba(255,255,255,0.56); }
 
 			.rv-btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; border:0; border-radius:10px; padding:16px 38px; font-family:'Amazon Ember Mono',monospace; font-size:13px; font-weight:700; letter-spacing:0.1em; cursor:pointer; text-decoration:none; transition:background 0.18s ease, border-color 0.18s ease, transform 0.18s ease; }
@@ -119,6 +121,10 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-field input { width:100%; padding:14px 16px; font-family:inherit; font-size:16px; color:#FFFFFF; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.16); border-radius:10px; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
 			.rv-field input:focus { outline:none; border-color:#00DFD8; box-shadow:0 0 0 3px rgba(0,223,216,0.14); }
 			.rv-field input::placeholder { color:rgba(255,255,255,0.32); }
+			.rv-field textarea { width:100%; padding:14px 16px; font-family:inherit; font-size:16px; line-height:1.65; color:#FFFFFF; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.16); border-radius:10px; resize:vertical; min-height:150px; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
+			.rv-field textarea:focus { outline:none; border-color:#00DFD8; box-shadow:0 0 0 3px rgba(0,223,216,0.14); }
+			.rv-field textarea::placeholder { color:rgba(255,255,255,0.32); }
+			.rv-field-hint { font-size:13px; line-height:1.6; color:rgba(255,255,255,0.5); margin:0 0 10px; }
 
 			.rv-question-label { display:block; font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.62); margin:0 0 14px; }
 
@@ -133,6 +139,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-confirm { display:flex; align-items:flex-start; gap:12px; padding:18px; margin-top:22px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.14); border-radius:12px; cursor:pointer; }
 			.rv-confirm input { width:18px; height:18px; margin-top:2px; accent-color:#00DFD8; cursor:pointer; flex-shrink:0; }
 			.rv-confirm-text { font-size:14px; line-height:1.65; color:rgba(255,255,255,0.7); }
+			.rv-confirm-sub { display:block; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.45); margin-top:4px; }
 
 			.rv-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:36px; }
 
@@ -194,30 +201,41 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 		<section class="rv-intro" x-show="currentStep === 0">
 			<img class="rv-skyline" src="<?php echo esc_url( $skyline ); ?>" alt="" aria-hidden="true">
 			<div class="rv-intro-inner">
-				<p class="rv-kicker">Invite-only · <?php echo esc_html( $location ); ?></p>
+				<p class="rv-kicker">AWS Community Islamabad is bringing</p>
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
 				<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
+				<p class="rv-lede-cta">Apply below to express your interest. Approved attendees will receive a confirmation email with event ticket details.</p>
 
 				<div class="rv-perks">
 					<div class="rv-perk">
 						<span class="rv-perk-idx">01</span>
-						<h3>Refreshments</h3>
-						<p>Food, drinks, and coffee on the house.</p>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.83z"/><path d="M7 7h.01"/></svg>Free Access</h3>
+						<p>Complimentary entry for approved attendees.</p>
 					</div>
 					<div class="rv-perk">
 						<span class="rv-perk-idx">02</span>
-						<h3>Swags</h3>
-						<p>Exclusive AWS swag to take home.</p>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a4 4 0 01-4 4H8a4 4 0 01-4-4V9z"/><path d="M16 10h1.5a2.5 2.5 0 010 5H16"/></svg>Refreshments</h3>
+						<p>Food and beverages available throughout the event.</p>
 					</div>
 					<div class="rv-perk">
 						<span class="rv-perk-idx">03</span>
-						<h3>Networking</h3>
-						<p>Meet builders, students, and cloud professionals.</p>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>AWS Swag</h3>
+						<p>Exclusive AWS merchandise and giveaways for attendees.</p>
 					</div>
 					<div class="rv-perk">
 						<span class="rv-perk-idx">04</span>
-						<h3>Activities</h3>
-						<p>Live watch party, quizzes, and hands-on builds.</p>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>Networking</h3>
+						<p>Meet builders, students, industry leaders, and cloud professionals.</p>
+					</div>
+					<div class="rv-perk">
+						<span class="rv-perk-idx">05</span>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><path d="M12 19v4"/><path d="M8 23h8"/></svg>Expert Sessions</h3>
+						<p>Hear from industry experts on Cloud, AI, Cybersecurity, and Emerging Technologies.</p>
+					</div>
+					<div class="rv-perk">
+						<span class="rv-perk-idx">06</span>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Activities</h3>
+						<p>Live watch party, interactive challenges, hands-on builds, and community experiences.</p>
 					</div>
 				</div>
 
@@ -278,6 +296,12 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					<h2 class="rv-step-title">Almost done</h2>
 					<p class="rv-step-sub">One last question and you're set.</p>
 
+					<div class="rv-field" style="margin-bottom:28px;">
+						<label for="rv-why">Why do you want to be invited to AWS re:Invent Islamabad 2026? <em>*</em></label>
+						<p class="rv-field-hint">This event is designed for passionate builders, learners, and technology enthusiasts. Tell us about your experience with AWS, community involvement, and what you're hoping to gain from the event.</p>
+						<textarea id="rv-why" name="why_invite" rows="6" :required="currentStep === 2" placeholder="Share your AWS experience, certifications, projects, community involvement, or why you'd like to attend (100-300 words)"></textarea>
+					</div>
+
 					<div style="margin-bottom:26px;">
 						<span class="rv-question-label" id="rv-attended-label">Have you attended any AWS community event before? <em>*</em></span>
 						<div class="rv-choices" role="radiogroup" aria-labelledby="rv-attended-label">
@@ -295,6 +319,11 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					<label class="rv-confirm">
 						<input type="checkbox" name="confirm" :required="currentStep === 2">
 						<span class="rv-confirm-text">I understand this is an invite-only event. I will be notified after review if my application is approved to attend AWS re:Invent.</span>
+					</label>
+
+					<label class="rv-confirm" style="margin-top:12px;">
+						<input type="checkbox" name="will_attend" value="yes" :required="currentStep === 2">
+						<span class="rv-confirm-text">I will attend the event if accepted.<span class="rv-confirm-sub">Seats are limited and resources are planned per attendee, so a no-show takes a seat from another builder.</span></span>
 					</label>
 
 					<div class="rv-actions">
@@ -365,8 +394,10 @@ function aws_sbg_handle_reinvent_registration() {
 	$city       = isset( $_POST['city'] ) ? sanitize_text_field( wp_unslash( $_POST['city'] ) ) : '';
 	$linkedin   = isset( $_POST['linkedin'] ) ? esc_url_raw( wp_unslash( $_POST['linkedin'] ) ) : '';
 	$attended   = isset( $_POST['attended_before'] ) ? sanitize_text_field( wp_unslash( $_POST['attended_before'] ) ) : '';
+	$why        = isset( $_POST['why_invite'] ) ? sanitize_textarea_field( wp_unslash( $_POST['why_invite'] ) ) : '';
+	$will_attend = isset( $_POST['will_attend'] ) ? sanitize_text_field( wp_unslash( $_POST['will_attend'] ) ) : '';
 
-	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) ) {
+	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) || empty( $why ) || 'yes' !== $will_attend ) {
 		wp_die( 'Please fill in all required fields.' );
 	}
 
@@ -389,6 +420,8 @@ function aws_sbg_handle_reinvent_registration() {
 	update_post_meta( $post_id, 'city', $city );
 	update_post_meta( $post_id, 'linkedin', $linkedin );
 	update_post_meta( $post_id, 'attended_before', $attended );
+	update_post_meta( $post_id, 'why_invite', $why );
+	update_post_meta( $post_id, 'will_attend', $will_attend );
 	update_post_meta( $post_id, 'approval_status', 'pending' );
 	update_post_meta( $post_id, 'notified', 'no' );
 
