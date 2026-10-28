@@ -257,15 +257,20 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					<div class="rv-fields">
 						<div class="rv-field">
 							<label for="rv-full-name">Full Name <em>*</em></label>
-							<input id="rv-full-name" type="text" name="full_name" :required="currentStep === 1" placeholder="Muhammad Ali">
+							<input id="rv-full-name" type="text" name="full_name" :required="currentStep === 1" placeholder="Your full name">
 						</div>
 						<div class="rv-field">
 							<label for="rv-email">Email Address <em>*</em></label>
-							<input id="rv-email" type="email" name="email" :required="currentStep === 1" placeholder="ali@example.com">
+							<input id="rv-email" type="email" name="email" :required="currentStep === 1" placeholder="youremail@domain.com">
 						</div>
 						<div class="rv-field">
 							<label for="rv-whatsapp">WhatsApp Number <em>*</em></label>
-							<input id="rv-whatsapp" type="tel" name="whatsapp" :required="currentStep === 1" placeholder="03000000000">
+							<input id="rv-whatsapp" type="tel" name="whatsapp" :required="currentStep === 1" placeholder="0300-0000000">
+						</div>
+						<div class="rv-field">
+							<label for="rv-cnic">CNIC / B-Form Number <em>*</em></label>
+							<p class="rv-field-hint" style="font-size:12px;">For gate security verification.</p>
+							<input id="rv-cnic" type="text" name="cnic" inputmode="numeric" :required="currentStep === 1" pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" maxlength="15" title="Format: 00000-0000000-0" placeholder="00000-0000000-0">
 						</div>
 						<div class="rv-field" style="grid-column:1/-1;">
 							<label id="rv-audience-label">I am a <em>*</em></label>
@@ -290,7 +295,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 						<div class="rv-field">
 							<label for="rv-city">City <em>*</em></label>
-							<input id="rv-city" type="text" name="city" :required="currentStep === 1" placeholder="Islamabad">
+							<input id="rv-city" type="text" name="city" :required="currentStep === 1" placeholder="Your city">
 						</div>
 						<div class="rv-field">
 							<label for="rv-linkedin">LinkedIn Profile URL <em>*</em></label>
@@ -372,7 +377,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				},
 				affiliationPlaceholder() {
 					const placeholders = {
-						student: 'Air University Islamabad',
+						student: 'Your institute name',
 						professional: 'Company name',
 						job_seeker: 'Where did you last study or work?',
 					};
@@ -421,6 +426,7 @@ function aws_sbg_handle_reinvent_registration() {
 	$full_name  = isset( $_POST['full_name'] ) ? sanitize_text_field( wp_unslash( $_POST['full_name'] ) ) : '';
 	$email      = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 	$whatsapp   = isset( $_POST['whatsapp'] ) ? sanitize_text_field( wp_unslash( $_POST['whatsapp'] ) ) : '';
+	$cnic       = isset( $_POST['cnic'] ) ? sanitize_text_field( wp_unslash( $_POST['cnic'] ) ) : '';
 	$university = isset( $_POST['affiliation'] ) ? sanitize_text_field( wp_unslash( $_POST['affiliation'] ) ) : '';
 	$audience   = isset( $_POST['audience_type'] ) ? sanitize_key( wp_unslash( $_POST['audience_type'] ) ) : '';
 	$city       = isset( $_POST['city'] ) ? sanitize_text_field( wp_unslash( $_POST['city'] ) ) : '';
@@ -431,7 +437,7 @@ function aws_sbg_handle_reinvent_registration() {
 
 	$valid_audience = in_array( $audience, array( 'student', 'professional', 'job_seeker' ), true );
 
-	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) || empty( $why ) || 'yes' !== $will_attend || ! $valid_audience ) {
+	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $cnic ) || ! preg_match( '/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/', $cnic ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) || empty( $why ) || 'yes' !== $will_attend || ! $valid_audience ) {
 		wp_die( 'Please fill in all required fields.' );
 	}
 
@@ -450,6 +456,7 @@ function aws_sbg_handle_reinvent_registration() {
 	update_post_meta( $post_id, 'registration_number', $reg_number );
 	update_post_meta( $post_id, 'email', $email );
 	update_post_meta( $post_id, 'whatsapp', $whatsapp );
+	update_post_meta( $post_id, 'cnic', $cnic );
 	update_post_meta( $post_id, 'university', $university );
 	update_post_meta( $post_id, 'audience_type', $audience );
 	update_post_meta( $post_id, 'city', $city );
@@ -705,7 +712,7 @@ function aws_sbg_export_reinvent_csv() {
 	header( 'Content-Disposition: attachment; filename=' . $filename );
 
 	$output = fopen( 'php://output', 'w' );
-	fputcsv( $output, array( 'Registration #', 'Name', 'Email', 'WhatsApp', 'Institute/Org', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS Event Before', 'Why Invite', 'Will Attend', 'Approval Status', 'Registered At' ) );
+	fputcsv( $output, array( 'Registration #', 'Name', 'Email', 'WhatsApp', 'CNIC/B-Form', 'Institute/Org', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS Event Before', 'Why Invite', 'Will Attend', 'Approval Status', 'Registered At' ) );
 
 	if ( $query->have_posts() ) {
 		foreach ( $query->posts as $reg ) {
@@ -713,6 +720,7 @@ function aws_sbg_export_reinvent_csv() {
 			$reg_number  = get_post_meta( $reg->ID, 'registration_number', true );
 			$email       = get_post_meta( $reg->ID, 'email', true );
 			$whatsapp    = get_post_meta( $reg->ID, 'whatsapp', true );
+			$cnic        = get_post_meta( $reg->ID, 'cnic', true );
 			$university  = get_post_meta( $reg->ID, 'university', true );
 			$audience    = get_post_meta( $reg->ID, 'audience_type', true );
 			$city        = get_post_meta( $reg->ID, 'city', true );
@@ -723,7 +731,7 @@ function aws_sbg_export_reinvent_csv() {
 			$approval    = get_post_meta( $reg->ID, 'approval_status', true ) ?: 'pending';
 			$registered  = get_the_date( 'Y-m-d H:i:s', $reg->ID );
 
-			fputcsv( $output, array( $reg_number, $title, $email, $whatsapp, $university, ucfirst( str_replace( '_', ' ', $audience ) ), $city, $linkedin, ucfirst( $attended ), $why, ucfirst( $will_attend ), ucfirst( $approval ), $registered ) );
+			fputcsv( $output, array( $reg_number, $title, $email, $whatsapp, $cnic, $university, ucfirst( str_replace( '_', ' ', $audience ) ), $city, $linkedin, ucfirst( $attended ), $why, ucfirst( $will_attend ), ucfirst( $approval ), $registered ) );
 		}
 	}
 
