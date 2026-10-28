@@ -133,6 +133,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-choice input { width:18px; height:18px; accent-color:#00DFD8; cursor:pointer; flex-shrink:0; }
 			.rv-choice-title { display:block; font-size:15px; font-weight:500; color:#FFFFFF; }
 			.rv-choice-hint { display:block; font-size:12px; color:rgba(255,255,255,0.5); margin-top:3px; }
+			.rv-choices-3 { grid-template-columns:repeat(3,1fr); }
 
 			.rv-commit { display:flex; align-items:flex-start; gap:14px; padding:18px 0; border-top:1px solid rgba(255,255,255,0.12); cursor:pointer; }
 			.rv-commit input { width:18px; height:18px; margin-top:3px; accent-color:#00DFD8; cursor:pointer; flex-shrink:0; }
@@ -266,9 +267,26 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 							<label for="rv-whatsapp">WhatsApp Number <em>*</em></label>
 							<input id="rv-whatsapp" type="tel" name="whatsapp" :required="currentStep === 1" placeholder="03000000000">
 						</div>
-						<div class="rv-field">
-							<label for="rv-university">University / Organization <em>*</em></label>
-							<input id="rv-university" type="text" name="university" :required="currentStep === 1" placeholder="Air University Islamabad">
+						<div class="rv-field" style="grid-column:1/-1;">
+							<label id="rv-audience-label">I am a <em>*</em></label>
+							<div class="rv-choices rv-choices-3" role="radiogroup" aria-labelledby="rv-audience-label">
+								<label class="rv-choice">
+									<input type="radio" name="audience_type" value="student" x-model="audienceType" :required="currentStep === 1">
+									<span><span class="rv-choice-title">Student</span><span class="rv-choice-hint">Currently studying</span></span>
+								</label>
+								<label class="rv-choice">
+									<input type="radio" name="audience_type" value="professional" x-model="audienceType" :required="currentStep === 1">
+									<span><span class="rv-choice-title">Professional</span><span class="rv-choice-hint">Working professional</span></span>
+								</label>
+								<label class="rv-choice">
+									<input type="radio" name="audience_type" value="job_seeker" x-model="audienceType" :required="currentStep === 1">
+									<span><span class="rv-choice-title">Job Seeker</span><span class="rv-choice-hint">Open to opportunities</span></span>
+								</label>
+							</div>
+						</div>
+						<div class="rv-field" x-show="audienceType" x-cloak>
+							<label for="rv-affiliation" x-text="affiliationLabel()">Institute / Organization <em>*</em></label>
+							<input id="rv-affiliation" type="text" name="affiliation" :required="currentStep === 1 && audienceType" :placeholder="affiliationPlaceholder()">
 						</div>
 						<div class="rv-field">
 							<label for="rv-city">City <em>*</em></label>
@@ -340,9 +358,26 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 		function reinventForm() {
 			return {
 				currentStep: 0,
+				audienceType: '',
 				isSubmitting: false,
 				nextStep() { this.currentStep++; },
 				prevStep() { if ( this.currentStep > 0 ) { this.currentStep--; } },
+				affiliationLabel() {
+					const labels = {
+						student: 'Institute Name',
+						professional: 'Organization Name',
+						job_seeker: 'Most Recent Organization / Institute',
+					};
+					return labels[ this.audienceType ] || 'Institute / Organization';
+				},
+				affiliationPlaceholder() {
+					const placeholders = {
+						student: 'Air University Islamabad',
+						professional: 'Company name',
+						job_seeker: 'Where did you last study or work?',
+					};
+					return placeholders[ this.audienceType ] || '';
+				},
 			};
 		}
 	</script>
@@ -386,14 +421,17 @@ function aws_sbg_handle_reinvent_registration() {
 	$full_name  = isset( $_POST['full_name'] ) ? sanitize_text_field( wp_unslash( $_POST['full_name'] ) ) : '';
 	$email      = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 	$whatsapp   = isset( $_POST['whatsapp'] ) ? sanitize_text_field( wp_unslash( $_POST['whatsapp'] ) ) : '';
-	$university = isset( $_POST['university'] ) ? sanitize_text_field( wp_unslash( $_POST['university'] ) ) : '';
+	$university = isset( $_POST['affiliation'] ) ? sanitize_text_field( wp_unslash( $_POST['affiliation'] ) ) : '';
+	$audience   = isset( $_POST['audience_type'] ) ? sanitize_key( wp_unslash( $_POST['audience_type'] ) ) : '';
 	$city       = isset( $_POST['city'] ) ? sanitize_text_field( wp_unslash( $_POST['city'] ) ) : '';
 	$linkedin   = isset( $_POST['linkedin'] ) ? esc_url_raw( wp_unslash( $_POST['linkedin'] ) ) : '';
 	$attended   = isset( $_POST['attended_before'] ) ? sanitize_text_field( wp_unslash( $_POST['attended_before'] ) ) : '';
 	$why        = isset( $_POST['why_invite'] ) ? sanitize_textarea_field( wp_unslash( $_POST['why_invite'] ) ) : '';
 	$will_attend = isset( $_POST['will_attend'] ) ? sanitize_text_field( wp_unslash( $_POST['will_attend'] ) ) : '';
 
-	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) || empty( $why ) || 'yes' !== $will_attend ) {
+	$valid_audience = in_array( $audience, array( 'student', 'professional', 'job_seeker' ), true );
+
+	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) || empty( $why ) || 'yes' !== $will_attend || ! $valid_audience ) {
 		wp_die( 'Please fill in all required fields.' );
 	}
 
@@ -413,6 +451,7 @@ function aws_sbg_handle_reinvent_registration() {
 	update_post_meta( $post_id, 'email', $email );
 	update_post_meta( $post_id, 'whatsapp', $whatsapp );
 	update_post_meta( $post_id, 'university', $university );
+	update_post_meta( $post_id, 'audience_type', $audience );
 	update_post_meta( $post_id, 'city', $city );
 	update_post_meta( $post_id, 'linkedin', $linkedin );
 	update_post_meta( $post_id, 'attended_before', $attended );
@@ -557,7 +596,7 @@ function aws_sbg_render_reinvent_admin_page() {
 						<th class="py-3.5 px-4">Name</th>
 						<th class="py-3.5 px-4">Email</th>
 						<th class="py-3.5 px-4">WhatsApp</th>
-						<th class="py-3.5 px-4">University</th>
+						<th class="py-3.5 px-4">Institute / Org</th>
 						<th class="py-3.5 px-4">City</th>
 						<th class="py-3.5 px-4">LinkedIn</th>
 						<th class="py-3.5 px-4 text-center">AWS Event Before?</th>
@@ -666,22 +705,25 @@ function aws_sbg_export_reinvent_csv() {
 	header( 'Content-Disposition: attachment; filename=' . $filename );
 
 	$output = fopen( 'php://output', 'w' );
-	fputcsv( $output, array( 'Registration #', 'Name', 'Email', 'WhatsApp', 'University/Org', 'City', 'LinkedIn', 'Attended AWS Event Before', 'Approval Status', 'Registered At' ) );
+	fputcsv( $output, array( 'Registration #', 'Name', 'Email', 'WhatsApp', 'Institute/Org', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS Event Before', 'Why Invite', 'Will Attend', 'Approval Status', 'Registered At' ) );
 
 	if ( $query->have_posts() ) {
 		foreach ( $query->posts as $reg ) {
-			$title      = preg_replace( '/^reinvent-#\d+\s*-\s*/', '', get_the_title( $reg->ID ) );
-			$reg_number = get_post_meta( $reg->ID, 'registration_number', true );
-			$email      = get_post_meta( $reg->ID, 'email', true );
-			$whatsapp   = get_post_meta( $reg->ID, 'whatsapp', true );
-			$university = get_post_meta( $reg->ID, 'university', true );
-			$city       = get_post_meta( $reg->ID, 'city', true );
-			$linkedin   = get_post_meta( $reg->ID, 'linkedin', true );
-			$attended   = get_post_meta( $reg->ID, 'attended_before', true );
-			$approval   = get_post_meta( $reg->ID, 'approval_status', true ) ?: 'pending';
-			$registered = get_the_date( 'Y-m-d H:i:s', $reg->ID );
+			$title       = preg_replace( '/^reinvent-#\d+\s*-\s*/', '', get_the_title( $reg->ID ) );
+			$reg_number  = get_post_meta( $reg->ID, 'registration_number', true );
+			$email       = get_post_meta( $reg->ID, 'email', true );
+			$whatsapp    = get_post_meta( $reg->ID, 'whatsapp', true );
+			$university  = get_post_meta( $reg->ID, 'university', true );
+			$audience    = get_post_meta( $reg->ID, 'audience_type', true );
+			$city        = get_post_meta( $reg->ID, 'city', true );
+			$linkedin    = get_post_meta( $reg->ID, 'linkedin', true );
+			$attended    = get_post_meta( $reg->ID, 'attended_before', true );
+			$why         = get_post_meta( $reg->ID, 'why_invite', true );
+			$will_attend = get_post_meta( $reg->ID, 'will_attend', true );
+			$approval    = get_post_meta( $reg->ID, 'approval_status', true ) ?: 'pending';
+			$registered  = get_the_date( 'Y-m-d H:i:s', $reg->ID );
 
-			fputcsv( $output, array( $reg_number, $title, $email, $whatsapp, $university, $city, $linkedin, ucfirst( $attended ), ucfirst( $approval ), $registered ) );
+			fputcsv( $output, array( $reg_number, $title, $email, $whatsapp, $university, ucfirst( str_replace( '_', ' ', $audience ) ), $city, $linkedin, ucfirst( $attended ), $why, ucfirst( $will_attend ), ucfirst( $approval ), $registered ) );
 		}
 	}
 
