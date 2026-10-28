@@ -53,195 +53,240 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 	ob_start();
 	?>
-	<div class="reinvent-form-wrap" x-data="reinventForm()">
+	<div class="rv-wrap" x-data="reinventForm()">
 		<style>
-			.reinvent-form-wrap * { box-sizing: border-box; }
-			@keyframes reinventPulse {
-				0%, 100% { box-shadow: 0 0 0 0 rgba(173, 92, 255, 0.4); }
-				50% { box-shadow: 0 0 0 12px rgba(173, 92, 255, 0); }
+			.rv-wrap { box-sizing:border-box; min-height:100vh; background:#ffffff; color:#0f172a; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; }
+			.rv-wrap *, .rv-wrap *::before, .rv-wrap *::after { box-sizing:border-box; }
+			.rv-wrap [x-cloak] { display:none !important; }
+			.rv-container { max-width:1040px; margin:0 auto; padding:48px 24px 88px; }
+
+			.rv-top { text-align:left; margin-bottom:56px; }
+			.rv-top a { color:#0f172a; font-size:13px; font-weight:700; text-decoration:none; }
+
+			.rv-title { font-size:clamp(30px,4.5vw,44px); font-weight:800; letter-spacing:-0.02em; line-height:1.15; margin:0 0 14px; }
+			.rv-lede { font-size:16px; color:#64748b; line-height:1.65; max-width:580px; margin:0 auto; }
+			.rv-meta { font-size:13px; color:#94a3b8; margin:14px 0 0; }
+
+			.rv-perks-heading { font-size:20px; font-weight:800; margin:64px 0 24px; }
+			.rv-perks { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin:0 0 44px; text-align:left; }
+			.rv-perk { background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:24px 20px; }
+			.rv-perk svg { width:26px; height:26px; color:#ad5cff; margin-bottom:16px; display:block; }
+			.rv-perk h3 { font-size:15px; font-weight:800; margin:0 0 6px; }
+			.rv-perk p { font-size:13.5px; color:#64748b; line-height:1.55; margin:0; }
+
+			.rv-btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; border:none; border-radius:12px; padding:14px 32px; font-size:14px; font-weight:800; letter-spacing:0.04em; cursor:pointer; text-decoration:none; transition:background 0.15s ease, border-color 0.15s ease; }
+			.rv-btn-primary { background:#ad5cff; color:#ffffff; }
+			.rv-btn-primary:hover { background:#9a47ea; }
+			.rv-btn-primary:disabled { opacity:0.7; cursor:default; }
+			.rv-btn-ghost { background:#ffffff; color:#475569; border:1px solid #e2e8f0; }
+			.rv-btn-ghost:hover { border-color:#cbd5e1; }
+
+			.rv-form { max-width:760px; margin:0 auto; }
+			.rv-step-label { display:block; font-size:11px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:#ad5cff; margin:0 0 10px; }
+			.rv-step-title { font-size:26px; font-weight:800; margin:0 0 8px; }
+			.rv-step-sub { font-size:14px; color:#64748b; margin:0 0 30px; }
+			.rv-question-label { display:block; font-size:12px; font-weight:700; color:#475569; margin:0 0 12px; }
+			.rv-question-label em { font-style:normal; color:#ad5cff; }
+
+			.rv-fields { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+			.rv-field label { display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:7px; }
+			.rv-field label em { font-style:normal; color:#ad5cff; }
+			.rv-field input { width:100%; padding:12px 14px; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
+			.rv-field input:focus { border-color:#ad5cff; outline:none; box-shadow:0 0 0 3px rgba(173,92,255,0.12); }
+			.rv-field input::placeholder { color:#a9b4c6; }
+
+			.rv-choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+			.rv-choice { display:flex; align-items:center; gap:12px; background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:14px 16px; cursor:pointer; transition:border-color 0.15s ease; }
+			.rv-choice:hover { border-color:#cbd5e1; }
+			.rv-choice:has(input:checked) { border-color:#ad5cff; background:#faf5ff; }
+			.rv-choice input { width:18px; height:18px; accent-color:#ad5cff; cursor:pointer; flex-shrink:0; }
+			.rv-choice-title { font-size:14px; font-weight:800; color:#0f172a; display:block; }
+			.rv-choice-hint { font-size:12px; color:#64748b; margin-top:2px; display:block; }
+
+			.rv-confirm { display:flex; align-items:flex-start; gap:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-top:22px; cursor:pointer; }
+			.rv-confirm input { width:18px; height:18px; margin-top:2px; accent-color:#ad5cff; cursor:pointer; flex-shrink:0; }
+			.rv-confirm-text { font-size:13.5px; color:#475569; line-height:1.6; font-weight:500; }
+
+			.rv-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:32px; }
+
+			@keyframes rv-spin { to { transform:rotate(360deg); } }
+			.rv-spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,0.4); border-top-color:#ffffff; border-radius:50%; display:inline-block; animation:rv-spin 0.7s linear infinite; }
+
+			.rv-success { min-height:70vh; display:flex; align-items:center; justify-content:center; padding:40px 20px; }
+			.rv-success-card { max-width:460px; width:100%; background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:48px 32px; text-align:center; }
+			.rv-success-icon { width:64px; height:64px; border-radius:50%; background:#ecfdf5; color:#10b981; display:flex; align-items:center; justify-content:center; margin:0 auto 18px; }
+			.rv-success-icon svg { width:28px; height:28px; }
+			.rv-code { display:inline-block; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:12px; padding:12px 22px; margin:16px 0 6px; }
+			.rv-code-label { font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:#64748b; display:block; margin-bottom:4px; }
+			.rv-code-value { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:19px; font-weight:700; color:#0f172a; }
+
+			@media (max-width:900px) {
+				.rv-perks { grid-template-columns:repeat(2,1fr); }
 			}
-			@keyframes spin {
-				0% { transform: rotate(0deg); }
-				100% { transform: rotate(360deg); }
-			}
-			@keyframes fadeIn {
-				from { opacity: 0; transform: translateY(12px); }
-				to { opacity: 1; transform: translateY(0); }
-			}
-			.reinvent-pulse { animation: reinventPulse 2.5s infinite; }
-			.reinvent-fade-in { animation: fadeIn 0.6s ease-out both; }
-			.reinvent-form-wrap input:focus,
-			.reinvent-form-wrap select:focus,
-			.reinvent-form-wrap textarea:focus {
-				border-color: #ad5cff !important;
-				outline: none;
-				box-shadow: 0 0 0 3px rgba(173, 92, 255, 0.15);
-			}
-			.reinvent-form-wrap input::placeholder,
-			.reinvent-form-wrap input::-webkit-input-placeholder { color: #94a3b8; }
-			@media (min-width: 1024px) {
-				.reinvent-split { flex-direction: row !important; }
-				.reinvent-hero { width: 45% !important; padding: 64px 48px !important; }
-				.reinvent-form-side { width: 55% !important; padding: 64px 48px !important; }
-			}
-			.reinvent-radio-card:has(input:checked) {
-				border-color: #ad5cff;
-				background: #faf5ff;
+			@media (max-width:600px) {
+				.rv-container { padding:40px 20px 64px; }
+				.rv-perks { grid-template-columns:1fr; }
+				.rv-fields { grid-template-columns:1fr; }
+				.rv-choices { grid-template-columns:1fr; }
+				.rv-actions { flex-direction:column-reverse; }
+				.rv-actions .rv-btn { width:100%; }
 			}
 		</style>
 
 		<?php if ( $success ) : ?>
-		<div class="reinvent-fade-in" style="min-height:70vh; display:flex; align-items:center; justify-content:center; padding:40px 20px; background:#f8fafc;">
-			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:32px; padding:56px 40px; text-align:center; box-shadow:0 24px 60px rgba(0,0,0,0.08); max-width:520px; width:100%;">
-				<div style="width:80px; height:80px; background:linear-gradient(135deg, #10b981, #059669); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; box-shadow:0 10px 30px rgba(16,185,129,0.25);">
-					<svg style="width:36px; height:36px; color:#ffffff;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-					</svg>
+		<div class="rv-success">
+			<div class="rv-success-card">
+				<div class="rv-success-icon">
+					<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
 				</div>
-				<h3 style="font-size:28px; font-weight:900; color:#0f172a; margin:0 0 12px;">You're on the list!</h3>
-				<p style="font-size:16px; color:#64748b; margin:0 0 8px; line-height:1.6;">Your application has been received and is under review.</p>
-				<div style="display:inline-block; background:#f1f5f9; border:1.5px dashed #cbd5e1; border-radius:12px; padding:12px 20px; margin:20px 0; font-family:ui-monospace, SFMono-Regular, Menlo, monospace;">
-					<span style="font-size:12px; color:#64748b; display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.05em; font-weight:800;">Registration Number</span>
-					<span style="font-size:20px; color:#0f172a; font-weight:900;"><?php echo esc_html( $reg_id ); ?></span>
+				<h2 style="font-size:24px; font-weight:800; margin:0 0 10px;">You're on the list</h2>
+				<p style="font-size:14px; color:#64748b; line-height:1.6; margin:0;">Your RSVP has been received and is under review. We'll notify you by email if your seat is approved.</p>
+				<div class="rv-code">
+					<span class="rv-code-label">Registration number</span>
+					<span class="rv-code-value"><?php echo esc_html( $reg_id ); ?></span>
 				</div>
-				<p style="font-size:14px; color:#94a3b8; margin:0 0 28px; line-height:1.5;">We'll notify you via email once your seat is approved for AWS re:Invent.</p>
-				<a href="<?php echo esc_url( home_url() ); ?>" style="display:inline-flex; align-items:center; gap:6px; padding:14px 28px; background:linear-gradient(135deg, #ad5cff, #7000ff); color:#fff; font-weight:800; font-size:14px; border-radius:12px; text-decoration:none; box-shadow:0 8px 24px rgba(173,92,255,0.3);">Back to Home</a>
+				<p style="margin:18px 0 0;"><a href="<?php echo esc_url( home_url() ); ?>" style="color:#ad5cff; font-weight:700; font-size:14px; text-decoration:none;">Back to home</a></p>
 			</div>
 		</div>
 		<?php else : ?>
 
-		<div class="reinvent-split" style="min-height:100vh; display:flex; flex-direction:column; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-			<!-- Hero Side -->
-			<div class="reinvent-hero" style="position:relative; width:100%; padding:48px 28px; background:linear-gradient(135deg, #0b0f19 0%, #1e293b 100%); color:#fff; display:flex; flex-direction:column; justify-content:center; overflow:hidden;">
-				<div style="position:absolute; top:-80px; right:-80px; width:420px; height:420px; background:radial-gradient(circle, rgba(173,92,255,0.22) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
-				<div style="position:absolute; bottom:-60px; left:-60px; width:300px; height:300px; background:radial-gradient(circle, rgba(255,153,0,0.12) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
+		<!-- Step 0: Intro -->
+		<section x-show="currentStep === 0">
+			<div class="rv-container">
+				<header class="rv-top">
+					<a href="<?php echo esc_url( home_url() ); ?>">AWS Student Builder Group</a>
+				</header>
 
-				<div style="position:relative; z-index:1; max-width:520px;">
-					<div style="display:inline-flex; align-items:center; gap:8px; background:rgba(173,92,255,0.18); color:#e9d5ff; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.1em; padding:8px 16px; border-radius:100px; margin-bottom:24px; border:1px solid rgba(173,92,255,0.35;">
-						<span class="reinvent-pulse" style="width:8px; height:8px; background:#ad5cff; border-radius:50%; display:inline-block;"></span>
-						Invite-Only Event
+				<h1 class="rv-title" style="text-align:center;"><?php echo esc_html( $title ); ?></h1>
+				<p class="rv-lede" style="text-align:center;"><?php echo esc_html( $subtitle ); ?></p>
+				<?php if ( $date || $location ) : ?>
+					<p class="rv-meta" style="text-align:center;"><?php echo esc_html( trim( $date . ( ( $date && $location ) ? ' · ' : '' ) . $location, ' ·' ) ); ?></p>
+				<?php endif; ?>
+
+				<h2 class="rv-perks-heading" style="text-align:center;">What's waiting for you at re:Invent</h2>
+				<div class="rv-perks">
+					<div class="rv-perk">
+						<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a4 4 0 01-4 4H8a4 4 0 01-4-4V9z"/><path d="M16 10h1.5a2.5 2.5 0 010 5H16"/></svg>
+						<h3>Refreshments</h3>
+						<p>Food, drinks, and coffee on the house.</p>
 					</div>
-
-					<h1 style="font-size:clamp(28px, 5vw, 42px); font-weight:900; margin:0 0 18px; line-height:1.1; letter-spacing:-0.02em;"><?php echo esc_html( $title ); ?></h1>
-					<p style="font-size:16px; color:#cbd5e1; margin:0 0 32px; line-height:1.7; max-width:440px;"><?php echo esc_html( $subtitle ); ?></p>
-
-					<div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:40px;">
-						<?php if ( $date ) : ?>
-							<div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); padding:10px 16px; border-radius:12px; font-size:13px; color:#e2e8f0;">
-								<svg style="width:16px; height:16px; color:#ad5cff;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-								<span><?php echo esc_html( $date ); ?></span>
-							</div>
-						<?php endif; ?>
-						<div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); padding:10px 16px; border-radius:12px; font-size:13px; color:#e2e8f0;">
-								<svg style="width:16px; height:16px; color:#ad5cff;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-								<span><?php echo esc_html( $location ); ?></span>
-							</div>
+					<div class="rv-perk">
+						<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+						<h3>Swags</h3>
+						<p>Exclusive AWS swag to take home.</p>
 					</div>
-
-					<div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:24px; backdrop-filter:blur(10px);">
-						<h4 style="font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:0.1em; color:#94a3b8; margin:0 0 16px;">What to expect</h4>
-						<ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px;">
-							<li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#e2e8f0;">
-								<span style="width:22px; height:22px; border-radius:6px; background:rgba(173,92,255,0.18); color:#ad5cff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900;">1</span>
-								Submit your application
-							</li>
-							<li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#e2e8f0;">
-								<span style="width:22px; height:22px; border-radius:6px; background:rgba(173,92,255,0.18); color:#ad5cff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900;">2</span>
-								Our team reviews your profile
-							</li>
-							<li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#e2e8f0;">
-								<span style="width:22px; height:22px; border-radius:6px; background:rgba(173,92,255,0.18); color:#ad5cff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900;">3</span>
-								Receive approval & event details
-							</li>
-						</ul>
+					<div class="rv-perk">
+						<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+						<h3>Networking</h3>
+						<p>Meet builders, students, and cloud professionals.</p>
+					</div>
+					<div class="rv-perk">
+						<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+						<h3>Activities</h3>
+						<p>Live watch party, quizzes, and hands-on builds.</p>
 					</div>
 				</div>
-			</div>
 
-			<!-- Form Side -->
-			<div class="reinvent-form-side" style="width:100%; padding:48px 28px; background:#f8fafc; display:flex; align-items:center; justify-content:center;">
-				<div class="reinvent-fade-in" style="width:100%; max-width:540px;">
-					<div style="margin-bottom:28px;">
-						<h2 style="font-size:22px; font-weight:900; color:#0f172a; margin:0 0 6px;">Request your invite</h2>
-						<p style="font-size:14px; color:#64748b; margin:0;">Fill in your details below. Limited seats available.</p>
+				<div style="text-align:center;">
+					<button type="button" class="rv-btn rv-btn-primary" @click="nextStep()">RSVP INVITE</button>
+				</div>
+			</div>
+		</section>
+
+		<!-- Steps 1 & 2 -->
+		<form class="rv-form" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" x-show="currentStep > 0" x-cloak @submit="isSubmitting = true">
+			<input type="hidden" name="action" value="submit_aws_reinvent_registration">
+			<?php wp_nonce_field( 'aws_reinvent_registration_action', 'aws_reinvent_registration_nonce' ); ?>
+
+			<!-- Step 1: Personal details -->
+			<section x-show="currentStep === 1">
+				<div class="rv-container">
+					<span class="rv-step-label">Step 1 of 2</span>
+					<h2 class="rv-step-title">Tell us about yourself</h2>
+					<p class="rv-step-sub">A few details so we can review your application.</p>
+
+					<div class="rv-fields">
+						<div class="rv-field">
+							<label>Full Name <em>*</em></label>
+							<input type="text" name="full_name" :required="currentStep === 1" placeholder="Muhammad Ali">
+						</div>
+						<div class="rv-field">
+							<label>Email Address <em>*</em></label>
+							<input type="email" name="email" :required="currentStep === 1" placeholder="ali@example.com">
+						</div>
+						<div class="rv-field">
+							<label>WhatsApp Number <em>*</em></label>
+							<input type="tel" name="whatsapp" :required="currentStep === 1" placeholder="03000000000">
+						</div>
+						<div class="rv-field">
+							<label>University / Organization <em>*</em></label>
+							<input type="text" name="university" :required="currentStep === 1" placeholder="Air University Islamabad">
+						</div>
+						<div class="rv-field">
+							<label>City <em>*</em></label>
+							<input type="text" name="city" :required="currentStep === 1" placeholder="Islamabad">
+						</div>
+						<div class="rv-field">
+							<label>LinkedIn Profile URL <em>*</em></label>
+							<input type="url" name="linkedin" :required="currentStep === 1" placeholder="https://linkedin.com/in/username">
+						</div>
 					</div>
 
-					<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" @submit="isSubmitting = true">
-						<input type="hidden" name="action" value="submit_aws_reinvent_registration">
-						<?php wp_nonce_field( 'aws_reinvent_registration_action', 'aws_reinvent_registration_nonce' ); ?>
+					<div class="rv-actions">
+						<button type="button" class="rv-btn rv-btn-ghost" @click="prevStep()">Back</button>
+						<button type="button" class="rv-btn rv-btn-primary" @click="$el.form.reportValidity() && nextStep()">Continue</button>
+					</div>
+				</div>
+			</section>
 
-						<div style="display:flex; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
-							<div style="flex:1 1 220px;">
-								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Full Name <span style="color:#ad5cff;">*</span></label>
-								<input type="text" name="full_name" required placeholder="Muhammad Ali" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
-							</div>
-							<div style="flex:1 1 220px;">
-								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Email Address <span style="color:#ad5cff;">*</span></label>
-								<input type="email" name="email" required placeholder="ali@example.com" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
-							</div>
-							<div style="flex:1 1 220px;">
-								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">WhatsApp Number <span style="color:#ad5cff;">*</span></label>
-								<input type="tel" name="whatsapp" required placeholder="03000000000" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
-							</div>
-							<div style="flex:1 1 220px;">
-								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">University / Organization <span style="color:#ad5cff;">*</span></label>
-								<input type="text" name="university" required placeholder="Air University Islamabad" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
-							</div>
-							<div style="flex:1 1 220px;">
-								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">City <span style="color:#ad5cff;">*</span></label>
-								<input type="text" name="city" required placeholder="Islamabad" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
-							</div>
-							<div style="flex:1 1 220px;">
-								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">LinkedIn Profile URL <span style="color:#ad5cff;">*</span></label>
-								<input type="url" name="linkedin" required placeholder="https://linkedin.com/in/username" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
-							</div>
-						</div>
+			<!-- Step 2: Finalize -->
+			<section x-show="currentStep === 2">
+				<div class="rv-container">
+					<span class="rv-step-label">Step 2 of 2</span>
+					<h2 class="rv-step-title">Almost done</h2>
+					<p class="rv-step-sub">One last question and you're set.</p>
 
-						<div style="margin-bottom:20px;">
-							<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.05em;">Have you attended any AWS community event before? <span style="color:#ad5cff;">*</span></label>
-							<div style="display:flex; flex-wrap:wrap; gap:12px;">
-								<label class="reinvent-radio-card" style="flex:1 1 140px; cursor:pointer; display:flex; align-items:center; gap:12px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:14px; padding:16px; transition:all 0.2s;">
-									<input type="radio" name="attended_before" value="yes" required style="width:18px; height:18px; accent-color:#ad5cff; flex-shrink:0; cursor:pointer;">
-									<div>
-										<div style="font-weight:800; color:#0f172a; font-size:14px;">Yes</div>
-										<div style="font-size:12px; color:#64748b; margin-top:2px;">I've joined before</div>
-									</div>
-								</label>
-								<label class="reinvent-radio-card" style="flex:1 1 140px; cursor:pointer; display:flex; align-items:center; gap:12px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:14px; padding:16px; transition:all 0.2s;">
-									<input type="radio" name="attended_before" value="no" required style="width:18px; height:18px; accent-color:#ad5cff; flex-shrink:0; cursor:pointer;">
-									<div>
-										<div style="font-weight:800; color:#0f172a; font-size:14px;">No</div>
-										<div style="font-size:12px; color:#64748b; margin-top:2px;">First time</div>
-									</div>
-								</label>
-							</div>
-						</div>
-
-						<div style="margin-bottom:24px; padding:18px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:16px;">
-							<label style="display:flex; align-items:flex-start; gap:12px; cursor:pointer; margin:0;">
-								<input type="checkbox" name="confirm" required style="width:20px; height:20px; margin-top:2px; accent-color:#ad5cff; flex-shrink:0; cursor:pointer;">
-								<span style="font-size:14px; color:#475569; font-weight:600; line-height:1.5;">I understand this is an invite-only event. I will be notified after review if my application is approved to attend AWS re:Invent.</span>
+					<div style="margin-bottom:22px;">
+						<span class="rv-question-label">Have you attended any AWS community event before? <em>*</em></span>
+						<div class="rv-choices">
+							<label class="rv-choice">
+								<input type="radio" name="attended_before" value="yes" :required="currentStep === 2">
+								<span><span class="rv-choice-title">Yes</span><span class="rv-choice-hint">I've joined before</span></span>
+							</label>
+							<label class="rv-choice">
+								<input type="radio" name="attended_before" value="no" :required="currentStep === 2">
+								<span><span class="rv-choice-title">No</span><span class="rv-choice-hint">First time</span></span>
 							</label>
 						</div>
+					</div>
 
-						<button type="submit" :disabled="isSubmitting" style="display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:18px 24px; background:linear-gradient(135deg, #ad5cff, #7000ff); color:#ffffff; font-size:16px; font-weight:900; border:none; border-radius:16px; cursor:pointer; box-shadow:0 12px 32px rgba(173,92,255,0.35); transition:all 0.2s; position:relative; overflow:hidden;">
-							<span x-show="!isSubmitting" style="position:relative; z-index:1;">Request Invite</span>
-							<span x-show="isSubmitting" style="display:none; align-items:center; gap:10px; position:relative; z-index:1;">
-								<span style="width:20px; height:20px; border:3px solid rgba(255,255,255,0.3); border-top-color:#ffffff; border-radius:50%; animation:spin 0.8s linear infinite; display:inline-block;"></span>
-								<span>Processing...</span>
-							</span>
+					<label class="rv-confirm">
+						<input type="checkbox" name="confirm" :required="currentStep === 2">
+						<span class="rv-confirm-text">I understand this is an invite-only event. I will be notified after review if my application is approved to attend AWS re:Invent.</span>
+					</label>
+
+					<div class="rv-actions">
+						<button type="button" class="rv-btn rv-btn-ghost" @click="prevStep()">Back</button>
+						<button type="submit" class="rv-btn rv-btn-primary" :disabled="isSubmitting">
+							<span x-show="!isSubmitting">RSVP INVITE</span>
+							<span x-show="isSubmitting" x-cloak style="gap:10px;"><span class="rv-spinner"></span> Submitting...</span>
 						</button>
-					</form>
+					</div>
 				</div>
-			</div>
-		</div>
+			</section>
+		</form>
 
 		<?php endif; ?>
 	</div>
 
 	<script>
 		function reinventForm() {
-			return { isSubmitting: false };
+			return {
+				currentStep: 0,
+				isSubmitting: false,
+				nextStep() { this.currentStep++; },
+				prevStep() { if ( this.currentStep > 0 ) { this.currentStep--; } },
+			};
 		}
 	</script>
 	<?php
