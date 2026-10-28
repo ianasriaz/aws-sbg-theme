@@ -56,6 +56,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 	$reg_id  = isset( $_GET['reg_id'] ) ? sanitize_text_field( wp_unslash( $_GET['reg_id'] ) ) : '';
 	$fonts   = get_template_directory_uri() . '/assets/design-kit/fonts';
 	$skyline = get_template_directory_uri() . '/assets/design-kit/Islamabad Landmark Footer.png';
+	$aws_logo = 'https://awsairuniversity.com/wp-content/uploads/2026/08/AWS-Logo-White.png';
+	$sbg_logo = 'https://awsairuniversity.com/wp-content/uploads/2026/09/SBG-Logo-White-Transparent.png';
 
 	ob_start();
 	?>
@@ -84,21 +86,20 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-wrap p { margin:0; }
 			.rv-field input, .rv-choice input, .rv-confirm input { margin:0; }
 
-			.rv-topbar { position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px clamp(20px,5vw,48px); border-bottom:1px solid rgba(255,255,255,0.08); }
-			.rv-topbar a, .rv-topbar span { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; text-decoration:none; }
-			.rv-topbar a { color:rgba(255,255,255,0.72); }
-			.rv-topbar a:hover { color:#00DFD8; }
-			.rv-topbar span { color:rgba(255,255,255,0.35); }
+			.rv-topbar { position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px clamp(20px,5vw,48px); border-bottom:1px solid rgba(255,255,255,0.08); }
+			.rv-topbar a { display:inline-flex; align-items:center; }
+			.rv-logo-aws { height:26px; width:auto; display:block; }
+			.rv-logo-sbg { height:30px; width:auto; display:block; }
 
 			/* Step 0 - intro */
 			.rv-intro { position:relative; z-index:1; display:flex; align-items:center; padding:clamp(48px,9vh,110px) clamp(20px,6vw,72px) clamp(180px,26vh,260px); min-height:82vh; }
 			.rv-skyline { position:absolute; left:0; bottom:0; width:100%; height:auto; opacity:0.42; pointer-events:none; user-select:none; z-index:0; }
 			.rv-intro-inner { position:relative; z-index:1; max-width:700px; }
-			.rv-kicker { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#00DFD8; margin:0 0 22px; }
-			.rv-title { font-weight:700; font-size:clamp(34px,5.2vw,58px); line-height:1.06; letter-spacing:-0.02em; margin:0 0 24px; }
-			.rv-lede { font-size:17px; line-height:1.75; color:rgba(255,255,255,0.66); max-width:52ch; margin:0 0 12px; }
+			.rv-kicker { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#00DFD8; margin:0 0 26px; }
+			.rv-title { font-weight:700; font-size:clamp(34px,5.2vw,58px); line-height:1.06; letter-spacing:-0.02em; margin:0 0 30px; }
+			.rv-lede { font-size:17px; line-height:1.75; color:rgba(255,255,255,0.66); max-width:52ch; margin:0 0 16px; }
 			.rv-lede-cta { font-size:16px; line-height:1.7; font-weight:700; color:rgba(255,255,255,0.66); max-width:52ch; margin:0; }
-			.rv-perks { display:grid; grid-template-columns:1fr 1fr; gap:0 clamp(28px,5vw,64px); margin:clamp(44px,7vh,64px) 0 clamp(40px,6vh,56px); }
+			.rv-perks { display:grid; grid-template-columns:1fr 1fr; gap:0 clamp(28px,5vw,64px); margin:clamp(48px,8vh,68px) 0 clamp(40px,6vh,56px); }
 			.rv-perk { border-top:1px solid rgba(255,255,255,0.14); padding:18px 0 24px; }
 			.rv-perk-idx { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.15em; color:#00DFD8; display:block; margin:0 0 10px; }
 			.rv-perk h3 { font-size:17px; font-weight:500; margin:0 0 6px; display:flex; align-items:center; gap:9px; }
@@ -169,6 +170,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				.rv-perks { grid-template-columns:1fr; }
 			}
 			@media (max-width:600px) {
+				.rv-logo-aws { height:21px; }
+				.rv-logo-sbg { height:24px; }
 				.rv-intro { padding-bottom:190px; min-height:auto; }
 				.rv-fields, .rv-choices { grid-template-columns:1fr; }
 				.rv-actions { flex-direction:column-reverse; }
@@ -179,8 +182,10 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 		<div class="rv-mesh" aria-hidden="true"></div>
 
 		<header class="rv-topbar">
-			<a href="<?php echo esc_url( home_url() ); ?>">AWS Student Builder Group</a>
-			<span>re:Invent 2026</span>
+			<a href="<?php echo esc_url( home_url() ); ?>">
+				<img class="rv-logo-aws" src="<?php echo esc_url( $aws_logo ); ?>" alt="AWS">
+			</a>
+			<img class="rv-logo-sbg" src="<?php echo esc_url( $sbg_logo ); ?>" alt="AWS Student Builder Group">
 		</header>
 
 		<?php if ( $success ) : ?>
@@ -211,7 +216,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				<p class="rv-kicker">AWS Community Islamabad is bringing</p>
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
 				<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
-				<p class="rv-lede-cta">Apply below to express your interest. Approved attendees will receive a confirmation email with event ticket details.</p>
+				<p class="rv-lede-cta">Register below to express your interest. Approved attendees will receive a confirmation email with event ticket details.</p>
 
 				<div class="rv-perks">
 					<div class="rv-perk">
@@ -246,7 +251,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					</div>
 				</div>
 
-				<button type="button" class="rv-btn rv-btn-primary" @click="nextStep()">RSVP INVITE</button>
+				<button type="button" class="rv-btn rv-btn-primary" @click="nextStep()">REGISTER NOW</button>
 			</div>
 		</section>
 
