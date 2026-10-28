@@ -63,18 +63,34 @@ jobs:
                 ;;
             esac
 
-      - name: Upload theme
+      - name: Pack archive
+        run: tar -czf deploy.tar.gz -C deploy .
+
+      - name: Upload archive
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SFTP_HOST }}
           username: ${{ secrets.SFTP_USERNAME }}
           password: ${{ secrets.SFTP_PASSWORD }}
           port: ${{ secrets.SFTP_PORT || '22' }}
-          source: "deploy/*"
-          target: ${{ secrets.REMOTE_PATH }}
-          strip_components: 1
+          source: "deploy.tar.gz"
+          target: "/tmp/"
+          strip_components: 0
           rm: false
           overwrite: true
+
+      - name: Extract on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          port: ${{ secrets.SFTP_PORT || 22 }}
+          script: |
+            TARGET="${{ secrets.REMOTE_PATH }}"
+            tar -xzf /tmp/deploy.tar.gz -C "$TARGET" --no-same-owner --no-same-permissions --touch
+            rm -f /tmp/deploy.tar.gz
+            echo "Extracted to $TARGET"
 
       - name: Verify deployment
         uses: appleboy/ssh-action@v1.0.3
