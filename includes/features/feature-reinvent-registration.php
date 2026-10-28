@@ -294,7 +294,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				<div class="rv-stage-inner">
 					<span class="rv-step-label">Step 2 of 2</span>
 					<h2 class="rv-step-title">Almost done</h2>
-					<p class="rv-step-sub">One last question and you're set.</p>
+					<p class="rv-step-sub">A few final details to complete your application.</p>
 
 					<div class="rv-field" style="margin-bottom:28px;">
 						<label for="rv-why">Why do you want to be invited to AWS re:Invent Islamabad 2026? <em>*</em></label>
