@@ -21,38 +21,49 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to ${{ github.event.inputs.environment }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch }}
-      
+
       - name: Prepare deployment package
         run: |
-          # Create deploy directory with only required files
+          # Ship the ENTIRE theme (no path whitelist to rot), minus repo/dev-only files.
           mkdir -p deploy
-          
-          # Copy theme core files (root level - required by WordPress)
-          cp style.css functions.php header.php footer.php index.php deploy/ 2>/dev/null || true
-          
-          # Copy directories needed on server
-          cp -r assets/images deploy/assets/ 2>/dev/null || true
-          cp -r assets/css deploy/assets/ 2>/dev/null || true
-          cp -r assets/js deploy/assets/ 2>/dev/null || true
-          cp -r assets/fonts deploy/assets/ 2>/dev/null || true
-          cp -r includes deploy/
-          cp -r templates deploy/
-          cp -r languages deploy/ 2>/dev/null || true
-          
-          # Copy config files (except seed data)
-          cp config/config-theme.php deploy/config/ 2>/dev/null || true
-          
+          rsync -a ./ deploy/ \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'node_modules/' \
+            --exclude '.commandcode/' \
+            --exclude 'config/seed-*.json'
+
           echo "=== Files ready for deployment ==="
           find deploy -type f | head -20
           echo "... ($(find deploy -type f | wc -l) total files)"
-      
-      - name: Deploy to WordPress (SFTP with Password)
+
+      - name: Clean target directories on server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          port: ${{ secrets.SFTP_PORT || 22 }}
+          script: |
+            TARGET="${{ secrets.REMOTE_PATH }}"
+            case "$TARGET" in
+              *themes*)
+                rm -rf "$TARGET"/*
+                echo "Cleaned $TARGET"
+                ;;
+              *)
+                echo "Refusing to clean unexpected path: $TARGET (must contain 'themes')"
+                exit 1
+                ;;
+            esac
+
+      - name: Upload theme
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SFTP_HOST }}
@@ -64,11 +75,27 @@ jobs:
           strip_components: 1
           rm: false
           overwrite: true
-      
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          port: ${{ secrets.SFTP_PORT || 22 }}
+          script: |
+            cd "${{ secrets.REMOTE_PATH }}"
+            echo "=== Deployed tree ==="
+            ls -la
+            test -f style.css && echo "OK: style.css"
+            test -f functions.php && echo "OK: functions.php"
+            test -f includes/admin/admin-design-kit.php && echo "OK: Brand Kit admin page"
+            test -f assets/design-kit/design-kit.js && echo "OK: Design Kit bundle"
+            test -f templates/pages/page-reinvent.php && echo "OK: re:Invent template"
+
       - name: Deployment Summary
         run: |
-          echo "✅ Deployment completed successfully!"
-          echo "Environment: ${{ github.event.inputs.environment }}"
-          echo "Branch: ${{ github.event.inputs.branch }}"
-          echo "Commit: ${{ github.sha }}"
-          echo "Deployed at: $(date)"
+          echo "### Deployment complete" >> $GITHUB_STEP_SUMMARY
+          echo "- Environment: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: ${{ github.event.inputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
