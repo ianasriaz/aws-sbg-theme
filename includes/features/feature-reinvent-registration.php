@@ -56,7 +56,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 	$reg_id  = isset( $_GET['reg_id'] ) ? sanitize_text_field( wp_unslash( $_GET['reg_id'] ) ) : '';
 	$fonts   = get_template_directory_uri() . '/assets/design-kit/fonts';
 	$skyline = get_template_directory_uri() . '/assets/design-kit/Islamabad Landmark Footer.png';
-	$aws_logo = 'https://awsairuniversity.com/wp-content/uploads/2026/08/AWS-Logo-White.png';
+	$aws_logo = get_template_directory_uri() . '/assets/images/AWS-Logo-White-Trim.png';
 	$sbg_logo = 'https://awsairuniversity.com/wp-content/uploads/2026/09/SBG-Logo-White-Transparent.png';
 
 	ob_start();
@@ -88,7 +88,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 			.rv-topbar { position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px clamp(20px,5vw,48px); border-bottom:1px solid rgba(255,255,255,0.08); }
 			.rv-topbar a { display:inline-flex; align-items:center; }
-			.rv-logo-aws { height:38px; width:auto; display:block; }
+			.rv-logo-aws { height:40px; width:auto; display:block; }
 			.rv-logo-sbg { height:44px; width:auto; display:block; }
 
 			/* Step 0 - intro */
@@ -170,7 +170,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				.rv-perks { grid-template-columns:1fr; }
 			}
 			@media (max-width:600px) {
-				.rv-logo-aws { height:30px; }
+				.rv-logo-aws { height:32px; }
 				.rv-logo-sbg { height:34px; }
 				.rv-intro { padding-bottom:190px; min-height:auto; }
 				.rv-fields, .rv-choices { grid-template-columns:1fr; }
