@@ -58,6 +58,12 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-wrap { box-sizing:border-box; min-height:100vh; background:#ffffff; color:#0f172a; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; }
 			.rv-wrap *, .rv-wrap *::before, .rv-wrap *::after { box-sizing:border-box; }
 			.rv-wrap [x-cloak] { display:none !important; }
+
+			/* Neutralize the theme's dark global styles (style.css sets white headings/text). */
+			.rv-wrap h1, .rv-wrap h2, .rv-wrap h3, .rv-wrap h4, .rv-wrap h5, .rv-wrap h6 { color:#0f172a; margin:0; }
+			.rv-wrap p, .rv-wrap li { color:#64748b; margin:0; }
+			.rv-field input, .rv-choice input, .rv-confirm input { margin:0; }
+			.rv-choice input, .rv-confirm input { background:#ffffff; color:#0f172a; }
 			.rv-container { max-width:1040px; margin:0 auto; padding:48px 24px 88px; }
 
 			.rv-top { text-align:left; margin-bottom:56px; }
