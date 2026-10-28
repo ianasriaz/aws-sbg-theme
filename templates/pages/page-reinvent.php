@@ -17,11 +17,7 @@ $location = 'Islamabad, Pakistan';
 ?>
 
 <main class="min-h-screen bg-gray-50">
-	<div class="px-0 md:px-8 py-0 md:py-12">
-		<div class="max-w-5xl mx-auto">
-			<?php echo aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ); ?>
-		</div>
-	</div>
+	<?php echo aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ); ?>
 </main>
 
 <?php

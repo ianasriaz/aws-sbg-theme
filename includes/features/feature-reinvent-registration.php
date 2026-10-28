@@ -64,7 +64,12 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				0% { transform: rotate(0deg); }
 				100% { transform: rotate(360deg); }
 			}
+			@keyframes fadeIn {
+				from { opacity: 0; transform: translateY(12px); }
+				to { opacity: 1; transform: translateY(0); }
+			}
 			.reinvent-pulse { animation: reinventPulse 2.5s infinite; }
+			.reinvent-fade-in { animation: fadeIn 0.6s ease-out both; }
 			.reinvent-form-wrap input:focus,
 			.reinvent-form-wrap select:focus,
 			.reinvent-form-wrap textarea:focus {
@@ -72,115 +77,166 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				outline: none;
 				box-shadow: 0 0 0 3px rgba(173, 92, 255, 0.15);
 			}
+			.reinvent-form-wrap input::placeholder,
+			.reinvent-form-wrap input::-webkit-input-placeholder { color: #94a3b8; }
+			@media (min-width: 1024px) {
+				.reinvent-split { flex-direction: row !important; }
+				.reinvent-hero { width: 45% !important; padding: 64px 48px !important; }
+				.reinvent-form-side { width: 55% !important; padding: 64px 48px !important; }
+			}
+			.reinvent-radio-card:has(input:checked) {
+				border-color: #ad5cff;
+				background: #faf5ff;
+			}
 		</style>
 
-		<div style="width:100%; max-width:720px; margin:0 auto; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-
-			<?php if ( $success ) : ?>
-				<div style="background:#ffffff; border:2px solid #10b981; border-radius:24px; padding:40px 28px; text-align:center; box-shadow:0 12px 35px rgba(16,185,129,0.12);">
-					<div style="width:64px; height:64px; background:#ecfdf5; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
-						<svg style="width:32px; height:32px; color:#10b981;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-						</svg>
-					</div>
-					<h3 style="font-size:22px; font-weight:900; color:#0f172a; margin:0 0 6px;">Application Received!</h3>
-					<p style="font-size:14px; color:#64748b; margin:0 0 16px;">Your registration number is <strong style="color:#0f172a; font-family:monospace;"><?php echo esc_html( $reg_id ); ?></strong>. We will review your application and notify you if you are approved to attend AWS re:Invent.</p>
-					<a href="<?php echo esc_url( home_url() ); ?>" style="display:inline-flex; align-items:center; gap:6px; padding:12px 22px; background:#ad5cff; color:#fff; font-weight:800; font-size:13px; border-radius:12px; text-decoration:none;">Back to Home</a>
+		<?php if ( $success ) : ?>
+		<div class="reinvent-fade-in" style="min-height:70vh; display:flex; align-items:center; justify-content:center; padding:40px 20px; background:#f8fafc;">
+			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:32px; padding:56px 40px; text-align:center; box-shadow:0 24px 60px rgba(0,0,0,0.08); max-width:520px; width:100%;">
+				<div style="width:80px; height:80px; background:linear-gradient(135deg, #10b981, #059669); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 24px; box-shadow:0 10px 30px rgba(16,185,129,0.25);">
+					<svg style="width:36px; height:36px; color:#ffffff;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+					</svg>
 				</div>
-			<?php else : ?>
+				<h3 style="font-size:28px; font-weight:900; color:#0f172a; margin:0 0 12px;">You're on the list!</h3>
+				<p style="font-size:16px; color:#64748b; margin:0 0 8px; line-height:1.6;">Your application has been received and is under review.</p>
+				<div style="display:inline-block; background:#f1f5f9; border:1.5px dashed #cbd5e1; border-radius:12px; padding:12px 20px; margin:20px 0; font-family:ui-monospace, SFMono-Regular, Menlo, monospace;">
+					<span style="font-size:12px; color:#64748b; display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.05em; font-weight:800;">Registration Number</span>
+					<span style="font-size:20px; color:#0f172a; font-weight:900;"><?php echo esc_html( $reg_id ); ?></span>
+				</div>
+				<p style="font-size:14px; color:#94a3b8; margin:0 0 28px; line-height:1.5;">We'll notify you via email once your seat is approved for AWS re:Invent.</p>
+				<a href="<?php echo esc_url( home_url() ); ?>" style="display:inline-flex; align-items:center; gap:6px; padding:14px 28px; background:linear-gradient(135deg, #ad5cff, #7000ff); color:#fff; font-weight:800; font-size:14px; border-radius:12px; text-decoration:none; box-shadow:0 8px 24px rgba(173,92,255,0.3);">Back to Home</a>
+			</div>
+		</div>
+		<?php else : ?>
 
-			<!-- Hero -->
-			<div style="background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius:24px; padding:32px 28px 28px; margin-bottom:24px; color:#fff; position:relative; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.15);">
-				<div style="position:absolute; top:-40px; right:-40px; width:180px; height:180px; background:rgba(173,92,255,0.18); border-radius:50%; filter:blur(40px);"></div>
-				<div style="position:relative; z-index:1;">
-					<div style="display:inline-flex; align-items:center; gap:8px; background:rgba(173,92,255,0.2); color:#e9d5ff; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; padding:6px 14px; border-radius:100px; margin-bottom:14px; border:1px solid rgba(173,92,255,0.35);">
+		<div class="reinvent-split" style="min-height:100vh; display:flex; flex-direction:column; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+			<!-- Hero Side -->
+			<div class="reinvent-hero" style="position:relative; width:100%; padding:48px 28px; background:linear-gradient(135deg, #0b0f19 0%, #1e293b 100%); color:#fff; display:flex; flex-direction:column; justify-content:center; overflow:hidden;">
+				<div style="position:absolute; top:-80px; right:-80px; width:420px; height:420px; background:radial-gradient(circle, rgba(173,92,255,0.22) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
+				<div style="position:absolute; bottom:-60px; left:-60px; width:300px; height:300px; background:radial-gradient(circle, rgba(255,153,0,0.12) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
+
+				<div style="position:relative; z-index:1; max-width:520px;">
+					<div style="display:inline-flex; align-items:center; gap:8px; background:rgba(173,92,255,0.18); color:#e9d5ff; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:0.1em; padding:8px 16px; border-radius:100px; margin-bottom:24px; border:1px solid rgba(173,92,255,0.35;">
 						<span class="reinvent-pulse" style="width:8px; height:8px; background:#ad5cff; border-radius:50%; display:inline-block;"></span>
 						Invite-Only Event
 					</div>
-					<h2 style="font-size:26px; font-weight:900; margin:0 0 10px; line-height:1.2;"><?php echo esc_html( $title ); ?></h2>
-					<p style="font-size:14px; color:#cbd5e1; margin:0 0 18px; line-height:1.5;"><?php echo esc_html( $subtitle ); ?></p>
-					<div style="display:flex; flex-wrap:wrap; gap:12px; font-size:13px; color:#e2e8f0;">
+
+					<h1 style="font-size:clamp(28px, 5vw, 42px); font-weight:900; margin:0 0 18px; line-height:1.1; letter-spacing:-0.02em;"><?php echo esc_html( $title ); ?></h1>
+					<p style="font-size:16px; color:#cbd5e1; margin:0 0 32px; line-height:1.7; max-width:440px;"><?php echo esc_html( $subtitle ); ?></p>
+
+					<div style="display:flex; flex-wrap:wrap; gap:12px; margin-bottom:40px;">
 						<?php if ( $date ) : ?>
-							<div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1); padding:8px 14px; border-radius:10px;">
-								<svg style="width:16px; height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+							<div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); padding:10px 16px; border-radius:12px; font-size:13px; color:#e2e8f0;">
+								<svg style="width:16px; height:16px; color:#ad5cff;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
 								<span><?php echo esc_html( $date ); ?></span>
 							</div>
 						<?php endif; ?>
-						<div style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.1); padding:8px 14px; border-radius:10px;">
-							<svg style="width:16px; height:16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-							<span><?php echo esc_html( $location ); ?></span>
-						</div>
+						<div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); padding:10px 16px; border-radius:12px; font-size:13px; color:#e2e8f0;">
+								<svg style="width:16px; height:16px; color:#ad5cff;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+								<span><?php echo esc_html( $location ); ?></span>
+							</div>
+					</div>
+
+					<div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:24px; backdrop-filter:blur(10px);">
+						<h4 style="font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:0.1em; color:#94a3b8; margin:0 0 16px;">What to expect</h4>
+						<ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px;">
+							<li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#e2e8f0;">
+								<span style="width:22px; height:22px; border-radius:6px; background:rgba(173,92,255,0.18); color:#ad5cff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900;">1</span>
+								Submit your application
+							</li>
+							<li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#e2e8f0;">
+								<span style="width:22px; height:22px; border-radius:6px; background:rgba(173,92,255,0.18); color:#ad5cff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900;">2</span>
+								Our team reviews your profile
+							</li>
+							<li style="display:flex; align-items:center; gap:10px; font-size:14px; color:#e2e8f0;">
+								<span style="width:22px; height:22px; border-radius:6px; background:rgba(173,92,255,0.18); color:#ad5cff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900;">3</span>
+								Receive approval & event details
+							</li>
+						</ul>
 					</div>
 				</div>
 			</div>
 
-			<!-- Form -->
-			<div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:24px; padding:28px; box-shadow:0 10px 40px rgba(0,0,0,0.06);">
-				<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" @submit="isSubmitting = true">
-					<input type="hidden" name="action" value="submit_aws_reinvent_registration">
-					<?php wp_nonce_field( 'aws_reinvent_registration_action', 'aws_reinvent_registration_nonce' ); ?>
+			<!-- Form Side -->
+			<div class="reinvent-form-side" style="width:100%; padding:48px 28px; background:#f8fafc; display:flex; align-items:center; justify-content:center;">
+				<div class="reinvent-fade-in" style="width:100%; max-width:540px;">
+					<div style="margin-bottom:28px;">
+						<h2 style="font-size:22px; font-weight:900; color:#0f172a; margin:0 0 6px;">Request your invite</h2>
+						<p style="font-size:14px; color:#64748b; margin:0;">Fill in your details below. Limited seats available.</p>
+					</div>
 
-					<div style="display:flex; flex-wrap:wrap; gap:16px;">
-						<div style="flex:1 1 280px;">
-							<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Full Name <span style="color:#ef4444;">*</span></label>
-							<input type="text" name="full_name" required placeholder="Muhammad Ali" style="width:100%; padding:13px 14px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; color:#0f172a;">
+					<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" @submit="isSubmitting = true">
+						<input type="hidden" name="action" value="submit_aws_reinvent_registration">
+						<?php wp_nonce_field( 'aws_reinvent_registration_action', 'aws_reinvent_registration_nonce' ); ?>
+
+						<div style="display:flex; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+							<div style="flex:1 1 220px;">
+								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Full Name <span style="color:#ad5cff;">*</span></label>
+								<input type="text" name="full_name" required placeholder="Muhammad Ali" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
+							</div>
+							<div style="flex:1 1 220px;">
+								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Email Address <span style="color:#ad5cff;">*</span></label>
+								<input type="email" name="email" required placeholder="ali@example.com" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
+							</div>
+							<div style="flex:1 1 220px;">
+								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">WhatsApp Number <span style="color:#ad5cff;">*</span></label>
+								<input type="tel" name="whatsapp" required placeholder="03000000000" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
+							</div>
+							<div style="flex:1 1 220px;">
+								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">University / Organization <span style="color:#ad5cff;">*</span></label>
+								<input type="text" name="university" required placeholder="Air University Islamabad" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
+							</div>
+							<div style="flex:1 1 220px;">
+								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">City <span style="color:#ad5cff;">*</span></label>
+								<input type="text" name="city" required placeholder="Islamabad" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
+							</div>
+							<div style="flex:1 1 220px;">
+								<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">LinkedIn Profile URL <span style="color:#ad5cff;">*</span></label>
+								<input type="url" name="linkedin" required placeholder="https://linkedin.com/in/username" style="width:100%; padding:14px 16px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:all 0.2s;">
+							</div>
 						</div>
-						<div style="flex:1 1 280px;">
-							<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">Email Address <span style="color:#ef4444;">*</span></label>
-							<input type="email" name="email" required placeholder="ali@example.com" style="width:100%; padding:13px 14px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; color:#0f172a;">
-						</div>
-						<div style="flex:1 1 280px;">
-							<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">WhatsApp Number <span style="color:#ef4444;">*</span></label>
-							<input type="tel" name="whatsapp" required placeholder="03000000000" style="width:100%; padding:13px 14px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; color:#0f172a;">
-						</div>
-						<div style="flex:1 1 280px;">
-							<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">University / Organization <span style="color:#ef4444;">*</span></label>
-							<input type="text" name="university" required placeholder="Air University Islamabad" style="width:100%; padding:13px 14px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; color:#0f172a;">
-						</div>
-						<div style="flex:1 1 280px;">
-							<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">City <span style="color:#ef4444;">*</span></label>
-							<input type="text" name="city" required placeholder="Islamabad" style="width:100%; padding:13px 14px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; color:#0f172a;">
-						</div>
-						<div style="flex:1 1 280px;">
-							<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">LinkedIn Profile URL <span style="color:#ef4444;">*</span></label>
-							<input type="url" name="linkedin" required placeholder="https://linkedin.com/in/username" style="width:100%; padding:13px 14px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; font-size:14px; color:#0f172a;">
-						</div>
-						<div style="flex:1 1 100%;">
-							<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;">Have you attended any AWS community event before? <span style="color:#ef4444;">*</span></label>
-							<div style="display:flex; flex-wrap:wrap; gap:16px;">
-								<label style="flex:1 1 140px; cursor:pointer; display:flex; align-items:center; gap:10px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; padding:14px 16px; transition:all 0.2s;" onmouseenter="this.style.borderColor='#ad5cff';" onmouseleave="if(!this.querySelector('input').checked){this.style.borderColor='#e2e8f0';}">
-									<input type="radio" name="attended_before" value="yes" required style="width:18px; height:18px; accent-color:#ad5cff; flex-shrink:0;">
-									<span style="font-weight:700; color:#0f172a; font-size:14px;">Yes</span>
+
+						<div style="margin-bottom:20px;">
+							<label style="display:block; font-size:11px; font-weight:800; color:#475569; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.05em;">Have you attended any AWS community event before? <span style="color:#ad5cff;">*</span></label>
+							<div style="display:flex; flex-wrap:wrap; gap:12px;">
+								<label class="reinvent-radio-card" style="flex:1 1 140px; cursor:pointer; display:flex; align-items:center; gap:12px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:14px; padding:16px; transition:all 0.2s;">
+									<input type="radio" name="attended_before" value="yes" required style="width:18px; height:18px; accent-color:#ad5cff; flex-shrink:0; cursor:pointer;">
+									<div>
+										<div style="font-weight:800; color:#0f172a; font-size:14px;">Yes</div>
+										<div style="font-size:12px; color:#64748b; margin-top:2px;">I've joined before</div>
+									</div>
 								</label>
-								<label style="flex:1 1 140px; cursor:pointer; display:flex; align-items:center; gap:10px; background:#f8fafc; border:2px solid #e2e8f0; border-radius:12px; padding:14px 16px; transition:all 0.2s;" onmouseenter="this.style.borderColor='#ad5cff';" onmouseleave="if(!this.querySelector('input').checked){this.style.borderColor='#e2e8f0';}">
-									<input type="radio" name="attended_before" value="no" required style="width:18px; height:18px; accent-color:#ad5cff; flex-shrink:0;">
-									<span style="font-weight:700; color:#0f172a; font-size:14px;">No</span>
+								<label class="reinvent-radio-card" style="flex:1 1 140px; cursor:pointer; display:flex; align-items:center; gap:12px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:14px; padding:16px; transition:all 0.2s;">
+									<input type="radio" name="attended_before" value="no" required style="width:18px; height:18px; accent-color:#ad5cff; flex-shrink:0; cursor:pointer;">
+									<div>
+										<div style="font-weight:800; color:#0f172a; font-size:14px;">No</div>
+										<div style="font-size:12px; color:#64748b; margin-top:2px;">First time</div>
+									</div>
 								</label>
 							</div>
 						</div>
-					</div>
 
-					<div style="margin-top:24px; padding:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px;">
-						<label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; margin:0;">
-							<input type="checkbox" name="confirm" required style="width:20px; height:20px; margin-top:2px; accent-color:#ad5cff; flex-shrink:0;">
-							<span style="font-size:14px; color:#475569; font-weight:600; line-height:1.5;">I understand this is an invite-only event. I will be notified after review if my application is approved to attend AWS re:Invent.</span>
-						</label>
-					</div>
+						<div style="margin-bottom:24px; padding:18px; background:#ffffff; border:1.5px solid #e2e8f0; border-radius:16px;">
+							<label style="display:flex; align-items:flex-start; gap:12px; cursor:pointer; margin:0;">
+								<input type="checkbox" name="confirm" required style="width:20px; height:20px; margin-top:2px; accent-color:#ad5cff; flex-shrink:0; cursor:pointer;">
+								<span style="font-size:14px; color:#475569; font-weight:600; line-height:1.5;">I understand this is an invite-only event. I will be notified after review if my application is approved to attend AWS re:Invent.</span>
+							</label>
+						</div>
 
-					<div style="margin-top:24px;">
-						<button type="submit" :disabled="isSubmitting" style="display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:18px 24px; background:linear-gradient(135deg, #ad5cff, #7000ff); color:#ffffff; font-size:16px; font-weight:900; border:none; border-radius:16px; cursor:pointer; box-shadow:0 10px 30px rgba(173,92,255,0.3); transition:opacity 0.2s;">
-							<span x-show="!isSubmitting">Request Invite</span>
-							<span x-show="isSubmitting" style="display:none; align-items:center; gap:10px;">
+						<button type="submit" :disabled="isSubmitting" style="display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:18px 24px; background:linear-gradient(135deg, #ad5cff, #7000ff); color:#ffffff; font-size:16px; font-weight:900; border:none; border-radius:16px; cursor:pointer; box-shadow:0 12px 32px rgba(173,92,255,0.35); transition:all 0.2s; position:relative; overflow:hidden;">
+							<span x-show="!isSubmitting" style="position:relative; z-index:1;">Request Invite</span>
+							<span x-show="isSubmitting" style="display:none; align-items:center; gap:10px; position:relative; z-index:1;">
 								<span style="width:20px; height:20px; border:3px solid rgba(255,255,255,0.3); border-top-color:#ffffff; border-radius:50%; animation:spin 0.8s linear infinite; display:inline-block;"></span>
 								<span>Processing...</span>
 							</span>
 						</button>
-					</div>
-				</form>
+					</form>
+				</div>
 			</div>
-
-			<?php endif; ?>
 		</div>
+
+		<?php endif; ?>
 	</div>
 
 	<script>
