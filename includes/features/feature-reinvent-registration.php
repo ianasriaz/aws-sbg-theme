@@ -88,8 +88,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 			.rv-topbar { position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px clamp(20px,5vw,48px); border-bottom:1px solid rgba(255,255,255,0.08); }
 			.rv-topbar a { display:inline-flex; align-items:center; }
-			.rv-logo-aws { height:26px; width:auto; display:block; }
-			.rv-logo-sbg { height:30px; width:auto; display:block; }
+			.rv-logo-aws { height:38px; width:auto; display:block; }
+			.rv-logo-sbg { height:44px; width:auto; display:block; }
 
 			/* Step 0 - intro */
 			.rv-intro { position:relative; z-index:1; display:flex; align-items:center; padding:clamp(48px,9vh,110px) clamp(20px,6vw,72px) clamp(180px,26vh,260px); min-height:82vh; }
@@ -170,8 +170,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				.rv-perks { grid-template-columns:1fr; }
 			}
 			@media (max-width:600px) {
-				.rv-logo-aws { height:21px; }
-				.rv-logo-sbg { height:24px; }
+				.rv-logo-aws { height:30px; }
+				.rv-logo-sbg { height:34px; }
 				.rv-intro { padding-bottom:190px; min-height:auto; }
 				.rv-fields, .rv-choices { grid-template-columns:1fr; }
 				.rv-actions { flex-direction:column-reverse; }
