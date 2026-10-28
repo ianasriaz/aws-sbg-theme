@@ -91,10 +91,10 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-skyline { position:absolute; left:0; bottom:0; width:100%; height:auto; opacity:0.42; pointer-events:none; user-select:none; z-index:0; }
 			.rv-intro-inner { position:relative; z-index:1; max-width:700px; }
 			.rv-kicker { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#00DFD8; margin:0 0 22px; }
-			.rv-title { font-weight:700; font-size:clamp(34px,5.2vw,58px); line-height:1.06; letter-spacing:-0.02em; margin:0 0 22px; }
-			.rv-lede { font-size:17px; line-height:1.7; color:rgba(255,255,255,0.66); max-width:52ch; margin:0 0 14px; }
-			.rv-lede-cta { font-size:16px; line-height:1.65; font-weight:700; color:rgba(255,255,255,0.9); max-width:52ch; margin:0 0 8px; }
-			.rv-perks { display:grid; grid-template-columns:1fr 1fr; gap:0 clamp(28px,5vw,64px); margin:0 0 clamp(36px,5vh,52px); }
+			.rv-title { font-weight:700; font-size:clamp(34px,5.2vw,58px); line-height:1.06; letter-spacing:-0.02em; margin:0 0 24px; }
+			.rv-lede { font-size:17px; line-height:1.75; color:rgba(255,255,255,0.66); max-width:52ch; margin:0 0 12px; }
+			.rv-lede-cta { font-size:16px; line-height:1.7; font-weight:700; color:rgba(255,255,255,0.66); max-width:52ch; margin:0; }
+			.rv-perks { display:grid; grid-template-columns:1fr 1fr; gap:0 clamp(28px,5vw,64px); margin:clamp(44px,7vh,64px) 0 clamp(40px,6vh,56px); }
 			.rv-perk { border-top:1px solid rgba(255,255,255,0.14); padding:18px 0 24px; }
 			.rv-perk-idx { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.15em; color:#00DFD8; display:block; margin:0 0 10px; }
 			.rv-perk h3 { font-size:17px; font-weight:500; margin:0 0 6px; display:flex; align-items:center; gap:9px; }
@@ -126,8 +126,6 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-field textarea::placeholder { color:rgba(255,255,255,0.32); }
 			.rv-field-hint { font-size:13px; line-height:1.6; color:rgba(255,255,255,0.5); margin:0 0 10px; }
 
-			.rv-question-label { display:block; font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.62); margin:0 0 14px; }
-
 			.rv-choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 			.rv-choice { display:flex; align-items:center; gap:12px; padding:16px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.14); border-radius:12px; cursor:pointer; transition:border-color 0.15s ease, background 0.15s ease; }
 			.rv-choice:hover { border-color:rgba(255,255,255,0.4); }
@@ -136,10 +134,10 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-choice-title { display:block; font-size:15px; font-weight:500; color:#FFFFFF; }
 			.rv-choice-hint { display:block; font-size:12px; color:rgba(255,255,255,0.5); margin-top:3px; }
 
-			.rv-confirm { display:flex; align-items:flex-start; gap:12px; padding:18px; margin-top:22px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.14); border-radius:12px; cursor:pointer; }
-			.rv-confirm input { width:18px; height:18px; margin-top:2px; accent-color:#00DFD8; cursor:pointer; flex-shrink:0; }
-			.rv-confirm-text { font-size:14px; line-height:1.65; color:rgba(255,255,255,0.7); }
-			.rv-confirm-sub { display:block; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.45); margin-top:4px; }
+			.rv-commit { display:flex; align-items:flex-start; gap:14px; padding:18px 0; border-top:1px solid rgba(255,255,255,0.12); cursor:pointer; }
+			.rv-commit input { width:18px; height:18px; margin-top:3px; accent-color:#00DFD8; cursor:pointer; flex-shrink:0; }
+			.rv-commit-text { font-size:14.5px; line-height:1.6; color:rgba(255,255,255,0.75); }
+			.rv-commit-sub { display:block; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.42); margin-top:4px; }
 
 			.rv-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:36px; }
 
@@ -296,14 +294,14 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					<h2 class="rv-step-title">Almost done</h2>
 					<p class="rv-step-sub">A few final details to complete your application.</p>
 
-					<div class="rv-field" style="margin-bottom:28px;">
+					<div class="rv-field" style="margin-bottom:36px;">
 						<label for="rv-why">Why do you want to be invited to AWS re:Invent Islamabad 2026? <em>*</em></label>
 						<p class="rv-field-hint">This event is designed for passionate builders, learners, and technology enthusiasts. Tell us about your experience with AWS, community involvement, and what you're hoping to gain from the event.</p>
 						<textarea id="rv-why" name="why_invite" rows="6" :required="currentStep === 2" placeholder="Share your AWS experience, certifications, projects, community involvement, or why you'd like to attend (100-300 words)"></textarea>
 					</div>
 
-					<div style="margin-bottom:26px;">
-						<span class="rv-question-label" id="rv-attended-label">Have you attended any AWS community event before? <em>*</em></span>
+					<div class="rv-field" style="margin-bottom:40px;">
+						<label id="rv-attended-label">Have you attended any AWS community event before? <em>*</em></label>
 						<div class="rv-choices" role="radiogroup" aria-labelledby="rv-attended-label">
 							<label class="rv-choice">
 								<input type="radio" name="attended_before" value="yes" :required="currentStep === 2">
@@ -316,20 +314,19 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 					</div>
 
-					<label class="rv-confirm">
+					<label class="rv-commit">
 						<input type="checkbox" name="confirm" :required="currentStep === 2">
-						<span class="rv-confirm-text">I understand this is an invite-only event. I will be notified after review if my application is approved to attend AWS re:Invent.</span>
+						<span class="rv-commit-text">I understand this is an invite-only event. I will be notified after review if my application is approved.</span>
 					</label>
-
-					<label class="rv-confirm" style="margin-top:12px;">
+					<label class="rv-commit">
 						<input type="checkbox" name="will_attend" value="yes" :required="currentStep === 2">
-						<span class="rv-confirm-text">I will attend the event if accepted.<span class="rv-confirm-sub">Seats are limited and resources are planned per attendee, so a no-show takes a seat from another builder.</span></span>
+						<span class="rv-commit-text">I will attend the event if accepted.<span class="rv-commit-sub">Seats are limited and resources are planned per attendee, so a no-show takes a seat from another builder.</span></span>
 					</label>
 
-					<div class="rv-actions">
+					<div class="rv-actions" style="margin-top:32px;">
 						<button type="button" class="rv-btn rv-btn-ghost" @click="prevStep()">Back</button>
 						<button type="submit" class="rv-btn rv-btn-primary" :disabled="isSubmitting">
-							<span x-show="!isSubmitting">RSVP INVITE</span>
+							<span x-show="!isSubmitting">SUBMIT</span>
 							<span x-show="isSubmitting" x-cloak><span class="rv-spinner"></span> Submitting</span>
 						</button>
 					</div>
