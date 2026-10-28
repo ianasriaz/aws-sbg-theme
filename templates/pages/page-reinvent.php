@@ -17,7 +17,7 @@ add_filter( 'show_admin_bar', '__return_false' );
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<?php wp_head(); ?>
 </head>
-<body <?php body_class(); ?> style="margin:0; background:#ffffff; color:#0f172a;">
+<body <?php body_class(); ?> style="margin:0; background:#06040c; color:#ffffff;">
 <?php
 $title    = 'AWS re:Invent Watch & Build Party Islamabad 2026';
 $subtitle = 'An invite-only evening for builders, dreamers, and cloud enthusiasts. Apply below and we will notify you once your seat is approved.';

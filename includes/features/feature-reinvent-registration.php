@@ -50,191 +50,217 @@ function aws_sbg_generate_reinvent_registration_number() {
 function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 	$success = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'success';
 	$reg_id  = isset( $_GET['reg_id'] ) ? sanitize_text_field( wp_unslash( $_GET['reg_id'] ) ) : '';
+	$fonts   = get_template_directory_uri() . '/assets/design-kit/fonts';
+	$skyline = get_template_directory_uri() . '/assets/design-kit/Islamabad Landmark Footer.png';
 
 	ob_start();
 	?>
 	<div class="rv-wrap" x-data="reinventForm()">
 		<style>
-			.rv-wrap { box-sizing:border-box; min-height:100vh; background:#ffffff; color:#0f172a; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; }
+			@font-face { font-family:'Amazon Ember Display'; src:url('<?php echo esc_url( $fonts ); ?>/AmazonEmberDisplay_Md.ttf') format('truetype'); font-weight:400; font-style:normal; font-display:swap; }
+			@font-face { font-family:'Amazon Ember Display'; src:url('<?php echo esc_url( $fonts ); ?>/AmazonEmberDisplay_Md.ttf') format('truetype'); font-weight:500; font-style:normal; font-display:swap; }
+			@font-face { font-family:'Amazon Ember Display'; src:url('<?php echo esc_url( $fonts ); ?>/AmazonEmberDisplay_Bd.ttf') format('truetype'); font-weight:700; font-style:normal; font-display:swap; }
+			@font-face { font-family:'Amazon Ember Mono'; src:url('<?php echo esc_url( $fonts ); ?>/AmazonEmberMono_Rg.ttf') format('truetype'); font-weight:400; font-style:normal; font-display:swap; }
+			@font-face { font-family:'Amazon Ember Mono'; src:url('<?php echo esc_url( $fonts ); ?>/AmazonEmberMono_Bd.ttf') format('truetype'); font-weight:700; font-style:normal; font-display:swap; }
+
+			.rv-wrap { position:relative; min-height:100vh; background:#06040C; color:#FFFFFF; font-family:'Amazon Ember Display',system-ui,-apple-system,'Segoe UI',sans-serif; overflow:hidden; }
 			.rv-wrap *, .rv-wrap *::before, .rv-wrap *::after { box-sizing:border-box; }
 			.rv-wrap [x-cloak] { display:none !important; }
+			.rv-wrap :focus-visible { outline:2px solid #00DFD8; outline-offset:3px; border-radius:4px; }
 
-			/* Neutralize the theme's dark global styles (style.css sets white headings/text). */
-			.rv-wrap h1, .rv-wrap h2, .rv-wrap h3, .rv-wrap h4, .rv-wrap h5, .rv-wrap h6 { color:#0f172a; margin:0; }
-			.rv-wrap p, .rv-wrap li { color:#64748b; margin:0; }
+			/* Diffused purple-to-cyan mesh, matching the kit's canvas */
+			.rv-mesh { position:absolute; inset:0; z-index:0; pointer-events:none; background:
+				radial-gradient(55% 42% at 12% -5%, rgba(107,69,232,0.5), transparent 68%),
+				radial-gradient(48% 38% at 88% 8%, rgba(46,99,224,0.38), transparent 70%),
+				radial-gradient(60% 46% at 82% 92%, rgba(10,141,192,0.34), transparent 70%),
+				radial-gradient(50% 40% at 8% 96%, rgba(135,73,220,0.30), transparent 72%); }
+
+			/* Theme style.css resets applied to this surface */
+			.rv-wrap h1, .rv-wrap h2, .rv-wrap h3, .rv-wrap h4 { color:#FFFFFF; margin:0; }
+			.rv-wrap p { margin:0; }
 			.rv-field input, .rv-choice input, .rv-confirm input { margin:0; }
-			.rv-choice input, .rv-confirm input { background:#ffffff; color:#0f172a; }
-			.rv-container { max-width:1040px; margin:0 auto; padding:48px 24px 88px; }
 
-			.rv-top { text-align:left; margin-bottom:56px; }
-			.rv-top a { color:#0f172a; font-size:13px; font-weight:700; text-decoration:none; }
+			.rv-topbar { position:relative; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px clamp(20px,5vw,48px); border-bottom:1px solid rgba(255,255,255,0.08); }
+			.rv-topbar a, .rv-topbar span { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; text-decoration:none; }
+			.rv-topbar a { color:rgba(255,255,255,0.72); }
+			.rv-topbar a:hover { color:#00DFD8; }
+			.rv-topbar span { color:rgba(255,255,255,0.35); }
 
-			.rv-title { font-size:clamp(30px,4.5vw,44px); font-weight:800; letter-spacing:-0.02em; line-height:1.15; margin:0 0 14px; }
-			.rv-lede { font-size:16px; color:#64748b; line-height:1.65; max-width:580px; margin:0 auto; }
-			.rv-meta { font-size:13px; color:#94a3b8; margin:14px 0 0; }
+			/* Step 0 - intro */
+			.rv-intro { position:relative; z-index:1; display:flex; align-items:center; padding:clamp(48px,9vh,110px) clamp(20px,6vw,72px) clamp(180px,26vh,260px); min-height:82vh; }
+			.rv-skyline { position:absolute; left:0; bottom:0; width:100%; height:auto; opacity:0.42; pointer-events:none; user-select:none; z-index:0; }
+			.rv-intro-inner { position:relative; z-index:1; max-width:700px; }
+			.rv-kicker { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#00DFD8; margin:0 0 22px; }
+			.rv-title { font-weight:700; font-size:clamp(34px,5.2vw,58px); line-height:1.06; letter-spacing:-0.02em; margin:0 0 22px; }
+			.rv-lede { font-size:17px; line-height:1.7; color:rgba(255,255,255,0.66); max-width:52ch; margin:0 0 16px; }
+			.rv-perks { display:grid; grid-template-columns:1fr 1fr; gap:0 clamp(28px,5vw,64px); margin:0 0 clamp(36px,5vh,52px); }
+			.rv-perk { border-top:1px solid rgba(255,255,255,0.14); padding:18px 0 24px; }
+			.rv-perk-idx { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.15em; color:#00DFD8; display:block; margin:0 0 10px; }
+			.rv-perk h3 { font-size:17px; font-weight:500; margin:0 0 6px; }
+			.rv-perk p { font-size:14px; line-height:1.6; color:rgba(255,255,255,0.56); }
 
-			.rv-perks-heading { font-size:20px; font-weight:800; margin:64px 0 24px; }
-			.rv-perks { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin:0 0 44px; text-align:left; }
-			.rv-perk { background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:24px 20px; }
-			.rv-perk svg { width:26px; height:26px; color:#ad5cff; margin-bottom:16px; display:block; }
-			.rv-perk h3 { font-size:15px; font-weight:800; margin:0 0 6px; }
-			.rv-perk p { font-size:13.5px; color:#64748b; line-height:1.55; margin:0; }
+			.rv-btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; border:0; border-radius:10px; padding:16px 38px; font-family:'Amazon Ember Mono',monospace; font-size:13px; font-weight:700; letter-spacing:0.1em; cursor:pointer; text-decoration:none; transition:background 0.18s ease, border-color 0.18s ease, transform 0.18s ease; }
+			.rv-btn-primary { background:#00DFD8; color:#06040C; }
+			.rv-btn-primary:hover { background:#40E7E2; transform:translateY(-1px); }
+			.rv-btn-primary:disabled { opacity:0.65; cursor:default; transform:none; }
+			.rv-btn-ghost { background:transparent; color:rgba(255,255,255,0.75); border:1px solid rgba(255,255,255,0.22); padding:15px 32px; }
+			.rv-btn-ghost:hover { border-color:rgba(255,255,255,0.5); color:#FFFFFF; }
 
-			.rv-btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; border:none; border-radius:12px; padding:14px 32px; font-size:14px; font-weight:800; letter-spacing:0.04em; cursor:pointer; text-decoration:none; transition:background 0.15s ease, border-color 0.15s ease; }
-			.rv-btn-primary { background:#ad5cff; color:#ffffff; }
-			.rv-btn-primary:hover { background:#9a47ea; }
-			.rv-btn-primary:disabled { opacity:0.7; cursor:default; }
-			.rv-btn-ghost { background:#ffffff; color:#475569; border:1px solid #e2e8f0; }
-			.rv-btn-ghost:hover { border-color:#cbd5e1; }
-
-			.rv-form { max-width:760px; margin:0 auto; }
-			.rv-step-label { display:block; font-size:11px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:#ad5cff; margin:0 0 10px; }
-			.rv-step-title { font-size:26px; font-weight:800; margin:0 0 8px; }
-			.rv-step-sub { font-size:14px; color:#64748b; margin:0 0 30px; }
-			.rv-question-label { display:block; font-size:12px; font-weight:700; color:#475569; margin:0 0 12px; }
-			.rv-question-label em { font-style:normal; color:#ad5cff; }
+			/* Steps 1 & 2 */
+			.rv-stage { position:relative; z-index:1; padding:clamp(48px,10vh,110px) clamp(20px,6vw,72px) clamp(72px,12vh,120px); }
+			.rv-stage-inner { max-width:640px; margin:0 auto; }
+			.rv-step-label { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#00DFD8; }
+			.rv-step-title { font-weight:700; font-size:clamp(26px,3.4vw,34px); letter-spacing:-0.01em; margin:14px 0 10px; }
+			.rv-step-sub { font-size:15px; line-height:1.6; color:rgba(255,255,255,0.58); margin:0 0 36px; }
 
 			.rv-fields { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-			.rv-field label { display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:7px; }
-			.rv-field label em { font-style:normal; color:#ad5cff; }
-			.rv-field input { width:100%; padding:12px 14px; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; font-size:15px; color:#0f172a; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
-			.rv-field input:focus { border-color:#ad5cff; outline:none; box-shadow:0 0 0 3px rgba(173,92,255,0.12); }
-			.rv-field input::placeholder { color:#a9b4c6; }
+			.rv-field label { display:block; font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.62); margin-bottom:8px; }
+			.rv-field label em, .rv-question-label em { font-style:normal; color:#00DFD8; }
+			.rv-field input { width:100%; padding:14px 16px; font-family:inherit; font-size:16px; color:#FFFFFF; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.16); border-radius:10px; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
+			.rv-field input:focus { outline:none; border-color:#00DFD8; box-shadow:0 0 0 3px rgba(0,223,216,0.14); }
+			.rv-field input::placeholder { color:rgba(255,255,255,0.32); }
+
+			.rv-question-label { display:block; font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.62); margin:0 0 14px; }
 
 			.rv-choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-			.rv-choice { display:flex; align-items:center; gap:12px; background:#ffffff; border:1px solid #e2e8f0; border-radius:14px; padding:14px 16px; cursor:pointer; transition:border-color 0.15s ease; }
-			.rv-choice:hover { border-color:#cbd5e1; }
-			.rv-choice:has(input:checked) { border-color:#ad5cff; background:#faf5ff; }
-			.rv-choice input { width:18px; height:18px; accent-color:#ad5cff; cursor:pointer; flex-shrink:0; }
-			.rv-choice-title { font-size:14px; font-weight:800; color:#0f172a; display:block; }
-			.rv-choice-hint { font-size:12px; color:#64748b; margin-top:2px; display:block; }
+			.rv-choice { display:flex; align-items:center; gap:12px; padding:16px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.14); border-radius:12px; cursor:pointer; transition:border-color 0.15s ease, background 0.15s ease; }
+			.rv-choice:hover { border-color:rgba(255,255,255,0.4); }
+			.rv-choice:has(input:checked) { border-color:#00DFD8; background:rgba(0,223,216,0.08); }
+			.rv-choice input { width:18px; height:18px; accent-color:#00DFD8; cursor:pointer; flex-shrink:0; }
+			.rv-choice-title { display:block; font-size:15px; font-weight:500; color:#FFFFFF; }
+			.rv-choice-hint { display:block; font-size:12px; color:rgba(255,255,255,0.5); margin-top:3px; }
 
-			.rv-confirm { display:flex; align-items:flex-start; gap:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-top:22px; cursor:pointer; }
-			.rv-confirm input { width:18px; height:18px; margin-top:2px; accent-color:#ad5cff; cursor:pointer; flex-shrink:0; }
-			.rv-confirm-text { font-size:13.5px; color:#475569; line-height:1.6; font-weight:500; }
+			.rv-confirm { display:flex; align-items:flex-start; gap:12px; padding:18px; margin-top:22px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.14); border-radius:12px; cursor:pointer; }
+			.rv-confirm input { width:18px; height:18px; margin-top:2px; accent-color:#00DFD8; cursor:pointer; flex-shrink:0; }
+			.rv-confirm-text { font-size:14px; line-height:1.65; color:rgba(255,255,255,0.7); }
 
-			.rv-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:32px; }
+			.rv-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:36px; }
 
 			@keyframes rv-spin { to { transform:rotate(360deg); } }
-			.rv-spinner { width:16px; height:16px; border:2px solid rgba(255,255,255,0.4); border-top-color:#ffffff; border-radius:50%; display:inline-block; animation:rv-spin 0.7s linear infinite; }
+			.rv-spinner { width:16px; height:16px; border:2px solid rgba(6,4,12,0.3); border-top-color:#06040C; border-radius:50%; display:inline-block; animation:rv-spin 0.7s linear infinite; }
 
-			.rv-success { min-height:70vh; display:flex; align-items:center; justify-content:center; padding:40px 20px; }
-			.rv-success-card { max-width:460px; width:100%; background:#ffffff; border:1px solid #e2e8f0; border-radius:20px; padding:48px 32px; text-align:center; }
-			.rv-success-icon { width:64px; height:64px; border-radius:50%; background:#ecfdf5; color:#10b981; display:flex; align-items:center; justify-content:center; margin:0 auto 18px; }
-			.rv-success-icon svg { width:28px; height:28px; }
-			.rv-code { display:inline-block; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:12px; padding:12px 22px; margin:16px 0 6px; }
-			.rv-code-label { font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:#64748b; display:block; margin-bottom:4px; }
-			.rv-code-value { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:19px; font-weight:700; color:#0f172a; }
+			/* Success */
+			.rv-success { position:relative; z-index:1; min-height:calc(100vh - 64px); display:flex; align-items:center; justify-content:center; padding:48px 24px; }
+			.rv-success-card { max-width:460px; width:100%; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:48px 32px; text-align:center; }
+			.rv-success-icon { width:60px; height:60px; border:2px solid #00DFD8; border-radius:50%; color:#00DFD8; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; }
+			.rv-success-icon svg { width:26px; height:26px; }
+			.rv-code { display:inline-block; border:1px dashed rgba(0,223,216,0.4); border-radius:12px; padding:14px 24px; margin:20px 0 4px; }
+			.rv-code-label { font-family:'Amazon Ember Mono',monospace; font-size:10px; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:rgba(255,255,255,0.5); display:block; margin-bottom:6px; }
+			.rv-code-value { font-family:'Amazon Ember Mono',monospace; font-size:18px; font-weight:700; color:#00DFD8; letter-spacing:0.04em; }
+			.rv-success-link { display:inline-block; font-family:'Amazon Ember Mono',monospace; font-size:12px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#00DFD8; text-decoration:none; margin-top:22px; border-bottom:1px solid transparent; }
+			.rv-success-link:hover { border-bottom-color:#00DFD8; }
 
-			@media (max-width:900px) {
-				.rv-perks { grid-template-columns:repeat(2,1fr); }
+			@media (prefers-reduced-motion:no-preference) {
+				@keyframes rvRise { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+				.rv-intro-inner, .rv-stage-inner, .rv-success-card { animation:rvRise 0.5s cubic-bezier(0.22,0.61,0.36,1) both; }
+			}
+
+			@media (max-width:700px) {
+				.rv-perks { grid-template-columns:1fr; }
 			}
 			@media (max-width:600px) {
-				.rv-container { padding:40px 20px 64px; }
-				.rv-perks { grid-template-columns:1fr; }
-				.rv-fields { grid-template-columns:1fr; }
-				.rv-choices { grid-template-columns:1fr; }
+				.rv-intro { padding-bottom:190px; min-height:auto; }
+				.rv-fields, .rv-choices { grid-template-columns:1fr; }
 				.rv-actions { flex-direction:column-reverse; }
 				.rv-actions .rv-btn { width:100%; }
 			}
 		</style>
 
+		<div class="rv-mesh" aria-hidden="true"></div>
+
+		<header class="rv-topbar">
+			<a href="<?php echo esc_url( home_url() ); ?>">AWS Student Builder Group</a>
+			<span>re:Invent 2026</span>
+		</header>
+
 		<?php if ( $success ) : ?>
-		<div class="rv-success">
+		<div class="rv-success" x-data="reinventForm()" style="display:flex;">
 			<div class="rv-success-card">
-				<div class="rv-success-icon">
+				<div class="rv-success-icon" style="animation:none;">
 					<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
 				</div>
-				<h2 style="font-size:24px; font-weight:800; margin:0 0 10px;">You're on the list</h2>
-				<p style="font-size:14px; color:#64748b; line-height:1.6; margin:0;">Your RSVP has been received and is under review. We'll notify you by email if your seat is approved.</p>
+				<h2 style="font-weight:700; font-size:26px; margin:0 0 10px;">RSVP received</h2>
+				<p style="font-size:15px; line-height:1.65; color:rgba(255,255,255,0.62);">Your application is under review. We'll notify you by email if your seat is approved for AWS re:Invent.</p>
 				<div class="rv-code">
 					<span class="rv-code-label">Registration number</span>
 					<span class="rv-code-value"><?php echo esc_html( $reg_id ); ?></span>
 				</div>
-				<p style="margin:18px 0 0;"><a href="<?php echo esc_url( home_url() ); ?>" style="color:#ad5cff; font-weight:700; font-size:14px; text-decoration:none;">Back to home</a></p>
+				<p style="margin:6px 0 0;"><a class="rv-success-link" href="<?php echo esc_url( home_url() ); ?>">Back to home</a></p>
 			</div>
 		</div>
 		<?php else : ?>
 
 		<!-- Step 0: Intro -->
-		<section x-show="currentStep === 0">
-			<div class="rv-container">
-				<header class="rv-top">
-					<a href="<?php echo esc_url( home_url() ); ?>">AWS Student Builder Group</a>
-				</header>
+		<section class="rv-intro" x-show="currentStep === 0">
+			<img class="rv-skyline" src="<?php echo esc_url( $skyline ); ?>" alt="" aria-hidden="true">
+			<div class="rv-intro-inner">
+				<p class="rv-kicker">Invite-only · <?php echo esc_html( $location ); ?></p>
+				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
+				<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
 
-				<h1 class="rv-title" style="text-align:center;"><?php echo esc_html( $title ); ?></h1>
-				<p class="rv-lede" style="text-align:center;"><?php echo esc_html( $subtitle ); ?></p>
-				<?php if ( $date || $location ) : ?>
-					<p class="rv-meta" style="text-align:center;"><?php echo esc_html( trim( $date . ( ( $date && $location ) ? ' · ' : '' ) . $location, ' ·' ) ); ?></p>
-				<?php endif; ?>
-
-				<h2 class="rv-perks-heading" style="text-align:center;">What's waiting for you at re:Invent</h2>
 				<div class="rv-perks">
 					<div class="rv-perk">
-						<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a4 4 0 01-4 4H8a4 4 0 01-4-4V9z"/><path d="M16 10h1.5a2.5 2.5 0 010 5H16"/></svg>
+						<span class="rv-perk-idx">01</span>
 						<h3>Refreshments</h3>
 						<p>Food, drinks, and coffee on the house.</p>
 					</div>
 					<div class="rv-perk">
-						<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+						<span class="rv-perk-idx">02</span>
 						<h3>Swags</h3>
 						<p>Exclusive AWS swag to take home.</p>
 					</div>
 					<div class="rv-perk">
-						<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+						<span class="rv-perk-idx">03</span>
 						<h3>Networking</h3>
 						<p>Meet builders, students, and cloud professionals.</p>
 					</div>
 					<div class="rv-perk">
-						<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+						<span class="rv-perk-idx">04</span>
 						<h3>Activities</h3>
 						<p>Live watch party, quizzes, and hands-on builds.</p>
 					</div>
 				</div>
 
-				<div style="text-align:center;">
-					<button type="button" class="rv-btn rv-btn-primary" @click="nextStep()">RSVP INVITE</button>
-				</div>
+				<button type="button" class="rv-btn rv-btn-primary" @click="nextStep()">RSVP INVITE</button>
 			</div>
 		</section>
 
 		<!-- Steps 1 & 2 -->
-		<form class="rv-form" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" x-show="currentStep > 0" x-cloak @submit="isSubmitting = true">
+		<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" x-show="currentStep > 0" x-cloak @submit="isSubmitting = true">
 			<input type="hidden" name="action" value="submit_aws_reinvent_registration">
 			<?php wp_nonce_field( 'aws_reinvent_registration_action', 'aws_reinvent_registration_nonce' ); ?>
 
 			<!-- Step 1: Personal details -->
-			<section x-show="currentStep === 1">
-				<div class="rv-container">
+			<section class="rv-stage" x-show="currentStep === 1">
+				<div class="rv-stage-inner">
 					<span class="rv-step-label">Step 1 of 2</span>
 					<h2 class="rv-step-title">Tell us about yourself</h2>
 					<p class="rv-step-sub">A few details so we can review your application.</p>
 
 					<div class="rv-fields">
 						<div class="rv-field">
-							<label>Full Name <em>*</em></label>
-							<input type="text" name="full_name" :required="currentStep === 1" placeholder="Muhammad Ali">
+							<label for="rv-full-name">Full Name <em>*</em></label>
+							<input id="rv-full-name" type="text" name="full_name" :required="currentStep === 1" placeholder="Muhammad Ali">
 						</div>
 						<div class="rv-field">
-							<label>Email Address <em>*</em></label>
-							<input type="email" name="email" :required="currentStep === 1" placeholder="ali@example.com">
+							<label for="rv-email">Email Address <em>*</em></label>
+							<input id="rv-email" type="email" name="email" :required="currentStep === 1" placeholder="ali@example.com">
 						</div>
 						<div class="rv-field">
-							<label>WhatsApp Number <em>*</em></label>
-							<input type="tel" name="whatsapp" :required="currentStep === 1" placeholder="03000000000">
+							<label for="rv-whatsapp">WhatsApp Number <em>*</em></label>
+							<input id="rv-whatsapp" type="tel" name="whatsapp" :required="currentStep === 1" placeholder="03000000000">
 						</div>
 						<div class="rv-field">
-							<label>University / Organization <em>*</em></label>
-							<input type="text" name="university" :required="currentStep === 1" placeholder="Air University Islamabad">
+							<label for="rv-university">University / Organization <em>*</em></label>
+							<input id="rv-university" type="text" name="university" :required="currentStep === 1" placeholder="Air University Islamabad">
 						</div>
 						<div class="rv-field">
-							<label>City <em>*</em></label>
-							<input type="text" name="city" :required="currentStep === 1" placeholder="Islamabad">
+							<label for="rv-city">City <em>*</em></label>
+							<input id="rv-city" type="text" name="city" :required="currentStep === 1" placeholder="Islamabad">
 						</div>
 						<div class="rv-field">
-							<label>LinkedIn Profile URL <em>*</em></label>
-							<input type="url" name="linkedin" :required="currentStep === 1" placeholder="https://linkedin.com/in/username">
+							<label for="rv-linkedin">LinkedIn Profile URL <em>*</em></label>
+							<input id="rv-linkedin" type="url" name="linkedin" :required="currentStep === 1" placeholder="https://linkedin.com/in/username">
 						</div>
 					</div>
 
@@ -246,15 +272,15 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			</section>
 
 			<!-- Step 2: Finalize -->
-			<section x-show="currentStep === 2">
-				<div class="rv-container">
+			<section class="rv-stage" x-show="currentStep === 2">
+				<div class="rv-stage-inner">
 					<span class="rv-step-label">Step 2 of 2</span>
 					<h2 class="rv-step-title">Almost done</h2>
 					<p class="rv-step-sub">One last question and you're set.</p>
 
-					<div style="margin-bottom:22px;">
-						<span class="rv-question-label">Have you attended any AWS community event before? <em>*</em></span>
-						<div class="rv-choices">
+					<div style="margin-bottom:26px;">
+						<span class="rv-question-label" id="rv-attended-label">Have you attended any AWS community event before? <em>*</em></span>
+						<div class="rv-choices" role="radiogroup" aria-labelledby="rv-attended-label">
 							<label class="rv-choice">
 								<input type="radio" name="attended_before" value="yes" :required="currentStep === 2">
 								<span><span class="rv-choice-title">Yes</span><span class="rv-choice-hint">I've joined before</span></span>
@@ -275,7 +301,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						<button type="button" class="rv-btn rv-btn-ghost" @click="prevStep()">Back</button>
 						<button type="submit" class="rv-btn rv-btn-primary" :disabled="isSubmitting">
 							<span x-show="!isSubmitting">RSVP INVITE</span>
-							<span x-show="isSubmitting" x-cloak style="gap:10px;"><span class="rv-spinner"></span> Submitting...</span>
+							<span x-show="isSubmitting" x-cloak><span class="rv-spinner"></span> Submitting</span>
 						</button>
 					</div>
 				</div>
