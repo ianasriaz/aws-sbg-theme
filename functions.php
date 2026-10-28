@@ -19,6 +19,7 @@ require_once get_template_directory() . '/includes/helpers/helpers-fonts.php';
 require_once get_template_directory() . '/includes/features/feature-event-registration.php';
 require_once get_template_directory() . '/includes/features/feature-reinvent-registration.php';
 require_once get_template_directory() . '/includes/admin/admin-dashboard.php';
+require_once get_template_directory() . '/includes/admin/admin-design-kit.php';
 
 // Load AWS Foundational Certification Mock Exam Feature
 require_once get_template_directory() . '/includes/features/feature-mock-exam.php';

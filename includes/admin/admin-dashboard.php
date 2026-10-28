@@ -82,6 +82,16 @@ function aws_sbg_register_admin_dashboard() {
 		'aws-mock-exam',
 		'aws_sbg_render_exam_admin_page'
 	);
+
+	// Brand Kit (re:Invent design kit)
+	add_submenu_page(
+		'aws-sbg-suite',
+		'Brand Kit',
+		'Brand Kit',
+		'manage_options',
+		'aws-brand-kit',
+		'aws_sbg_render_design_kit_page'
+	);
 }
 add_action( 'admin_menu', 'aws_sbg_register_admin_dashboard', 9 );
 
@@ -831,6 +841,7 @@ function aws_sbg_cleanup_suite_menu() {
 		'edit.php?post_type=aws_giveaway'   => 10,
 		'aws-giveaway-submissions'   => 11,
 		'aws-swag-wheel'             => 12,
+		'aws-brand-kit'              => 13,
 	);
 
 	foreach ( $items as &$item ) {
