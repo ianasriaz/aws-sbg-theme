@@ -294,12 +294,6 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					<h2 class="rv-step-title">Almost done</h2>
 					<p class="rv-step-sub">A few final details to complete your application.</p>
 
-					<div class="rv-field" style="margin-bottom:36px;">
-						<label for="rv-why">Why do you want to be invited to AWS re:Invent Islamabad 2026? <em>*</em></label>
-						<p class="rv-field-hint">This event is designed for passionate builders, learners, and technology enthusiasts. Tell us about your experience with AWS, community involvement, and what you're hoping to gain from the event.</p>
-						<textarea id="rv-why" name="why_invite" rows="6" :required="currentStep === 2" placeholder="Share your AWS experience, certifications, projects, community involvement, or why you'd like to attend (100-300 words)"></textarea>
-					</div>
-
 					<div class="rv-field" style="margin-bottom:40px;">
 						<label id="rv-attended-label">Have you attended any AWS community event before? <em>*</em></label>
 						<div class="rv-choices" role="radiogroup" aria-labelledby="rv-attended-label">
@@ -312,6 +306,11 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 								<span><span class="rv-choice-title">No</span><span class="rv-choice-hint">First time</span></span>
 							</label>
 						</div>
+					</div>
+
+					<div class="rv-field">
+						<label for="rv-why">Why do you want to be invited to AWS re:Invent Islamabad 2026? <em>*</em></label>
+						<textarea id="rv-why" name="why_invite" rows="6" :required="currentStep === 2" placeholder="Tell us about your experience with AWS, community involvement, and what you're hoping to gain from the event."></textarea>
 					</div>
 
 					<label class="rv-commit">
