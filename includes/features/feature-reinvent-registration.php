@@ -117,8 +117,9 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-stage { position:relative; z-index:1; padding:clamp(48px,10vh,110px) clamp(20px,6vw,72px) clamp(72px,12vh,120px); }
 			.rv-stage-inner { max-width:640px; margin:0 auto; }
 			.rv-step-label { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#00DFD8; }
-			.rv-step-title { font-weight:700; font-size:clamp(26px,3.4vw,34px); letter-spacing:-0.01em; margin:14px 0 10px; }
-			.rv-step-sub { font-size:15px; line-height:1.6; color:rgba(255,255,255,0.58); margin:0 0 36px; }
+			.rv-step-title { font-weight:700; font-size:clamp(26px,3.4vw,34px); letter-spacing:-0.01em; margin:14px 0 24px; }
+			.rv-progress { height:4px; background:rgba(255,255,255,0.1); border-radius:99px; overflow:hidden; margin:12px 0 26px; }
+			.rv-progress-fill { height:100%; background:#00DFD8; border-radius:99px; transition:width 0.45s cubic-bezier(0.22,0.61,0.36,1); }
 
 			.rv-fields { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
 			.rv-field label { display:block; font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.62); margin-bottom:8px; }
@@ -129,12 +130,13 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-field textarea { width:100%; padding:14px 16px; font-family:inherit; font-size:16px; line-height:1.65; color:#FFFFFF; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.16); border-radius:10px; resize:vertical; min-height:150px; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
 			.rv-field textarea:focus { outline:none; border-color:#00DFD8; box-shadow:0 0 0 3px rgba(0,223,216,0.14); }
 			.rv-field textarea::placeholder { color:rgba(255,255,255,0.32); }
-			.rv-field-hint { font-size:13px; line-height:1.6; color:rgba(255,255,255,0.5); margin:0 0 10px; }
 
 			/* Info tooltip (hover on desktop, tap/focus on mobile) */
 			.rv-field { position:relative; }
 			.rv-has-tip { position:relative; }
-			.rv-tip-mark { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; margin-left:7px; border:1px solid rgba(255,255,255,0.35); border-radius:50%; color:rgba(255,255,255,0.65); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:10px; font-weight:800; font-style:normal; vertical-align:middle; cursor:help; }
+			.rv-tip-mark { display:inline-flex; width:15px; height:15px; margin-left:7px; color:rgba(255,255,255,0.5); vertical-align:middle; cursor:help; transition:color 0.15s ease; }
+			.rv-tip-mark svg { width:100%; height:100%; display:block; }
+			.rv-tip-mark:hover, .rv-tip-mark:focus { color:#00DFD8; outline:none; }
 			.rv-tip-bubble { position:absolute; left:0; top:calc(100% + 8px); z-index:30; width:min(240px, 100%); padding:10px 13px; background:#0d1322; border:1px solid rgba(255,255,255,0.16); border-radius:10px; font-family:'Amazon Ember Display',system-ui,sans-serif; font-size:12.5px; font-weight:400; line-height:1.55; color:rgba(255,255,255,0.8); text-transform:none; letter-spacing:normal; text-align:left; box-shadow:0 10px 30px rgba(0,0,0,0.4); opacity:0; visibility:hidden; transform:translateY(-4px); transition:opacity 0.15s ease, transform 0.15s ease; pointer-events:none; }
 			.rv-has-tip:hover .rv-tip-bubble, .rv-field:focus-within .rv-tip-bubble { opacity:1; visibility:visible; transform:none; }
 
@@ -271,8 +273,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			<section class="rv-stage" x-show="currentStep === 1">
 				<div class="rv-stage-inner">
 					<span class="rv-step-label">Step 1 of 2</span>
+					<div class="rv-progress" aria-hidden="true"><div class="rv-progress-fill" :style="'width:' + ( ( currentStep / 2 ) * 100 ) + '%'"></div></div>
 					<h2 class="rv-step-title">Tell us about yourself</h2>
-					<p class="rv-step-sub">A few details so we can review your application.</p>
 
 					<div class="rv-fields">
 						<div class="rv-field">
@@ -290,7 +292,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						<div class="rv-field">
 							<label class="rv-has-tip" for="rv-cnic">
 								CNIC / B-Form <em>*</em>
-								<span class="rv-tip-mark" tabindex="0" aria-label="Why we ask: checked at the gate for security verification.">i</span>
+								<span class="rv-tip-mark" tabindex="0" aria-label="Why we ask: checked at the gate for security verification."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="1" fill="currentColor" stroke="none"/></svg></span>
 								<span class="rv-tip-bubble" role="tooltip">Checked at the gate for security verification.</span>
 							</label>
 							<input id="rv-cnic" type="text" name="cnic" inputmode="numeric" :required="currentStep === 1" pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" maxlength="15" title="Format: 00000-0000000-0" placeholder="00000-0000000-0">
@@ -300,15 +302,15 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 							<div class="rv-choices rv-choices-3" role="radiogroup" aria-labelledby="rv-audience-label">
 								<label class="rv-choice">
 									<input type="radio" name="audience_type" value="student" x-model="audienceType" :required="currentStep === 1">
-									<span><span class="rv-choice-title">Student</span><span class="rv-choice-hint">Currently studying</span></span>
+									<span class="rv-choice-title">Student</span>
 								</label>
 								<label class="rv-choice">
 									<input type="radio" name="audience_type" value="professional" x-model="audienceType" :required="currentStep === 1">
-									<span><span class="rv-choice-title">Professional</span><span class="rv-choice-hint">Working professional</span></span>
+									<span class="rv-choice-title">Professional</span>
 								</label>
 								<label class="rv-choice">
 									<input type="radio" name="audience_type" value="job_seeker" x-model="audienceType" :required="currentStep === 1">
-									<span><span class="rv-choice-title">Job Seeker</span><span class="rv-choice-hint">Open to opportunities</span></span>
+									<span class="rv-choice-title">Job Seeker</span>
 								</label>
 							</div>
 						</div>
@@ -337,19 +339,19 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			<section class="rv-stage" x-show="currentStep === 2">
 				<div class="rv-stage-inner">
 					<span class="rv-step-label">Step 2 of 2</span>
+					<div class="rv-progress" aria-hidden="true"><div class="rv-progress-fill" :style="'width:' + ( ( currentStep / 2 ) * 100 ) + '%'"></div></div>
 					<h2 class="rv-step-title">Almost done</h2>
-					<p class="rv-step-sub">A few final details to complete your application.</p>
 
 					<div class="rv-field" style="margin-bottom:40px;">
 						<label id="rv-attended-label">Have you attended any AWS community event before? <em>*</em></label>
 						<div class="rv-choices" role="radiogroup" aria-labelledby="rv-attended-label">
 							<label class="rv-choice">
 								<input type="radio" name="attended_before" value="yes" :required="currentStep === 2">
-								<span><span class="rv-choice-title">Yes</span><span class="rv-choice-hint">I've joined before</span></span>
+								<span class="rv-choice-title">Yes</span>
 							</label>
 							<label class="rv-choice">
 								<input type="radio" name="attended_before" value="no" :required="currentStep === 2">
-								<span><span class="rv-choice-title">No</span><span class="rv-choice-hint">First time</span></span>
+								<span class="rv-choice-title">No</span>
 							</label>
 						</div>
 					</div>
