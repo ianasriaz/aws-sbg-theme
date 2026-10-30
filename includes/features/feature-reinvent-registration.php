@@ -141,12 +141,11 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-has-tip:hover .rv-tip-bubble, .rv-field:focus-within .rv-tip-bubble { opacity:1; visibility:visible; transform:none; }
 
 			.rv-choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-			.rv-choice { display:flex; align-items:center; gap:12px; padding:16px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.14); border-radius:12px; cursor:pointer; transition:border-color 0.15s ease, background 0.15s ease; }
+			.rv-choice { display:flex; align-items:center; gap:12px; padding:13px 16px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.14); border-radius:12px; cursor:pointer; transition:border-color 0.15s ease, background 0.15s ease; }
 			.rv-choice:hover { border-color:rgba(255,255,255,0.4); }
 			.rv-choice:has(input:checked) { border-color:#00DFD8; background:rgba(0,223,216,0.08); }
 			.rv-choice input { width:18px; height:18px; accent-color:#00DFD8; cursor:pointer; flex-shrink:0; }
-			.rv-choice-title { display:block; font-size:15px; font-weight:500; color:#FFFFFF; }
-			.rv-choice-hint { display:block; font-size:12px; color:rgba(255,255,255,0.5); margin-top:3px; }
+			.rv-choice-title { display:block; font-size:14px; font-weight:400; color:#FFFFFF; }
 			.rv-choices-3 { grid-template-columns:repeat(3,1fr); }
 
 			.rv-commit { display:flex; align-items:flex-start; gap:14px; padding:18px 0; border-top:1px solid rgba(255,255,255,0.12); cursor:pointer; }
