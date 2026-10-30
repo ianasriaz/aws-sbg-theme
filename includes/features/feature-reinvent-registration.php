@@ -131,6 +131,13 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-field textarea::placeholder { color:rgba(255,255,255,0.32); }
 			.rv-field-hint { font-size:13px; line-height:1.6; color:rgba(255,255,255,0.5); margin:0 0 10px; }
 
+			/* Info tooltip (hover on desktop, tap/focus on mobile) */
+			.rv-field { position:relative; }
+			.rv-has-tip { position:relative; }
+			.rv-tip-mark { display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; margin-left:7px; border:1px solid rgba(255,255,255,0.35); border-radius:50%; color:rgba(255,255,255,0.65); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:10px; font-weight:800; font-style:normal; vertical-align:middle; cursor:help; }
+			.rv-tip-bubble { position:absolute; left:0; top:calc(100% + 8px); z-index:30; width:min(240px, 100%); padding:10px 13px; background:#0d1322; border:1px solid rgba(255,255,255,0.16); border-radius:10px; font-family:'Amazon Ember Display',system-ui,sans-serif; font-size:12.5px; font-weight:400; line-height:1.55; color:rgba(255,255,255,0.8); text-transform:none; letter-spacing:normal; text-align:left; box-shadow:0 10px 30px rgba(0,0,0,0.4); opacity:0; visibility:hidden; transform:translateY(-4px); transition:opacity 0.15s ease, transform 0.15s ease; pointer-events:none; }
+			.rv-has-tip:hover .rv-tip-bubble, .rv-field:focus-within .rv-tip-bubble { opacity:1; visibility:visible; transform:none; }
+
 			.rv-choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 			.rv-choice { display:flex; align-items:center; gap:12px; padding:16px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.14); border-radius:12px; cursor:pointer; transition:border-color 0.15s ease, background 0.15s ease; }
 			.rv-choice:hover { border-color:rgba(255,255,255,0.4); }
@@ -281,8 +288,11 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 							<input id="rv-whatsapp" type="tel" name="whatsapp" :required="currentStep === 1" placeholder="0300-0000000">
 						</div>
 						<div class="rv-field">
-							<label for="rv-cnic">CNIC / B-Form Number <em>*</em></label>
-							<p class="rv-field-hint" style="font-size:12px;">For gate security verification.</p>
+							<label class="rv-has-tip" for="rv-cnic">
+								CNIC / B-Form <em>*</em>
+								<span class="rv-tip-mark" tabindex="0" aria-label="Why we ask: checked at the gate for security verification.">i</span>
+								<span class="rv-tip-bubble" role="tooltip">Checked at the gate for security verification.</span>
+							</label>
 							<input id="rv-cnic" type="text" name="cnic" inputmode="numeric" :required="currentStep === 1" pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" maxlength="15" title="Format: 00000-0000000-0" placeholder="00000-0000000-0">
 						</div>
 						<div class="rv-field" style="grid-column:1/-1;">
