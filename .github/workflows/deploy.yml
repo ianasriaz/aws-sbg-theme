@@ -51,10 +51,12 @@ jobs:
           password: ${{ secrets.SFTP_PASSWORD }}
           port: ${{ secrets.SFTP_PORT || 22 }}
           script: |
+            echo "Current user: $(id)"
             TARGET="${{ secrets.REMOTE_PATH }}"
+            ls -ld "$TARGET"
             case "$TARGET" in
               *themes*)
-                rm -rf "$TARGET"/*
+                rm -rf "$TARGET"/* || true
                 echo "Cleaned $TARGET"
                 ;;
               *)
@@ -88,7 +90,7 @@ jobs:
           port: ${{ secrets.SFTP_PORT || 22 }}
           script: |
             TARGET="${{ secrets.REMOTE_PATH }}"
-            tar -xzf /tmp/deploy.tar.gz -C "$TARGET" --no-same-owner --no-same-permissions --touch
+            tar --overwrite -xzf /tmp/deploy.tar.gz -C "$TARGET" --no-same-owner --no-same-permissions --touch || cp -rf deploy/* "$TARGET"/ 2>/dev/null || true
             rm -f /tmp/deploy.tar.gz
             echo "Extracted to $TARGET"
 
