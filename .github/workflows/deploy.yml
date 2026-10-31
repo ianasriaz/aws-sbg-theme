@@ -51,13 +51,12 @@ jobs:
           password: ${{ secrets.SFTP_PASSWORD }}
           port: ${{ secrets.SFTP_PORT || 22 }}
           script: |
-            echo "Current user: $(id)"
             TARGET="${{ secrets.REMOTE_PATH }}"
-            ls -ld "$TARGET"
+            sudo -n chmod -R 775 "$TARGET" 2>/dev/null || true
+            chmod -R g+w "$TARGET" 2>/dev/null || true
             case "$TARGET" in
               *themes*)
                 rm -rf "$TARGET"/* || true
-                echo "Cleaned $TARGET"
                 ;;
               *)
                 echo "Refusing to clean unexpected path: $TARGET (must contain 'themes')"
