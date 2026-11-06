@@ -1,0 +1,429 @@
+<?php
+/**
+ * AWS SBG Invitation Confirmation — Admin
+ * File: invite-admin.php
+ *
+ * Event settings meta boxes, submissions screen, CSV export, shareable links.
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/* ============================================================================
+ * 1. META BOXES
+ * ============================================================================ */
+
+function aws_sbg_invite_add_meta_boxes() {
+	add_meta_box( 'aws_sbg_invite_settings', 'Invitation Settings', 'aws_sbg_invite_render_settings_box', 'aws_invite_event', 'normal', 'high' );
+	add_meta_box( 'aws_sbg_invite_share', 'Share & Embed', 'aws_sbg_invite_render_share_box', 'aws_invite_event', 'side', 'default' );
+}
+add_action( 'add_meta_boxes', 'aws_sbg_invite_add_meta_boxes' );
+
+function aws_sbg_invite_render_settings_box( $post ) {
+	wp_nonce_field( 'aws_sbg_invite_meta_action', 'aws_sbg_invite_meta_nonce' );
+	$m = aws_sbg_invite_get_event_meta( $post->ID );
+	?>
+	<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;">
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Status</label>
+			<select name="event_status" style="width:100%;">
+				<option value="open" <?php selected( $m['event_status'], 'open' ); ?>>Open, accepting confirmations</option>
+				<option value="closed" <?php selected( $m['event_status'], 'closed' ); ?>>Closed</option>
+			</select>
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Photo required</label>
+			<select name="photo_required" style="width:100%;">
+				<option value="yes" <?php selected( $m['photo_required'], 'yes' ); ?>>Yes</option>
+				<option value="no" <?php selected( $m['photo_required'], 'no' ); ?>>No</option>
+			</select>
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Allow guests</label>
+			<select name="allow_guests" style="width:100%;">
+				<option value="yes" <?php selected( $m['allow_guests'], 'yes' ); ?>>Yes (Speaker + Guest + Leader)</option>
+				<option value="no" <?php selected( $m['allow_guests'], 'no' ); ?>>No (Speaker + Leader only)</option>
+			</select>
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Notify admin</label>
+			<select name="notify_admin" style="width:100%;">
+				<option value="yes" <?php selected( $m['notify_admin'], 'yes' ); ?>>Yes</option>
+				<option value="no" <?php selected( $m['notify_admin'], 'no' ); ?>>No</option>
+			</select>
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Deadline (optional)</label>
+			<input type="datetime-local" name="deadline" value="<?php echo esc_attr( $m['deadline'] ); ?>" style="width:100%;">
+		</div>
+		<div>
+			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">WhatsApp link (optional)</label>
+			<input type="text" name="whatsapp_url" value="<?php echo esc_attr( $m['whatsapp_url'] ); ?>" style="width:100%;">
+		</div>
+	</div>
+	<div style="margin-top:14px;">
+		<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Confirmation message (shown after submit)</label>
+		<textarea name="confirm_message" rows="2" style="width:100%;"><?php echo esc_textarea( $m['confirm_message'] ); ?></textarea>
+	</div>
+	<?php
+}
+
+function aws_sbg_invite_render_share_box( $post ) {
+	$slug = $post->post_name;
+	if ( ! $slug ) {
+		$slug = sanitize_title( $post->post_title );
+	}
+	$shortcode    = '[aws_invite_form event="' . $slug . '"]';
+	$standalone   = home_url( '/confirm/?event=' . $slug );
+	?>
+	<p style="font-size:12px;color:#64748b;margin-top:0;">Use either link to share this invitation.</p>
+	<p style="font-size:11px;font-weight:800;text-transform:uppercase;color:#334155;margin-bottom:4px;">Shortcode (embed in a page)</p>
+	<input type="text" readonly value="<?php echo esc_attr( $shortcode ); ?>" onclick="this.select()" style="width:100%;font-family:monospace;font-size:12px;">
+	<p style="font-size:11px;font-weight:800;text-transform:uppercase;color:#334155;margin:16px 0 4px;">Standalone page (full-screen)</p>
+	<input type="text" readonly value="<?php echo esc_url( $standalone ); ?>" onclick="this.select()" style="width:100%;font-family:monospace;font-size:12px;">
+	<?php
+}
+
+function aws_sbg_invite_save_meta( $post_id ) {
+	if ( ! isset( $_POST['aws_sbg_invite_meta_nonce'] ) || ! wp_verify_nonce( $_POST['aws_sbg_invite_meta_nonce'], 'aws_sbg_invite_meta_action' ) ) {
+		return;
+	}
+	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+		return;
+	}
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return;
+	}
+
+	$select_keys = array( 'event_status', 'photo_required', 'allow_guests', 'notify_admin' );
+	foreach ( $select_keys as $key ) {
+		if ( isset( $_POST[ $key ] ) ) {
+			update_post_meta( $post_id, $key, sanitize_key( wp_unslash( $_POST[ $key ] ) ) );
+		}
+	}
+	if ( isset( $_POST['deadline'] ) ) {
+		update_post_meta( $post_id, 'deadline', sanitize_text_field( wp_unslash( $_POST['deadline'] ) ) );
+	}
+	if ( isset( $_POST['whatsapp_url'] ) ) {
+		update_post_meta( $post_id, 'whatsapp_url', esc_url_raw( wp_unslash( $_POST['whatsapp_url'] ) ) );
+	}
+	if ( isset( $_POST['confirm_message'] ) ) {
+		update_post_meta( $post_id, 'confirm_message', sanitize_textarea_field( wp_unslash( $_POST['confirm_message'] ) ) );
+	}
+}
+add_action( 'save_post_aws_invite_event', 'aws_sbg_invite_save_meta' );
+
+/* ============================================================================
+ * 2. ROW ACTION + ADMIN MENU
+ * ============================================================================ */
+
+function aws_sbg_invite_row_actions( $actions, $post ) {
+	if ( 'aws_invite_event' === $post->post_type ) {
+		$actions['submissions'] = '<a href="' . esc_url( admin_url( 'admin.php?page=aws-invite-submissions&event_id=' . $post->ID ) ) . '">View Confirmations</a>';
+	}
+	return $actions;
+}
+add_filter( 'post_row_actions', 'aws_sbg_invite_row_actions', 10, 2 );
+
+function aws_sbg_invite_register_admin_menu() {
+	add_submenu_page(
+		'aws-sbg-suite',
+		'Speaker & Guest Confirmations',
+		'Speaker & Guest Confirmations',
+		'manage_options',
+		'aws-invite-submissions',
+		'aws_sbg_invite_render_submissions_page'
+	);
+}
+add_action( 'admin_menu', 'aws_sbg_invite_register_admin_menu', 23 );
+
+/* ============================================================================
+ * 3. STANDALONE PAGE (auto-created once)
+ * ============================================================================ */
+
+function aws_sbg_invite_maybe_create_confirm_page() {
+	if ( ! is_admin() ) {
+		return;
+	}
+	$existing = get_page_by_path( 'confirm' );
+	if ( $existing ) {
+		return;
+	}
+	$page_id = wp_insert_post( array(
+		'post_type'    => 'page',
+		'post_title'   => 'Invitation Confirmation',
+		'post_content' => '',
+		'post_status'  => 'publish',
+		'post_name'    => 'confirm',
+	) );
+	if ( $page_id && ! is_wp_error( $page_id ) ) {
+		update_post_meta( $page_id, '_wp_page_template', 'page-invite-confirmation.php' );
+	}
+	flush_rewrite_rules();
+}
+add_action( 'admin_init', 'aws_sbg_invite_maybe_create_confirm_page' );
+
+/* ============================================================================
+ * 4. SUBMISSIONS SCREEN
+ * ============================================================================ */
+
+function aws_sbg_invite_render_submissions_page() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized access.' );
+	}
+
+	global $wpdb;
+	$table = $wpdb->prefix . 'aws_invite_submissions';
+
+	$events = get_posts( array(
+		'post_type'      => 'aws_invite_event',
+		'posts_per_page' => 100,
+		'post_status'    => 'any',
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+	) );
+
+	$event_id = isset( $_GET['event_id'] ) ? intval( $_GET['event_id'] ) : 0;
+	if ( ! $event_id && ! empty( $events ) ) {
+		$event_id = $events[0]->ID;
+	}
+
+	$role_filter = isset( $_GET['role'] ) ? sanitize_key( wp_unslash( $_GET['role'] ) ) : '';
+	$search      = isset( $_GET['s'] ) ? sanitize_text_field( trim( wp_unslash( $_GET['s'] ) ) ) : '';
+	$per_page    = 50;
+	$page        = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
+	$offset      = ( $page - 1 ) * $per_page;
+
+	$where = $wpdb->prepare( ' WHERE event_id = %d', $event_id );
+	if ( '' !== $role_filter ) {
+		$where .= $wpdb->prepare( ' AND role = %s', $role_filter );
+	}
+	if ( '' !== $search ) {
+		$like   = '%' . $wpdb->esc_like( $search ) . '%';
+		$where .= $wpdb->prepare( ' AND (name LIKE %s OR email LIKE %s OR phone LIKE %s OR reference LIKE %s)', $like, $like, $like, $like );
+	}
+
+	$rows           = $wpdb->get_results( "SELECT * FROM $table $where ORDER BY id DESC LIMIT $per_page OFFSET $offset", ARRAY_A );
+	$total_filtered = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $table $where" );
+	$total_pages    = (int) ceil( $total_filtered / $per_page );
+
+	$role_counts = array();
+	if ( $event_id ) {
+		$counts = $wpdb->get_results( $wpdb->prepare( "SELECT role, COUNT(*) AS n FROM $table WHERE event_id = %d GROUP BY role", $event_id ), ARRAY_A );
+		foreach ( $counts as $c ) {
+			$role_counts[ $c['role'] ] = (int) $c['n'];
+		}
+	}
+
+	$roles = aws_sbg_invite_roles();
+	?>
+	<div class="wrap" style="max-width:1200px;margin:20px auto 40px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+		<?php if ( function_exists( 'aws_sbg_render_admin_nav_tabs' ) ) { aws_sbg_render_admin_nav_tabs( 'invites' ); } ?>
+
+		<div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px 28px;margin-bottom:24px;">
+			<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;">
+				<div>
+					<h1 style="margin:0;font-size:22px;font-weight:800;color:#0f172a;">Speaker &amp; Guest Confirmations</h1>
+					<p style="margin:4px 0 0;color:#64748b;font-size:13px;">Review invitation confirmations per event, with photos and role-specific details.</p>
+				</div>
+				<div style="display:flex;gap:10px;">
+					<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=aws_invite_event' ) ); ?>" class="button button-primary">+ New Event</a>
+					<a href="<?php echo esc_url( admin_url( 'admin-ajax.php?action=aws_sbg_invite_export_csv&event_id=' . $event_id ) ); ?>" class="button">Export CSV</a>
+				</div>
+			</div>
+
+			<form method="get" style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+				<input type="hidden" name="page" value="aws-invite-submissions">
+				<select name="event_id" style="min-width:240px;padding:6px 10px;">
+					<?php if ( empty( $events ) ) : ?>
+						<option value="0">No events yet</option>
+					<?php else : ?>
+						<?php foreach ( $events as $ev ) : ?>
+							<option value="<?php echo esc_attr( $ev->ID ); ?>" <?php selected( $event_id, $ev->ID ); ?>><?php echo esc_html( $ev->post_title ); ?></option>
+						<?php endforeach; ?>
+					<?php endif; ?>
+				</select>
+				<select name="role" style="padding:6px 10px;">
+					<option value="">All roles</option>
+					<?php foreach ( $roles as $role_key => $role_label ) : ?>
+						<option value="<?php echo esc_attr( $role_key ); ?>" <?php selected( $role_filter, $role_key ); ?>><?php echo esc_html( $role_label ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<input type="text" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="Search name, email, phone, ref…" style="padding:6px 10px;width:240px;">
+				<button type="submit" class="button">Search</button>
+			</form>
+
+			<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:18px;">
+				<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;">
+					<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;">Total</div>
+					<div style="font-size:26px;font-weight:900;color:#0f172a;"><?php echo esc_html( number_format( array_sum( $role_counts ) ) ); ?></div>
+				</div>
+				<?php foreach ( $roles as $role_key => $role_label ) : ?>
+					<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 18px;">
+						<div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#64748b;"><?php echo esc_html( $role_label ); ?></div>
+						<div style="font-size:26px;font-weight:900;color:#7928ca;"><?php echo esc_html( isset( $role_counts[ $role_key ] ) ? number_format( $role_counts[ $role_key ] ) : 0 ); ?></div>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+
+		<?php if ( ! $event_id ) : ?>
+			<div style="background:#fff;border:2px dashed #e2e8f0;border-radius:16px;padding:60px 20px;text-align:center;">
+				<h3 style="margin:0 0 6px;color:#0f172a;">No invitation events yet</h3>
+				<p style="color:#64748b;">Create your first invitation event to start collecting confirmations.</p>
+				<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=aws_invite_event' ) ); ?>" class="button button-primary">+ Create Event</a>
+			</div>
+		<?php else : ?>
+			<div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;">
+				<table style="width:100%;border-collapse:collapse;text-align:left;font-size:13px;">
+					<thead>
+						<tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;">
+							<th style="padding:12px 18px;">Photo</th>
+							<th style="padding:12px 18px;">Reference</th>
+							<th style="padding:12px 18px;">Name / Shield</th>
+							<th style="padding:12px 18px;">Role</th>
+							<th style="padding:12px 18px;">Contact</th>
+							<th style="padding:12px 18px;">Vehicle</th>
+							<th style="padding:12px 18px;">Details</th>
+							<th style="padding:12px 18px;">Consent</th>
+							<th style="padding:12px 18px;">Date</th>
+						</tr>
+					</thead>
+					<tbody>
+					<?php if ( empty( $rows ) ) : ?>
+						<tr><td colspan="9" style="padding:50px 20px;text-align:center;color:#64748b;">No confirmations yet for this event.</td></tr>
+					<?php else : ?>
+						<?php foreach ( $rows as $r ) : ?>
+							<?php
+							$payload = json_decode( $r['payload'], true );
+							if ( ! is_array( $payload ) ) {
+								$payload = array();
+							}
+							$photo_url = $r['photo_id'] ? wp_get_attachment_url( (int) $r['photo_id'] ) : '';
+							$vehicle   = '';
+							if ( 'yes' === ( $payload['vehicle'] ?? 'no' ) ) {
+								$vehicle = ucfirst( $payload['vehicle_type'] ?? '' ) . ( ! empty( $payload['vehicle_number'] ) ? ' · ' . $payload['vehicle_number'] : '' );
+							}
+							?>
+							<tr style="border-bottom:1px solid #f1f5f9;vertical-align:top;">
+								<td style="padding:12px 18px;">
+									<?php if ( $photo_url ) : ?>
+										<a href="<?php echo esc_url( $photo_url ); ?>" target="_blank"><img src="<?php echo esc_url( $photo_url ); ?>" loading="lazy" style="height:40px;width:40px;object-fit:cover;border-radius:8px;"></a>
+									<?php else : ?>
+										<span style="color:#cbd5e1;">—</span>
+									<?php endif; ?>
+								</td>
+								<td style="padding:12px 18px;font-family:monospace;font-weight:800;color:#7928ca;"><?php echo esc_html( $r['reference'] ); ?></td>
+								<td style="padding:12px 18px;">
+									<div style="font-weight:700;color:#0f172a;"><?php echo esc_html( $r['name'] ); ?></div>
+									<div style="font-size:12px;color:#64748b;"><?php echo esc_html( $r['shield_line'] ); ?></div>
+								</td>
+								<td style="padding:12px 18px;">
+									<span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;"><?php echo esc_html( $roles[ $r['role'] ] ?? $r['role'] ); ?></span>
+								</td>
+								<td style="padding:12px 18px;color:#475569;">
+									<div><?php echo esc_html( $r['email'] ); ?></div>
+									<div style="font-size:12px;"><?php echo esc_html( $r['phone'] ); ?></div>
+								</td>
+								<td style="padding:12px 18px;color:#475569;"><?php echo $vehicle ? esc_html( $vehicle ) : '<span style="color:#cbd5e1;">—</span>'; ?></td>
+								<td style="padding:12px 18px;color:#334155;font-size:12px;">
+									<?php
+									if ( 'speaker' === $r['role'] ) {
+										echo '<div>Topic: ' . esc_html( $payload['topic'] ?? '' ) . '</div>';
+										echo '<div>Slot: ' . esc_html( ucfirst( $payload['slot'] ?? '' ) ) . '</div>';
+										if ( ! empty( $payload['comment'] ) ) {
+											echo '<details style="margin-top:4px;"><summary style="cursor:pointer;color:#7928ca;">Comment</summary><div style="margin-top:4px;white-space:pre-wrap;">' . esc_html( $payload['comment'] ) . '</div></details>';
+										}
+									} elseif ( 'community_leader' === $r['role'] ) {
+										$programs = aws_sbg_invite_programs();
+										echo '<div>Program: ' . esc_html( $programs[ $payload['program'] ] ?? '' ) . '</div>';
+										echo '<div>Term: ' . esc_html( $payload['term'] ?? '' ) . '</div>';
+										if ( ! empty( $payload['about'] ) ) {
+											echo '<details style="margin-top:4px;"><summary style="cursor:pointer;color:#7928ca;">About</summary><div style="margin-top:4px;white-space:pre-wrap;">' . esc_html( $payload['about'] ) . '</div></details>';
+										}
+									} else {
+										echo '<span style="color:#cbd5e1;">—</span>';
+									}
+									?>
+								</td>
+								<td style="padding:12px 18px;color:#16a34a;font-weight:700;">&#10003;</td>
+								<td style="padding:12px 18px;color:#64748b;font-size:12px;"><?php echo esc_html( mysql2date( 'M j, g:i a', $r['created_at'] ) ); ?></td>
+							</tr>
+						<?php endforeach; ?>
+					<?php endif; ?>
+					</tbody>
+				</table>
+
+				<?php if ( $total_pages > 1 ) : ?>
+					<div style="padding:14px 20px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#64748b;">
+						<div>Page <?php echo esc_html( $page ); ?> of <?php echo esc_html( $total_pages ); ?></div>
+						<div style="display:flex;gap:6px;">
+							<?php for ( $i = 1; $i <= $total_pages; $i++ ) : ?>
+								<a href="<?php echo esc_url( add_query_arg( 'paged', $i ) ); ?>" style="padding:4px 10px;border:1px solid #cbd5e1;border-radius:6px;text-decoration:none;<?php echo ( $i === $page ) ? 'background:#7928ca;color:#fff;' : 'color:#0f172a;'; ?>"><?php echo esc_html( $i ); ?></a>
+							<?php endfor; ?>
+						</div>
+					</div>
+				<?php endif; ?>
+			</div>
+		<?php endif; ?>
+	</div>
+	<?php
+}
+
+/* ============================================================================
+ * 5. CSV EXPORT
+ * ============================================================================ */
+
+function aws_sbg_invite_export_csv() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized', 'Error', array( 'response' => 403 ) );
+	}
+
+	global $wpdb;
+	$table    = $wpdb->prefix . 'aws_invite_submissions';
+	$event_id = isset( $_GET['event_id'] ) ? intval( $_GET['event_id'] ) : 0;
+
+	$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE event_id = %d ORDER BY id ASC", $event_id ), ARRAY_A );
+
+	header( 'Content-Type: text/csv; charset=utf-8' );
+	header( 'Content-Disposition: attachment; filename=invite-confirmations-' . $event_id . '-' . gmdate( 'Y-m-d' ) . '.csv' );
+
+	$output = fopen( 'php://output', 'w' );
+	fputcsv( $output, array( 'Reference', 'Role', 'Name', 'Shield Line', 'Email', 'Phone', 'Vehicle Type', 'Vehicle Number', 'Photo URL', 'Consent', 'Topic', 'Slot', 'Comment', 'Program', 'Term', 'About', 'Status', 'Created At' ) );
+
+	$programs = aws_sbg_invite_programs();
+	$roles    = aws_sbg_invite_roles();
+
+	foreach ( $rows as $r ) {
+		$payload = json_decode( $r['payload'], true );
+		if ( ! is_array( $payload ) ) {
+			$payload = array();
+		}
+		$photo_url = $r['photo_id'] ? wp_get_attachment_url( (int) $r['photo_id'] ) : '';
+
+		fputcsv( $output, array(
+			$r['reference'],
+			$roles[ $r['role'] ] ?? $r['role'],
+			$r['name'],
+			$r['shield_line'],
+			$r['email'],
+			$r['phone'],
+			$payload['vehicle_type'] ?? '',
+			$payload['vehicle_number'] ?? '',
+			$photo_url,
+			'yes',
+			$payload['topic'] ?? '',
+			ucfirst( $payload['slot'] ?? '' ),
+			$payload['comment'] ?? '',
+			$programs[ $payload['program'] ] ?? '',
+			$payload['term'] ?? '',
+			$payload['about'] ?? '',
+			$r['status'],
+			$r['created_at'],
+		) );
+	}
+	fclose( $output );
+	exit;
+}
+add_action( 'wp_ajax_aws_sbg_invite_export_csv', 'aws_sbg_invite_export_csv' );

@@ -118,6 +118,7 @@ function aws_sbg_render_admin_nav_tabs( $active_tab = 'overview' ) {
 		'mock_exam'     => array( 'title' => 'Mock Exams', 'url' => admin_url( 'admin.php?page=aws-mock-exam' ) ),
 		'swag_wheel'    => array( 'title' => 'Swag Picker', 'url' => admin_url( 'admin.php?page=aws-swag-wheel' ) ),
 		'giveaways'     => array( 'title' => 'Giveaways', 'url' => admin_url( 'admin.php?page=aws-giveaway-submissions' ) ),
+		'invites'       => array( 'title' => 'Invitations', 'url' => admin_url( 'admin.php?page=aws-invite-submissions' ) ),
 	);
 	?>
 	<div style="background:#ffffff; border-bottom:1px solid #e2e8f0; margin:-10px -20px 25px -20px; padding:15px 25px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 4px rgba(0,0,0,0.02); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
@@ -853,6 +854,8 @@ function aws_sbg_cleanup_suite_menu() {
 		'aws-swag-wheel'             => 12,
 		'aws-brand-kit'              => 13,
 		'aws-email-center'           => 14,
+		'edit.php?post_type=aws_invite_event' => 15,
+		'aws-invite-submissions'       => 16,
 	);
 
 	foreach ( $items as &$item ) {

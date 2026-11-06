@@ -35,6 +35,9 @@ require_once get_template_directory() . '/includes/features/feature-swag-wheel.p
 // Load Modular On-Campus Giveaway Engine
 require_once get_template_directory() . '/includes/features/feature-giveaway.php';
 
+// Load Event Invitation Confirmation System (Speaker / Guest / Community Leader)
+require_once get_template_directory() . '/includes/features/feature-invite-confirmation.php';
+
 /**
  * Filter template path to support templates in subdirectory
  * This handles templates stored in templates/pages/ while WP looks in root
