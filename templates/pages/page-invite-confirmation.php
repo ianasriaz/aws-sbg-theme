@@ -30,7 +30,7 @@ add_filter( 'show_admin_bar', '__return_false' );
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<?php wp_head(); ?>
 </head>
-<body <?php body_class(); ?> style="margin:0; background:#ffffff; color:#0F141F;">
+<body <?php body_class(); ?> style="margin:0; background:#F8FAFC; color:#0F141F;">
 <?php
 if ( $event && function_exists( 'aws_sbg_invite_render_form' ) ) {
 	echo aws_sbg_invite_render_form( $event->ID );
