@@ -71,21 +71,22 @@ function aws_sbg_invite_render_form( $event_id ) {
 			.inv-field label{display:block;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
 			.inv-field label em{font-style:normal;color:var(--brand);}
 			.inv-field .inv-help{display:block;font-size:12.5px;color:var(--muted);margin-top:6px;}
-			.inv-field input[type="text"],.inv-field input[type="email"],.inv-field input[type="tel"],.inv-field textarea,.inv-field select{width:100%;padding:12px 14px;font-family:inherit;font-size:16px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;transition:border-color .15s ease,box-shadow .15s ease;}
+			.inv-field input[type="text"],.inv-field input[type="email"],.inv-field input[type="tel"],.inv-field textarea,.inv-field select{width:100%;padding:12px 14px;font-family:inherit;font-size:16px;color:var(--ink);background:var(--surface);border:1px solid #cbd5e1;border-radius:10px;transition:border-color .15s ease,box-shadow .15s ease;}
+			.inv-field input::placeholder,.inv-field textarea::placeholder{color:#94a3b8;}
 			.inv-field input:focus,.inv-field textarea:focus,.inv-field select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(121,40,202,0.12);}
 			.inv-field textarea{min-height:120px;resize:vertical;}
 			.inv-span-2{grid-column:1/-1;}
 
-			.inv-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
-			.inv-role{display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+			.inv-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:stretch;}
+			.inv-role{display:flex;align-items:center;gap:12px;min-height:60px;padding:14px 16px;background:var(--surface);border:1px solid #cbd5e1;border-radius:12px;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
 			.inv-role:hover{border-color:#94a3b8;}
 			.inv-role:has(input:checked){border-color:var(--brand);background:#F5F3FF;}
-			.inv-role input{width:18px;height:18px;accent-color:var(--brand);cursor:pointer;}
-			.inv-role-title{font-size:14px;font-weight:700;color:var(--ink);}
+			.inv-role input{width:18px;height:18px;accent-color:var(--brand);cursor:pointer;flex-shrink:0;margin:0;}
+			.inv-role-title{font-size:14px;font-weight:700;color:var(--ink);line-height:1.3;}
 
-			.inv-choice-row{display:flex;gap:14px;align-items:center;padding:13px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px;cursor:pointer;}
+			.inv-choice-row{display:flex;gap:14px;align-items:center;min-height:52px;padding:13px 16px;background:var(--surface);border:1px solid #cbd5e1;border-radius:12px;cursor:pointer;}
 			.inv-choice-row:has(input:checked){border-color:var(--brand);background:#F5F3FF;}
-			.inv-choice-row input{width:18px;height:18px;accent-color:var(--brand);cursor:pointer;flex-shrink:0;}
+			.inv-choice-row input{width:18px;height:18px;accent-color:var(--brand);cursor:pointer;flex-shrink:0;margin:0;}
 			.inv-choice-title{font-size:14px;color:var(--ink);}
 
 			.inv-commit{display:flex;align-items:flex-start;gap:14px;padding:18px 0;border-top:1px solid var(--line);cursor:pointer;}
@@ -180,7 +181,7 @@ function aws_sbg_invite_render_form( $event_id ) {
 								<label for="inv-email">Email <em>*</em></label>
 								<input id="inv-email" type="email" name="email" placeholder="you@example.com" required>
 							</div>
-							<div class="inv-field">
+							<div class="inv-field inv-span-2">
 								<label for="inv-phone">Contact number <em>*</em></label>
 								<input id="inv-phone" type="tel" name="phone" placeholder="0300-0000000" required>
 							</div>
@@ -197,7 +198,7 @@ function aws_sbg_invite_render_form( $event_id ) {
 									</label>
 								</div>
 							</div>
-							<div class="inv-field" x-show="hasVehicle === 'yes'" x-cloak>
+							<div class="inv-field inv-span-2" x-show="hasVehicle === 'yes'" x-cloak>
 								<label>Vehicle type</label>
 								<div style="display:flex;gap:14px;">
 									<label class="inv-choice-row" style="flex:1;">
@@ -210,7 +211,7 @@ function aws_sbg_invite_render_form( $event_id ) {
 									</label>
 								</div>
 							</div>
-							<div class="inv-field" x-show="hasVehicle === 'yes'" x-cloak>
+							<div class="inv-field inv-span-2" x-show="hasVehicle === 'yes'" x-cloak>
 								<label for="inv-vehicle-number">Vehicle number</label>
 								<input id="inv-vehicle-number" type="text" name="vehicle_number" placeholder="ABC-123">
 							</div>
