@@ -126,7 +126,7 @@ function aws_sbg_render_admin_nav_tabs( $active_tab = 'overview' ) {
 			<div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #ad5cff, #7000ff); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px; box-shadow:0 4px 10px rgba(173,92,255,0.3);">SBG</div>
 			<div>
 				<h2 style="margin:0; font-size:18px; font-weight:800; color:#0f172a; line-height:1.2;">AWS SBG Control Center</h2>
-				<span style="font-size:11px; color:#64748b; font-weight:600;">Air University Community Platform â€¢ Unified Suite</span>
+				<span style="font-size:11px; color:#64748b; font-weight:600;">Air University Community Platform &middot; Unified Suite</span>
 			</div>
 		</div>
 		<div style="display:flex; items-center; gap:6px; background:#f8fafc; padding:4px; border-radius:12px; border:1px solid #e2e8f0;">

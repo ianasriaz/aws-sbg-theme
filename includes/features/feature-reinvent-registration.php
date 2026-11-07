@@ -728,88 +728,157 @@ function aws_sbg_render_reinvent_admin_page() {
 		}
 	}
 
+	$total_results = (int) $query->found_posts;
+	$start         = $total_results ? ( ( $paged - 1 ) * $per_page ) + 1 : 0;
+	$end           = min( $start + $per_page - 1, $total_results );
+
 	aws_sbg_render_admin_nav_tabs( 'reinvent' );
 	?>
-	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; max-width:1200px;">
-		<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+	<div class="wrap rvadm" style="max-width:1200px;">
+		<style>
+			.rvadm{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--surface:#ffffff;--surface2:#f8fafc;--brand:#7928ca;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--ink);}
+			.rvadm *{box-sizing:border-box;}
+			.rvadm h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-0.01em;color:var(--ink);}
+			.rvadm .rvadm-sub{font-size:13px;color:var(--muted);margin-top:4px;}
 
-		<div class="flex flex-wrap justify-between items-center gap-4 mb-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+			.rvadm-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;}
+			.rvadm-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+			.rvadm-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+			.rvadm-btn:hover{border-color:#cbd5e1;background:var(--surface2);}
+
+			.rvadm-filters{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:16px;}
+			.rvadm-filters form{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;}
+			.rvadm-field{display:flex;flex-direction:column;gap:5px;}
+			.rvadm-field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);}
+			.rvadm-field select,.rvadm-field input{padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;color:var(--ink);background:var(--surface);}
+			.rvadm-field select{min-width:160px;}
+			.rvadm-field input{min-width:240px;}
+			.rvadm-field select:focus,.rvadm-field input:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand);}
+			.rvadm-search-btn{padding:8px 16px;border-radius:6px;border:1px solid var(--brand);background:var(--brand);color:#ffffff;font-size:13px;font-weight:600;cursor:pointer;}
+			.rvadm-search-btn:hover{background:#6b22c0;border-color:#6b22c0;}
+
+			.rvadm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+			.rvadm-stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;}
+			.rvadm-stat-num{font-size:28px;font-weight:700;color:var(--ink);line-height:1;}
+			.rvadm-stat-label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);margin-top:8px;}
+			.rvadm-dot{width:8px;height:8px;border-radius:50%;background:#cbd5e1;flex-shrink:0;}
+			.rvadm-dot-pending{background:#d97706;}
+			.rvadm-dot-approved{background:#059669;}
+			.rvadm-dot-rejected{background:#dc2626;}
+
+			.rvadm-table-wrap{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto;}
+			.rvadm-table-wrap table{width:100%;border-collapse:collapse;font-size:13px;min-width:980px;}
+			.rvadm-table-wrap thead th{background:var(--surface2);text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;}
+			.rvadm-table-wrap tbody td{padding:13px 14px;border-bottom:1px solid #f1f5f9;vertical-align:middle;white-space:nowrap;}
+			.rvadm-table-wrap tbody tr:last-child td{border-bottom:0;}
+			.rvadm-table-wrap tbody tr:hover{background:#fafafa;}
+			.rvadm-reg{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;color:var(--brand);}
+			.rvadm-name{font-weight:600;color:var(--ink);white-space:normal;}
+			.rvadm-muted{color:var(--muted);}
+			.rvadm-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);}
+			.rvadm-null{color:#cbd5e1;}
+
+			.rvadm-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:9999px;font-size:11px;font-weight:700;}
+			.rvadm-badge-pending{background:#fef3c7;color:#b45309;}
+			.rvadm-badge-approved{background:#d1fae5;color:#047857;}
+			.rvadm-badge-rejected{background:#fee2e2;color:#b91c1c;}
+
+			.rvadm-row-actions{display:flex;gap:8px;justify-content:flex-end;}
+			.rvadm-approve{padding:6px 12px;border-radius:6px;border:1px solid #059669;background:#059669;color:#ffffff;font-size:12px;font-weight:600;text-decoration:none;}
+			.rvadm-approve:hover{background:#047857;border-color:#047857;}
+			.rvadm-reject{padding:6px 12px;border-radius:6px;border:1px solid #fca5a5;background:#ffffff;color:#b91c1c;font-size:12px;font-weight:600;text-decoration:none;}
+			.rvadm-reject:hover{background:#fef2f2;}
+
+			.rvadm-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);flex-wrap:wrap;}
+			.rvadm-pages{display:flex;gap:6px;}
+			.rvadm-pages a,.rvadm-pages span{display:inline-block;padding:4px 10px;border:1px solid var(--line);border-radius:6px;text-decoration:none;color:var(--ink);font-size:12px;}
+			.rvadm-pages .current{background:var(--brand);border-color:var(--brand);color:#ffffff;}
+
+			@media (max-width:782px){.rvadm-stats{grid-template-columns:1fr 1fr;}.rvadm-field select,.rvadm-field input{min-width:100%;}}
+		</style>
+
+		<div class="rvadm-head">
 			<div>
-				<h1 class="text-2xl font-black text-slate-900 tracking-tight">🎉 re:Invent Watch & Build Party Registrations</h1>
-				<p class="text-slate-500 text-xs mt-1 font-medium">Review, approve, or reject invite requests. Export the list at any time.</p>
+				<h1>re:Invent Watch &amp; Build Party Registrations</h1>
+				<p class="rvadm-sub">Review, approve, or reject applications. Use the roster for a printable event-day list.</p>
 			</div>
-			<div class="flex items-center gap-2 flex-wrap">
-				<form method="GET" class="flex items-center gap-2 flex-wrap">
-					<input type="hidden" name="page" value="aws-reinvent-registrations">
-					<select name="status_filter" onchange="this.form.submit()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none">
-						<option value="">All Statuses</option>
-						<option value="pending" <?php selected( $status, 'pending' ); ?>>⏳ Pending</option>
-						<option value="approved" <?php selected( $status, 'approved' ); ?>>✅ Approved</option>
-						<option value="rejected" <?php selected( $status, 'rejected' ); ?>>❌ Rejected</option>
+			<div class="rvadm-actions">
+				<a class="rvadm-btn" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'export_csv' => '1' ) ) ); ?>">Export CSV</a>
+				<a class="rvadm-btn" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'roster' => '1' ) ) ); ?>" target="_blank">Print Roster</a>
+			</div>
+		</div>
+
+		<div class="rvadm-filters">
+			<form method="GET">
+				<input type="hidden" name="page" value="aws-reinvent-registrations">
+				<div class="rvadm-field">
+					<label for="rvadm-status">Status</label>
+					<select id="rvadm-status" name="status_filter" onchange="this.form.submit()">
+						<option value="">All statuses</option>
+						<option value="pending" <?php selected( $status, 'pending' ); ?>>Pending</option>
+						<option value="approved" <?php selected( $status, 'approved' ); ?>>Approved</option>
+						<option value="rejected" <?php selected( $status, 'rejected' ); ?>>Rejected</option>
 					</select>
-					<input type="text" name="search" value="<?php echo esc_attr( $search ); ?>" placeholder="Reg #, email, phone" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:outline-none w-44">
-					<button type="submit" class="bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-xl hover:bg-slate-800 transition-all">Search</button>
-				</form>
-				<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'export_csv' => '1' ) ) ); ?>" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all">⬇ Export CSV</a>
-				<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'roster' => '1' ) ) ); ?>" target="_blank" class="bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all">Print Roster</a>
+				</div>
+				<div class="rvadm-field">
+					<label for="rvadm-search">Search</label>
+					<input id="rvadm-search" type="search" name="search" value="<?php echo esc_attr( $search ); ?>" placeholder="Name, email, phone, or reg #">
+				</div>
+				<button type="submit" class="rvadm-search-btn">Search</button>
+			</form>
+		</div>
+
+		<div class="rvadm-stats">
+			<div class="rvadm-stat">
+				<div class="rvadm-stat-num"><?php echo intval( $counts['total'] ); ?></div>
+				<div class="rvadm-stat-label"><span class="rvadm-dot"></span>Total</div>
+			</div>
+			<div class="rvadm-stat">
+				<div class="rvadm-stat-num"><?php echo intval( $counts['pending'] ); ?></div>
+				<div class="rvadm-stat-label"><span class="rvadm-dot rvadm-dot-pending"></span>Pending</div>
+			</div>
+			<div class="rvadm-stat">
+				<div class="rvadm-stat-num"><?php echo intval( $counts['approved'] ); ?></div>
+				<div class="rvadm-stat-label"><span class="rvadm-dot rvadm-dot-approved"></span>Approved</div>
+			</div>
+			<div class="rvadm-stat">
+				<div class="rvadm-stat-num"><?php echo intval( $counts['rejected'] ); ?></div>
+				<div class="rvadm-stat-label"><span class="rvadm-dot rvadm-dot-rejected"></span>Rejected</div>
 			</div>
 		</div>
 
-		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-			<div class="bg-white border border-slate-200 rounded-2xl p-5 text-center shadow-xs">
-				<div class="text-3xl font-black text-slate-900"><?php echo intval( $counts['total'] ); ?></div>
-				<div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Total</div>
-			</div>
-			<div class="bg-white border border-slate-200 rounded-2xl p-5 text-center shadow-xs">
-				<div class="text-3xl font-black text-amber-600"><?php echo intval( $counts['pending'] ); ?></div>
-				<div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Pending</div>
-			</div>
-			<div class="bg-white border border-slate-200 rounded-2xl p-5 text-center shadow-xs">
-				<div class="text-3xl font-black text-emerald-600"><?php echo intval( $counts['approved'] ); ?></div>
-				<div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Approved</div>
-			</div>
-			<div class="bg-white border border-slate-200 rounded-2xl p-5 text-center shadow-xs">
-				<div class="text-3xl font-black text-red-600"><?php echo intval( $counts['rejected'] ); ?></div>
-				<div class="text-xs font-bold text-slate-500 uppercase tracking-wider mt-1">Rejected</div>
-			</div>
-		</div>
-
-		<div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
-			<table class="w-full text-left text-xs border-collapse">
+		<div class="rvadm-table-wrap">
+			<table>
 				<thead>
-					<tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-extrabold uppercase tracking-wider">
-						<th class="py-3.5 px-4">Reg #</th>
-						<th class="py-3.5 px-4">Name</th>
-						<th class="py-3.5 px-4">Email</th>
-						<th class="py-3.5 px-4">WhatsApp</th>
-						<th class="py-3.5 px-4">Institute / Org</th>
-						<th class="py-3.5 px-4">City</th>
-						<th class="py-3.5 px-4">LinkedIn</th>
-						<th class="py-3.5 px-4 text-center">AWS Event Before?</th>
-						<th class="py-3.5 px-4">Vehicle</th>
-						<th class="py-3.5 px-4 text-center">Parking</th>
-						<th class="py-3.5 px-4 text-center">Status</th>
-						<th class="py-3.5 px-4 text-center">Actions</th>
+					<tr>
+						<th>Reg #</th>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Phone</th>
+						<th>Institute / City</th>
+						<th>Vehicle</th>
+						<th>Parking</th>
+						<th>Status</th>
+						<th>Submitted</th>
+						<th style="text-align:right;">Actions</th>
 					</tr>
 				</thead>
-				<tbody class="divide-y divide-slate-100">
+				<tbody>
 					<?php if ( ! $query->have_posts() ) : ?>
 						<tr>
-							<td colspan="12" class="py-8 text-center text-slate-500 font-medium">No registrations found.</td>
+							<td colspan="10" class="rvadm-muted" style="padding:40px; text-align:center;">No registrations found.</td>
 						</tr>
 					<?php else : ?>
 						<?php while ( $query->have_posts() ) : $query->the_post(); ?>
 							<?php
 							$reg_id      = get_the_ID();
-							$raw_title   = get_the_title();
-							$name        = preg_replace( '/^reinvent-#\d+\s*-\s*/', '', $raw_title );
+							$name        = preg_replace( '/^reinvent-#\d+\s*[–\-]\s*/', '', get_the_title() );
 							$reg_number  = get_post_meta( $reg_id, 'registration_number', true );
 							$email       = get_post_meta( $reg_id, 'email', true );
-							$whatsapp    = get_post_meta( $reg_id, 'whatsapp', true );
+							$phone       = get_post_meta( $reg_id, 'whatsapp', true );
 							$university  = get_post_meta( $reg_id, 'university', true );
 							$city        = get_post_meta( $reg_id, 'city', true );
-							$linkedin    = get_post_meta( $reg_id, 'linkedin', true );
-							$attended    = get_post_meta( $reg_id, 'attended_before', true );
 							$approval    = get_post_meta( $reg_id, 'approval_status', true ) ?: 'pending';
 							$has_vehicle = get_post_meta( $reg_id, 'has_vehicle', true );
 							$vehicle     = 'No';
@@ -817,60 +886,59 @@ function aws_sbg_render_reinvent_admin_page() {
 								$vehicle = ucfirst( get_post_meta( $reg_id, 'vehicle_type', true ) ) . ' · ' . get_post_meta( $reg_id, 'vehicle_number', true );
 							}
 							$parking_ok = 'yes' === get_post_meta( $reg_id, 'parking_policy', true );
+							$org_city   = trim( $university . ( $city ? ' · ' . $city : '' ) );
 							?>
-							<tr class="hover:bg-slate-50/80 transition-colors">
-								<td class="py-3.5 px-4 font-mono font-bold text-slate-900"><?php echo $reg_number ? esc_html( $reg_number ) : '<span class="text-slate-400">—</span>'; ?></td>
-								<td class="py-3.5 px-4 font-bold text-slate-900"><?php echo esc_html( $name ); ?></td>
-								<td class="py-3.5 px-4 font-mono text-slate-600"><?php echo esc_html( $email ); ?></td>
-								<td class="py-3.5 px-4 font-mono text-slate-600"><?php echo esc_html( $whatsapp ); ?></td>
-								<td class="py-3.5 px-4 text-slate-700"><?php echo esc_html( $university ); ?></td>
-								<td class="py-3.5 px-4 text-slate-700"><?php echo esc_html( $city ); ?></td>
-								<td class="py-3.5 px-4">
-									<?php if ( $linkedin ) : ?>
-										<a href="<?php echo esc_url( $linkedin ); ?>" target="_blank" class="text-purple-600 font-bold hover:underline">View</a>
+							<tr>
+								<td class="rvadm-reg"><?php echo $reg_number ? esc_html( $reg_number ) : '<span class="rvadm-null">—</span>'; ?></td>
+								<td class="rvadm-name"><?php echo esc_html( $name ); ?></td>
+								<td class="rvadm-mono"><?php echo esc_html( $email ); ?></td>
+								<td class="rvadm-mono"><?php echo esc_html( $phone ); ?></td>
+								<td class="rvadm-muted"><?php echo esc_html( $org_city ); ?></td>
+								<td class="rvadm-muted"><?php echo esc_html( $vehicle ); ?></td>
+								<td><?php echo $parking_ok ? '<span style="color:#059669;font-weight:700;">Yes</span>' : '<span class="rvadm-null">—</span>'; ?></td>
+								<td>
+									<?php if ( 'approved' === $approval ) : ?>
+										<span class="rvadm-badge rvadm-badge-approved">Approved</span>
+									<?php elseif ( 'rejected' === $approval ) : ?>
+										<span class="rvadm-badge rvadm-badge-rejected">Rejected</span>
 									<?php else : ?>
-										<span class="text-slate-400">—</span>
+										<span class="rvadm-badge rvadm-badge-pending">Pending</span>
 									<?php endif; ?>
 								</td>
-								<td class="py-3.5 px-4 text-center font-bold text-slate-700"><?php echo esc_html( ucfirst( $attended ) ); ?></td>
-								<td class="py-3.5 px-4 text-slate-700"><?php echo esc_html( $vehicle ); ?></td>
-								<td class="py-3.5 px-4 text-center"><?php echo $parking_ok ? '<span class="text-emerald-600 font-bold">✓</span>' : '<span class="text-slate-400">—</span>'; ?></td>
-								<td class="py-3.5 px-4 text-center">
-									<?php if ( $approval === 'approved' ) : ?>
-										<span class="bg-emerald-100 text-emerald-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">Approved</span>
-									<?php elseif ( $approval === 'rejected' ) : ?>
-										<span class="bg-red-100 text-red-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">Rejected</span>
+								<td class="rvadm-muted"><?php echo esc_html( get_the_date( 'M j, Y', $reg_id ) ); ?></td>
+								<td>
+									<?php if ( 'pending' === $approval ) : ?>
+										<div class="rvadm-row-actions">
+											<a class="rvadm-approve" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'action' => 'approve', 'reg_id' => $reg_id ) ), 'aws_reinvent_review_' . $reg_id ) ); ?>">Approve</a>
+											<a class="rvadm-reject" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'action' => 'reject', 'reg_id' => $reg_id ) ), 'aws_reinvent_review_' . $reg_id ) ); ?>">Reject</a>
+										</div>
 									<?php else : ?>
-										<span class="bg-amber-100 text-amber-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">Pending</span>
+										<span class="rvadm-null">—</span>
 									<?php endif; ?>
-								</td>
-								<td class="py-3.5 px-4 text-center">
-									<div class="flex items-center justify-center gap-2">
-										<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'action' => 'approve', 'reg_id' => $reg_id ) ), 'aws_reinvent_review_' . $reg_id ) ); ?>" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all">Approve</a>
-										<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'action' => 'reject', 'reg_id' => $reg_id ) ), 'aws_reinvent_review_' . $reg_id ) ); ?>" class="bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all">Reject</a>
-									</div>
 								</td>
 							</tr>
 						<?php endwhile; wp_reset_postdata(); ?>
 					<?php endif; ?>
 				</tbody>
 			</table>
-		</div>
-
-		<?php if ( $query->max_num_pages > 1 ) : ?>
-			<div class="mt-6 flex justify-center">
-				<?php
-				echo paginate_links( array(
-					'base'      => add_query_arg( 'paged', '%#%' ),
-					'format'    => '',
-					'current'   => $paged,
-					'total'     => $query->max_num_pages,
-					'prev_text' => '« Prev',
-					'next_text' => 'Next »',
-				) );
-				?>
+			<div class="rvadm-foot">
+				<span><?php echo $total_results ? 'Showing ' . $start . ' to ' . $end . ' of ' . $total_results : 'No results'; ?></span>
+				<?php if ( $query->max_num_pages > 1 ) : ?>
+					<div class="rvadm-pages">
+						<?php
+						echo paginate_links( array(
+							'base'      => add_query_arg( 'paged', '%#%' ),
+							'format'    => '',
+							'current'   => $paged,
+							'total'     => $query->max_num_pages,
+							'prev_text' => 'Prev',
+							'next_text' => 'Next',
+						) );
+						?>
+					</div>
+				<?php endif; ?>
 			</div>
-		<?php endif; ?>
+		</div>
 	</div>
 	<?php
 }
