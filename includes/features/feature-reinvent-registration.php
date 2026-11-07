@@ -37,14 +37,37 @@ function aws_sbg_register_reinvent_reg_post_type() {
 add_action( 'init', 'aws_sbg_register_reinvent_reg_post_type' );
 
 /* ========================================================================
- * 2. REGISTRATION NUMBER GENERATOR
+ * 2. REGISTRATION NUMBER ALLOCATION (atomic, approval-time)
  * ======================================================================== */
 
-function aws_sbg_generate_reinvent_registration_number() {
-	$next = (int) get_option( 'aws_reinvent_next_number', 1 );
-	$formatted = 'reinvent-#' . str_pad( $next, 3, '0', STR_PAD_LEFT );
-	update_option( 'aws_reinvent_next_number', $next + 1 );
-	return $formatted;
+function aws_sbg_reinvent_numbers_init_db() {
+	global $wpdb;
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+	$table = $wpdb->prefix . 'aws_reinvent_numbers';
+	dbDelta( "CREATE TABLE $table (
+		id bigint(20) NOT NULL AUTO_INCREMENT,
+		created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (id)
+	) {$wpdb->get_charset_collate()};" );
+
+	if ( ! get_option( 'aws_reinvent_numbers_seeded' ) ) {
+		$legacy_next = (int) get_option( 'aws_reinvent_next_number', 1 );
+		$count       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $table" );
+		if ( 0 === $count && $legacy_next > 1 ) {
+			$wpdb->query( "ALTER TABLE $table AUTO_INCREMENT = " . intval( $legacy_next ) );
+		}
+		update_option( 'aws_reinvent_numbers_seeded', 1 );
+	}
+}
+add_action( 'after_switch_theme', 'aws_sbg_reinvent_numbers_init_db' );
+add_action( 'admin_init', 'aws_sbg_reinvent_numbers_init_db', 10 );
+
+function aws_sbg_allocate_reinvent_registration_number() {
+	global $wpdb;
+	$table = $wpdb->prefix . 'aws_reinvent_numbers';
+	$wpdb->insert( $table, array( 'created_at' => current_time( 'mysql' ) ), array( '%s' ) );
+	$num = (int) $wpdb->insert_id;
+	return 'reinvent-#' . str_pad( $num, 3, '0', STR_PAD_LEFT );
 }
 
 /* ========================================================================
@@ -53,7 +76,7 @@ function aws_sbg_generate_reinvent_registration_number() {
 
 function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 	$success = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'success';
-	$reg_id  = isset( $_GET['reg_id'] ) ? sanitize_text_field( wp_unslash( $_GET['reg_id'] ) ) : '';
+	$exists  = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'exists';
 	$fonts   = get_template_directory_uri() . '/assets/design-kit/fonts';
 	$skyline = get_template_directory_uri() . '/assets/design-kit/Islamabad Landmark Footer.png';
 	$aws_logo = get_template_directory_uri() . '/assets/images/AWS-Logo-White-Trim.png';
@@ -202,12 +225,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				<div class="rv-success-icon" style="animation:none;">
 					<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
 				</div>
-				<h2 style="font-weight:700; font-size:26px; margin:0 0 10px; letter-spacing:0.02em;">UNDER REVIEW!</h2>
-				<p style="font-size:15px; line-height:1.65; color:rgba(255,255,255,0.62);">Thanks for your interest in AWS re:Invent Watch &amp; Build Party Islamabad 2026. You'll be notified by email once your seat is approved.</p>
-				<div class="rv-code">
-					<span class="rv-code-label">Registration number</span>
-					<span class="rv-code-value"><?php echo esc_html( $reg_id ); ?></span>
-				</div>
+				<h2 style="font-weight:700; font-size:26px; margin:0 0 10px; letter-spacing:0.02em;">Application Received</h2>
+				<p style="font-size:15px; line-height:1.65; color:rgba(255,255,255,0.62);">Thanks for your interest in AWS re:Invent Watch &amp; Build Party Islamabad 2026. Only approved attendees will be informed by email.</p>
 				<div style="margin-top:26px;">
 					<a href="<?php echo esc_url( AWS_REINVENT_WHATSAPP_URL ); ?>" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; justify-content:center; gap:10px; background:#00DFD8; color:#06040C; font-family:'Amazon Ember Mono',monospace; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; text-decoration:none; padding:14px 26px; border-radius:10px;">Join WhatsApp community</a>
 					<p style="font-size:12.5px; color:rgba(255,255,255,0.45); margin:10px 0 0; line-height:1.6;">For updates &amp; announcements.</p>
@@ -216,6 +235,10 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			</div>
 		</div>
 		<?php else : ?>
+
+		<?php if ( $exists ) : ?>
+		<div style="position:relative;z-index:2;padding:16px 20px;border:1px solid rgba(0,223,216,0.4);border-radius:10px;background:rgba(0,223,216,0.08);color:#FFFFFF;font-size:14px;line-height:1.6;margin-bottom:20px;">You've already submitted an application. We'll email you once your seat is approved.</div>
+		<?php endif; ?>
 
 		<!-- Step 0: Intro -->
 		<section class="rv-intro" x-show="currentStep === 0">
@@ -325,6 +348,36 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 							<label for="rv-linkedin">LinkedIn Profile URL <em>*</em></label>
 							<input id="rv-linkedin" type="url" name="linkedin" :required="currentStep === 1" placeholder="https://linkedin.com/in/username">
 						</div>
+						<div class="rv-field" style="grid-column:1/-1;">
+							<label>Bringing a vehicle? <span style="font-weight:400;">(optional)</span></label>
+							<div class="rv-choices" role="radiogroup" aria-label="Vehicle">
+								<label class="rv-choice">
+									<input type="radio" name="has_vehicle" value="no" x-model="hasVehicle">
+									<span class="rv-choice-title">No</span>
+								</label>
+								<label class="rv-choice">
+									<input type="radio" name="has_vehicle" value="yes" x-model="hasVehicle">
+									<span class="rv-choice-title">Yes</span>
+								</label>
+							</div>
+						</div>
+						<div class="rv-field" style="grid-column:1/-1;" x-show="hasVehicle === 'yes'" x-cloak>
+							<label>Vehicle type</label>
+							<div class="rv-choices" role="radiogroup" aria-label="Vehicle type">
+								<label class="rv-choice">
+									<input type="radio" name="vehicle_type" value="bike">
+									<span class="rv-choice-title">Bike</span>
+								</label>
+								<label class="rv-choice">
+									<input type="radio" name="vehicle_type" value="car">
+									<span class="rv-choice-title">Car</span>
+								</label>
+							</div>
+						</div>
+						<div class="rv-field" style="grid-column:1/-1;" x-show="hasVehicle === 'yes'" x-cloak>
+							<label for="rv-vehicle-number">Vehicle number</label>
+							<input id="rv-vehicle-number" type="text" name="vehicle_number" placeholder="ABC-123">
+						</div>
 					</div>
 
 					<div class="rv-actions">
@@ -368,6 +421,10 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						<input type="checkbox" name="will_attend" value="yes" :required="currentStep === 2">
 						<span class="rv-commit-text">I will attend the event if accepted.<span class="rv-commit-sub">Seats are limited and resources are planned per attendee, so a no-show takes a seat from another builder.</span></span>
 					</label>
+					<label class="rv-commit">
+						<input type="checkbox" name="parking_policy" value="yes" :required="currentStep === 2">
+						<span class="rv-commit-text">I understand that due to limited parking capacity, we encourage public transport (InDrive, Yango, Bykea).<span class="rv-commit-sub">In the first phase, we will prioritize attendees with no vehicle.</span></span>
+					</label>
 
 					<div class="rv-actions" style="margin-top:32px;">
 						<button type="button" class="rv-btn rv-btn-ghost" @click="prevStep()">Back</button>
@@ -388,6 +445,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			return {
 				currentStep: 0,
 				audienceType: '',
+				hasVehicle: 'no',
 				isSubmitting: false,
 				nextStep() { this.currentStep++; },
 				prevStep() { if ( this.currentStep > 0 ) { this.currentStep--; } },
@@ -459,17 +517,44 @@ function aws_sbg_handle_reinvent_registration() {
 	$why        = isset( $_POST['why_invite'] ) ? sanitize_textarea_field( wp_unslash( $_POST['why_invite'] ) ) : '';
 	$will_attend = isset( $_POST['will_attend'] ) ? sanitize_text_field( wp_unslash( $_POST['will_attend'] ) ) : '';
 
+	$has_vehicle    = ( isset( $_POST['has_vehicle'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['has_vehicle'] ) ) ) ? 'yes' : 'no';
+	$vehicle_type   = '';
+	$vehicle_number = '';
+	if ( 'yes' === $has_vehicle ) {
+		$vehicle_type   = isset( $_POST['vehicle_type'] ) ? sanitize_key( wp_unslash( $_POST['vehicle_type'] ) ) : '';
+		$vehicle_number = isset( $_POST['vehicle_number'] ) ? sanitize_text_field( wp_unslash( $_POST['vehicle_number'] ) ) : '';
+		if ( ! in_array( $vehicle_type, array( 'bike', 'car' ), true ) || '' === trim( $vehicle_number ) ) {
+			wp_die( 'Please provide your vehicle type and number.' );
+		}
+	}
+
+	$parking_policy = ( isset( $_POST['parking_policy'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['parking_policy'] ) ) );
+
 	$valid_audience = in_array( $audience, array( 'student', 'professional', 'job_seeker' ), true );
 
-	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $cnic ) || ! preg_match( '/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/', $cnic ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) || empty( $why ) || 'yes' !== $will_attend || ! $valid_audience ) {
+	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $cnic ) || ! preg_match( '/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/', $cnic ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) || empty( $why ) || 'yes' !== $will_attend || ! $parking_policy || ! $valid_audience ) {
 		wp_die( 'Please fill in all required fields.' );
 	}
 
-	$reg_number = aws_sbg_generate_reinvent_registration_number();
+	// Duplicate guard by email.
+	$existing = get_posts( array(
+		'post_type'      => 'aws_reinvent_reg',
+		'posts_per_page' => 1,
+		'post_status'    => 'publish',
+		'meta_key'       => 'email',
+		'meta_value'     => $email,
+		'fields'         => 'ids',
+	) );
+	if ( ! empty( $existing ) ) {
+		$redirect = wp_get_referer() ? wp_get_referer() : home_url();
+		$redirect = add_query_arg( array( 'reinvent_registration' => 'exists' ), $redirect );
+		wp_safe_redirect( $redirect );
+		exit;
+	}
 
 	$post_id = wp_insert_post( array(
 		'post_type'   => 'aws_reinvent_reg',
-		'post_title'  => $reg_number . ' - ' . $full_name,
+		'post_title'  => $full_name,
 		'post_status' => 'publish',
 	) );
 
@@ -477,7 +562,6 @@ function aws_sbg_handle_reinvent_registration() {
 		wp_die( 'Failed to save registration. Please try again.' );
 	}
 
-	update_post_meta( $post_id, 'registration_number', $reg_number );
 	update_post_meta( $post_id, 'email', $email );
 	update_post_meta( $post_id, 'whatsapp', $whatsapp );
 	update_post_meta( $post_id, 'cnic', $cnic );
@@ -488,47 +572,45 @@ function aws_sbg_handle_reinvent_registration() {
 	update_post_meta( $post_id, 'attended_before', $attended );
 	update_post_meta( $post_id, 'why_invite', $why );
 	update_post_meta( $post_id, 'will_attend', $will_attend );
+	update_post_meta( $post_id, 'has_vehicle', $has_vehicle );
+	update_post_meta( $post_id, 'vehicle_type', $vehicle_type );
+	update_post_meta( $post_id, 'vehicle_number', $vehicle_number );
+	update_post_meta( $post_id, 'parking_policy', $parking_policy ? 'yes' : 'no' );
 	update_post_meta( $post_id, 'approval_status', 'pending' );
 	update_post_meta( $post_id, 'notified', 'no' );
 	update_post_meta( $post_id, 'notified_status', '' );
 
-	/* Applicant confirmation */
+	/* Applicant confirmation (under review) */
 	if ( function_exists( 'aws_sbg_mail_send' ) ) {
 		$confirm_body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $full_name ) . '</strong>,</p>'
-			. '<p style="margin:0 0 14px 0;">Thank you for your interest in <strong style="color:#FFFFFF;">AWS re:Invent Watch &amp; Build Party Islamabad 2026</strong>. Your details have been successfully received and are now under review.</p>'
-			. '<p style="margin:0 0 14px 0;">Your Registration ID: <strong style="color:#00DFD8;">' . esc_html( $reg_number ) . '</strong></p>'
-			. '<p style="margin:0 0 8px 0; font-weight:700; color:#FFFFFF;">What happens next?</p>'
+			. '<p style="margin:0 0 14px 0;">Thank you for your interest in <strong style="color:#FFFFFF;">AWS re:Invent Watch &amp; Build Party 2026</strong>, hosted by the AWS Student Builder Group at Air University Islamabad.</p>'
+			. '<p style="margin:0 0 14px 0;">Your application has been received and is now under review. If approved, you\'ll receive your re:Invent pass and event details.</p>'
+			. '<p style="margin:0 0 8px 0; font-weight:700; color:#FFFFFF;">What happens next</p>'
 			. '<ul style="margin:0 0 14px 20px; padding:0;">'
-			. '<li style="margin:0 0 7px 0;">Our team will review your application.</li>'
-			. '<li style="margin:0 0 7px 0;">You\'ll receive an email notifying you whether your seat has been approved.</li>'
-			. '<li style="margin:0;">If approved, you\'ll receive your event ticket and further details.</li>'
+			. '<li style="margin:0 0 7px 0;">Our team reviews your application.</li>'
+			. '<li style="margin:0;">You\'ll be notified by email once your seat is confirmed.</li>'
 			. '</ul>'
-			. '<p style="margin:0 0 6px 0; font-weight:700; color:#FFFFFF;">Stay Connected</p>'
-			. '<p style="margin:0 0 4px 0;">Join our WhatsApp community for event updates and important announcements.</p>'
-			. '<p style="margin:16px 0 0 0;">Regards,<br><strong style="color:#FFFFFF;">AWS STUDENT BUILDER GROUP</strong><br><span style="font-size:12px; color:rgba(255,255,255,0.5);">AIR UNIVERSITY ISLAMABAD</span></p>';
-		aws_sbg_mail_send( 'reinvent', $email, 'AWS re:Invent Islamabad Application Received for Review', 'Application Received', 'Your application is under review', $confirm_body, AWS_REINVENT_WHATSAPP_URL, 'Join WhatsApp Community' );
+			. '<p style="margin:16px 0 0 0;">AWS Student Builder Group at Air University Islamabad<br>info@awsairuniversity.com · +923492449953</p>';
+		aws_sbg_mail_send( 'reinvent', $email, 'Your AWS re:Invent application is under review', 'Application Received', 'Thank you for your interest', $confirm_body, AWS_REINVENT_WHATSAPP_URL, 'Join WhatsApp Community' );
 
 		/* Admin notification (optional) */
-		$mail_settings = aws_sbg_mail_get_settings();
-		if ( 'yes' === ( $mail_settings['notify_admin_rsvp'] ?? 'yes' ) ) {
-			$admin_to   = ! empty( $mail_settings['admin_email'] ) ? $mail_settings['admin_email'] : get_option( 'admin_email' );
-			$admin_body = '<p style="margin:0 0 12px 0;">New re:Invent RSVP:</p>'
-				. '<p style="margin:0 0 6px 0;"><strong style="color:#FFFFFF;">' . esc_html( $full_name ) . '</strong> — ' . esc_html( ucfirst( str_replace( '_', ' ', $audience ) ) ) . '</p>'
-				. '<p style="margin:0 0 6px 0;">Reg #: ' . esc_html( $reg_number ) . '</p>'
-				. '<p style="margin:0 0 6px 0;">' . esc_html( $university ) . ' · ' . esc_html( $city ) . '</p>'
-				. '<p style="margin:0 0 6px 0;">Attended before: ' . esc_html( ucfirst( $attended ) ) . '</p>'
-				. '<p style="margin:0;">Why: ' . esc_html( wp_trim_words( $why, 40, '…' ) ) . '</p>';
-			aws_sbg_mail_send( 'reinvent', $admin_to, 'New re:Invent RSVP — ' . $reg_number, 'New RSVP', 'Review needed', $admin_body, admin_url( 'admin.php?page=aws-reinvent-registrations' ), 'Open registrations' );
+		if ( function_exists( 'aws_sbg_mail_get_settings' ) ) {
+			$mail_settings = aws_sbg_mail_get_settings();
+			if ( 'yes' === ( $mail_settings['notify_admin_rsvp'] ?? 'yes' ) ) {
+				$admin_to   = ! empty( $mail_settings['admin_email'] ) ? $mail_settings['admin_email'] : get_option( 'admin_email' );
+				$admin_body = '<p style="margin:0 0 12px 0;">New re:Invent application:</p>'
+					. '<p style="margin:0 0 6px 0;"><strong style="color:#FFFFFF;">' . esc_html( $full_name ) . '</strong> · ' . esc_html( ucfirst( str_replace( '_', ' ', $audience ) ) ) . '</p>'
+					. '<p style="margin:0 0 6px 0;">' . esc_html( $university ) . ' · ' . esc_html( $city ) . '</p>'
+					. '<p style="margin:0 0 6px 0;">Attended before: ' . esc_html( ucfirst( $attended ) ) . '</p>'
+					. '<p style="margin:0;">Why: ' . esc_html( wp_trim_words( $why, 40, '…' ) ) . '</p>';
+				aws_sbg_mail_send( 'reinvent', $admin_to, 'New re:Invent application · ' . esc_html( $full_name ), 'New Application', 'Review needed', $admin_body, admin_url( 'admin.php?page=aws-reinvent-registrations' ), 'Open registrations' );
+			}
 		}
 	}
 
 	$redirect = wp_get_referer() ? wp_get_referer() : home_url();
-	$redirect = add_query_arg( array(
-		'reinvent_registration' => 'success',
-		'reg_id'                => urlencode( $reg_number ),
-	), $redirect );
-
-	wp_redirect( $redirect );
+	$redirect = add_query_arg( array( 'reinvent_registration' => 'success' ), $redirect );
+	wp_safe_redirect( $redirect );
 	exit;
 }
 add_action( 'admin_post_nopriv_submit_aws_reinvent_registration', 'aws_sbg_handle_reinvent_registration' );
@@ -545,35 +627,46 @@ function aws_sbg_render_reinvent_admin_page() {
 		wp_die( 'Unauthorized access.' );
 	}
 
+	if ( isset( $_GET['roster'] ) ) {
+		aws_sbg_render_reinvent_roster();
+	}
+
 	if ( isset( $_GET['action'], $_GET['reg_id'], $_GET['_wpnonce'] ) && in_array( $_GET['action'], array( 'approve', 'reject' ), true ) ) {
 		$reg_id = intval( $_GET['reg_id'] );
 		if ( wp_verify_nonce( $_GET['_wpnonce'], 'aws_reinvent_review_' . $reg_id ) ) {
-			$status = 'approve' === $_GET['action'] ? 'approved' : 'rejected';
+			$status      = 'approve' === $_GET['action'] ? 'approved' : 'rejected';
+			$prev_status = get_post_meta( $reg_id, 'notified_status', true );
 			update_post_meta( $reg_id, 'approval_status', $status );
 
-			/* Send the matching email once per status change */
-			$prev_status = get_post_meta( $reg_id, 'notified_status', true );
-			if ( $prev_status !== $status && function_exists( 'aws_sbg_mail_send' ) ) {
-				$to_email = get_post_meta( $reg_id, 'email', true );
-				$name     = preg_replace( '/^reinvent-#\d+\s*-\s*/', '', get_the_title( $reg_id ) );
-				$reg_no   = get_post_meta( $reg_id, 'registration_number', true );
+			if ( 'approved' === $status && $prev_status !== 'approved' && function_exists( 'aws_sbg_mail_send' ) ) {
+				$name   = preg_replace( '/^reinvent-#\d+\s*-\s*/', '', get_the_title( $reg_id ) );
+				$reg_no = get_post_meta( $reg_id, 'registration_number', true );
+				if ( empty( $reg_no ) ) {
+					$reg_no = aws_sbg_allocate_reinvent_registration_number();
+					update_post_meta( $reg_id, 'registration_number', $reg_no );
+					wp_update_post( array( 'ID' => $reg_id, 'post_title' => $reg_no . ' - ' . $name ) );
+				}
 
+				$to_email = get_post_meta( $reg_id, 'email', true );
 				if ( $to_email ) {
-					if ( 'approved' === $status ) {
-						$body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
-							. '<p style="margin:0 0 12px 0;">Great news — your application for <strong style="color:#FFFFFF;">AWS re:Invent Watch &amp; Build Party Islamabad 2026</strong> has been <strong style="color:#00DFD8;">approved</strong>.</p>'
-							. '<p style="margin:0 0 12px 0;">Venue: Air University, Islamabad. Date and timings will be shared closer to the event.</p>'
-							. '<p style="margin:0;">Your registration number is <strong style="color:#00DFD8;">' . esc_html( $reg_no ) . '</strong>. Please bring your CNIC / B-Form for gate verification.</p>';
-						aws_sbg_mail_send( 'reinvent', $to_email, 'You\'re invited — AWS re:Invent Watch & Build Party', 'Application Approved', 'You\'re invited', $body );
-					} else {
-						$body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
-							. '<p style="margin:0 0 12px 0;">Thank you for applying to <strong style="color:#FFFFFF;">AWS re:Invent Watch &amp; Build Party Islamabad 2026</strong>. This time we were unable to approve your application — seats were extremely limited.</p>'
-							. '<p style="margin:0;">We\'d love to see you at our upcoming events. Keep building.</p>';
-						aws_sbg_mail_send( 'reinvent', $to_email, 'Update on your AWS re:Invent application', 'Application Update', 'Thank you for applying', $body );
-					}
+					$body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
+						. '<p style="margin:0 0 14px 0;">Congratulations, your application for <strong style="color:#FFFFFF;">AWS re:Invent Watch &amp; Build Party 2026</strong> has been approved.</p>'
+						. '<div style="margin:16px 0 20px 0;border:1px dashed #00DFD8;border-radius:10px;padding:14px 20px;">'
+						. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#00DFD8;margin-bottom:6px;">Event Pass</div>'
+						. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:22px;font-weight:700;color:#FFFFFF;letter-spacing:0.03em;">' . esc_html( $reg_no ) . '</div>'
+						. '</div>'
+						. '<p style="margin:0 0 8px 0; font-weight:700; color:#FFFFFF;">What we have for you</p>'
+						. '<ul style="margin:0 0 16px 20px; padding:0;">'
+						. '<li style="margin:0 0 7px 0;">Expert sessions and talks</li>'
+						. '<li style="margin:0 0 7px 0;">Refreshments (snacks, food, drinks)</li>'
+						. '<li style="margin:0;">Swags (subject to availability and activity participation)</li>'
+						. '</ul>'
+						. '<p style="margin:16px 0 0 0;">AWS Student Builder Group at Air University Islamabad<br>info@awsairuniversity.com · +923492449953</p>';
+					aws_sbg_mail_send( 'reinvent', $to_email, 'You\'re approved for AWS re:Invent Watch & Build Party', 'Application Approved', 'Congratulations', $body );
 					update_post_meta( $reg_id, 'notified', 'yes' );
 				}
 			}
+
 			update_post_meta( $reg_id, 'notified_status', $status );
 		}
 	}
@@ -617,15 +710,20 @@ function aws_sbg_render_reinvent_admin_page() {
 
 	$query = new WP_Query( $args );
 
-	$counts = array('total' => 0, 'pending' => 0, 'approved' => 0, 'rejected' => 0);
-	$all = new WP_Query( array( 'post_type' => 'aws_reinvent_reg', 'posts_per_page' => -1, 'post_status' => 'publish' ) );
-	if ( $all->have_posts() ) {
-		foreach ( $all->posts as $reg ) {
-			$counts['total']++;
-			$s = get_post_meta( $reg->ID, 'approval_status', true );
-			if ( $s === 'approved' ) $counts['approved']++;
-			elseif ( $s === 'rejected' ) $counts['rejected']++;
-			else $counts['pending']++;
+	$counts = array( 'total' => 0, 'pending' => 0, 'approved' => 0, 'rejected' => 0 );
+	$counts['total'] = (int) wp_count_posts( 'aws_reinvent_reg' )->publish;
+
+	global $wpdb;
+	$count_rows = $wpdb->get_results(
+		"SELECT pm.meta_value AS status, COUNT(*) AS n
+		 FROM {$wpdb->postmeta} pm
+		 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+		 WHERE p.post_type = 'aws_reinvent_reg' AND p.post_status = 'publish' AND pm.meta_key = 'approval_status'
+		 GROUP BY pm.meta_value"
+	);
+	foreach ( $count_rows as $cr ) {
+		if ( isset( $counts[ $cr->status ] ) ) {
+			$counts[ $cr->status ] = (int) $cr->n;
 		}
 	}
 
@@ -652,6 +750,7 @@ function aws_sbg_render_reinvent_admin_page() {
 					<button type="submit" class="bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-xl hover:bg-slate-800 transition-all">Search</button>
 				</form>
 				<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'export_csv' => '1' ) ) ); ?>" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all">⬇ Export CSV</a>
+				<a href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'roster' => '1' ) ) ); ?>" target="_blank" class="bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all">Print Roster</a>
 			</div>
 		</div>
 
@@ -686,6 +785,8 @@ function aws_sbg_render_reinvent_admin_page() {
 						<th class="py-3.5 px-4">City</th>
 						<th class="py-3.5 px-4">LinkedIn</th>
 						<th class="py-3.5 px-4 text-center">AWS Event Before?</th>
+						<th class="py-3.5 px-4">Vehicle</th>
+						<th class="py-3.5 px-4 text-center">Parking</th>
 						<th class="py-3.5 px-4 text-center">Status</th>
 						<th class="py-3.5 px-4 text-center">Actions</th>
 					</tr>
@@ -693,7 +794,7 @@ function aws_sbg_render_reinvent_admin_page() {
 				<tbody class="divide-y divide-slate-100">
 					<?php if ( ! $query->have_posts() ) : ?>
 						<tr>
-							<td colspan="10" class="py-8 text-center text-slate-500 font-medium">No registrations found.</td>
+							<td colspan="12" class="py-8 text-center text-slate-500 font-medium">No registrations found.</td>
 						</tr>
 					<?php else : ?>
 						<?php while ( $query->have_posts() ) : $query->the_post(); ?>
@@ -709,9 +810,15 @@ function aws_sbg_render_reinvent_admin_page() {
 							$linkedin    = get_post_meta( $reg_id, 'linkedin', true );
 							$attended    = get_post_meta( $reg_id, 'attended_before', true );
 							$approval    = get_post_meta( $reg_id, 'approval_status', true ) ?: 'pending';
+							$has_vehicle = get_post_meta( $reg_id, 'has_vehicle', true );
+							$vehicle     = 'No';
+							if ( 'yes' === $has_vehicle ) {
+								$vehicle = ucfirst( get_post_meta( $reg_id, 'vehicle_type', true ) ) . ' · ' . get_post_meta( $reg_id, 'vehicle_number', true );
+							}
+							$parking_ok = 'yes' === get_post_meta( $reg_id, 'parking_policy', true );
 							?>
 							<tr class="hover:bg-slate-50/80 transition-colors">
-								<td class="py-3.5 px-4 font-mono font-bold text-slate-900"><?php echo esc_html( $reg_number ); ?></td>
+								<td class="py-3.5 px-4 font-mono font-bold text-slate-900"><?php echo $reg_number ? esc_html( $reg_number ) : '<span class="text-slate-400">—</span>'; ?></td>
 								<td class="py-3.5 px-4 font-bold text-slate-900"><?php echo esc_html( $name ); ?></td>
 								<td class="py-3.5 px-4 font-mono text-slate-600"><?php echo esc_html( $email ); ?></td>
 								<td class="py-3.5 px-4 font-mono text-slate-600"><?php echo esc_html( $whatsapp ); ?></td>
@@ -725,6 +832,8 @@ function aws_sbg_render_reinvent_admin_page() {
 									<?php endif; ?>
 								</td>
 								<td class="py-3.5 px-4 text-center font-bold text-slate-700"><?php echo esc_html( ucfirst( $attended ) ); ?></td>
+								<td class="py-3.5 px-4 text-slate-700"><?php echo esc_html( $vehicle ); ?></td>
+								<td class="py-3.5 px-4 text-center"><?php echo $parking_ok ? '<span class="text-emerald-600 font-bold">✓</span>' : '<span class="text-slate-400">—</span>'; ?></td>
 								<td class="py-3.5 px-4 text-center">
 									<?php if ( $approval === 'approved' ) : ?>
 										<span class="bg-emerald-100 text-emerald-800 font-black px-2.5 py-1 rounded-full text-[10px] uppercase">Approved</span>
@@ -765,6 +874,94 @@ function aws_sbg_render_reinvent_admin_page() {
 	<?php
 }
 
+function aws_sbg_render_reinvent_roster() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized access.' );
+	}
+
+	$args = array(
+		'post_type'      => 'aws_reinvent_reg',
+		'posts_per_page' => -1,
+		'post_status'    => 'publish',
+		'orderby'        => 'date',
+		'order'          => 'DESC',
+	);
+	$query = new WP_Query( $args );
+
+	$priority = array( 'pending' => 0, 'approved' => 1, 'rejected' => 2 );
+	$rows     = array();
+	if ( $query->have_posts() ) {
+		while ( $query->have_posts() ) {
+			$query->the_post();
+			$id          = get_the_ID();
+			$reg_no      = get_post_meta( $id, 'registration_number', true );
+			$name        = preg_replace( '/^reinvent-#\d+\s*-\s*/', '', get_the_title() );
+			$phone       = get_post_meta( $id, 'whatsapp', true );
+			$has_vehicle = get_post_meta( $id, 'has_vehicle', true );
+			$vehicle     = 'No';
+			if ( 'yes' === $has_vehicle ) {
+				$vehicle = ucfirst( get_post_meta( $id, 'vehicle_type', true ) ) . ' · ' . get_post_meta( $id, 'vehicle_number', true );
+			}
+			$parking  = 'yes' === get_post_meta( $id, 'parking_policy', true );
+			$approval = get_post_meta( $id, 'approval_status', true ) ?: 'pending';
+			$rows[]   = compact( 'reg_no', 'name', 'phone', 'vehicle', 'parking', 'approval' );
+		}
+		wp_reset_postdata();
+	}
+	usort( $rows, function ( $a, $b ) use ( $priority ) {
+		return $priority[ $a['approval'] ] <=> $priority[ $b['approval'] ];
+	} );
+	?>
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<meta charset="utf-8">
+		<title>re:Invent Event Roster</title>
+		<style>
+			body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #0f172a; margin: 24px; }
+			table { width: 100%; border-collapse: collapse; font-size: 13px; }
+			th, td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; text-align: left; vertical-align: top; }
+			th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #475569; border-bottom: 2px solid #cbd5e1; }
+			.status-pending { color: #b45309; font-weight: 700; }
+			.status-approved { color: #047857; font-weight: 700; }
+			.status-rejected { color: #b91c1c; font-weight: 700; }
+			@media print { body { margin: 0; } }
+		</style>
+	</head>
+	<body>
+		<h1 style="font-size:20px; margin:0 0 4px;">AWS re:Invent Watch &amp; Build Party 2026</h1>
+		<p style="font-size:13px; color:#475569; margin:0 0 18px;">Event roster</p>
+		<table>
+			<thead>
+				<tr>
+					<th>Pass</th>
+					<th>Name</th>
+					<th>Phone</th>
+					<th>Vehicle</th>
+					<th>Parking</th>
+					<th>Status</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach ( $rows as $r ) : ?>
+				<tr>
+					<td style="font-family:monospace; font-weight:700;"><?php echo $r['reg_no'] ? esc_html( $r['reg_no'] ) : ''; ?></td>
+					<td><?php echo esc_html( $r['name'] ); ?></td>
+					<td><?php echo esc_html( $r['phone'] ); ?></td>
+					<td><?php echo esc_html( $r['vehicle'] ); ?></td>
+					<td><?php echo $r['parking'] ? '✓' : ''; ?></td>
+					<td class="status-<?php echo esc_attr( $r['approval'] ); ?>"><?php echo esc_html( ucfirst( $r['approval'] ) ); ?></td>
+				</tr>
+			<?php endforeach; ?>
+			</tbody>
+		</table>
+		<script>window.onload = function(){ window.print(); };</script>
+	</body>
+	</html>
+	<?php
+	exit;
+}
+
 /* ========================================================================
  * 6. CSV EXPORT
  * ======================================================================== */
@@ -791,7 +988,7 @@ function aws_sbg_export_reinvent_csv() {
 	header( 'Content-Disposition: attachment; filename=' . $filename );
 
 	$output = fopen( 'php://output', 'w' );
-	fputcsv( $output, array( 'Registration #', 'Name', 'Email', 'WhatsApp', 'CNIC/B-Form', 'Institute/Org', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS Event Before', 'Why Invite', 'Will Attend', 'Approval Status', 'Registered At' ) );
+	fputcsv( $output, array( 'Registration #', 'Name', 'Email', 'WhatsApp', 'CNIC/B-Form', 'Institute/Org', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS Event Before', 'Why Invite', 'Will Attend', 'Vehicle', 'Parking Policy', 'Approval Status', 'Registered At' ) );
 
 	if ( $query->have_posts() ) {
 		foreach ( $query->posts as $reg ) {
@@ -807,10 +1004,16 @@ function aws_sbg_export_reinvent_csv() {
 			$attended    = get_post_meta( $reg->ID, 'attended_before', true );
 			$why         = get_post_meta( $reg->ID, 'why_invite', true );
 			$will_attend = get_post_meta( $reg->ID, 'will_attend', true );
-			$approval    = get_post_meta( $reg->ID, 'approval_status', true ) ?: 'pending';
-			$registered  = get_the_date( 'Y-m-d H:i:s', $reg->ID );
+			$has_vehicle = get_post_meta( $reg->ID, 'has_vehicle', true );
+			$vehicle     = 'No';
+			if ( 'yes' === $has_vehicle ) {
+				$vehicle = ucfirst( get_post_meta( $reg->ID, 'vehicle_type', true ) ) . ' · ' . get_post_meta( $reg->ID, 'vehicle_number', true );
+			}
+			$parking    = 'yes' === get_post_meta( $reg->ID, 'parking_policy', true ) ? 'Yes' : 'No';
+			$approval   = get_post_meta( $reg->ID, 'approval_status', true ) ?: 'pending';
+			$registered = get_the_date( 'Y-m-d H:i:s', $reg->ID );
 
-			fputcsv( $output, array( $reg_number, $title, $email, $whatsapp, $cnic, $university, ucfirst( str_replace( '_', ' ', $audience ) ), $city, $linkedin, ucfirst( $attended ), $why, ucfirst( $will_attend ), ucfirst( $approval ), $registered ) );
+			fputcsv( $output, array( $reg_number, $title, $email, $whatsapp, $cnic, $university, ucfirst( str_replace( '_', ' ', $audience ) ), $city, $linkedin, ucfirst( $attended ), $why, ucfirst( $will_attend ), $vehicle, $parking, ucfirst( $approval ), $registered ) );
 		}
 	}
 
