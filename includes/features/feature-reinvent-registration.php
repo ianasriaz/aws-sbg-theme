@@ -365,18 +365,19 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 							<label>Vehicle type</label>
 							<div class="rv-choices" role="radiogroup" aria-label="Vehicle type">
 								<label class="rv-choice">
-									<input type="radio" name="vehicle_type" value="bike">
+									<input type="radio" name="vehicle_type" value="bike" :required="currentStep === 1 && hasVehicle === 'yes'">
 									<span class="rv-choice-title">Bike</span>
 								</label>
 								<label class="rv-choice">
-									<input type="radio" name="vehicle_type" value="car">
+									<input type="radio" name="vehicle_type" value="car" :required="currentStep === 1 && hasVehicle === 'yes'">
 									<span class="rv-choice-title">Car</span>
 								</label>
 							</div>
 						</div>
 						<div class="rv-field" style="grid-column:1/-1;" x-show="hasVehicle === 'yes'" x-cloak>
 							<label for="rv-vehicle-number">Vehicle number</label>
-							<input id="rv-vehicle-number" type="text" name="vehicle_number" placeholder="ABC-123">
+							<input id="rv-vehicle-number" type="text" name="vehicle_number" placeholder="ABC-123" :required="currentStep === 1 && hasVehicle === 'yes'">
+							<p style="margin:6px 0 0; font-size:12.5px; line-height:1.5; color:rgba(255,255,255,0.5);">In the first phase, we will prioritize attendees with no vehicle.</p>
 						</div>
 					</div>
 
@@ -423,7 +424,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					</label>
 					<label class="rv-commit">
 						<input type="checkbox" name="parking_policy" value="yes" :required="currentStep === 2">
-						<span class="rv-commit-text">I understand that due to limited parking capacity, we encourage public transport (InDrive, Yango, Bykea).<span class="rv-commit-sub">In the first phase, we will prioritize attendees with no vehicle.</span></span>
+						<span class="rv-commit-text">I understand that due to limited parking capacity, attendees with no vehicle will be prioritized.<span class="rv-commit-sub">We encourage using public transport (InDrive, Yango, Bykea).</span></span>
 					</label>
 
 					<div class="rv-actions" style="margin-top:32px;">
