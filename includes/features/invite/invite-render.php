@@ -104,6 +104,11 @@ function aws_sbg_invite_render_form( $event_id ) {
 			.inv-role input{width:18px;height:18px;accent-color:var(--brand);cursor:pointer;flex-shrink:0;margin:0;}
 			.inv-role-title{font-size:14px;font-weight:600;color:var(--ink);line-height:1.3;}
 
+			.inv-select-wrap{position:relative;width:100%;}
+			.inv-select{width:100%;height:48px;padding:0 38px 0 14px;font-family:inherit;font-size:15px;font-weight:500;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:4px;appearance:none;-webkit-appearance:none;cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease;}
+			.inv-select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(121,40,202,0.12);}
+			.inv-select-arrow{position:absolute;right:14px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);display:flex;align-items:center;justify-content:center;}
+
 			.inv-choice-row{display:flex;gap:12px;align-items:center;min-height:48px;padding:12px 16px;background:var(--paper);border:1px solid var(--line);border-radius:4px;cursor:pointer;}
 			.inv-choice-row:has(input:checked){border-color:var(--brand);background:var(--brand-soft);}
 			.inv-choice-row input{width:18px;height:18px;accent-color:var(--brand);cursor:pointer;flex-shrink:0;margin:0;}
@@ -113,10 +118,24 @@ function aws_sbg_invite_render_form( $event_id ) {
 			.inv-commit input{width:18px;height:18px;margin-top:3px;accent-color:var(--brand);cursor:pointer;flex-shrink:0;}
 			.inv-commit-text{font-size:14.5px;line-height:1.6;color:var(--text);}
 
-			.inv-photo-zone{display:flex;align-items:center;gap:16px;padding:16px;background:var(--surface);border:1px dashed #94a3b8;border-radius:4px;}
-			.inv-photo-zone input{flex:1;font-size:13px;color:var(--muted);}
-			.inv-photo-preview{width:56px;height:56px;object-fit:cover;border-radius:4px;border:1px solid var(--line);display:none;}
-			.inv-photo-preview.is-visible{display:block;}
+			.inv-upload-zone{position:relative;border:1px dashed #cbd5e1;border-radius:6px;background:var(--surface);padding:22px 18px;text-align:center;cursor:pointer;transition:border-color .15s ease,background-color .15s ease;outline:none;}
+			.inv-upload-zone:hover,.inv-upload-zone.is-dragover{border-color:var(--brand);background:var(--brand-soft);}
+			.inv-upload-zone:focus-visible{border-color:var(--brand);box-shadow:0 0 0 3px rgba(121,40,202,0.12);}
+			.inv-upload-input{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;}
+			.inv-upload-empty{display:flex;flex-direction:column;align-items:center;gap:6px;}
+			.inv-upload-icon-circle{width:38px;height:38px;border-radius:50%;background:var(--paper);border:1px solid var(--line);color:var(--muted);display:flex;align-items:center;justify-content:center;margin-bottom:2px;transition:color .15s ease,border-color .15s ease;}
+			.inv-upload-zone:hover .inv-upload-icon-circle{color:var(--brand);border-color:var(--brand);}
+			.inv-upload-prompt{font-size:13.5px;color:var(--text);}
+			.inv-upload-browse{font-weight:700;color:var(--brand);}
+			.inv-upload-drag{color:var(--muted);}
+			.inv-upload-meta{font-size:12px;color:#94a3b8;}
+			.inv-upload-filled{display:flex;align-items:center;gap:14px;text-align:left;}
+			.inv-upload-thumb{width:52px;height:52px;border-radius:6px;object-fit:cover;border:1px solid var(--line);background:var(--paper);flex-shrink:0;}
+			.inv-upload-info{flex:1;min-width:0;}
+			.inv-upload-filename{font-size:13.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+			.inv-upload-filesize{font-size:12px;color:var(--muted);margin-top:2px;}
+			.inv-upload-change{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--brand);background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:6px 12px;cursor:pointer;flex-shrink:0;position:relative;z-index:3;transition:background-color .15s ease,border-color .15s ease;}
+			.inv-upload-change:hover{background:var(--brand-soft);border-color:var(--brand);}
 
 			.inv-submit{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding-top:8px;}
 			.inv-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:4px;padding:14px 30px;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.01em;cursor:pointer;text-decoration:none;transition:background .18s ease,transform .18s ease;}
@@ -233,15 +252,20 @@ function aws_sbg_invite_render_form( $event_id ) {
 							<div class="inv-notice inv-notice-error" x-show="clientError" x-text="clientError" x-cloak style="margin-bottom:18px;"></div>
 
 							<div class="inv-section">
-								<p class="inv-section-label">I am joining as</p>
-								<div class="inv-roles" role="radiogroup" aria-label="Role">
-									<?php foreach ( $roles as $role_key => $role_label ) : ?>
-										<?php if ( 'guest' === $role_key && ! $allow_guests ) { continue; } ?>
-										<label class="inv-role">
-											<input type="radio" name="role" value="<?php echo esc_attr( $role_key ); ?>" x-model="role" required>
-											<span class="inv-role-title"><?php echo esc_html( $role_label ); ?></span>
-										</label>
-									<?php endforeach; ?>
+								<label for="inv-role" class="inv-section-label" style="display:block;margin-bottom:8px;">I am joining as <em>*</em></label>
+								<div class="inv-select-wrap">
+									<select id="inv-role" name="role" x-model="role" required class="inv-select">
+										<option value="" disabled selected>Select your role…</option>
+										<?php foreach ( $roles as $role_key => $role_label ) : ?>
+											<?php if ( 'guest' === $role_key && ! $allow_guests ) { continue; } ?>
+											<option value="<?php echo esc_attr( $role_key ); ?>"><?php echo esc_html( $role_label ); ?></option>
+										<?php endforeach; ?>
+									</select>
+									<span class="inv-select-arrow" aria-hidden="true">
+										<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+											<polyline points="6 9 12 15 18 9"></polyline>
+										</svg>
+									</span>
 								</div>
 							</div>
 
@@ -303,12 +327,34 @@ function aws_sbg_invite_render_form( $event_id ) {
 							<div class="inv-section">
 								<p class="inv-section-label">Photo</p>
 								<div class="inv-field">
-									<label for="inv-photo">Fresh photo <em>*</em></label>
-									<div class="inv-photo-zone">
-										<img class="inv-photo-preview" id="inv-photo-preview" alt="">
-										<input id="inv-photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp" <?php echo $photo_required ? 'required' : ''; ?>>
+									<label for="inv-photo">Fresh portrait photo <em>*</em></label>
+									<div class="inv-upload-zone" id="inv-upload-zone" tabindex="0" role="button" aria-label="Upload photo">
+										<input id="inv-photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp" <?php echo $photo_required ? 'required' : ''; ?> class="inv-upload-input">
+										
+										<div class="inv-upload-empty" id="inv-upload-empty">
+											<div class="inv-upload-icon-circle">
+												<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<rect x="3" y="3" width="18" height="18" rx="3" ry="3"/>
+													<circle cx="8.5" cy="8.5" r="1.5"/>
+													<polyline points="21 15 16 10 5 21"/>
+												</svg>
+											</div>
+											<div class="inv-upload-prompt">
+												<span class="inv-upload-browse">Choose a photo</span> <span class="inv-upload-drag">or drag &amp; drop here</span>
+											</div>
+											<div class="inv-upload-meta">JPG, PNG or WebP · Up to 8 MB</div>
+										</div>
+
+										<div class="inv-upload-filled" id="inv-upload-filled" style="display:none;">
+											<img class="inv-upload-thumb" id="inv-photo-preview" alt="Preview">
+											<div class="inv-upload-info">
+												<div class="inv-upload-filename" id="inv-upload-filename">photo.jpg</div>
+												<div class="inv-upload-filesize" id="inv-upload-filesize">1.2 MB</div>
+											</div>
+											<button type="button" class="inv-upload-change" id="inv-upload-change-btn">Change</button>
+										</div>
 									</div>
-									<span class="inv-help">Used for recognition and event creatives. JPG, PNG, or WebP (up to 8 MB).</span>
+									<span class="inv-help">Used for recognition shield and event creatives. High-resolution portrait recommended.</span>
 								</div>
 							</div>
 
@@ -492,15 +538,62 @@ function aws_sbg_invite_render_form( $event_id ) {
 		}
 		document.addEventListener('DOMContentLoaded', function () {
 			var input = document.getElementById('inv-photo');
+			var zone = document.getElementById('inv-upload-zone');
+			var emptyState = document.getElementById('inv-upload-empty');
+			var filledState = document.getElementById('inv-upload-filled');
 			var preview = document.getElementById('inv-photo-preview');
-			if (input && preview) {
-				input.addEventListener('change', function () {
-					if (input.files && input.files[0]) {
-						preview.src = URL.createObjectURL(input.files[0]);
-						preview.classList.add('is-visible');
-					} else {
-						preview.classList.remove('is-visible');
-					}
+			var nameEl = document.getElementById('inv-upload-filename');
+			var sizeEl = document.getElementById('inv-upload-filesize');
+			var changeBtn = document.getElementById('inv-upload-change-btn');
+
+			function formatSize(bytes) {
+				if (!bytes) return '';
+				if (bytes < 1024 * 1024) {
+					return (bytes / 1024).toFixed(0) + ' KB';
+				}
+				return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+			}
+
+			function updateFileDisplay() {
+				if (input && input.files && input.files[0]) {
+					var f = input.files[0];
+					if (preview) preview.src = URL.createObjectURL(f);
+					if (nameEl) nameEl.textContent = f.name;
+					if (sizeEl) sizeEl.textContent = formatSize(f.size);
+					if (emptyState) emptyState.style.display = 'none';
+					if (filledState) filledState.style.display = 'flex';
+				} else {
+					if (preview) preview.src = '';
+					if (emptyState) emptyState.style.display = 'flex';
+					if (filledState) filledState.style.display = 'none';
+				}
+			}
+
+			if (input) {
+				input.addEventListener('change', updateFileDisplay);
+			}
+
+			if (changeBtn && input) {
+				changeBtn.addEventListener('click', function(e) {
+					e.preventDefault();
+					input.click();
+				});
+			}
+
+			if (zone) {
+				['dragenter', 'dragover'].forEach(function(evt) {
+					zone.addEventListener(evt, function(e) {
+						e.preventDefault();
+						e.stopPropagation();
+						zone.classList.add('is-dragover');
+					});
+				});
+				['dragleave', 'drop'].forEach(function(evt) {
+					zone.addEventListener(evt, function(e) {
+						e.preventDefault();
+						e.stopPropagation();
+						zone.classList.remove('is-dragover');
+					});
 				});
 			}
 		});

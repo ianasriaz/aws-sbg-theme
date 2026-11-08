@@ -687,6 +687,21 @@ aws-sbg-theme/
 
 ---
 
+### 2026-11-08 21:02 - Antigravity (Claude 3.7 Sonnet)
+
+**Task**: Replace role selection pills with minimal dropdown list and upgrade file upload to clean modern interactive zone
+
+**Files Changed**:
+- `includes/features/invite/invite-render.php`:
+  - Replaced the 3-column role radio pills with a clean, minimal `<select>` dropdown (`.inv-select`) with custom SVG arrow, seamlessly integrated with AlpineJS `x-model="role"`.
+  - Replaced the browser default `<input type="file">` with an interactive, modern upload zone (`.inv-upload-zone`):
+    - Dotted/dashed light container with drag & drop feedback (`.is-dragover`).
+    - Clean iconography, "Choose a photo or drag & drop here" prompt, and format/size guidelines.
+    - Filled preview state displaying thumbnail, truncated filename, formatted filesize in KB/MB, and a "Change" button.
+    - Fully accessible via keyboard focus and click.
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*
