@@ -649,6 +649,28 @@ aws-sbg-theme/
 
 ---
 
+### 2026-11-08 20:50 - Antigravity (Claude 3.7 Sonnet)
+
+**Task**: Update partner confirmation email copy and structure to "You're officially part of the team!"
+
+**Files Changed**:
+- `includes/emails/aws-emails.php`:
+  - Added support for `$closing_html` in `aws_sbg_email_template` and `aws_sbg_mail_send` to allow a closing message after the CTA button before the footer divider.
+- `includes/features/invite/invite-handler.php`:
+  - Updated subject to `"You're officially part of the team! — [Event Name]"`.
+  - Updated email kicker to `"AWS Community Partner"` and title to `"You're officially part of the team!"`.
+  - Updated body copy to:
+    - `"Hi [NAME],"`
+    - `"Thank you for accepting our invitation!"`
+    - `"As an AWS Community Leader and official AWS Community Partner, you're invited to represent your community at the AWS re:Invent 2026 Watch & Build Party in Islamabad."`
+    - `"We'll come together as community leaders and partners, each representing our respective communities while collectively representing AWS."`
+    - `"Your event pass will be shared separately."`
+    - `"Join our WhatsApp group for event updates and announcements."`
+  - Added green WhatsApp CTA button `[Join WhatsApp Group]`.
+  - Added closing line: `"Looking forward to bringing the AWS community together!"`.
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*

@@ -121,7 +121,7 @@ add_action( 'admin_init', 'aws_sbg_mail_migrate_legacy' );
  * 4. BRANDED KIT-STYLE HTML TEMPLATE
  * ======================================================================== */
 
-function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $cta_label = '', $cta_sub = '' ) {
+function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $cta_label = '', $cta_sub = '', $closing_html = '' ) {
 	$cta_html = '';
 	if ( $cta_url && $cta_label ) {
 		$is_wa     = ( false !== stripos( $cta_label, 'whatsapp' ) );
@@ -163,6 +163,9 @@ function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $ct
 							<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:22px;font-weight:800;color:#FFFFFF;line-height:1.25;margin-bottom:14px;"><?php echo esc_html( $title ); ?></div>
 							<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:14px;color:#cbd5e1;line-height:1.7;"><?php echo $body_html; ?></div>
 							<?php echo $cta_html; ?>
+							<?php if ( $closing_html ) : ?>
+								<div style="margin-top:20px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:14px;color:#cbd5e1;line-height:1.7;"><?php echo $closing_html; ?></div>
+							<?php endif; ?>
 							<div style="border-top:1px solid #1a2236;margin-top:24px;padding-top:14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:1px;color:#64748b;">AWS STUDENT BUILDER GROUP · AIR UNIVERSITY ISLAMABAD · <?php echo esc_html( date( 'Y' ) ); ?></div>
 						</td>
 					</tr>
@@ -180,7 +183,7 @@ function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $ct
  * 5. CONTEXT-AWARE SENDER + MAIL LOG
  * ======================================================================== */
 
-function aws_sbg_mail_send( $context, $to, $subject, $kicker, $title, $body_html, $cta_url = '', $cta_label = '', $connection_id = '', $cta_sub = '' ) {
+function aws_sbg_mail_send( $context, $to, $subject, $kicker, $title, $body_html, $cta_url = '', $cta_label = '', $connection_id = '', $cta_sub = '', $closing_html = '' ) {
 	$conn = null;
 
 	// Subject must always be plain text without HTML entities (&amp;, &#039;, etc.)
@@ -199,7 +202,7 @@ function aws_sbg_mail_send( $context, $to, $subject, $kicker, $title, $body_html
 
 	$conn_label = $conn ? ( ! empty( $conn['label'] ) ? $conn['label'] : $conn['host'] ) : 'wp-native';
 
-	$html    = aws_sbg_email_template( $kicker, $title, $body_html, $cta_url, $cta_label, $cta_sub );
+	$html    = aws_sbg_email_template( $kicker, $title, $body_html, $cta_url, $cta_label, $cta_sub, $closing_html );
 	$headers = array( 'Content-Type: text/html; charset=UTF-8' );
 
 	$hook = null;
