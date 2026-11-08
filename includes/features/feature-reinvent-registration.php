@@ -3,7 +3,7 @@
  * AWS re:Invent Watch & Build Party — Dedicated Registration Form & Admin Manager
  *
  * Invite-only event registration for "AWS re:Invent Watch & Build Party Islamabad 2026".
- * Registration numbers are allocated as reinvent-#001, reinvent-#002, etc.
+ * Registration numbers are allocated as RIV-01, RIV-02, etc.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -67,7 +67,7 @@ function aws_sbg_allocate_reinvent_registration_number() {
 	$table = $wpdb->prefix . 'aws_reinvent_numbers';
 	$wpdb->insert( $table, array( 'created_at' => current_time( 'mysql' ) ), array( '%s' ) );
 	$num = (int) $wpdb->insert_id;
-	return 'reinvent-#' . str_pad( $num, 3, '0', STR_PAD_LEFT );
+	return 'RIV-' . str_pad( $num, 2, '0', STR_PAD_LEFT );
 }
 
 /* ========================================================================
@@ -775,12 +775,14 @@ function aws_sbg_render_reinvent_admin_page() {
 			update_post_meta( $reg_id, 'approval_status', $status );
 
 			if ( 'approved' === $status && $prev_status !== 'approved' && function_exists( 'aws_sbg_mail_send' ) ) {
-				$name   = preg_replace( '/^reinvent-#\d+\s*-\s*/', '', get_the_title( $reg_id ) );
+				$name   = preg_replace( '/^(reinvent-#\d+|RIV-\d+)\s*[–\-]\s*/i', '', get_the_title( $reg_id ) );
 				$reg_no = get_post_meta( $reg_id, 'registration_number', true );
 				if ( empty( $reg_no ) ) {
 					$reg_no = aws_sbg_allocate_reinvent_registration_number();
 					update_post_meta( $reg_id, 'registration_number', $reg_no );
-					wp_update_post( array( 'ID' => $reg_id, 'post_title' => $reg_no . ' - ' . $name ) );
+				}
+				if ( get_the_title( $reg_id ) !== $name ) {
+					wp_update_post( array( 'ID' => $reg_id, 'post_title' => $name ) );
 				}
 
 				$to_email = get_post_meta( $reg_id, 'email', true );
@@ -1068,7 +1070,7 @@ function aws_sbg_render_reinvent_admin_page() {
 						<?php while ( $query->have_posts() ) : $query->the_post(); ?>
 							<?php
 							$reg_id      = get_the_ID();
-							$name        = preg_replace( '/^reinvent-#\d+\s*[–\-]\s*/', '', get_the_title() );
+							$name        = preg_replace( '/^(reinvent-#\d+|RIV-\d+)\s*[–\-]\s*/i', '', get_the_title() );
 							$reg_number  = get_post_meta( $reg_id, 'registration_number', true );
 							$email       = get_post_meta( $reg_id, 'email', true );
 							$phone       = get_post_meta( $reg_id, 'whatsapp', true );
@@ -1091,7 +1093,7 @@ function aws_sbg_render_reinvent_admin_page() {
 							?>
 							<tr>
 								<td class="rvadm-reg">
-									<?php echo $reg_number ? esc_html( $reg_number ) : '<span class="rvadm-null">— Pending</span>'; ?>
+									<?php echo $reg_number ? esc_html( $reg_number ) : '<span class="rvadm-null">—</span>'; ?>
 								</td>
 								<td>
 									<div class="rvadm-name"><?php echo esc_html( $name ); ?></div>
@@ -1218,7 +1220,7 @@ function aws_sbg_render_reinvent_admin_page() {
 
 					<label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#334155;margin-bottom:16px;cursor:pointer;">
 						<input type="checkbox" name="reset_counter" value="1" checked style="border-radius:4px;margin-top:2px;">
-						<span><strong>Reset sequence counter back to #001</strong><br><span style="font-size:11.5px;color:#64748b;">Truncates table <code>aws_reinvent_numbers</code> so the next approved registration begins at reinvent-#001.</span></span>
+						<span><strong>Reset sequence counter back to #01</strong><br><span style="font-size:11.5px;color:#64748b;">Truncates table <code>aws_reinvent_numbers</code> so the next approved registration begins at RIV-01.</span></span>
 					</label>
 
 					<div style="margin-bottom:20px;">
@@ -1324,7 +1326,7 @@ function aws_sbg_render_reinvent_roster() {
 			$query->the_post();
 			$id          = get_the_ID();
 			$reg_no      = get_post_meta( $id, 'registration_number', true );
-			$name        = preg_replace( '/^reinvent-#\d+\s*[–\-]\s*/', '', get_the_title() );
+			$name        = preg_replace( '/^(reinvent-#\d+|RIV-\d+)\s*[–\-]\s*/i', '', get_the_title() );
 			$cnic        = get_post_meta( $id, 'cnic', true );
 			$phone       = get_post_meta( $id, 'whatsapp', true );
 			$email       = get_post_meta( $id, 'email', true );
@@ -1799,7 +1801,7 @@ function aws_sbg_export_reinvent_csv() {
 
 	if ( $query->have_posts() ) {
 		foreach ( $query->posts as $reg ) {
-			$title       = preg_replace( '/^reinvent-#\d+\s*[–\-]\s*/', '', get_the_title( $reg->ID ) );
+			$title       = preg_replace( '/^(reinvent-#\d+|RIV-\d+)\s*[–\-]\s*/i', '', get_the_title( $reg->ID ) );
 			$reg_number  = get_post_meta( $reg->ID, 'registration_number', true );
 			$email       = get_post_meta( $reg->ID, 'email', true );
 			$whatsapp    = get_post_meta( $reg->ID, 'whatsapp', true );

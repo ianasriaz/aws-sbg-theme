@@ -34,6 +34,23 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-09 00:10 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Update re:Invent registration numbers to simple `RIV-01` sequence and isolate registration ID strictly to the `Reg #` field (do not prepend to application title or applicant name).
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` -
+  - **Sequential Numbering Format**: Switched numbering allocation from `reinvent-#001` to `RIV-01` (`RIV-` with 2-digit zero padding via `str_pad( $num, 2, '0', STR_PAD_LEFT )`, naturally expanding to `RIV-10`, `RIV-100`, etc.).
+  - **Post Title Isolation**: Removed automatic prefixing of registration ID to `post_title` (`$reg_no . ' - ' . $name`) upon approval; `post_title` remains strictly the applicant's name (`Full Name`). Added title normalization to strip any legacy ID prefixes (`reinvent-#...` or `RIV-...`) back to pure name.
+  - **Admin Table Reg # Column**: Display registration number solely in the `Reg #` column (or `—` when unassigned), keeping the Applicant column clean with only the full name, audience chip, CNIC chip, and LinkedIn link.
+  - **Clear Modal Label & Regex Update**: Updated clear modal reset sequence description to "Reset sequence counter back to #01 (begins at RIV-01)", and updated regex parsers in admin table, roster view, and CSV export to seamlessly strip both legacy `reinvent-#` and modern `RIV-` prefixes.
+
+**Key Decisions**:
+- Clean applicant naming: Application titles (`post_title`) and attendee names represent human beings, not ticket numbers. Storing the registration ID strictly within `registration_number` meta keeps the database clean, search predictable, and ensures the ID only displays in designated registration number columns and badges.
+- Short & Memorable Reg ID: `RIV-01` provides a clean, concise badge code for attendees and gate verification compared to verbose prefixes.
+
+---
+
 ### 2026-11-08 23:55 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Remove SBG logo from WP Admin, eliminate arbitrary `max-width` restrictions across admin pages causing 20-30% empty void on widescreen displays, and clean up the admin UI to be minimal, responsive, and robust.
