@@ -702,6 +702,17 @@ aws-sbg-theme/
 
 ---
 
+### 2026-11-08 21:07 - Antigravity (Claude 3.7 Sonnet)
+
+**Task**: Update parking advisory text to include ride-hailing and soft grey color, update photo microcopy to focus on social creatives and event banners
+
+**Files Changed**:
+- `includes/features/invite/invite-render.php`:
+  - Updated parking advisory copy to `"Due to limited parking space, we encourage using public transport OR ride-hailing (InDrive, Yango, Bykea)."` and styled in soft neutral grey (`color: #64748b;`).
+  - Updated photo help text to `"Used for social creatives and event banners. High-resolution portrait recommended."`, removing reference to recognition shield.
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*

@@ -290,8 +290,8 @@ function aws_sbg_invite_render_form( $event_id ) {
 									</div>
 									<div class="inv-field inv-span-2">
 										<label>Bringing a vehicle? <span style="font-weight:400;">(optional)</span></label>
-										<p x-show="role === 'community_partner' || role === 'community_leader'" style="font-size:12.5px;color:#b45309;margin:0 0 8px 0;" x-cloak>
-											Due to limited parking space, we encourage using public transport (InDrive, Yango, Bykea).
+										<p x-show="role === 'community_partner' || role === 'community_leader'" style="font-size:12.5px;color:#64748b;margin:0 0 8px 0;" x-cloak>
+											Due to limited parking space, we encourage using public transport OR ride-hailing (InDrive, Yango, Bykea).
 										</p>
 										<div style="display:flex;gap:12px;">
 											<label class="inv-choice-row" style="flex:1;">
@@ -354,7 +354,7 @@ function aws_sbg_invite_render_form( $event_id ) {
 											<button type="button" class="inv-upload-change" id="inv-upload-change-btn">Change</button>
 										</div>
 									</div>
-									<span class="inv-help">Used for recognition shield and event creatives. High-resolution portrait recommended.</span>
+									<span class="inv-help">Used for social creatives and event banners. High-resolution portrait recommended.</span>
 								</div>
 							</div>
 
