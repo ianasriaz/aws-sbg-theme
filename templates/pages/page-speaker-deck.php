@@ -44,7 +44,10 @@ $ver       = file_exists( $asset_dir . '/design-kit.js' ) ? (string) filemtime( 
 			padding: 0 !important;
 			background: #06040C !important;
 			color: #FFFFFF !important;
-			overflow-x: hidden;
+			overflow: hidden !important;
+			height: 100% !important;
+			height: 100dvh !important;
+			width: 100% !important;
 			-webkit-touch-callout: none;
 			-webkit-user-select: none;
 			user-select: none;
@@ -62,9 +65,12 @@ $ver       = file_exists( $asset_dir . '/design-kit.js' ) ? (string) filemtime( 
 		}
 
 		#root {
-			min-height: 100vh;
+			height: 100% !important;
+			height: 100dvh !important;
+			width: 100% !important;
 			display: flex;
 			flex-direction: column;
+			overflow: hidden;
 		}
 	</style>
 

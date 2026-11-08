@@ -34,6 +34,20 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-08 21:40 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Fix mobile responsiveness and page navigation visibility on Speaker Deck: remove cluttered "Slide View / All Pages" buttons from mobile header, add prominent floating circular side arrows (`‹` and `›`), pinned high-contrast bottom navigation dock with large tap targets, and an interactive slide navigation drawer.
+
+**Files Changed**:
+- `SpeakerDeckViewer.tsx` (in `reinvent-kit`, compiled to `assets/design-kit/design-kit.js`) - Stripped cluttered segmented view switch from mobile header; implemented prominent circular side floating chevrons (`‹` and `›`) with accent glow; pinned bottom controller dock with high-contrast `Next` CTA and slide progress indicator; added slide navigation drawer modal (`☰ Slides`); enabled tap-to-flip zones and touch swipe.
+- `templates/pages/page-speaker-deck.php` - Updated root and body styles to use `100dvh` and lock overflow, preventing mobile address bar bounce and preserving fixed dock visibility.
+
+**Key Decisions**:
+- Clean mobile header: Removed "Slide View / All Pages" buttons on mobile viewports so the header stays sleek, uncluttered, and perfectly aligned.
+- Obvious page turning cues: Added prominent floating side arrow buttons and a bold cyan "Next" button in the pinned footer so visitors never have to guess how to change pages.
+
+---
+
 ### 2026-11-08 21:28 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Deploy dedicated, unlisted, non-downloadable Speaker Deck presentation page for AWS re:Invent 2026 Watch & Build Party Islamabad with zero password requirement, auto-synced with `reinvent-kit`.
