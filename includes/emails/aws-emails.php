@@ -121,10 +121,25 @@ add_action( 'admin_init', 'aws_sbg_mail_migrate_legacy' );
  * 4. BRANDED KIT-STYLE HTML TEMPLATE
  * ======================================================================== */
 
-function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $cta_label = '' ) {
+function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $cta_label = '', $cta_sub = '' ) {
 	$cta_html = '';
 	if ( $cta_url && $cta_label ) {
-		$cta_html = '<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:22px 0 6px 0;"><tr><td align="center" bgcolor="#00DFD8" style="border-radius:10px;"><a href="' . esc_url( $cta_url ) . '" target="_blank" style="display:inline-block;padding:14px 30px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:13px;font-weight:800;letter-spacing:1px;color:#06040C;text-decoration:none;border-radius:10px;">' . esc_html( $cta_label ) . '</a></td></tr></table>';
+		$is_wa     = ( false !== stripos( $cta_label, 'whatsapp' ) );
+		$btn_bg    = $is_wa ? '#25D366' : '#00DFD8';
+		$btn_color = $is_wa ? '#FFFFFF' : '#06040C';
+
+		$cta_html = '<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:22px 0 6px 0;">'
+			. '<tr><td align="center" bgcolor="' . esc_attr( $btn_bg ) . '" style="border-radius:8px;">'
+			. '<a href="' . esc_url( $cta_url ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 22px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:13px;font-weight:700;letter-spacing:0.3px;color:' . esc_attr( $btn_color ) . ';text-decoration:none;border-radius:8px;white-space:nowrap;">'
+			. esc_html( $cta_label )
+			. '</a></td></tr>';
+
+		if ( $cta_sub ) {
+			$cta_html .= '<tr><td align="center" style="padding-top:8px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:12px;color:#94a3b8;letter-spacing:0.2px;">'
+				. esc_html( $cta_sub )
+				. '</td></tr>';
+		}
+		$cta_html .= '</table>';
 	}
 
 	ob_start();
@@ -165,8 +180,11 @@ function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $ct
  * 5. CONTEXT-AWARE SENDER + MAIL LOG
  * ======================================================================== */
 
-function aws_sbg_mail_send( $context, $to, $subject, $kicker, $title, $body_html, $cta_url = '', $cta_label = '', $connection_id = '' ) {
+function aws_sbg_mail_send( $context, $to, $subject, $kicker, $title, $body_html, $cta_url = '', $cta_label = '', $connection_id = '', $cta_sub = '' ) {
 	$conn = null;
+
+	// Subject must always be plain text without HTML entities (&amp;, &#039;, etc.)
+	$subject = html_entity_decode( wp_strip_all_tags( $subject ), ENT_QUOTES, 'UTF-8' );
 
 	if ( $connection_id ) {
 		$connections = aws_sbg_mail_get_connections();
@@ -181,7 +199,7 @@ function aws_sbg_mail_send( $context, $to, $subject, $kicker, $title, $body_html
 
 	$conn_label = $conn ? ( ! empty( $conn['label'] ) ? $conn['label'] : $conn['host'] ) : 'wp-native';
 
-	$html    = aws_sbg_email_template( $kicker, $title, $body_html, $cta_url, $cta_label );
+	$html    = aws_sbg_email_template( $kicker, $title, $body_html, $cta_url, $cta_label, $cta_sub );
 	$headers = array( 'Content-Type: text/html; charset=UTF-8' );
 
 	$hook = null;

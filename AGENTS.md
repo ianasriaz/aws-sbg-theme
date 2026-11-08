@@ -630,6 +630,25 @@ aws-sbg-theme/
 
 ---
 
+### 2026-11-08 20:38 - Antigravity (Claude 3.7 Sonnet)
+
+**Task**: Fix email template subject entity encoding, remove redundant WhatsApp box from email body, add single-line WhatsApp button with subtext, and personalize submission success screen
+
+**Files Changed**:
+- `includes/emails/aws-emails.php`:
+  - Automatically decoded HTML entities in email subjects via `html_entity_decode( wp_strip_all_tags( $subject ), ENT_QUOTES, 'UTF-8' )` so plain-text subjects display literal `&` instead of `&amp;`.
+  - Added optional `$cta_sub` support in `aws_sbg_email_template` and `aws_sbg_mail_send` to display subtext like "For Updates & Announcements".
+  - Enforced `white-space: nowrap;` and balanced padding on the CTA button so "Join WhatsApp Group" never wraps on mobile screens. WhatsApp button automatically styled in WhatsApp green (`#25D366`).
+- `includes/features/invite/invite-handler.php`:
+  - Updated submitter email copy to start with "Hi [NAME], Thank you for accepting invitation." followed by the role details.
+  - Removed duplicate purple WhatsApp box from email body, using only the bottom CTA button and subtext "For Updates & Announcements".
+  - Passed `invite_name` in query params on redirect for instant personalized success messaging.
+- `includes/features/invite/invite-render.php`:
+  - Updated success card title to "Thank You [NAME]" (e.g., "Thank You Anas Riaz") and description to "Your details have been received."
+  - Retained the partner announcement and WhatsApp group invitation box with single-line button on mobile.
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*

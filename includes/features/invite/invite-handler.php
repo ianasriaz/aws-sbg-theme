@@ -189,6 +189,7 @@ function aws_sbg_invite_handle_submission() {
 		'ref'           => $reference,
 		'invite_event'  => $event_id,
 		'role'          => $role,
+		'invite_name'   => rawurlencode( $name ),
 	), $url );
 	wp_safe_redirect( $url );
 	exit;
@@ -217,36 +218,37 @@ function aws_sbg_invite_send_notifications( $event_id, $to, $name, $role, $refer
 		return;
 	}
 
-	$roles      = aws_sbg_invite_roles();
-	$role_label = $roles[ $role ] ?? 'Invitee';
-	$event      = get_post( $event_id );
-	$event_name = $event ? $event->post_title : 'the event';
-	$is_partner = ( 'community_partner' === $role || 'community_leader' === $role );
-	$partner_wa = 'https://chat.whatsapp.com/ErXASXh3wLvAWhb7do2I1l?s=cl&p=a&iam=2';
+	$roles            = aws_sbg_invite_roles();
+	$role_label       = $roles[ $role ] ?? 'Invitee';
+	$event            = get_post( $event_id );
+	$event_name       = $event ? wp_strip_all_tags( $event->post_title ) : 'the event';
+	$clean_event_name = html_entity_decode( $event_name, ENT_QUOTES, 'UTF-8' );
+	$is_partner       = ( 'community_partner' === $role || 'community_leader' === $role );
+	$partner_wa       = 'https://chat.whatsapp.com/ErXASXh3wLvAWhb7do2I1l?s=cl&p=a&iam=2';
 
 	// Submitter confirmation.
 	if ( $is_partner ) {
 		$confirm_body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
+			. '<p style="margin:0 0 12px 0;">Thank you for accepting invitation.</p>'
 			. '<p style="margin:0 0 14px 0;">You are the official AWS community partner collaborating on the AWS re:Invent 2026 Watch &amp; Build Party in Islamabad. Let\'s grow and represent AWS together!</p>'
 			. '<p style="margin:0 0 14px 0;color:#d0d0d0;">Event pass will be shared separately.</p>'
-			. ( ! empty( $meta['confirm_message'] ) ? '<p style="margin:0 0 14px 0;">' . esc_html( $meta['confirm_message'] ) . '</p>' : '' )
-			. '<div style="margin-top:18px;padding:14px;background:#1e1430;border:1px solid #7928ca;border-radius:6px;">'
-			. '<p style="margin:0 0 8px 0;font-weight:700;color:#00DFD8;">WhatsApp Updates:</p>'
-			. '<p style="margin:0 0 10px 0;font-size:13px;color:#d0d0d0;">Join the official WhatsApp group for updates &amp; announcements:</p>'
-			. '<p style="margin:0;"><a href="' . esc_url( $partner_wa ) . '" style="color:#00DFD8;font-weight:700;text-decoration:underline;">Join WhatsApp Group &rarr;</a></p>'
-			. '</div>';
+			. ( ! empty( $meta['confirm_message'] ) ? '<p style="margin:0 0 14px 0;">' . esc_html( $meta['confirm_message'] ) . '</p>' : '' );
 	} else {
 		$confirm_body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
-			. '<p style="margin:0 0 14px 0;">Your invitation to <strong style="color:#FFFFFF;">' . esc_html( $event_name ) . '</strong> is confirmed.</p>'
+			. '<p style="margin:0 0 12px 0;">Thank you for accepting invitation.</p>'
+			. '<p style="margin:0 0 14px 0;">Your invitation to <strong style="color:#FFFFFF;">' . esc_html( $clean_event_name ) . '</strong> is confirmed.</p>'
 			. '<p style="margin:0 0 14px 0;">Reference: <strong style="color:#00DFD8;">' . esc_html( $reference ) . '</strong></p>'
 			. ( ! empty( $payload['cnic'] ) ? '<p style="margin:0 0 14px 0;">CNIC for Gate Clearance: <strong style="color:#FFFFFF;">' . esc_html( $payload['cnic'] ) . '</strong></p>' : '' )
-			. '<p style="margin:0 0 14px 0;">' . esc_html( $meta['confirm_message'] ) . '</p>';
+			. ( ! empty( $meta['confirm_message'] ) ? '<p style="margin:0 0 14px 0;">' . esc_html( $meta['confirm_message'] ) . '</p>' : '' );
 	}
 
 	$cta_url   = $is_partner ? $partner_wa : ( ! empty( $meta['whatsapp_url'] ) ? $meta['whatsapp_url'] : '' );
 	$cta_label = ( $is_partner || $cta_url ) ? 'Join WhatsApp Group' : '';
+	$cta_sub   = ( $is_partner || $cta_url ) ? 'For Updates & Announcements' : '';
 
-	aws_sbg_mail_send( 'invite', $to, 'Invitation confirmed — ' . esc_html( $event_name ), 'Invitation Confirmed', 'Thank you for confirming', $confirm_body, $cta_url, $cta_label );
+	$subject = 'Invitation confirmed — ' . $clean_event_name;
+
+	aws_sbg_mail_send( 'invite', $to, $subject, 'Invitation Confirmed', 'Thank you for confirming', $confirm_body, $cta_url, $cta_label, '', $cta_sub );
 
 	// Admin notification.
 	if ( 'yes' === $meta['notify_admin'] ) {
