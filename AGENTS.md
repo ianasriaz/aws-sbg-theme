@@ -34,6 +34,21 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-08 20:22 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Add partner community promotion consent checkbox, update partner email template and success screen to celebrate official AWS Community Partner collaboration without displaying reference number or CNIC (clarifying event pass is shared separately), and rename WhatsApp button to "Join WhatsApp Group" with compact mobile-aligned dimensions.
+
+**Files Changed**:
+- `includes/features/invite/invite-render.php` - Added conditional partner consent checkbox (`"I will help to promote event within my community as possible"`). Refactored partner success screen into a minimal layout: removed reference box, added official partner collaboration copy with separate event pass notice, and renamed/compacted the WhatsApp button to `"Join WhatsApp Group"` for mobile screens. Added partner promo consent to Alpine.js draft persistence.
+- `includes/features/invite/invite-handler.php` - Validated partner promo consent on submission and stored in payload. Updated submitter confirmation email for partners: included collaboration message, removed reference number and CNIC, noted separate event pass delivery, and renamed button to `"Join WhatsApp Group"`.
+- `includes/features/invite/invite-admin.php` - Added promo consent indicator in submissions details column for partners.
+
+**Key Decisions**:
+- Tailored partner messaging specifically for collaboration without technical reference/CNIC noise in their email or success view, confirming passes are issued separately.
+- Ensured WhatsApp button is compact (`padding: 9px 18px; font-size: 13px`) so it never breaks awkwardly on narrow mobile screens.
+
+---
+
 ### 2026-11-08 20:15 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Revert confirmation form UI back to the clean, minimal, uncluttered design, removing superfluous section numbering, role descriptions, and badge tags while retaining the CNIC input and subtle partner parking note.

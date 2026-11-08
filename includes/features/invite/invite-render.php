@@ -162,31 +162,35 @@ function aws_sbg_invite_render_form( $event_id ) {
 					<div class="inv-body inv-body-center">
 						<div class="inv-success-icon">&#10003;</div>
 						<h2 class="inv-success-title">Invitation confirmed</h2>
-						<p style="font-size:15px;line-height:1.65;color:var(--muted);"><?php echo esc_html( $meta['confirm_message'] ); ?></p>
-						<?php if ( $ref ) : ?>
-							<div class="inv-ref">
-								<span class="inv-ref-label">Reference</span>
-								<span class="inv-ref-value"><?php echo esc_html( $ref ); ?></span>
-							</div>
-						<?php endif; ?>
 						<?php if ( $is_partner ) : ?>
-							<div class="inv-partner-whatsapp-box" style="margin:26px auto 10px;max-width:520px;padding:22px;background:#FAF5FF;border:1.5px solid #D8B4FE;border-radius:8px;text-align:left;box-shadow:0 4px 14px rgba(121,40,202,0.08);">
-								<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-									<span style="display:inline-block;padding:3px 9px;background:#7928CA;color:#FFFFFF;border-radius:4px;font-size:11px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;">Community Partner</span>
-									<span style="font-size:15px;font-weight:700;color:#0F141F;">WhatsApp Group</span>
-								</div>
-								<p style="font-size:13.5px;color:#334155;margin:0 0 14px;line-height:1.55;">
-									Please join the official AWS Community Partner WhatsApp group for updates, announcements, and event coordination:
+							<p style="font-size:15px;line-height:1.65;color:var(--ink);max-width:480px;margin:0 auto 8px;font-weight:500;">
+								You are the official AWS community partner collaborating on the AWS re:Invent 2026 Watch &amp; Build Party in Islamabad. Let's grow and represent AWS together!
+							</p>
+							<p style="font-size:13px;color:var(--muted);margin:0 0 20px;">
+								Event pass will be shared separately.
+							</p>
+							<div style="margin:20px auto 8px;max-width:380px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:6px;text-align:center;">
+								<p style="font-size:13px;color:var(--text);margin:0 0 12px;line-height:1.5;">
+									Join for updates &amp; announcements:
 								</p>
-								<a class="inv-btn" href="https://chat.whatsapp.com/ErXASXh3wLvAWhb7do2I1l?s=cl&p=a&iam=2" target="_blank" rel="noopener noreferrer" style="background:#25D366;color:#FFFFFF;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;padding:12px 22px;border-radius:6px;text-decoration:none;box-shadow:0 2px 8px rgba(37,211,102,0.25);">
-									<span>Join Partner WhatsApp Group</span>
+								<a class="inv-btn" href="https://chat.whatsapp.com/ErXASXh3wLvAWhb7do2I1l?s=cl&p=a&iam=2" target="_blank" rel="noopener noreferrer" style="background:#25D366;color:#FFFFFF;padding:9px 18px;font-size:13px;font-weight:700;border-radius:5px;box-shadow:none;display:inline-flex;align-items:center;gap:6px;">
+									<span>Join WhatsApp Group</span>
 									<span>&rarr;</span>
 								</a>
 							</div>
-						<?php elseif ( ! empty( $meta['whatsapp_url'] ) ) : ?>
-							<div style="margin-top:24px;">
-								<a class="inv-btn inv-btn-primary" href="<?php echo esc_url( $meta['whatsapp_url'] ); ?>" target="_blank" rel="noopener">Join WhatsApp</a>
-							</div>
+						<?php else : ?>
+							<p style="font-size:15px;line-height:1.65;color:var(--muted);"><?php echo esc_html( $meta['confirm_message'] ); ?></p>
+							<?php if ( $ref ) : ?>
+								<div class="inv-ref">
+									<span class="inv-ref-label">Reference</span>
+									<span class="inv-ref-value"><?php echo esc_html( $ref ); ?></span>
+								</div>
+							<?php endif; ?>
+							<?php if ( ! empty( $meta['whatsapp_url'] ) ) : ?>
+								<div style="margin-top:20px;">
+									<a class="inv-btn inv-btn-primary" href="<?php echo esc_url( $meta['whatsapp_url'] ); ?>" target="_blank" rel="noopener" style="padding:9px 18px;font-size:13px;">Join WhatsApp Group</a>
+								</div>
+							<?php endif; ?>
 						<?php endif; ?>
 						<p style="margin:22px 0 0;"><a href="<?php echo esc_url( home_url() ); ?>" style="font-size:13px;font-weight:700;">Back to home</a></p>
 					</div>
@@ -355,6 +359,12 @@ function aws_sbg_invite_render_form( $event_id ) {
 									<input type="checkbox" name="consent" value="yes" required>
 									<span class="inv-commit-text">I confirm my invitation and consent to my name and photo being used for the recognition shield and event creatives.</span>
 								</label>
+								<div x-show="role === 'community_partner' || role === 'community_leader'" style="margin-top:14px;" x-cloak>
+									<label class="inv-commit">
+										<input type="checkbox" name="partner_promo_consent" value="yes" :required="role === 'community_partner' || role === 'community_leader'">
+										<span class="inv-commit-text">I will help to promote event within my community as possible.</span>
+									</label>
+								</div>
 							</div>
 
 							<div class="inv-submit">
@@ -414,6 +424,8 @@ function aws_sbg_invite_render_form( $event_id ) {
 									if (elSlot && data.slot) elSlot.value = data.slot;
 									var elComment = document.getElementById('inv-comment');
 									if (elComment && data.comment) elComment.value = data.comment;
+									var elPromo = document.querySelector('[name="partner_promo_consent"]');
+									if (elPromo && data.partner_promo_consent === 'yes') elPromo.checked = true;
 								}, 50);
 							}
 						}
@@ -436,7 +448,8 @@ function aws_sbg_invite_render_form( $event_id ) {
 							guest_about: (document.getElementById('inv-guest-about') || {}).value || '',
 							topic: (document.getElementById('inv-topic') || {}).value || '',
 							slot: (document.getElementById('inv-slot') || {}).value || '',
-							comment: (document.getElementById('inv-comment') || {}).value || ''
+							comment: (document.getElementById('inv-comment') || {}).value || '',
+							partner_promo_consent: (document.querySelector('[name="partner_promo_consent"]') || {}).checked ? 'yes' : ''
 						};
 						localStorage.setItem('aws_invite_draft_' + this.eventId, JSON.stringify(draft));
 					} catch(e) {}

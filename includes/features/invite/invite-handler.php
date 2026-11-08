@@ -59,6 +59,12 @@ function aws_sbg_invite_handle_submission() {
 		aws_sbg_invite_submission_error( $event_id, 'consent' );
 	}
 
+	$is_partner = ( 'community_partner' === $role || 'community_leader' === $role );
+	$partner_promo_consent = ( isset( $_POST['partner_promo_consent'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['partner_promo_consent'] ) ) );
+	if ( $is_partner && ! $partner_promo_consent ) {
+		aws_sbg_invite_submission_error( $event_id, 'consent' );
+	}
+
 	// Vehicle (optional, but if present the type + number are required).
 	$has_vehicle   = ( isset( $_POST['has_vehicle'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['has_vehicle'] ) ) ) ? 'yes' : 'no';
 	$vehicle_type  = '';
@@ -74,10 +80,11 @@ function aws_sbg_invite_handle_submission() {
 	// Role-specific fields, sanitized and validated against the fixed schema.
 	$role_fields = aws_sbg_invite_role_fields()[ $role ];
 	$payload     = array(
-		'cnic'           => $cnic,
-		'vehicle'        => $has_vehicle,
-		'vehicle_type'   => $vehicle_type,
-		'vehicle_number' => $vehicle_number,
+		'cnic'                  => $cnic,
+		'vehicle'               => $has_vehicle,
+		'vehicle_type'          => $vehicle_type,
+		'vehicle_number'        => $vehicle_number,
+		'partner_promo_consent' => $partner_promo_consent ? 'yes' : 'no',
 	);
 	$raw_role = isset( $_POST['role_field'] ) ? (array) wp_unslash( $_POST['role_field'] ) : array();
 	foreach ( $role_fields as $field ) {
@@ -218,22 +225,26 @@ function aws_sbg_invite_send_notifications( $event_id, $to, $name, $role, $refer
 	$partner_wa = 'https://chat.whatsapp.com/ErXASXh3wLvAWhb7do2I1l?s=cl&p=a&iam=2';
 
 	// Submitter confirmation.
-	$confirm_body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
-		. '<p style="margin:0 0 14px 0;">Your invitation to <strong style="color:#FFFFFF;">' . esc_html( $event_name ) . '</strong> is confirmed.</p>'
-		. '<p style="margin:0 0 14px 0;">Reference: <strong style="color:#00DFD8;">' . esc_html( $reference ) . '</strong></p>'
-		. ( ! empty( $payload['cnic'] ) ? '<p style="margin:0 0 14px 0;">CNIC for Gate Clearance: <strong style="color:#FFFFFF;">' . esc_html( $payload['cnic'] ) . '</strong></p>' : '' )
-		. '<p style="margin:0 0 14px 0;">' . esc_html( $meta['confirm_message'] ) . '</p>';
-
 	if ( $is_partner ) {
-		$confirm_body .= '<div style="margin-top:18px;padding:14px;background:#1e1430;border:1px solid #7928ca;border-radius:6px;">'
-			. '<p style="margin:0 0 8px 0;font-weight:700;color:#00DFD8;">AWS Community Partner Updates:</p>'
-			. '<p style="margin:0 0 10px 0;font-size:13px;color:#d0d0d0;">Join the official AWS Community Partner WhatsApp group for updates &amp; announcements:</p>'
-			. '<p style="margin:0;"><a href="' . esc_url( $partner_wa ) . '" style="color:#00DFD8;font-weight:700;text-decoration:underline;">Join Partner WhatsApp Group &rarr;</a></p>'
+		$confirm_body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
+			. '<p style="margin:0 0 14px 0;">You are the official AWS community partner collaborating on the AWS re:Invent 2026 Watch &amp; Build Party in Islamabad. Let\'s grow and represent AWS together!</p>'
+			. '<p style="margin:0 0 14px 0;color:#d0d0d0;">Event pass will be shared separately.</p>'
+			. ( ! empty( $meta['confirm_message'] ) ? '<p style="margin:0 0 14px 0;">' . esc_html( $meta['confirm_message'] ) . '</p>' : '' )
+			. '<div style="margin-top:18px;padding:14px;background:#1e1430;border:1px solid #7928ca;border-radius:6px;">'
+			. '<p style="margin:0 0 8px 0;font-weight:700;color:#00DFD8;">WhatsApp Updates:</p>'
+			. '<p style="margin:0 0 10px 0;font-size:13px;color:#d0d0d0;">Join the official WhatsApp group for updates &amp; announcements:</p>'
+			. '<p style="margin:0;"><a href="' . esc_url( $partner_wa ) . '" style="color:#00DFD8;font-weight:700;text-decoration:underline;">Join WhatsApp Group &rarr;</a></p>'
 			. '</div>';
+	} else {
+		$confirm_body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
+			. '<p style="margin:0 0 14px 0;">Your invitation to <strong style="color:#FFFFFF;">' . esc_html( $event_name ) . '</strong> is confirmed.</p>'
+			. '<p style="margin:0 0 14px 0;">Reference: <strong style="color:#00DFD8;">' . esc_html( $reference ) . '</strong></p>'
+			. ( ! empty( $payload['cnic'] ) ? '<p style="margin:0 0 14px 0;">CNIC for Gate Clearance: <strong style="color:#FFFFFF;">' . esc_html( $payload['cnic'] ) . '</strong></p>' : '' )
+			. '<p style="margin:0 0 14px 0;">' . esc_html( $meta['confirm_message'] ) . '</p>';
 	}
 
 	$cta_url   = $is_partner ? $partner_wa : ( ! empty( $meta['whatsapp_url'] ) ? $meta['whatsapp_url'] : '' );
-	$cta_label = $is_partner ? 'Join Partner WhatsApp' : ( $cta_url ? 'Join WhatsApp' : '' );
+	$cta_label = ( $is_partner || $cta_url ) ? 'Join WhatsApp Group' : '';
 
 	aws_sbg_mail_send( 'invite', $to, 'Invitation confirmed — ' . esc_html( $event_name ), 'Invitation Confirmed', 'Thank you for confirming', $confirm_body, $cta_url, $cta_label );
 

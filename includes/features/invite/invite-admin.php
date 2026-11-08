@@ -358,6 +358,9 @@ function aws_sbg_invite_render_submissions_page() {
 										if ( ! empty( $payload['about'] ) ) {
 											echo '<details style="margin-top:4px;"><summary style="cursor:pointer;color:#7928ca;">Intro &amp; Leadership</summary><div style="margin-top:4px;white-space:pre-wrap;">' . esc_html( $payload['about'] ) . '</div></details>';
 										}
+										if ( ! empty( $payload['partner_promo_consent'] ) && 'yes' === $payload['partner_promo_consent'] ) {
+											echo '<div style="margin-top:4px;font-size:11px;color:#16a34a;">&#10003; Community promo committed</div>';
+										}
 									} elseif ( 'guest' === $r['role'] ) {
 										if ( ! empty( $payload['about'] ) ) {
 											echo '<details style="margin-top:4px;"><summary style="cursor:pointer;color:#7928ca;">Intro &amp; Achievements</summary><div style="margin-top:4px;white-space:pre-wrap;">' . esc_html( $payload['about'] ) . '</div></details>';
