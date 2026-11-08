@@ -34,6 +34,20 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-08 21:46 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Remove floating side chevrons from Speaker Deck presentation canvas and remove the exclusionary subtitle ("This is an expert stage, not an open call.") from the "Who We're Looking For" slide.
+
+**Files Changed**:
+- `assets/design-kit/design-kit.js` - Rebuilt and synced from `reinvent-kit`: removed floating circular side chevrons, keeping the clean pinned bottom dock, invisible tap zones, swipe gestures, and slide drawer for navigation.
+- `SpeakerDeck.tsx` (in `reinvent-kit`) - Removed `<Lead>This is an expert stage, not an open call.</Lead>` from `WhoPage()`, keeping the tone welcoming, inviting, and professional.
+
+**Key Decisions**:
+- Removed side floating arrows for an unobstructed, clean slide canvas while relying on the pinned bottom navigation bar (`‹ Prev`, `Next ›`, progress stepper), slide drawer, and natural swipe gestures.
+- Eliminated negative phrasing on the audience qualification slide.
+
+---
+
 ### 2026-11-08 21:40 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Fix mobile responsiveness and page navigation visibility on Speaker Deck: remove cluttered "Slide View / All Pages" buttons from mobile header, add prominent floating circular side arrows (`‹` and `›`), pinned high-contrast bottom navigation dock with large tap targets, and an interactive slide navigation drawer.
