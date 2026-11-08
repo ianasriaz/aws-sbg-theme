@@ -34,6 +34,24 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-09 00:58 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Update re:Invent registration highlights copy (Free Access, Snacks, Food & Drinks, AWS Swag, Networking, Expert Sessions, Activities).
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` - Updated all 6 highlight cards in `.rv-perks`:
+  - `01 — Free Access`: "Complimentary entry for approved, invited attendees."
+  - `02 — Snacks, Food & Drinks`: "Enjoy complimentary snacks, food, and beverages." (updated title from Refreshments)
+  - `03 — AWS Swag`: "Swag and giveaways, subject to availability and participation criteria."
+  - `04 — Networking`: "Connect with builders, students, and cloud professionals."
+  - `05 — Expert Sessions`: "Watch streamed re:Invent sessions from Las Vegas and attend in-person talks."
+  - `06 — Activities`: "Join interactive challenges, hands-on builds, and community experiences."
+
+**Key Decisions**:
+- Precision copy alignment: Directly aligned the event benefits on the landing page with official organizer policy regarding invitation-only entry and swag availability criteria.
+
+---
+
 ### 2026-11-09 00:10 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Update re:Invent registration numbers to simple `RIV-01` sequence and isolate registration ID strictly to the `Reg #` field (do not prepend to application title or applicant name).
