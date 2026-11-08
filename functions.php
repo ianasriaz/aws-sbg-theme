@@ -59,6 +59,17 @@ function aws_sbg_template_include( $template ) {
 			}
 		}
 	}
+
+	// Direct URL fallback for unlisted /speaker-deck route
+	$req_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+	$clean_path = trim( (string) parse_url( $req_uri, PHP_URL_PATH ), '/' );
+	if ( 'speaker-deck' === $clean_path ) {
+		$deck_template = get_template_directory() . '/templates/pages/page-speaker-deck.php';
+		if ( file_exists( $deck_template ) ) {
+			status_header( 200 );
+			return $deck_template;
+		}
+	}
 	
 	// Get template basename
 	$basename = basename( $template );
@@ -249,9 +260,54 @@ function aws_sbg_auto_create_exam_page() {
 		}
 	}
 
+	// 7. Dedicated Speaker Deck (Invite Only) Page (/speaker-deck/)
+	$speaker_deck_slug = 'speaker-deck';
+	$speaker_deck_check = get_page_by_path( $speaker_deck_slug );
+	if ( ! isset( $speaker_deck_check->ID ) ) {
+		$speaker_deck_id = wp_insert_post( array(
+			'post_type'    => 'page',
+			'post_title'   => 'Call for Speakers · AWS re:Invent 2026',
+			'post_content' => '<!-- AWS re:Invent Speaker Deck (Invite Only) -->',
+			'post_status'  => 'publish',
+			'post_name'    => $speaker_deck_slug,
+		) );
+		if ( $speaker_deck_id && ! is_wp_error( $speaker_deck_id ) ) {
+			update_post_meta( $speaker_deck_id, '_wp_page_template', 'page-speaker-deck.php' );
+		}
+	}
+
 	flush_rewrite_rules();
 }
 add_action( 'admin_init', 'aws_sbg_auto_create_exam_page' );
+
+/**
+ * Exclude unlisted speaker deck from public site search queries
+ */
+function aws_sbg_exclude_speaker_deck_from_search( $query ) {
+	if ( ! is_admin() && $query->is_main_query() && $query->is_search() ) {
+		$speaker_deck = get_page_by_path( 'speaker-deck' );
+		if ( $speaker_deck ) {
+			$post__not_in   = (array) $query->get( 'post__not_in' );
+			$post__not_in[] = $speaker_deck->ID;
+			$query->set( 'post__not_in', $post__not_in );
+		}
+	}
+}
+add_action( 'pre_get_posts', 'aws_sbg_exclude_speaker_deck_from_search' );
+
+/**
+ * Exclude unlisted speaker deck from WordPress core XML sitemaps
+ */
+add_filter( 'wp_sitemaps_posts_query_args', function( $args, $post_type ) {
+	if ( 'page' === $post_type ) {
+		$speaker_deck = get_page_by_path( 'speaker-deck' );
+		if ( $speaker_deck ) {
+			$args['post__not_in']   = isset( $args['post__not_in'] ) ? (array) $args['post__not_in'] : array();
+			$args['post__not_in'][] = $speaker_deck->ID;
+		}
+	}
+	return $args;
+}, 10, 2 );
 
 /**
  * Fix template paths for existing pages after folder reorganization

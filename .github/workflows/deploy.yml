@@ -109,6 +109,7 @@ jobs:
             test -f includes/admin/admin-design-kit.php && echo "OK: Brand Kit admin page"
             test -f assets/design-kit/design-kit.js && echo "OK: Design Kit bundle"
             test -f templates/pages/page-reinvent.php && echo "OK: re:Invent template"
+            test -f templates/pages/page-speaker-deck.php && echo "OK: Speaker Deck template"
 
       - name: Deployment Summary
         run: |

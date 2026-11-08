@@ -34,6 +34,22 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-08 21:28 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Deploy dedicated, unlisted, non-downloadable Speaker Deck presentation page for AWS re:Invent 2026 Watch & Build Party Islamabad with zero password requirement, auto-synced with `reinvent-kit`.
+
+**Files Changed**:
+- `templates/pages/page-speaker-deck.php` - New standalone distraction-free template (`Template Name: Speaker Deck (Call for Speakers)`). Sets `X-Robots-Tag: noindex, nofollow, noarchive, nosnippet`, suppresses admin bar, disables browser print via `@media print { ... display: none !important }`, blocks right-click context menu and save/print keystrokes (`Ctrl+P`, `Ctrl+S`), and boots the synced design kit bundle.
+- `functions.php` - Added direct URL routing fallback for `/speaker-deck`, auto-creates the unlisted page on admin initialization, and hooks `pre_get_posts` & `wp_sitemaps_posts_query_args` to exclude `/speaker-deck` from public site search queries and XML sitemaps.
+- `assets/design-kit/design-kit.js` - Rebuilt and synced from `reinvent-kit` including `SpeakerDeckViewer` with dual presentation/scroll modes, responsive viewport scaling, touch gestures, and anti-download guards.
+- `.github/workflows/deploy.yml` - Added verification check for `templates/pages/page-speaker-deck.php`.
+
+**Key Decisions**:
+- Pure no-password, invite-only access: Speakers who have the direct link can access seamlessly without remembering passwords or PINs, while search engines, sitemaps, and site navigation remain blind to the URL.
+- Responsive scaling: The 794x1123 A4 slide format dynamically scales via CSS transforms to fit mobile, tablet, and desktop viewports without horizontal clipping or scroll cut-offs.
+
+---
+
 ### 2026-11-08 20:22 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Add partner community promotion consent checkbox, update partner email template and success screen to celebrate official AWS Community Partner collaboration without displaying reference number or CNIC (clarifying event pass is shared separately), and rename WhatsApp button to "Join WhatsApp Group" with compact mobile-aligned dimensions.
