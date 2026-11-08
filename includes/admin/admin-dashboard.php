@@ -121,17 +121,13 @@ function aws_sbg_render_admin_nav_tabs( $active_tab = 'overview' ) {
 		'invites'       => array( 'title' => 'Invitations', 'url' => admin_url( 'admin.php?page=aws-invite-submissions' ) ),
 	);
 	?>
-	<div style="background:#ffffff; border-bottom:1px solid #e2e8f0; margin:-10px -20px 25px -20px; padding:15px 25px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 2px 4px rgba(0,0,0,0.02); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-		<div style="display:flex; align-items:center; gap:12px;">
-			<div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #ad5cff, #7000ff); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px; box-shadow:0 4px 10px rgba(173,92,255,0.3);">SBG</div>
-			<div>
-				<h2 style="margin:0; font-size:18px; font-weight:800; color:#0f172a; line-height:1.2;">AWS SBG Control Center</h2>
-				<span style="font-size:11px; color:#64748b; font-weight:600;">Air University Community Platform &middot; Unified Suite</span>
-			</div>
+	<div style="background:#ffffff; border-bottom:1px solid #e2e8f0; margin:-10px -20px 20px -20px; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+		<div style="display:flex; align-items:center; gap:8px;">
+			<h2 style="margin:0; font-size:15px; font-weight:700; color:#0f172a; line-height:1.2; letter-spacing:-0.01em;">Community Suite</h2>
 		</div>
-		<div style="display:flex; items-center; gap:6px; background:#f8fafc; padding:4px; border-radius:12px; border:1px solid #e2e8f0;">
+		<div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap; background:#f8fafc; padding:3px; border-radius:8px; border:1px solid #e2e8f0;">
 			<?php foreach ( $tabs as $key => $tab ) : ?>
-				<a href="<?php echo esc_url( $tab['url'] ); ?>" style="padding:8px 14px; border-radius:8px; font-size:12px; font-weight:700; text-decoration:none; transition:all 0.15s ease; <?php echo ( $active_tab === $key ) ? 'background:#ffffff; color:#ad5cff; box-shadow:0 2px 4px rgba(0,0,0,0.06); border:1px solid #e2e8f0;' : 'color:#64748b;'; ?>">
+				<a href="<?php echo esc_url( $tab['url'] ); ?>" style="padding:6px 12px; border-radius:6px; font-size:12px; font-weight:600; text-decoration:none; transition:all 0.15s ease; <?php echo ( $active_tab === $key ) ? 'background:#0f172a; color:#ffffff;' : 'color:#475569; background:transparent;'; ?>">
 					<?php echo esc_html( $tab['title'] ); ?>
 				</a>
 			<?php endforeach; ?>
@@ -170,12 +166,12 @@ function aws_sbg_render_overview_dashboard() {
 
 	aws_sbg_render_admin_nav_tabs( 'overview' );
 	?>
-	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; max-width:1200px;">
+	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; width:100%; max-width:none; box-sizing:border-box; padding-right:20px;">
 		
 		<!-- WELCOME BANNER -->
 		<div style="background:linear-gradient(135deg, #0f172a, #1e293b); color:#ffffff; padding:25px; border-radius:16px; margin-bottom:25px; box-shadow:0 10px 25px rgba(0,0,0,0.1); position:relative; overflow:hidden;">
 			<div style="position:absolute; right:-20px; top:-20px; width:200px; height:200px; background:rgba(173,92,255,0.15); border-radius:100px; blur:40px; pointer-events:none;"></div>
-			<span style="background:rgba(173,92,255,0.2); color:#ad5cff; border:1px solid rgba(173,92,255,0.4); font-size:10px; font-weight:800; text-transform:uppercase; padding:4px 10px; border-radius:20px;">AWS SBG Command Center</span>
+			<span style="background:rgba(255,255,255,0.1); color:#94a3b8; border:1px solid rgba(255,255,255,0.15); font-size:10px; font-weight:700; text-transform:uppercase; padding:3px 10px; border-radius:20px; letter-spacing:0.04em;">Platform Overview</span>
 			<h1 style="margin:10px 0 6px 0; font-size:24px; font-weight:900; color:#ffffff;">Welcome back, Administrator</h1>
 			<p style="margin:0; font-size:13px; color:#94a3b8; max-width:600px;">Manage active workshop registrations, issue verified certificates, track community referral signups, and monitor exam performance from a single dashboard.</p>
 		</div>
@@ -490,7 +486,7 @@ function aws_sbg_render_admin_dashboard() {
 
 	aws_sbg_render_admin_nav_tabs( 'registrations' );
 	?>
-	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; max-width:1200px;">
+	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; width:100%; max-width:none; box-sizing:border-box; padding-right:20px;">
 		<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 		<style>
 			@media print {

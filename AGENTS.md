@@ -34,6 +34,22 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-08 23:55 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Remove SBG logo from WP Admin, eliminate arbitrary `max-width` restrictions across admin pages causing 20-30% empty void on widescreen displays, and clean up the admin UI to be minimal, responsive, and robust.
+
+**Files Changed**:
+- `includes/admin/admin-dashboard.php` - Removed the purple gradient "SBG" logo box from `aws_sbg_render_admin_nav_tabs()`, switched navigation tabs to a minimal, clean slate aesthetic with dark active pill, and removed fixed `max-width: 1200px` from Overview and Registrations wrappers, allowing 100% fluid width.
+- `includes/features/feature-reinvent-registration.php` - Removed `max-width: 1280px` constraint from `.rvadm`, set width to fluid 100% with standard 20px right padding, removed flashy purple `--brand` color in favor of minimal `#0f172a` ink, and made table and stats grid responsive across all viewport sizes.
+- `includes/features/invite/invite-admin.php` - Replaced centered `max-width: 1200px; margin: 20px auto` with fluid `width: 100%; max-width: none; margin: 10px 0 30px 0; padding-right: 20px;`.
+- `includes/admin/admin-email-center.php`, `includes/features/feature-events.php`, `includes/features/feature-giveaway.php`, `includes/features/feature-swag-wheel.php` - Replaced fixed 1200px/1400px widths with fluid full-width wrappers with standard right padding.
+
+**Key Decisions**:
+- Full viewport coverage: Standard WordPress admin pages (Posts, Pages, WooCommerce) expand to fill the entire content area (`#wpbody-content`). Removing hardcoded `max-width: 1200px/1280px` eliminates the 20-30% empty void on modern desktop screens and gives multi-column tables the breathing room they need.
+- Icon and logo minimalism: Stripped heavy purple gradient logo badges from the admin navigation bar in favor of clean, uncluttered slate typography.
+
+---
+
 ### 2026-11-08 23:45 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Implement safe clear testing option with snapshot backup for re:Invent registrations, fix "Ready to Print" event roster preview & layout, display applicant motivation statements (user note) and internal admin notes (text not from user) in admin table, and reinforce registration flow robustness.

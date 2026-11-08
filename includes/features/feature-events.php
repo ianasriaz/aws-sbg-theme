@@ -145,7 +145,7 @@ function aws_sbg_render_events_admin_page() {
 	$events = $wpdb->get_results( "SELECT * FROM $table_events ORDER BY id DESC" );
 	aws_sbg_render_admin_nav_tabs( 'events' );
 	?>
-	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; max-width:1200px;">
+	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; width:100%; max-width:none; box-sizing:border-box; padding-right:20px;">
 		<h1 style="display:flex; align-items:center; gap:10px; font-weight:700;">
 			<span class="dashicons dashicons-groups" style="font-size:32px; width:32px; height:32px; color:#ad5cff;"></span>
 			AWS SBG Event & Self-Service Certificate Management
@@ -545,7 +545,7 @@ function aws_sbg_render_members_admin_page() {
 	$total_referrals = $wpdb->get_var( "SELECT COUNT(*) FROM $table_certs WHERE is_new_builder = 1" );
 	aws_sbg_render_admin_nav_tabs( 'members' );
 	?>
-	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; max-width:1200px;">
+	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; width:100%; max-width:none; box-sizing:border-box; padding-right:20px;">
 		<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
 			<h1 style="display:flex; align-items:center; gap:10px; font-weight:700; margin:0;">
 				<span class="dashicons dashicons-id" style="font-size:32px; width:32px; height:32px; color:#ad5cff;"></span>

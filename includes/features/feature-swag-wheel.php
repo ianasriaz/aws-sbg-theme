@@ -168,7 +168,7 @@ function aws_sbg_render_swag_wheel_admin_page() {
 	$table_events = $wpdb->prefix . 'aws_sbg_events';
 	$sql_events = $wpdb->get_results( "SELECT id, title FROM $table_events ORDER BY id DESC LIMIT 50", ARRAY_A );
 	?>
-	<div class="wrap" style="max-width:1400px; margin:20px auto; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+	<div class="wrap" style="width:100%; max-width:none; margin:10px 0 30px 0; padding-right:20px; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 		
 		<?php if ( function_exists( 'aws_sbg_render_admin_nav_tabs' ) ) : ?>
 			<?php aws_sbg_render_admin_nav_tabs( 'swag_wheel' ); ?>

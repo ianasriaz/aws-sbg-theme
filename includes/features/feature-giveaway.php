@@ -1007,7 +1007,7 @@ function aws_sbg_render_giveaway_submissions_page() {
 	$winners       = $giveaway_id ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE giveaway_id = %d AND is_winner = 1", $giveaway_id ) ) : 0;
 	$meta          = $giveaway_id ? aws_sbg_get_giveaway_meta( $giveaway_id ) : array( 'winner_count' => 5, 'giveaway_status' => 'open' );
 	?>
-	<div class="wrap" style="max-width:1200px; margin:20px auto 40px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+	<div class="wrap" style="width:100%; max-width:none; margin:10px 0 30px 0; padding-right:20px; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 		<?php if ( function_exists( 'aws_sbg_render_admin_nav_tabs' ) ) { aws_sbg_render_admin_nav_tabs( 'giveaways' ); } ?>
 
 		<div style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:24px 28px;margin-bottom:24px;">

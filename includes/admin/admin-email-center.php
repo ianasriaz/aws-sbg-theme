@@ -151,7 +151,7 @@ function aws_sbg_render_email_center_page() {
 		'error_required'    => array( 'Missing required fields.', 'error' ),
 	);
 	?>
-	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; max-width:1200px;">
+	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; width:100%; max-width:none; box-sizing:border-box; padding-right:20px;">
 		<?php if ( $msg && isset( $notices[ $msg ] ) ) :
 			list( $text, $type ) = $notices[ $msg ]; ?>
 			<div style="background:#ffffff; border-left:4px solid <?php echo 'error' === $type ? '#ef4444' : '#10b981'; ?>; padding:14px 18px; border-radius:10px; margin:18px 0; font-size:13px; font-weight:700; color:#0f172a; box-shadow:0 1px 3px rgba(0,0,0,0.04);">

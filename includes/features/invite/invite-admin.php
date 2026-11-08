@@ -225,7 +225,7 @@ function aws_sbg_invite_render_submissions_page() {
 	$notice = isset( $_GET['notice'] ) ? sanitize_key( wp_unslash( $_GET['notice'] ) ) : '';
 	$count  = isset( $_GET['count'] ) ? intval( $_GET['count'] ) : 0;
 	?>
-	<div class="wrap" style="max-width:1200px;margin:20px auto 40px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+	<div class="wrap" style="width:100%;max-width:none;margin:10px 0 30px 0;padding-right:20px;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 		<?php if ( function_exists( 'aws_sbg_render_admin_nav_tabs' ) ) { aws_sbg_render_admin_nav_tabs( 'invites' ); } ?>
 
 		<?php if ( 'entry_deleted' === $notice ) : ?>
