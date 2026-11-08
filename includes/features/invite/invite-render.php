@@ -31,6 +31,7 @@ function aws_sbg_invite_render_form( $event_id ) {
 	$status = isset( $_GET['invite_status'] ) ? sanitize_key( wp_unslash( $_GET['invite_status'] ) ) : '';
 	$ref    = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref'] ) ) : '';
 	$err    = isset( $_GET['invite_error'] ) ? sanitize_key( wp_unslash( $_GET['invite_error'] ) ) : '';
+	$role_param = isset( $_GET['role'] ) ? sanitize_key( wp_unslash( $_GET['role'] ) ) : '';
 
 	$photo_required = ( 'yes' === $meta['photo_required'] );
 	$allow_guests   = ( 'yes' === $meta['allow_guests'] );
@@ -43,16 +44,16 @@ function aws_sbg_invite_render_form( $event_id ) {
 		'vehicle'   => 'Please provide your vehicle type and number.',
 		'photo'     => 'Please upload your photo.',
 		'role'      => 'Please choose a valid role.',
-		'filesize'  => 'Your photo is too large. Please upload a smaller image.',
+		'filesize'  => 'Your photo is too large (max 8 MB). Please choose a smaller image.',
 		'filetype'  => 'Please upload a JPG, PNG, or WebP image.',
-		'upload'    => 'We could not upload your photo. Please try again.',
+		'upload'    => 'We could not process your photo upload. Please try again.',
 		'spam'      => 'Submission blocked.',
 		'db'        => 'We could not save your confirmation. Please try again.',
 	);
 
 	ob_start();
 	?>
-	<div class="inv-root" x-data="inviteForm(<?php echo $photo_required ? 'true' : 'false'; ?>)">
+	<div class="inv-root" x-data="inviteForm(<?php echo $photo_required ? 'true' : 'false'; ?>, <?php echo intval( $event_id ); ?>)">
 		<style>
 			.inv-root{
 				--ink:#0F141F;--paper:#FFFFFF;--surface:#F8FAFC;--line:#E2E8F0;--text:#334155;--muted:#475569;--brand:#7928CA;--brand-soft:#F5F3FF;--accent:#FF9900;
@@ -143,6 +144,15 @@ function aws_sbg_invite_render_form( $event_id ) {
 
 		<div class="inv-page">
 			<?php if ( 'success' === $status ) : ?>
+				<?php
+				$submitted_role = $role_param;
+				if ( ! $submitted_role && $ref ) {
+					global $wpdb;
+					$table = $wpdb->prefix . 'aws_invite_submissions';
+					$submitted_role = (string) $wpdb->get_var( $wpdb->prepare( "SELECT role FROM $table WHERE reference = %s LIMIT 1", $ref ) );
+				}
+				$is_partner = ( 'community_partner' === $submitted_role || 'community_leader' === $submitted_role );
+				?>
 				<div class="inv-ticket">
 					<header class="inv-stub">
 						<p class="inv-kicker">AWS Student Builder Group</p>
@@ -159,7 +169,21 @@ function aws_sbg_invite_render_form( $event_id ) {
 								<span class="inv-ref-value"><?php echo esc_html( $ref ); ?></span>
 							</div>
 						<?php endif; ?>
-						<?php if ( ! empty( $meta['whatsapp_url'] ) ) : ?>
+						<?php if ( $is_partner ) : ?>
+							<div class="inv-partner-whatsapp-box" style="margin:26px auto 10px;max-width:520px;padding:22px;background:#FAF5FF;border:1.5px solid #D8B4FE;border-radius:8px;text-align:left;box-shadow:0 4px 14px rgba(121,40,202,0.08);">
+								<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+									<span style="display:inline-block;padding:3px 9px;background:#7928CA;color:#FFFFFF;border-radius:4px;font-size:11px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;">Community Partner</span>
+									<span style="font-size:15px;font-weight:700;color:#0F141F;">WhatsApp Group</span>
+								</div>
+								<p style="font-size:13.5px;color:#334155;margin:0 0 14px;line-height:1.55;">
+									Please join the official AWS Community Partner WhatsApp group for updates, announcements, and event coordination:
+								</p>
+								<a class="inv-btn" href="https://chat.whatsapp.com/ErXASXh3wLvAWhb7do2I1l?s=cl&p=a&iam=2" target="_blank" rel="noopener noreferrer" style="background:#25D366;color:#FFFFFF;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;padding:12px 22px;border-radius:6px;text-decoration:none;box-shadow:0 2px 8px rgba(37,211,102,0.25);">
+									<span>Join Partner WhatsApp Group</span>
+									<span>&rarr;</span>
+								</a>
+							</div>
+						<?php elseif ( ! empty( $meta['whatsapp_url'] ) ) : ?>
 							<div style="margin-top:24px;">
 								<a class="inv-btn inv-btn-primary" href="<?php echo esc_url( $meta['whatsapp_url'] ); ?>" target="_blank" rel="noopener">Join WhatsApp</a>
 							</div>
@@ -182,11 +206,13 @@ function aws_sbg_invite_render_form( $event_id ) {
 							<div class="inv-notice inv-notice-error"><?php echo esc_html( $error_messages[ $err ] ); ?></div>
 						<?php endif; ?>
 
-						<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" enctype="multipart/form-data" @submit="isSubmitting = true">
+						<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" enctype="multipart/form-data" @submit="handleSubmit($event)" @input="saveDraft()" @change="saveDraft()">
 							<input type="hidden" name="action" value="aws_sbg_invite_submit">
 							<input type="hidden" name="event_id" value="<?php echo esc_attr( $event_id ); ?>">
 							<?php wp_nonce_field( 'aws_sbg_invite_submit', 'invite_nonce' ); ?>
 							<input type="text" name="website_url" value="" style="position:absolute;left:-9999px;" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+							<div class="inv-notice inv-notice-error" x-show="clientError" x-text="clientError" x-cloak style="margin-bottom:18px;"></div>
 
 							<div class="inv-section">
 								<p class="inv-section-label">I am joining as</p>
@@ -286,28 +312,32 @@ function aws_sbg_invite_render_form( $event_id ) {
 							</div>
 							<?php endif; ?>
 
-							<?php if ( ! empty( $fields['community_leader'] ) ) : ?>
-							<div class="inv-section" x-show="role === 'community_leader'" x-cloak>
-								<p class="inv-section-label">AWS Community Leader</p>
+							<?php if ( ! empty( $fields['guest'] ) ) : ?>
+							<div class="inv-section" x-show="role === 'guest'" x-cloak>
+								<p class="inv-section-label">Guest details</p>
 								<div class="inv-grid">
-									<div class="inv-field">
-										<label for="inv-program">Program <em>*</em></label>
-										<select id="inv-program" name="role_field[program]" :required="role === 'community_leader'">
-											<option value="">Select…</option>
-											<?php foreach ( $options['programs'] as $prog_key => $prog_label ) : ?>
-												<option value="<?php echo esc_attr( $prog_key ); ?>"><?php echo esc_html( $prog_label ); ?></option>
-											<?php endforeach; ?>
-										</select>
+									<div class="inv-field inv-span-2">
+										<label for="inv-guest-about">Short intro about you <em>*</em></label>
+										<textarea id="inv-guest-about" name="role_field[about]" placeholder="Write a short intro about you, especially about your AWS community leadership, professional experience, and achievements…" :required="role === 'guest'"></textarea>
+										<span class="inv-help">Please share a short intro about your background, especially regarding AWS community leadership, professional experience, and key achievements.</span>
 									</div>
-									<div class="inv-field">
-										<label for="inv-term">Term or tenure <em>*</em></label>
-										<input id="inv-term" type="text" name="role_field[term]" placeholder="e.g. 2025-26" :required="role === 'community_leader'">
-										<span class="inv-help">SBG Leaders: your one-year leadership term (e.g. 2025-26). AWS Community Builders: your current or most recent term (e.g. 2025-26).</span>
+								</div>
+							</div>
+							<?php endif; ?>
+
+							<?php if ( ! empty( $fields['community_partner'] ) || ! empty( $fields['community_leader'] ) ) : ?>
+							<div class="inv-section" x-show="role === 'community_partner' || role === 'community_leader'" x-cloak>
+								<p class="inv-section-label">AWS Community Partner details</p>
+								<div class="inv-grid">
+									<div class="inv-field inv-span-2">
+										<label for="inv-university">University / Institute Name <em>*</em></label>
+										<input id="inv-university" type="text" name="role_field[university]" placeholder="e.g. Air University Islamabad" :required="role === 'community_partner' || role === 'community_leader'">
+										<span class="inv-help">The university or institute chapter you represent.</span>
 									</div>
 									<div class="inv-field inv-span-2">
-										<label for="inv-about">About you <em>*</em></label>
-										<textarea id="inv-about" name="role_field[about]" :required="role === 'community_leader'"></textarea>
-										<span class="inv-help">Your AWS community journey, the institute or organization you represent, and your contribution.</span>
+										<label for="inv-partner-about">Short intro about you &amp; AWS leadership term <em>*</em></label>
+										<textarea id="inv-partner-about" name="role_field[about]" placeholder="Write a short intro about you and your AWS leadership term…" :required="role === 'community_partner' || role === 'community_leader'"></textarea>
+										<span class="inv-help">Write a short intro about you and your AWS leadership term (e.g. your AWS community journey, your role, and achievements).</span>
 									</div>
 								</div>
 							</div>
@@ -334,12 +364,95 @@ function aws_sbg_invite_render_form( $event_id ) {
 	</div>
 
 	<script>
-		function inviteForm(photoRequired) {
+		function inviteForm(photoRequired, eventId) {
 			return {
 				role: '',
 				hasVehicle: 'no',
 				isSubmitting: false,
-				photoRequired: photoRequired
+				photoRequired: photoRequired,
+				eventId: eventId,
+				clientError: '',
+				init: function() {
+					try {
+						// Clean draft if success
+						<?php if ( 'success' === $status ) : ?>
+							if (typeof localStorage !== 'undefined') {
+								localStorage.removeItem('aws_invite_draft_' + this.eventId);
+							}
+							return;
+						<?php endif; ?>
+
+						// Restore draft on load so no user effort is lost
+						if (typeof localStorage !== 'undefined') {
+							var draftRaw = localStorage.getItem('aws_invite_draft_' + this.eventId);
+							if (draftRaw) {
+								var data = JSON.parse(draftRaw);
+								if (data.role) this.role = data.role;
+								if (data.hasVehicle) this.hasVehicle = data.hasVehicle;
+								var self = this;
+								setTimeout(function() {
+									['name', 'email', 'phone', 'vehicle_type', 'vehicle_number'].forEach(function(f) {
+										var el = document.querySelector('[name="' + f + '"]');
+										if (el && data[f]) el.value = data[f];
+									});
+									var elUni = document.getElementById('inv-university');
+									if (elUni && data.university) elUni.value = data.university;
+									var elAboutP = document.getElementById('inv-partner-about');
+									if (elAboutP && data.partner_about) elAboutP.value = data.partner_about;
+									var elAboutG = document.getElementById('inv-guest-about');
+									if (elAboutG && data.guest_about) elAboutG.value = data.guest_about;
+									var elTopic = document.getElementById('inv-topic');
+									if (elTopic && data.topic) elTopic.value = data.topic;
+									var elSlot = document.getElementById('inv-slot');
+									if (elSlot && data.slot) elSlot.value = data.slot;
+									var elComment = document.getElementById('inv-comment');
+									if (elComment && data.comment) elComment.value = data.comment;
+								}, 50);
+							}
+						}
+					} catch(e) {}
+				},
+				saveDraft: function() {
+					try {
+						if (typeof localStorage === 'undefined') return;
+						var draft = {
+							role: this.role,
+							hasVehicle: this.hasVehicle,
+							name: (document.getElementById('inv-name') || {}).value || '',
+							email: (document.getElementById('inv-email') || {}).value || '',
+							phone: (document.getElementById('inv-phone') || {}).value || '',
+							vehicle_type: (document.querySelector('[name="vehicle_type"]:checked') || {}).value || '',
+							vehicle_number: (document.getElementById('inv-vehicle-number') || {}).value || '',
+							university: (document.getElementById('inv-university') || {}).value || '',
+							partner_about: (document.getElementById('inv-partner-about') || {}).value || '',
+							guest_about: (document.getElementById('inv-guest-about') || {}).value || '',
+							topic: (document.getElementById('inv-topic') || {}).value || '',
+							slot: (document.getElementById('inv-slot') || {}).value || '',
+							comment: (document.getElementById('inv-comment') || {}).value || ''
+						};
+						localStorage.setItem('aws_invite_draft_' + this.eventId, JSON.stringify(draft));
+					} catch(e) {}
+				},
+				handleSubmit: function(e) {
+					this.clientError = '';
+					var fileInput = document.getElementById('inv-photo');
+					if (fileInput && fileInput.files && fileInput.files[0]) {
+						var file = fileInput.files[0];
+						if (file.size > 8 * 1024 * 1024) {
+							e.preventDefault();
+							this.clientError = 'Your photo is too large (' + (file.size / (1024*1024)).toFixed(1) + ' MB). Please choose an image under 8 MB.';
+							this.isSubmitting = false;
+							return false;
+						}
+					} else if (this.photoRequired) {
+						e.preventDefault();
+						this.clientError = 'Please upload a photo for your event creatives.';
+						this.isSubmitting = false;
+						return false;
+					}
+					this.saveDraft();
+					this.isSubmitting = true;
+				}
 			};
 		}
 		document.addEventListener('DOMContentLoaded', function () {

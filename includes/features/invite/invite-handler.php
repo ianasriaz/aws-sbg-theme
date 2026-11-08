@@ -33,6 +33,9 @@ function aws_sbg_invite_handle_submission() {
 	}
 
 	$role = isset( $_POST['role'] ) ? sanitize_key( wp_unslash( $_POST['role'] ) ) : '';
+	if ( 'community_leader' === $role ) {
+		$role = 'community_partner';
+	}
 	if ( ! aws_sbg_invite_role_allowed( $role, $event_id ) ) {
 		aws_sbg_invite_submission_error( $event_id, 'role' );
 	}
@@ -124,39 +127,60 @@ function aws_sbg_invite_handle_submission() {
 	global $wpdb;
 	$table = $wpdb->prefix . 'aws_invite_submissions';
 
+	// Ensure table exists (self-healing architecture)
+	if ( $wpdb->get_var( "SHOW TABLES LIKE '$table'" ) !== $table ) {
+		aws_sbg_invite_init_db();
+	}
+
 	$shield_line = aws_sbg_invite_build_shield_line( $name, $role, $payload );
 	$reference   = aws_sbg_invite_generate_reference( $event_id );
 	$ip          = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
 
-	$inserted = $wpdb->insert(
-		$table,
-		array(
-			'event_id'    => $event_id,
-			'role'        => $role,
-			'name'        => $name,
-			'email'       => $email,
-			'phone'       => $phone,
-			'shield_line' => $shield_line,
-			'reference'   => $reference,
-			'photo_id'    => $photo_id,
-			'payload'     => wp_json_encode( $payload ),
-			'consent'     => wp_json_encode( array( 'agreed' => true, 'agreed_at' => current_time( 'mysql' ) ) ),
-			'status'      => 'received',
-			'ip_address'  => $ip,
-			'created_at'  => current_time( 'mysql' ),
-		),
-		array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s' )
+	$insert_data = array(
+		'event_id'    => $event_id,
+		'role'        => $role,
+		'name'        => $name,
+		'email'       => $email,
+		'phone'       => $phone,
+		'shield_line' => $shield_line,
+		'reference'   => $reference,
+		'photo_id'    => $photo_id,
+		'payload'     => wp_json_encode( $payload ),
+		'consent'     => wp_json_encode( array( 'agreed' => true, 'agreed_at' => current_time( 'mysql' ) ) ),
+		'status'      => 'received',
+		'ip_address'  => $ip,
+		'created_at'  => current_time( 'mysql' ),
 	);
+	$insert_format = array( '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%s', '%s' );
+
+	$inserted = $wpdb->insert( $table, $insert_data, $insert_format );
 
 	if ( false === $inserted ) {
-		aws_sbg_invite_submission_error( $event_id, 'db' );
+		error_log( 'AWS SBG Invite DB Insert Error: ' . $wpdb->last_error . ' | Payload: ' . wp_json_encode( $insert_data ) );
+
+		// Attempt self-healing migration and retry insert once
+		aws_sbg_invite_init_db();
+		$inserted = $wpdb->insert( $table, $insert_data, $insert_format );
+
+		if ( false === $inserted ) {
+			// Emergency persistent backup in wp_options so NO SUBMISSION IS EVER LOST
+			$backups   = get_option( 'aws_invite_emergency_backups', array() );
+			$backups[] = array_merge( $insert_data, array( 'error' => $wpdb->last_error, 'saved_at' => current_time( 'mysql' ) ) );
+			update_option( 'aws_invite_emergency_backups', $backups, false );
+			aws_sbg_invite_submission_error( $event_id, 'db' );
+		}
 	}
 
 	aws_sbg_invite_invalidate_count( $event_id );
 	aws_sbg_invite_send_notifications( $event_id, $email, $name, $role, $reference, $payload, $meta );
 
 	$url = wp_get_referer() ? wp_get_referer() : home_url( '/' );
-	$url = add_query_arg( array( 'invite_status' => 'success', 'ref' => $reference, 'invite_event' => $event_id ), $url );
+	$url = add_query_arg( array(
+		'invite_status' => 'success',
+		'ref'           => $reference,
+		'invite_event'  => $event_id,
+		'role'          => $role,
+	), $url );
 	wp_safe_redirect( $url );
 	exit;
 }
@@ -184,18 +208,31 @@ function aws_sbg_invite_send_notifications( $event_id, $to, $name, $role, $refer
 		return;
 	}
 
-	$roles    = aws_sbg_invite_roles();
+	$roles      = aws_sbg_invite_roles();
 	$role_label = $roles[ $role ] ?? 'Invitee';
-	$event    = get_post( $event_id );
+	$event      = get_post( $event_id );
 	$event_name = $event ? $event->post_title : 'the event';
+	$is_partner = ( 'community_partner' === $role || 'community_leader' === $role );
+	$partner_wa = 'https://chat.whatsapp.com/ErXASXh3wLvAWhb7do2I1l?s=cl&p=a&iam=2';
 
 	// Submitter confirmation.
 	$confirm_body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
 		. '<p style="margin:0 0 14px 0;">Your invitation to <strong style="color:#FFFFFF;">' . esc_html( $event_name ) . '</strong> is confirmed.</p>'
 		. '<p style="margin:0 0 14px 0;">Reference: <strong style="color:#00DFD8;">' . esc_html( $reference ) . '</strong></p>'
-		. '<p style="margin:0;">' . esc_html( $meta['confirm_message'] ) . '</p>';
-	$cta_url = ! empty( $meta['whatsapp_url'] ) ? $meta['whatsapp_url'] : '';
-	aws_sbg_mail_send( 'invite', $to, 'Invitation confirmed — ' . esc_html( $event_name ), 'Invitation Confirmed', 'Thank you for confirming', $confirm_body, $cta_url, $cta_url ? 'Join WhatsApp' : '' );
+		. '<p style="margin:0 0 14px 0;">' . esc_html( $meta['confirm_message'] ) . '</p>';
+
+	if ( $is_partner ) {
+		$confirm_body .= '<div style="margin-top:18px;padding:14px;background:#1e1430;border:1px solid #7928ca;border-radius:6px;">'
+			. '<p style="margin:0 0 8px 0;font-weight:700;color:#00DFD8;">AWS Community Partner Updates:</p>'
+			. '<p style="margin:0 0 10px 0;font-size:13px;color:#d0d0d0;">Join the official AWS Community Partner WhatsApp group for updates &amp; announcements:</p>'
+			. '<p style="margin:0;"><a href="' . esc_url( $partner_wa ) . '" style="color:#00DFD8;font-weight:700;text-decoration:underline;">Join Partner WhatsApp Group &rarr;</a></p>'
+			. '</div>';
+	}
+
+	$cta_url   = $is_partner ? $partner_wa : ( ! empty( $meta['whatsapp_url'] ) ? $meta['whatsapp_url'] : '' );
+	$cta_label = $is_partner ? 'Join Partner WhatsApp' : ( $cta_url ? 'Join WhatsApp' : '' );
+
+	aws_sbg_mail_send( 'invite', $to, 'Invitation confirmed — ' . esc_html( $event_name ), 'Invitation Confirmed', 'Thank you for confirming', $confirm_body, $cta_url, $cta_label );
 
 	// Admin notification.
 	if ( 'yes' === $meta['notify_admin'] ) {
@@ -205,9 +242,19 @@ function aws_sbg_invite_send_notifications( $event_id, $to, $name, $role, $refer
 		$extra = '';
 		if ( 'speaker' === $role ) {
 			$extra = '<p style="margin:0 0 6px 0;">Topic: ' . esc_html( $payload['topic'] ?? '' ) . ' · Slot: ' . esc_html( ucfirst( $payload['slot'] ?? '' ) ) . '</p>';
-		} elseif ( 'community_leader' === $role ) {
-			$programs = aws_sbg_invite_programs();
-			$extra    = '<p style="margin:0 0 6px 0;">Program: ' . esc_html( $programs[ $payload['program'] ] ?? '' ) . ' · Term: ' . esc_html( $payload['term'] ?? '' ) . '</p>';
+			if ( ! empty( $payload['comment'] ) ) {
+				$extra .= '<p style="margin:0 0 6px 0;">Comment: ' . esc_html( $payload['comment'] ) . '</p>';
+			}
+		} elseif ( $is_partner ) {
+			$uni = ! empty( $payload['university'] ) ? $payload['university'] : ( $payload['program'] ?? '' );
+			$extra = '<p style="margin:0 0 6px 0;">University: ' . esc_html( $uni ) . '</p>';
+			if ( ! empty( $payload['about'] ) ) {
+				$extra .= '<p style="margin:0 0 6px 0;">About &amp; Term: ' . esc_html( $payload['about'] ) . '</p>';
+			}
+		} elseif ( 'guest' === $role ) {
+			if ( ! empty( $payload['about'] ) ) {
+				$extra = '<p style="margin:0 0 6px 0;">About: ' . esc_html( $payload['about'] ) . '</p>';
+			}
 		}
 
 		$admin_body = '<p style="margin:0 0 12px 0;">New invitation confirmation:</p>'

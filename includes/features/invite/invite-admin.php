@@ -197,7 +197,11 @@ function aws_sbg_invite_render_submissions_page() {
 
 	$where = $wpdb->prepare( ' WHERE event_id = %d', $event_id );
 	if ( '' !== $role_filter ) {
-		$where .= $wpdb->prepare( ' AND role = %s', $role_filter );
+		if ( 'community_partner' === $role_filter || 'community_leader' === $role_filter ) {
+			$where .= " AND (role = 'community_partner' OR role = 'community_leader')";
+		} else {
+			$where .= $wpdb->prepare( ' AND role = %s', $role_filter );
+		}
 	}
 	if ( '' !== $search ) {
 		$like   = '%' . $wpdb->esc_like( $search ) . '%';
@@ -212,7 +216,8 @@ function aws_sbg_invite_render_submissions_page() {
 	if ( $event_id ) {
 		$counts = $wpdb->get_results( $wpdb->prepare( "SELECT role, COUNT(*) AS n FROM $table WHERE event_id = %d GROUP BY role", $event_id ), ARRAY_A );
 		foreach ( $counts as $c ) {
-			$role_counts[ $c['role'] ] = (int) $c['n'];
+			$k = ( 'community_leader' === $c['role'] ) ? 'community_partner' : $c['role'];
+			$role_counts[ $k ] = ( $role_counts[ $k ] ?? 0 ) + (int) $c['n'];
 		}
 	}
 
@@ -320,7 +325,8 @@ function aws_sbg_invite_render_submissions_page() {
 									<div style="font-size:12px;color:#64748b;"><?php echo esc_html( $r['shield_line'] ); ?></div>
 								</td>
 								<td style="padding:12px 18px;">
-									<span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;"><?php echo esc_html( $roles[ $r['role'] ] ?? $r['role'] ); ?></span>
+									<?php $display_role = ( 'community_leader' === $r['role'] ) ? 'community_partner' : $r['role']; ?>
+									<span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;"><?php echo esc_html( $roles[ $display_role ] ?? $r['role'] ); ?></span>
 								</td>
 								<td style="padding:12px 18px;color:#475569;">
 									<div><?php echo esc_html( $r['email'] ); ?></div>
@@ -330,17 +336,30 @@ function aws_sbg_invite_render_submissions_page() {
 								<td style="padding:12px 18px;color:#334155;font-size:12px;">
 									<?php
 									if ( 'speaker' === $r['role'] ) {
-										echo '<div>Topic: ' . esc_html( $payload['topic'] ?? '' ) . '</div>';
-										echo '<div>Slot: ' . esc_html( ucfirst( $payload['slot'] ?? '' ) ) . '</div>';
+										echo '<div><strong>Topic:</strong> ' . esc_html( $payload['topic'] ?? '' ) . '</div>';
+										echo '<div><strong>Slot:</strong> ' . esc_html( ucfirst( $payload['slot'] ?? '' ) ) . '</div>';
 										if ( ! empty( $payload['comment'] ) ) {
 											echo '<details style="margin-top:4px;"><summary style="cursor:pointer;color:#7928ca;">Comment</summary><div style="margin-top:4px;white-space:pre-wrap;">' . esc_html( $payload['comment'] ) . '</div></details>';
 										}
-									} elseif ( 'community_leader' === $r['role'] ) {
-										$programs = aws_sbg_invite_programs();
-										echo '<div>Program: ' . esc_html( $programs[ $payload['program'] ] ?? '' ) . '</div>';
-										echo '<div>Term: ' . esc_html( $payload['term'] ?? '' ) . '</div>';
+									} elseif ( 'community_partner' === $r['role'] || 'community_leader' === $r['role'] ) {
+										if ( ! empty( $payload['university'] ) ) {
+											echo '<div><strong>University:</strong> ' . esc_html( $payload['university'] ) . '</div>';
+										}
+										if ( ! empty( $payload['program'] ) ) {
+											$programs = aws_sbg_invite_programs();
+											echo '<div><strong>Program:</strong> ' . esc_html( $programs[ $payload['program'] ] ?? $payload['program'] ) . '</div>';
+										}
+										if ( ! empty( $payload['term'] ) ) {
+											echo '<div><strong>Term:</strong> ' . esc_html( $payload['term'] ) . '</div>';
+										}
 										if ( ! empty( $payload['about'] ) ) {
-											echo '<details style="margin-top:4px;"><summary style="cursor:pointer;color:#7928ca;">About</summary><div style="margin-top:4px;white-space:pre-wrap;">' . esc_html( $payload['about'] ) . '</div></details>';
+											echo '<details style="margin-top:4px;"><summary style="cursor:pointer;color:#7928ca;">Intro &amp; Leadership</summary><div style="margin-top:4px;white-space:pre-wrap;">' . esc_html( $payload['about'] ) . '</div></details>';
+										}
+									} elseif ( 'guest' === $r['role'] ) {
+										if ( ! empty( $payload['about'] ) ) {
+											echo '<details style="margin-top:4px;"><summary style="cursor:pointer;color:#7928ca;">Intro &amp; Achievements</summary><div style="margin-top:4px;white-space:pre-wrap;">' . esc_html( $payload['about'] ) . '</div></details>';
+										} else {
+											echo '<span style="color:#cbd5e1;">—</span>';
 										}
 									} else {
 										echo '<span style="color:#cbd5e1;">—</span>';
@@ -390,7 +409,7 @@ function aws_sbg_invite_export_csv() {
 	header( 'Content-Disposition: attachment; filename=invite-confirmations-' . $event_id . '-' . gmdate( 'Y-m-d' ) . '.csv' );
 
 	$output = fopen( 'php://output', 'w' );
-	fputcsv( $output, array( 'Reference', 'Role', 'Name', 'Shield Line', 'Email', 'Phone', 'Vehicle Type', 'Vehicle Number', 'Photo URL', 'Consent', 'Topic', 'Slot', 'Comment', 'Program', 'Term', 'About', 'Status', 'Created At' ) );
+	fputcsv( $output, array( 'Reference', 'Role', 'Name', 'Shield Line', 'Email', 'Phone', 'Vehicle Type', 'Vehicle Number', 'Photo URL', 'Consent', 'Topic', 'Slot', 'Comment', 'University / Institute', 'About / Bio', 'Program (Legacy)', 'Term (Legacy)', 'Status', 'Created At' ) );
 
 	$programs = aws_sbg_invite_programs();
 	$roles    = aws_sbg_invite_roles();
@@ -400,11 +419,12 @@ function aws_sbg_invite_export_csv() {
 		if ( ! is_array( $payload ) ) {
 			$payload = array();
 		}
-		$photo_url = $r['photo_id'] ? wp_get_attachment_url( (int) $r['photo_id'] ) : '';
+		$photo_url   = $r['photo_id'] ? wp_get_attachment_url( (int) $r['photo_id'] ) : '';
+		$display_role = ( 'community_leader' === $r['role'] ) ? 'AWS Community Partner' : ( $roles[ $r['role'] ] ?? $r['role'] );
 
 		fputcsv( $output, array(
 			$r['reference'],
-			$roles[ $r['role'] ] ?? $r['role'],
+			$display_role,
 			$r['name'],
 			$r['shield_line'],
 			$r['email'],
@@ -416,9 +436,10 @@ function aws_sbg_invite_export_csv() {
 			$payload['topic'] ?? '',
 			ucfirst( $payload['slot'] ?? '' ),
 			$payload['comment'] ?? '',
-			$programs[ $payload['program'] ] ?? '',
-			$payload['term'] ?? '',
+			$payload['university'] ?? '',
 			$payload['about'] ?? '',
+			$programs[ $payload['program'] ] ?? ( $payload['program'] ?? '' ),
+			$payload['term'] ?? '',
 			$r['status'],
 			$r['created_at'],
 		) );

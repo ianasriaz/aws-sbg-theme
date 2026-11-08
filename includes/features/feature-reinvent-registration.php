@@ -80,7 +80,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 	$fonts   = get_template_directory_uri() . '/assets/design-kit/fonts';
 	$skyline = get_template_directory_uri() . '/assets/design-kit/Islamabad Landmark Footer.png';
 	$aws_logo = get_template_directory_uri() . '/assets/images/AWS-Logo-White-Trim.png';
-	$sbg_logo = 'https://awsairuniversity.com/wp-content/uploads/2026/09/SBG-Logo-White-Transparent.png';
+	$sbg_logo = function_exists( 'aws_sbg_get_logo_url' ) ? aws_sbg_get_logo_url() : get_template_directory_uri() . '/assets/images/icons/SBG-Logo-White-Transparent.png';
 
 	ob_start();
 	?>

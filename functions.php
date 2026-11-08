@@ -377,19 +377,25 @@ add_action( 'wp_enqueue_scripts', 'aws_sbg_enqueue_scripts', 5 );
  * @return string JavaScript configuration
  */
 function aws_sbg_get_tailwind_config() {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = function_exists( 'aws_sbg_get_theme_config' )
+		? aws_sbg_get_theme_config()
+		: ( file_exists( get_template_directory() . '/config/config-theme.php' )
+			? include get_template_directory() . '/config/config-theme.php'
+			: array() );
 	
 	// Build colors object
 	$colors_js = array();
-	foreach ( $config['colors'] as $name => $value ) {
-		if ( is_array( $value ) ) {
-			foreach ( $value as $sub_name => $sub_value ) {
-				if ( ! is_array( $sub_value ) ) {
-					$colors_js[ "{$name}-{$sub_name}" ] = $sub_value;
+	if ( ! empty( $config['colors'] ) && is_array( $config['colors'] ) ) {
+		foreach ( $config['colors'] as $name => $value ) {
+			if ( is_array( $value ) ) {
+				foreach ( $value as $sub_name => $sub_value ) {
+					if ( ! is_array( $sub_value ) ) {
+						$colors_js[ "{$name}-{$sub_name}" ] = $sub_value;
+					}
 				}
+			} else {
+				$colors_js[ $name ] = $value;
 			}
-		} else {
-			$colors_js[ $name ] = $value;
 		}
 	}
 
@@ -811,9 +817,10 @@ function aws_sbg_debug_info() {
 		'PHP Version' => phpversion(),
 		'Tailwind CDN' => '✓ Enqueued',
 		'Alpine.js CDN' => '✓ Enqueued',
-		'Config File' => file_exists( get_template_directory() . '/config-theme.php' ) ? '✓ Found' : '✗ Missing',
-		'Helpers Colors' => file_exists( get_template_directory() . '/helpers-colors.php' ) ? '✓ Found' : '✗ Missing',
-		'Helpers Fonts' => file_exists( get_template_directory() . '/helpers-fonts.php' ) ? '✓ Found' : '✗ Missing',
+		'Config File' => file_exists( get_template_directory() . '/config/config-theme.php' ) ? '✓ Found' : '✗ Missing',
+		'Helpers Colors' => file_exists( get_template_directory() . '/includes/helpers/helpers-colors.php' ) ? '✓ Found' : '✗ Missing',
+		'Helpers Fonts' => file_exists( get_template_directory() . '/includes/helpers/helpers-fonts.php' ) ? '✓ Found' : '✗ Missing',
+		'Theme Logo' => file_exists( get_template_directory() . '/assets/images/icons/SBG-Logo-White-Transparent.png' ) ? '✓ Local' : '✗ Missing',
 	);
 
 	echo '<!-- AWS SBG Theme Debug Info -->';

@@ -81,9 +81,9 @@ add_action( 'init', 'aws_sbg_invite_register_cpt', 5 );
 
 function aws_sbg_invite_roles() {
 	return array(
-		'speaker'          => 'Speaker',
-		'guest'            => 'Guest',
-		'community_leader' => 'AWS Community Leader',
+		'speaker'           => 'Speaker',
+		'guest'             => 'Guest',
+		'community_partner' => 'AWS Community Partner',
 	);
 }
 
@@ -108,16 +108,56 @@ function aws_sbg_invite_slot_options() {
  */
 function aws_sbg_invite_role_fields() {
 	return array(
-		'speaker'          => array(
+		'speaker'           => array(
 			array( 'id' => 'topic',   'label' => 'Topic / Session title', 'type' => 'text',     'required' => 1 ),
 			array( 'id' => 'slot',    'label' => 'Preferred slot',        'type' => 'select',   'required' => 1, 'options' => array( 'early' => 'Early', 'mid' => 'Mid', 'last' => 'Last' ) ),
 			array( 'id' => 'comment', 'label' => 'Comment for the organizer', 'type' => 'textarea', 'required' => 0 ),
 		),
-		'guest'            => array(),
-		'community_leader' => array(
-			array( 'id' => 'program', 'label' => 'Program',       'type' => 'select', 'required' => 1, 'options' => array( 'community_builder' => 'AWS Community Builder', 'sbg_leader' => 'SBG Leader' ) ),
-			array( 'id' => 'term',    'label' => 'Term / Tenure', 'type' => 'text',   'required' => 1, 'placeholder' => 'e.g. 2025–26', 'help' => 'SBG Leaders: your one-year leadership term (e.g. 2025–26). AWS Community Builders: your current or most recent term (e.g. 2025–26).' ),
-			array( 'id' => 'about',   'label' => 'About you',     'type' => 'textarea', 'required' => 1, 'help' => 'Your AWS community journey, the institute or organization you represent, and your contribution.' ),
+		'guest'             => array(
+			array(
+				'id'          => 'about',
+				'label'       => 'Short intro about you',
+				'type'        => 'textarea',
+				'required'    => 1,
+				'placeholder' => 'Write a short intro about you, especially about your AWS community leadership, professional experience, and achievements…',
+				'help'        => 'Short intro about you, especially regarding AWS community leadership, professional experience, and achievements.',
+			),
+		),
+		'community_partner' => array(
+			array(
+				'id'          => 'university',
+				'label'       => 'University / Institute Name',
+				'type'        => 'text',
+				'required'    => 1,
+				'placeholder' => 'e.g. Air University Islamabad',
+				'help'        => 'The university or institute chapter you represent.',
+			),
+			array(
+				'id'          => 'about',
+				'label'       => 'Short intro about you & AWS leadership term',
+				'type'        => 'textarea',
+				'required'    => 1,
+				'placeholder' => 'Write a short intro about you and your AWS leadership term…',
+				'help'        => 'Write a short intro about you and your AWS leadership term (e.g. your AWS community journey, your role, and achievements).',
+			),
+		),
+		'community_leader'  => array(
+			array(
+				'id'          => 'university',
+				'label'       => 'University / Institute Name',
+				'type'        => 'text',
+				'required'    => 1,
+				'placeholder' => 'e.g. Air University Islamabad',
+				'help'        => 'The university or institute chapter you represent.',
+			),
+			array(
+				'id'          => 'about',
+				'label'       => 'Short intro about you & AWS leadership term',
+				'type'        => 'textarea',
+				'required'    => 1,
+				'placeholder' => 'Write a short intro about you and your AWS leadership term…',
+				'help'        => 'Write a short intro about you and your AWS leadership term (e.g. your AWS community journey, your role, and achievements).',
+			),
 		),
 	);
 }
@@ -174,6 +214,10 @@ function aws_sbg_invite_is_open( $event_id ) {
 
 function aws_sbg_invite_role_allowed( $role, $event_id ) {
 	$roles = aws_sbg_invite_roles();
+	// Allow community_leader as legacy alias for community_partner
+	if ( 'community_leader' === $role ) {
+		$role = 'community_partner';
+	}
 	if ( ! array_key_exists( $role, $roles ) ) {
 		return false;
 	}
@@ -201,11 +245,17 @@ function aws_sbg_invite_sanitize_field( $type, $value ) {
 function aws_sbg_invite_build_shield_line( $name, $role, $payload ) {
 	$name = trim( (string) $name );
 
-	if ( 'community_leader' === $role ) {
-		$programs = aws_sbg_invite_programs();
-		$program  = isset( $payload['program'], $programs[ $payload['program'] ] ) ? $programs[ $payload['program'] ] : 'AWS Community Leader';
-		$term     = isset( $payload['term'] ) ? trim( (string) $payload['term'] ) : '';
-		return trim( $name . ' · ' . $program . ( $term ? ' · ' . $term : '' ) );
+	if ( 'community_partner' === $role || 'community_leader' === $role ) {
+		$uni = ! empty( $payload['university'] ) ? trim( (string) $payload['university'] ) : '';
+		if ( ! $uni && ! empty( $payload['program'] ) ) {
+			$programs = aws_sbg_invite_programs();
+			$uni = $programs[ $payload['program'] ] ?? '';
+		}
+		return trim( $name . ' · AWS Community Partner' . ( $uni ? ' · ' . $uni : '' ) );
+	}
+
+	if ( 'guest' === $role ) {
+		return trim( $name . ' · Distinguished Guest' );
 	}
 
 	$roles = aws_sbg_invite_roles();

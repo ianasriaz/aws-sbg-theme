@@ -103,8 +103,9 @@
 
 				<!-- Center: Logo -->
 				<div class="flex-1 md:flex-shrink-0 flex justify-center items-center min-w-0">
+					<?php $sbg_logo_url = function_exists( 'aws_sbg_get_logo_url' ) ? aws_sbg_get_logo_url() : get_template_directory_uri() . '/assets/images/icons/SBG-Logo-White-Transparent.png'; ?>
 					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-flex items-center justify-center hover:opacity-90 transition-opacity" aria-label="AWS SBG Home">
-						<img id="header-logo-img" src="https://awsairuniversity.com/wp-content/uploads/2026/09/SBG-Logo-White-Transparent.png" alt="AWS SBG Air University" class="h-9 sm:h-10 md:h-12 w-auto max-w-full object-contain">
+						<img id="header-logo-img" src="<?php echo esc_url( $sbg_logo_url ); ?>" alt="AWS SBG Air University" class="h-9 sm:h-10 md:h-12 w-auto max-w-full object-contain">
 					</a>
 				</div>
 
@@ -128,7 +129,7 @@
 		<!-- Top Bar inside Drawer -->
 		<div class="flex items-center justify-between px-6 h-20 border-b border-[#1d2636] bg-[#0a0d14] shrink-0">
 			<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="inline-flex items-center">
-				<img src="https://awsairuniversity.com/wp-content/uploads/2026/09/SBG-Logo-White-Transparent.png" alt="AWS SBG" class="h-8 w-auto object-contain">
+				<img src="<?php echo esc_url( $sbg_logo_url ); ?>" alt="AWS SBG" class="h-8 w-auto object-contain">
 			</a>
 			<button 
 				id="mobile-menu-close" 

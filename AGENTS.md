@@ -34,6 +34,52 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-08 20:00 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Review and update invitation confirmation form (`includes/features/invite/`): rename AWS Community Leader to AWS Community Partner, update Partner fields (university name, intro/leadership term), add Guest intro & achievements field, add WhatsApp community group invitation on submission, ensure robust zero-data-loss architecture and admin dashboard compatibility.
+
+**Files Changed**:
+- `includes/features/invite/invite-core.php` - Renamed role to "AWS Community Partner" (`community_partner`) while retaining `community_leader` as backward-compatible alias. Replaced `program` and `term` with `university` and `about` for Community Partner. Added `about` (intro, leadership, professional experience, achievements) for Guest. Updated shield line builder for Partner and Guest roles.
+- `includes/features/invite/invite-render.php` - Updated form UI with university name and leadership intro inputs for Community Partner, and intro/experience textarea for Guest. Added Alpine.js `localStorage` draft saving and restoration (`aws_invite_draft_<event_id>`). Added client-side file size pre-validation (rejects >8 MB before upload) and disabled submit button on submission. Added highlighted WhatsApp group card on success for Community Partners (`https://chat.whatsapp.com/ErXASXh3wLvAWhb7do2I1l?s=cl&p=a&iam=2`).
+- `includes/features/invite/invite-handler.php` - Normalized `community_leader` to `community_partner`. Added self-healing table verification (`SHOW TABLES LIKE`) before insert. Added fallback emergency backup into `aws_invite_emergency_backups` option and `error_log` if DB query fails. Updated submitter confirmation and admin notification emails with new fields and WhatsApp group link. Passed submitted `role` in success redirect query.
+- `includes/features/invite/invite-admin.php` - Updated role filter and counter metrics to aggregate both `community_partner` and legacy `community_leader`. Updated details column to display university, intro, and guest achievements. Updated CSV export to output `University / Institute` and `About / Bio` alongside legacy columns.
+
+**Key Decisions**:
+- Implemented multi-layered zero-data-loss architecture: client-side `localStorage` retains form inputs across browser refreshes or photo upload errors, and server-side fallback (`aws_invite_emergency_backups`) captures the payload even if SQL insert fails.
+- Maintained complete backward compatibility for previous `community_leader` records so historical submissions and CSV exports do not break.
+
+**Notes for Future Agents**:
+- Confirmation form code is located in `includes/features/invite/`.
+- Community Partner WhatsApp group URL is `https://chat.whatsapp.com/ErXASXh3wLvAWhb7do2I1l?s=cl&p=a&iam=2`.
+- Drafts are stored in localStorage key `aws_invite_draft_{eventId}` and automatically cleared on success.
+
+---
+
+### 2026-11-08 18:50 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Fix all key findings and actionable fixes identified in theme review (config path resolution, font 404s, local logo asset).
+
+**Files Changed**:
+- `includes/helpers/helpers-colors.php` - Introduced `aws_sbg_get_theme_config()` with static in-memory caching to resolve `config/config-theme.php` (with fallback to root). Replaced 14 direct `include` calls across color helpers with this cached loader. Added `aws_sbg_get_logo_url()` helper prioritizing local asset with CDN fallback.
+- `functions.php` - Updated `aws_sbg_get_tailwind_config()` to use `aws_sbg_get_theme_config()` and safely guard against null/empty arrays in PHP 8. Updated `aws_sbg_debug_info()` diagnostic paths for `config/config-theme.php`, `includes/helpers/helpers-colors.php`, `includes/helpers/helpers-fonts.php`, and local logo asset.
+- `includes/helpers/helpers-fonts.php` - Rewrote `aws_sbg_register_custom_fonts()` and `aws_sbg_preload_critical_fonts()` to load available fonts (`Amazon Ember Display` and `Amazon Ember Mono` .ttf files) from `assets/design-kit/fonts/`. Added `Amazon Ember` alias mapping so standard font declarations resolve locally. Eliminated 404 network errors caused by missing `/fonts/*.woff2` references.
+- `templates/partials/header.php` - Replaced hardcoded remote image URLs for desktop and mobile drawer logos with `aws_sbg_get_logo_url()`.
+- `includes/features/feature-reinvent-registration.php` - Replaced hardcoded remote image URL with `aws_sbg_get_logo_url()`.
+- `assets/images/icons/SBG-Logo-White-Transparent.png` - Saved local high-resolution transparent logo asset.
+- `reinvent-kit/package.json` - Added `"build:wp": "vite build --config vite.wp.config.ts"` npm script for clear and reproducible WordPress bundle builds.
+
+**Key Decisions**:
+- Caching `aws_sbg_get_theme_config()` statically prevents redundant filesystem reads on every individual color lookup call.
+- Font declarations now check `file_exists()` before outputting `@font-face` and `<link rel="preload">`, preventing browser 404s.
+- `aws_sbg_get_logo_url()` uses the bundled local asset first while retaining the remote URL as a resilient fallback.
+
+**Notes for Future Agents**:
+- `config-theme.php` lives in `config/config-theme.php` — always use `aws_sbg_get_theme_config()` to read theme config.
+- Font files live in `assets/design-kit/fonts/`.
+- Rebuilding the brand kit for WordPress can now be done with `npm run build:wp` in `reinvent-kit/`.
+
+---
+
 ### 2026-10-22 - Command Code
 
 **Task**: Remove the giveaway and swag prizes from the community page — rewards only — and retire the entry popup.

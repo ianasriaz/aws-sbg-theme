@@ -20,14 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * OPTION 1: Self-Hosted Amazon Ember Fonts
- * 
- * Folder structure (place .woff2 files here):
- * /wp-content/themes/aws-sbg-theme/fonts/
- *   ├── amazon-ember-regular.woff2
- *   ├── amazon-ember-medium.woff2
- *   ├── amazon-ember-semibold.woff2
- *   └── amazon-ember-bold.woff2
+ * OPTION 1: Self-Hosted Amazon Ember Fonts (from assets/design-kit/fonts/)
  */
 
 /**
@@ -35,63 +28,111 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Enqueue in wp_head for optimal loading
  */
 function aws_sbg_register_custom_fonts() {
-	$font_dir = get_template_directory_uri() . '/fonts';
-	
-	// Define fonts with metadata
+	$font_dir_path = get_template_directory() . '/assets/design-kit/fonts';
+	$font_dir_uri  = get_template_directory_uri() . '/assets/design-kit/fonts';
+
+	if ( ! is_dir( $font_dir_path ) ) {
+		return;
+	}
+
 	$fonts = array(
+		// Amazon Ember Display (Brand Display Font)
 		array(
-			'name' => 'Amazon Ember',
-			'weight' => 400,
-			'style' => 'normal',
-			'file' => $font_dir . '/amazon-ember-regular.woff2',
-			'display' => 'swap', // Shows fallback immediately
+			'family' => 'Amazon Ember Display',
+			'weight' => 300,
+			'style'  => 'normal',
+			'file'   => $font_dir_uri . '/AmazonEmberDisplay_Lt.ttf',
+			'path'   => $font_dir_path . '/AmazonEmberDisplay_Lt.ttf',
 		),
 		array(
-			'name' => 'Amazon Ember',
+			'family' => 'Amazon Ember Display',
 			'weight' => 500,
-			'style' => 'normal',
-			'file' => $font_dir . '/amazon-ember-medium.woff2',
-			'display' => 'swap',
+			'style'  => 'normal',
+			'file'   => $font_dir_uri . '/AmazonEmberDisplay_Md.ttf',
+			'path'   => $font_dir_path . '/AmazonEmberDisplay_Md.ttf',
 		),
 		array(
-			'name' => 'Amazon Ember',
-			'weight' => 600,
-			'style' => 'normal',
-			'file' => $font_dir . '/amazon-ember-semibold.woff2',
-			'display' => 'swap',
-		),
-		array(
-			'name' => 'Amazon Ember',
+			'family' => 'Amazon Ember Display',
 			'weight' => 700,
-			'style' => 'normal',
-			'file' => $font_dir . '/amazon-ember-bold.woff2',
-			'display' => 'swap',
+			'style'  => 'normal',
+			'file'   => $font_dir_uri . '/AmazonEmberDisplay_Bd.ttf',
+			'path'   => $font_dir_path . '/AmazonEmberDisplay_Bd.ttf',
+		),
+		// Amazon Ember Mono (Technical Code & Details)
+		array(
+			'family' => 'Amazon Ember Mono',
+			'weight' => 400,
+			'style'  => 'normal',
+			'file'   => $font_dir_uri . '/AmazonEmberMono_Rg.ttf',
+			'path'   => $font_dir_path . '/AmazonEmberMono_Rg.ttf',
+		),
+		array(
+			'family' => 'Amazon Ember Mono',
+			'weight' => 700,
+			'style'  => 'normal',
+			'file'   => $font_dir_uri . '/AmazonEmberMono_Bd.ttf',
+			'path'   => $font_dir_path . '/AmazonEmberMono_Bd.ttf',
+		),
+		// Aliases for 'Amazon Ember' family so global body/headings resolve locally
+		array(
+			'family' => 'Amazon Ember',
+			'weight' => 300,
+			'style'  => 'normal',
+			'file'   => $font_dir_uri . '/AmazonEmberDisplay_Lt.ttf',
+			'path'   => $font_dir_path . '/AmazonEmberDisplay_Lt.ttf',
+		),
+		array(
+			'family' => 'Amazon Ember',
+			'weight' => 400,
+			'style'  => 'normal',
+			'file'   => $font_dir_uri . '/AmazonEmberDisplay_Md.ttf',
+			'path'   => $font_dir_path . '/AmazonEmberDisplay_Md.ttf',
+		),
+		array(
+			'family' => 'Amazon Ember',
+			'weight' => 500,
+			'style'  => 'normal',
+			'file'   => $font_dir_uri . '/AmazonEmberDisplay_Md.ttf',
+			'path'   => $font_dir_path . '/AmazonEmberDisplay_Md.ttf',
+		),
+		array(
+			'family' => 'Amazon Ember',
+			'weight' => 700,
+			'style'  => 'normal',
+			'file'   => $font_dir_uri . '/AmazonEmberDisplay_Bd.ttf',
+			'path'   => $font_dir_path . '/AmazonEmberDisplay_Bd.ttf',
 		),
 	);
-	
+
 	// Generate @font-face rules
 	$css = '';
 	foreach ( $fonts as $font ) {
+		if ( ! file_exists( $font['path'] ) ) {
+			continue;
+		}
 		$css .= sprintf(
-			"
-@font-face {
-	font-family: '%s';
-	src: url('%s') format('woff2');
-	font-weight: %d;
-	font-style: %s;
-	font-display: %s;
-}
-",
-			esc_attr( $font['name'] ),
+			"@font-face { font-family: '%s'; src: url('%s') format('truetype'); font-weight: %d; font-style: %s; font-display: swap; }\n",
+			esc_attr( $font['family'] ),
 			esc_url( $font['file'] ),
 			intval( $font['weight'] ),
-			esc_attr( $font['style'] ),
-			esc_attr( $font['display'] )
+			esc_attr( $font['style'] )
 		);
 	}
-	
+
+	if ( empty( $css ) ) {
+		return;
+	}
+
 	// Inline CSS in wp_head for critical rendering path
-	wp_add_inline_style( 'wp-block-library', $css );
+	if ( wp_style_is( 'aws-sbg-theme-style', 'registered' ) || wp_style_is( 'aws-sbg-theme-style', 'enqueued' ) ) {
+		wp_add_inline_style( 'aws-sbg-theme-style', $css );
+	} elseif ( wp_style_is( 'wp-block-library', 'registered' ) ) {
+		wp_add_inline_style( 'wp-block-library', $css );
+	} else {
+		add_action( 'wp_head', function() use ( $css ) {
+			echo '<style id="aws-sbg-theme-fonts">' . $css . '</style>';
+		}, 1 );
+	}
 }
 add_action( 'wp_enqueue_scripts', 'aws_sbg_register_custom_fonts', 5 );
 
@@ -153,11 +194,12 @@ function aws_sbg_get_custom_font_stack( $type = 'body' ) {
  * @return array Status of font loading
  */
 function aws_sbg_check_font_status() {
+	$font_dir_path = get_template_directory() . '/assets/design-kit/fonts';
 	$status = array(
-		'amazon-ember-files' => file_exists( get_template_directory() . '/fonts/amazon-ember-regular.woff2' ),
-		'fonts-folder' => is_dir( get_template_directory() . '/fonts' ),
+		'amazon-ember-files'    => file_exists( $font_dir_path . '/AmazonEmberDisplay_Md.ttf' ),
+		'fonts-folder'          => is_dir( $font_dir_path ),
 		'custom-fonts-enqueued' => true,
-		'recommendation' => 'Ensure .woff2 files are in /fonts folder for best performance',
+		'recommendation'        => 'Amazon Ember Display and Mono fonts hosted in assets/design-kit/fonts/',
 	);
 	
 	return $status;
@@ -169,12 +211,13 @@ function aws_sbg_check_font_status() {
  * Adds preload links for critical fonts to improve FCP (First Contentful Paint)
  */
 function aws_sbg_preload_critical_fonts() {
-	$font_dir = get_template_directory_uri() . '/fonts';
-	
-	// Preload only the regular weight (most critical)
-	echo '
-	<link rel="preload" as="font" type="font/woff2" href="' . esc_url( $font_dir . '/amazon-ember-regular.woff2' ) . '" crossorigin>
-	';
+	$font_file_path = get_template_directory() . '/assets/design-kit/fonts/AmazonEmberDisplay_Md.ttf';
+	if ( ! file_exists( $font_file_path ) ) {
+		return;
+	}
+
+	$font_file_uri = get_template_directory_uri() . '/assets/design-kit/fonts/AmazonEmberDisplay_Md.ttf';
+	echo '<link rel="preload" as="font" type="font/ttf" href="' . esc_url( $font_file_uri ) . '" crossorigin>' . "\n";
 }
 add_action( 'wp_head', 'aws_sbg_preload_critical_fonts', 2 );
 

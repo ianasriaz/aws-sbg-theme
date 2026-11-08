@@ -12,6 +12,40 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Get the master theme configuration array (cached statically)
+ *
+ * @return array Master theme configuration
+ */
+function aws_sbg_get_theme_config() {
+	static $config = null;
+	if ( null === $config ) {
+		$file = get_template_directory() . '/config/config-theme.php';
+		if ( file_exists( $file ) ) {
+			$config = include $file;
+		} elseif ( file_exists( get_template_directory() . '/config-theme.php' ) ) {
+			$config = include get_template_directory() . '/config-theme.php';
+		} else {
+			$config = array();
+		}
+	}
+	return is_array( $config ) ? $config : array();
+}
+
+/**
+ * Get the official AWS SBG Logo URL
+ * Prioritizes local transparent logo in assets/images/icons/ with remote CDN fallback.
+ *
+ * @return string Logo image URL
+ */
+function aws_sbg_get_logo_url() {
+	$local_path = get_template_directory() . '/assets/images/icons/SBG-Logo-White-Transparent.png';
+	if ( file_exists( $local_path ) ) {
+		return get_template_directory_uri() . '/assets/images/icons/SBG-Logo-White-Transparent.png';
+	}
+	return 'https://awsairuniversity.com/wp-content/uploads/2026/09/SBG-Logo-White-Transparent.png';
+}
+
+/**
  * Get a color from the config with optional opacity
  * 
  * @param string $color_key The color key from config-theme.php
@@ -23,7 +57,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *   echo 'style="background: ' . esc_attr( aws_sbg_get_color( 'dark-bg-secondary' ) ) . '"';
  */
 function aws_sbg_get_color( $color_key = 'brand', $opacity = null ) {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	
 	// Handle nested color keys (e.g., 'buttons-primary-bg')
 	if ( strpos( $color_key, '-' ) !== false ) {
@@ -78,7 +112,7 @@ function aws_sbg_hex_to_rgba( $hex, $opacity = 1 ) {
  *   echo 'style="color: ' . esc_attr( aws_sbg_get_semantic_color( 'success' ) ) . '"';
  */
 function aws_sbg_get_semantic_color( $type = 'info' ) {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	$valid_types = array( 'success', 'error', 'warning', 'info', 'muted' );
 	
 	if ( ! in_array( $type, $valid_types, true ) ) {
@@ -99,7 +133,7 @@ function aws_sbg_get_semantic_color( $type = 'info' ) {
  *   echo 'style="background: ' . esc_attr( $button_colors['bg'] ) . '; color: ' . esc_attr( $button_colors['text'] ) . '"';
  */
 function aws_sbg_get_button_colors( $variant = 'primary' ) {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	$buttons = $config['colors']['buttons'];
 	
 	switch ( $variant ) {
@@ -140,7 +174,7 @@ function aws_sbg_get_button_colors( $variant = 'primary' ) {
  * @return array Array with form styling values
  */
 function aws_sbg_get_form_colors() {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	return $config['colors']['forms'];
 }
 
@@ -150,7 +184,7 @@ function aws_sbg_get_form_colors() {
  * @return array Array with card styling values
  */
 function aws_sbg_get_surface_colors() {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	return $config['colors']['surfaces'];
 }
 
@@ -164,7 +198,7 @@ function aws_sbg_get_surface_colors() {
  *   echo 'style="background: ' . esc_attr( aws_sbg_get_gradient( 'brand-to-dark' ) ) . '"';
  */
 function aws_sbg_get_gradient( $gradient_key = 'brand-to-dark' ) {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	return $config['colors']['gradients'][ $gradient_key ] ?? $config['colors']['gradients']['brand-to-dark'];
 }
 
@@ -175,7 +209,7 @@ function aws_sbg_get_gradient( $gradient_key = 'brand-to-dark' ) {
  * @return string CSS box-shadow value
  */
 function aws_sbg_get_shadow( $shadow_key = 'brand-glow-soft' ) {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	return $config['colors']['shadows'][ $shadow_key ] ?? $config['colors']['shadows']['brand-glow-soft'];
 }
 
@@ -186,7 +220,7 @@ function aws_sbg_get_shadow( $shadow_key = 'brand-glow-soft' ) {
  * @return array Array with CSS properties
  */
 function aws_sbg_get_text_style( $style_key = 'body-normal' ) {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	return $config['typography']['styles'][ $style_key ] ?? $config['typography']['styles']['body-normal'];
 }
 
@@ -197,7 +231,7 @@ function aws_sbg_get_text_style( $style_key = 'body-normal' ) {
  * @return string Font family CSS value
  */
 function aws_sbg_get_font_family( $type = 'body' ) {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	return $config['typography']['fonts'][ $type ] ?? $config['typography']['fonts']['body'];
 }
 
@@ -208,7 +242,7 @@ function aws_sbg_get_font_family( $type = 'body' ) {
  * @return string Spacing value in rem
  */
 function aws_sbg_get_spacing( $size = 'md' ) {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	return $config['spacing'][ $size ] ?? $config['spacing']['md'];
 }
 
@@ -219,7 +253,7 @@ function aws_sbg_get_spacing( $size = 'md' ) {
  * @return string Border radius value
  */
 function aws_sbg_get_border_radius( $size = 'md' ) {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	return $config['border-radius'][ $size ] ?? $config['border-radius']['md'];
 }
 
@@ -230,7 +264,7 @@ function aws_sbg_get_border_radius( $size = 'md' ) {
  * @return int Z-index value
  */
 function aws_sbg_get_z_index( $layer = 'modal' ) {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	return $config['z-index'][ $layer ] ?? 1050;
 }
 
@@ -273,7 +307,7 @@ function aws_sbg_generate_styles( $properties = array() ) {
  *   echo '<style>' . aws_sbg_get_css_variables() . '</style>';
  */
 function aws_sbg_get_css_variables() {
-	$config = include get_template_directory() . '/config-theme.php';
+	$config = aws_sbg_get_theme_config();
 	$css = ":root {\n";
 	
 	foreach ( $config['colors'] as $name => $value ) {
