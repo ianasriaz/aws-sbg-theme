@@ -122,20 +122,27 @@ add_action( 'admin_init', 'aws_sbg_mail_migrate_legacy' );
  * ======================================================================== */
 
 function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $cta_label = '', $cta_sub = '', $closing_html = '' ) {
+	// Sanitize legacy hardcoded dark-mode colors so all text renders cleanly on light cards
+	$body_html = str_ireplace(
+		array( 'color:#FFFFFF', 'color:#FFF', 'color:#00DFD8', 'color:#d0d0d0', 'color:#cbd5e1', 'color:#e2e8f0' ),
+		array( 'color:#0f172a', 'color:#0f172a', 'color:#7928ca', 'color:#64748b', 'color:#334155', 'color:#475569' ),
+		$body_html
+	);
+
 	$cta_html = '';
 	if ( $cta_url && $cta_label ) {
 		$is_wa     = ( false !== stripos( $cta_label, 'whatsapp' ) );
-		$btn_bg    = $is_wa ? '#25D366' : '#00DFD8';
-		$btn_color = $is_wa ? '#FFFFFF' : '#06040C';
+		$btn_bg    = $is_wa ? '#25D366' : '#0f172a';
+		$btn_color = '#FFFFFF';
 
-		$cta_html = '<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:22px 0 6px 0;">'
-			. '<tr><td align="center" bgcolor="' . esc_attr( $btn_bg ) . '" style="border-radius:8px;">'
-			. '<a href="' . esc_url( $cta_url ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 22px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:13px;font-weight:700;letter-spacing:0.3px;color:' . esc_attr( $btn_color ) . ';text-decoration:none;border-radius:8px;white-space:nowrap;">'
+		$cta_html = '<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:18px 0 6px 0;">'
+			. '<tr><td align="left" bgcolor="' . esc_attr( $btn_bg ) . '" style="border-radius:6px;">'
+			. '<a class="email-btn" href="' . esc_url( $cta_url ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 20px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.2px;color:' . esc_attr( $btn_color ) . ';text-decoration:none;border-radius:6px;white-space:nowrap;">'
 			. esc_html( $cta_label )
 			. '</a></td></tr>';
 
 		if ( $cta_sub ) {
-			$cta_html .= '<tr><td align="center" style="padding-top:8px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:12px;color:#94a3b8;letter-spacing:0.2px;">'
+			$cta_html .= '<tr><td align="left" style="padding-top:6px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:12px;color:#64748b;">'
 				. esc_html( $cta_sub )
 				. '</td></tr>';
 		}
@@ -149,24 +156,37 @@ function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $ct
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="color-scheme" content="dark">
+	<meta name="color-scheme" content="light">
+	<meta name="supported-color-schemes" content="light">
 	<title><?php echo esc_html( $title ); ?></title>
+	<style>
+		body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: #f4f6f8; }
+		table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+		@media only screen and (max-width: 560px) {
+			.email-outer-td { padding: 14px 8px !important; }
+			.email-card-td { padding: 22px 18px !important; }
+			.email-title { font-size: 17px !important; }
+			.email-body { font-size: 13.5px !important; }
+		}
+	</style>
 </head>
-<body style="margin:0;padding:0;background-color:#06040C;">
-	<table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#06040C;padding:24px 10px;">
+<body style="margin:0;padding:0;background-color:#f4f6f8;-webkit-font-smoothing:antialiased;">
+	<table class="email-outer" width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation" style="background-color:#f4f6f8;width:100%;">
 		<tr>
-			<td align="center">
-				<table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:480px;width:100%;background-color:#0d1322;border:1px solid #1e293b;border-radius:16px;">
+			<td class="email-outer-td" align="center" style="padding:32px 12px;">
+				<table class="email-card" width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation" style="max-width:500px;width:100%;background-color:#ffffff;border:1px solid #e2e8f0;border-radius:10px;">
 					<tr>
-						<td style="padding:28px 24px;">
-							<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#00DFD8;margin-bottom:10px;"><?php echo esc_html( $kicker ); ?></div>
-							<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:22px;font-weight:800;color:#FFFFFF;line-height:1.25;margin-bottom:14px;"><?php echo esc_html( $title ); ?></div>
-							<div style="font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:14px;color:#cbd5e1;line-height:1.7;"><?php echo $body_html; ?></div>
+						<td class="email-card-td" style="padding:28px 24px;">
+							<?php if ( $kicker ) : ?>
+								<div class="email-kicker" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#64748b;margin-bottom:8px;"><?php echo esc_html( $kicker ); ?></div>
+							<?php endif; ?>
+							<div class="email-title" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:18px;font-weight:700;color:#0f172a;line-height:1.35;margin-bottom:14px;"><?php echo esc_html( $title ); ?></div>
+							<div class="email-body" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13.5px;color:#334155;line-height:1.6;"><?php echo $body_html; ?></div>
 							<?php echo $cta_html; ?>
 							<?php if ( $closing_html ) : ?>
-								<div style="margin-top:20px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:14px;color:#cbd5e1;line-height:1.7;"><?php echo $closing_html; ?></div>
+								<div class="email-closing" style="margin-top:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;color:#475569;line-height:1.5;"><?php echo $closing_html; ?></div>
 							<?php endif; ?>
-							<div style="border-top:1px solid #1a2236;margin-top:24px;padding-top:14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:1px;color:#64748b;">AWS STUDENT BUILDER GROUP · AIR UNIVERSITY ISLAMABAD · <?php echo esc_html( date( 'Y' ) ); ?></div>
+							<div style="border-top:1px solid #e2e8f0;margin-top:22px;padding-top:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.04em;color:#94a3b8;">AWS STUDENT BUILDER GROUP · AIR UNIVERSITY ISLAMABAD · <?php echo esc_html( date( 'Y' ) ); ?></div>
 						</td>
 					</tr>
 				</table>

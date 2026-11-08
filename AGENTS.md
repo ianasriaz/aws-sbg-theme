@@ -671,6 +671,22 @@ aws-sbg-theme/
 
 ---
 
+### 2026-11-08 20:54 - Antigravity (Claude 3.7 Sonnet)
+
+**Task**: Refactor email template to light, minimal, human-crafted design with responsive device scaling
+
+**Files Changed**:
+- `includes/emails/aws-emails.php`:
+  - Transformed global HTML email template from dark cyberpunk aesthetic to a crisp, minimal light theme (`#f4f6f8` backdrop, `#ffffff` card, `#e2e8f0` 1px border, `#0f172a` headings, `#334155` readable body text).
+  - Reduced title size to a minimal, tasteful `18px` bold headline and kicker to `11px` slate.
+  - Added defensive color mapping (`str_ireplace`) for legacy white text (`#FFFFFF`) to ensure contrast readability across all existing email contexts.
+  - Added clean mobile responsive styles (`@media only screen and (max-width: 560px)`) with scaled padding, fluid card width, and full-width touch-friendly button.
+- `includes/features/invite/invite-handler.php`:
+  - Adjusted inline colors for submitter and admin notifications (`#0f172a` for names/CNIC, `#7928ca` for reference tags, `#64748b` for notes).
+  - Tightened line margins to clean `12px` rhythm.
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*
