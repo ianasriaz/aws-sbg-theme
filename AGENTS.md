@@ -34,6 +34,27 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-09 01:20 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Streamline re:Invent registration form fields: simplify CNIC label, convert persona pills into a clean dropdown, standardize Institute/Company field, update City traveling label, add parking prioritization subtext, and refocus applicant note on last attended event with 250 character limit.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` -
+  - **CNIC Label**: Updated label to `CNIC (For check-in) *`, removing the extraneous info icon and hover tooltip for a cleaner interface.
+  - **"I am a" Dropdown**: Converted the 3-column radio buttons into a styled `<select>` dropdown (`Student`, `Professional`, `Job Seeker`), styled with custom SVG chevron and dark menu aesthetic.
+  - **Institute / Company Field**: Simplified to a static, always-visible field titled `Institute/Company *` with placeholder `Air University Islamabad/Nayatel/Jazz`, removing dynamic role-conditional field toggling.
+  - **City Field**: Updated label to `City (Travelling from on event day) *`.
+  - **Parking Policy Subtext**: Added prominent subtitle note `Due to limited parking space, In the first phase, we will prioritize attendees with no vehicle.` under the vehicle section.
+  - **Prior Event Note (250 Char Limit)**: Updated Step 2 textarea label to `Tell us about your last attended AWS or any community event (250 CHAR LIMIT) *` with live countdown indicator (`... left`), HTML5 `maxlength="250"`, and backend `mb_substr` truncation guard.
+  - **Attendance Question**: Updated radio question label to `Have you attended AWS or any community event before? *`.
+  - **Admin Table & CSV Headers**: Reflected new labels in admin table column headers, note summaries, and CSV export.
+
+**Key Decisions**:
+- Streamlined form UX: Grouped Step 1 into clean 2-column balanced pairs (Name/Email, Phone/CNIC, Persona/Institute, City/LinkedIn, Vehicle full width). Eliminating conditional field jumps makes mobile and desktop registration faster and more predictable.
+- Concise qualitative note: 250 character limit on previous event participation keeps applicant statements succinct and focused, greatly speeding up administrative review.
+
+---
+
 ### 2026-11-09 00:58 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Update re:Invent registration highlights copy (Free Access, Snacks, Food & Drinks, AWS Swag, Networking, Expert Sessions, Activities).

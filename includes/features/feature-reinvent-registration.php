@@ -147,10 +147,13 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-fields { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
 			.rv-field label { display:block; font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.62); margin-bottom:8px; }
 			.rv-field label em, .rv-question-label em { font-style:normal; color:#00DFD8; }
-			.rv-field input { width:100%; padding:14px 16px; font-family:inherit; font-size:16px; color:#FFFFFF; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.16); border-radius:10px; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
-			.rv-field input:focus { outline:none; border-color:#00DFD8; box-shadow:0 0 0 3px rgba(0,223,216,0.14); }
+			.rv-field input, .rv-field select { width:100%; padding:14px 16px; font-family:inherit; font-size:16px; color:#FFFFFF; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.16); border-radius:10px; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
+			.rv-field input:focus, .rv-field select:focus { outline:none; border-color:#00DFD8; box-shadow:0 0 0 3px rgba(0,223,216,0.14); }
 			.rv-field input::placeholder { color:rgba(255,255,255,0.32); }
-			.rv-field textarea { width:100%; padding:14px 16px; font-family:inherit; font-size:16px; line-height:1.65; color:#FFFFFF; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.16); border-radius:10px; resize:vertical; min-height:150px; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
+			.rv-field select { appearance:none; -webkit-appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:40px; cursor:pointer; }
+			.rv-field select:invalid, .rv-field select option[value=""] { color:rgba(255,255,255,0.38); }
+			.rv-field select option { background:#0d1322; color:#FFFFFF; }
+			.rv-field textarea { width:100%; padding:14px 16px; font-family:inherit; font-size:16px; line-height:1.65; color:#FFFFFF; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.16); border-radius:10px; resize:vertical; min-height:130px; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
 			.rv-field textarea:focus { outline:none; border-color:#00DFD8; box-shadow:0 0 0 3px rgba(0,223,216,0.14); }
 			.rv-field textarea::placeholder { color:rgba(255,255,255,0.32); }
 
@@ -312,36 +315,24 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 							<input id="rv-whatsapp" type="tel" name="whatsapp" :required="currentStep === 1" placeholder="0300-0000000">
 						</div>
 						<div class="rv-field">
-							<label class="rv-has-tip" for="rv-cnic">
-								CNIC / B-Form <em>*</em>
-								<span class="rv-tip-mark" tabindex="0" aria-label="Why we ask: checked at the gate for security verification."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="8" r="1" fill="currentColor" stroke="none"/></svg></span>
-								<span class="rv-tip-bubble" role="tooltip">Checked at the gate for security verification.</span>
-							</label>
+							<label for="rv-cnic">CNIC (For check-in) <em>*</em></label>
 							<input id="rv-cnic" type="text" name="cnic" inputmode="numeric" :required="currentStep === 1" pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" maxlength="15" title="Format: 00000-0000000-0" placeholder="00000-0000000-0" @input="formatCnic($event)">
 						</div>
-						<div class="rv-field" style="grid-column:1/-1;">
-							<label id="rv-audience-label">I am a <em>*</em></label>
-							<div class="rv-choices rv-choices-3" role="radiogroup" aria-labelledby="rv-audience-label">
-								<label class="rv-choice">
-									<input type="radio" name="audience_type" value="student" x-model="audienceType" :required="currentStep === 1">
-									<span class="rv-choice-title">Student</span>
-								</label>
-								<label class="rv-choice">
-									<input type="radio" name="audience_type" value="professional" x-model="audienceType" :required="currentStep === 1">
-									<span class="rv-choice-title">Professional</span>
-								</label>
-								<label class="rv-choice">
-									<input type="radio" name="audience_type" value="job_seeker" x-model="audienceType" :required="currentStep === 1">
-									<span class="rv-choice-title">Job Seeker</span>
-								</label>
-							</div>
-						</div>
-						<div class="rv-field" x-show="audienceType" x-cloak>
-							<label for="rv-affiliation" x-text="affiliationLabel()">Institute / Organization <em>*</em></label>
-							<input id="rv-affiliation" type="text" name="affiliation" :required="currentStep === 1 && audienceType" :placeholder="affiliationPlaceholder()">
+						<div class="rv-field">
+							<label for="rv-audience-type">I am a <em>*</em></label>
+							<select id="rv-audience-type" name="audience_type" x-model="audienceType" :required="currentStep === 1">
+								<option value="" disabled selected>Select an option</option>
+								<option value="student">Student</option>
+								<option value="professional">Professional</option>
+								<option value="job_seeker">Job Seeker</option>
+							</select>
 						</div>
 						<div class="rv-field">
-							<label for="rv-city">City <em>*</em></label>
+							<label for="rv-affiliation">Institute/Company <em>*</em></label>
+							<input id="rv-affiliation" type="text" name="affiliation" :required="currentStep === 1" placeholder="Air University Islamabad/Nayatel/Jazz">
+						</div>
+						<div class="rv-field">
+							<label for="rv-city">City (Travelling from on event day) <em>*</em></label>
 							<input id="rv-city" type="text" name="city" :required="currentStep === 1" placeholder="Your city">
 						</div>
 						<div class="rv-field">
@@ -350,6 +341,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 						<div class="rv-field" style="grid-column:1/-1;">
 							<label>Bringing a vehicle? <span style="font-weight:400;">(optional)</span></label>
+							<p style="margin:0 0 10px; font-size:12.5px; line-height:1.5; color:rgba(255,255,255,0.5);">Due to limited parking space, In the first phase, we will prioritize attendees with no vehicle.</p>
 							<div class="rv-choices" role="radiogroup" aria-label="Vehicle">
 								<label class="rv-choice">
 									<input type="radio" name="has_vehicle" value="no" x-model="hasVehicle">
@@ -377,7 +369,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						<div class="rv-field" style="grid-column:1/-1;" x-show="hasVehicle === 'yes'" x-cloak>
 							<label for="rv-vehicle-number">Vehicle number</label>
 							<input id="rv-vehicle-number" type="text" name="vehicle_number" placeholder="ABC-123" :required="currentStep === 1 && hasVehicle === 'yes'">
-							<p style="margin:6px 0 0; font-size:12.5px; line-height:1.5; color:rgba(255,255,255,0.5);">In the first phase, we will prioritize attendees with no vehicle.</p>
+							<p style="margin:6px 0 0; font-size:12.5px; line-height:1.5; color:rgba(255,255,255,0.5);">Due to limited parking space, In the first phase, we will prioritize attendees with no vehicle.</p>
 						</div>
 					</div>
 
@@ -395,8 +387,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					<div class="rv-progress" aria-hidden="true"><div class="rv-progress-fill" :style="'width:' + ( ( currentStep / 2 ) * 100 ) + '%'"></div></div>
 					<h2 class="rv-step-title">Almost done</h2>
 
-					<div class="rv-field" style="margin-bottom:40px;">
-						<label id="rv-attended-label">Have you attended any AWS community event before? <em>*</em></label>
+					<div class="rv-field" style="margin-bottom:34px;">
+						<label id="rv-attended-label">Have you attended AWS or any community event before? <em>*</em></label>
 						<div class="rv-choices" role="radiogroup" aria-labelledby="rv-attended-label">
 							<label class="rv-choice">
 								<input type="radio" name="attended_before" value="yes" :required="currentStep === 2">
@@ -409,9 +401,12 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 					</div>
 
-					<div class="rv-field">
-						<label for="rv-why">Why do you want to be invited to AWS re:Invent Islamabad 2026? <em>*</em></label>
-						<textarea id="rv-why" name="why_invite" rows="6" :required="currentStep === 2" placeholder="Tell us about your experience with AWS, community involvement, and what you're hoping to gain from the event."></textarea>
+					<div class="rv-field" style="margin-bottom:28px;">
+						<div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+							<label for="rv-why" style="margin-bottom:0;">Tell us about your last attended AWS or any community event (250 CHAR LIMIT) <em>*</em></label>
+							<span style="font-family:'Amazon Ember Mono',monospace; font-size:11px; color:rgba(255,255,255,0.45);" x-text="(250 - (whyInviteText ? whyInviteText.length : 0)) + ' left'"></span>
+						</div>
+						<textarea id="rv-why" name="why_invite" rows="5" maxlength="250" x-model="whyInviteText" :required="currentStep === 2" placeholder="Tell us about the event, what you learned, or your community participation..."></textarea>
 					</div>
 
 					<label class="rv-commit">
@@ -446,26 +441,11 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			return {
 				currentStep: 0,
 				audienceType: '',
+				whyInviteText: '',
 				hasVehicle: 'no',
 				isSubmitting: false,
 				nextStep() { this.currentStep++; },
 				prevStep() { if ( this.currentStep > 0 ) { this.currentStep--; } },
-				affiliationLabel() {
-					const labels = {
-						student: 'Institute Name',
-						professional: 'Organization Name',
-						job_seeker: 'Most Recent Organization / Institute',
-					};
-					return labels[ this.audienceType ] || 'Institute / Organization';
-				},
-				affiliationPlaceholder() {
-					const placeholders = {
-						student: 'Your institute name',
-						professional: 'Company name',
-						job_seeker: 'Where did you last study or work?',
-					};
-					return placeholders[ this.audienceType ] || '';
-				},
 				formatCnic(e) {
 					let val = e.target.value.replace(/[^0-9]/g, '');
 					if (val.length > 13) val = val.substring(0, 13);
@@ -536,6 +516,11 @@ function aws_sbg_handle_reinvent_registration() {
 	$linkedin   = isset( $_POST['linkedin'] ) ? esc_url_raw( wp_unslash( $_POST['linkedin'] ) ) : '';
 	$attended   = isset( $_POST['attended_before'] ) ? sanitize_text_field( wp_unslash( $_POST['attended_before'] ) ) : '';
 	$why        = isset( $_POST['why_invite'] ) ? sanitize_textarea_field( wp_unslash( $_POST['why_invite'] ) ) : '';
+	if ( function_exists( 'mb_substr' ) ) {
+		$why = mb_substr( $why, 0, 250 );
+	} else {
+		$why = substr( $why, 0, 250 );
+	}
 	$will_attend = isset( $_POST['will_attend'] ) ? sanitize_text_field( wp_unslash( $_POST['will_attend'] ) ) : '';
 
 	$has_vehicle    = ( isset( $_POST['has_vehicle'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['has_vehicle'] ) ) ) ? 'yes' : 'no';
@@ -554,7 +539,7 @@ function aws_sbg_handle_reinvent_registration() {
 	$valid_audience = in_array( $audience, array( 'student', 'professional', 'job_seeker' ), true );
 
 	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $cnic ) || ! preg_match( '/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/', $cnic ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) || empty( $why ) || 'yes' !== $will_attend || ! $parking_policy || ! $valid_audience ) {
-		wp_die( 'Please fill in all required fields. Ensure your CNIC / B-Form contains 13 digits (e.g. 12345-1234567-1).' );
+		wp_die( 'Please fill in all required fields. Ensure your CNIC contains 13 digits (e.g. 12345-1234567-1).' );
 	}
 
 	// Duplicate guard by email.
@@ -1053,7 +1038,7 @@ function aws_sbg_render_reinvent_admin_page() {
 						<th>Applicant</th>
 						<th>Contact</th>
 						<th>Institute / City</th>
-						<th>Applicant Statement (User Note)</th>
+						<th>Last Attended Event (User Note)</th>
 						<th>Admin Note (Internal)</th>
 						<th>Vehicle &amp; Parking</th>
 						<th>Status</th>
@@ -1127,7 +1112,7 @@ function aws_sbg_render_reinvent_admin_page() {
 											<div class="rvadm-statement-full">
 												<p style="margin:0 0 8px;"><?php echo nl2br( esc_html( $why ) ); ?></p>
 												<div style="font-size:11px;color:#64748b;border-top:1px dashed #cbd5e1;padding-top:6px;">
-													<strong>Attended AWS event before:</strong> <?php echo 'yes' === strtolower( $attended ) ? '<span style="color:#059669;font-weight:700;">Yes</span>' : 'No'; ?>
+													<strong>Attended AWS or community event:</strong> <?php echo 'yes' === strtolower( $attended ) ? '<span style="color:#059669;font-weight:700;">Yes</span>' : 'No'; ?>
 												</div>
 											</div>
 										</details>
@@ -1797,7 +1782,7 @@ function aws_sbg_export_reinvent_csv() {
 	header( 'Content-Disposition: attachment; filename=' . $filename );
 
 	$output = fopen( 'php://output', 'w' );
-	fputcsv( $output, array( 'Registration #', 'Name', 'Email', 'WhatsApp', 'CNIC/B-Form', 'Institute/Org', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS Event Before', 'Applicant Note (Why Invite)', 'Admin Note (Internal)', 'Will Attend', 'Vehicle', 'Parking Policy', 'Approval Status', 'Registered At' ) );
+	fputcsv( $output, array( 'Registration #', 'Name', 'Email', 'WhatsApp', 'CNIC', 'Institute/Company', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS or Community Event Before', 'Applicant Note (Last Attended Event)', 'Admin Note (Internal)', 'Will Attend', 'Vehicle', 'Parking Policy', 'Approval Status', 'Registered At' ) );
 
 	if ( $query->have_posts() ) {
 		foreach ( $query->posts as $reg ) {
