@@ -34,6 +34,18 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-08 20:15 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Revert confirmation form UI back to the clean, minimal, uncluttered design, removing superfluous section numbering, role descriptions, and badge tags while retaining the CNIC input and subtle partner parking note.
+
+**Files Changed**:
+- `includes/features/invite/invite-render.php` - Reverted form layout back to the clean, minimal printed ticket design. Removed cluttered "Part 01"–"Part 06" headings, role card subtext descriptions, and extra badges. Placed CNIC cleanly beside Contact number in the 2-column grid and added a subtle, single-line parking transit note for Community Partners.
+
+**Key Decisions**:
+- Preserved the clean, distraction-free aesthetic of the original ticket-stub layout as requested.
+
+---
+
 ### 2026-11-08 20:10 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Add CNIC field for gate clearance (speaker, guest, partner), add campus parking advisory for AWS Community Partner encouraging public transport (InDrive, Yango, Bykea), and elevate form UI/UX with editorial collegiate styling to eliminate generic AI-slop aesthetic.
