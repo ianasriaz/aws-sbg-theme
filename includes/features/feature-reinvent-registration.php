@@ -139,13 +139,13 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			/* Steps 1 & 2 */
 			.rv-stage { position:relative; z-index:1; padding:clamp(48px,10vh,110px) clamp(20px,6vw,72px) clamp(72px,12vh,120px); }
 			.rv-stage-inner { max-width:640px; margin:0 auto; }
-			.rv-step-label { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#00DFD8; }
-			.rv-step-title { font-weight:700; font-size:clamp(26px,3.4vw,34px); letter-spacing:-0.01em; margin:14px 0 34px; }
-			.rv-progress { height:4px; background:rgba(255,255,255,0.1); border-radius:99px; overflow:hidden; margin:12px 0 26px; }
+			.rv-step-label { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#00DFD8; display:inline-block; }
+			.rv-step-title { font-weight:700; font-size:clamp(26px,3.4vw,34px); line-height:1.2; letter-spacing:-0.01em; margin:0 0 clamp(36px,5vh,48px) 0; }
+			.rv-progress { height:4px; background:rgba(255,255,255,0.1); border-radius:99px; overflow:hidden; margin:14px 0 28px; }
 			.rv-progress-fill { height:100%; background:#00DFD8; border-radius:99px; transition:width 0.45s cubic-bezier(0.22,0.61,0.36,1); }
 
-			.rv-fields { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-			.rv-field label { display:block; font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.62); margin-bottom:8px; }
+			.rv-fields { display:grid; grid-template-columns:1fr 1fr; gap:26px 20px; }
+			.rv-field label { display:block; font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.68); margin-bottom:10px; line-height:1.45; }
 			.rv-field label em, .rv-question-label em { font-style:normal; color:#00DFD8; }
 			.rv-field input, .rv-field select { width:100%; padding:14px 16px; font-family:inherit; font-size:16px; color:#FFFFFF; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.16); border-radius:10px; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
 			.rv-field input:focus, .rv-field select:focus { outline:none; border-color:#00DFD8; box-shadow:0 0 0 3px rgba(0,223,216,0.14); }
@@ -174,12 +174,12 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-choice-title { display:block; font-size:14px; font-weight:400; color:#FFFFFF; }
 			.rv-choices-3 { grid-template-columns:repeat(3,1fr); }
 
-			.rv-commit { display:flex; align-items:flex-start; gap:14px; padding:18px 0; border-top:1px solid rgba(255,255,255,0.12); cursor:pointer; }
+			.rv-commit { display:flex; align-items:flex-start; gap:14px; padding:20px 0; border-top:1px solid rgba(255,255,255,0.12); cursor:pointer; }
 			.rv-commit input { width:18px; height:18px; margin-top:3px; accent-color:#00DFD8; cursor:pointer; flex-shrink:0; }
 			.rv-commit-text { font-size:14.5px; line-height:1.6; color:rgba(255,255,255,0.75); }
 			.rv-commit-sub { display:block; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.42); margin-top:4px; }
 
-			.rv-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:36px; }
+			.rv-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:44px; }
 
 			@keyframes rv-spin { to { transform:rotate(360deg); } }
 			.rv-spinner { width:16px; height:16px; border:2px solid rgba(6,4,12,0.3); border-top-color:#06040C; border-radius:50%; display:inline-block; animation:rv-spin 0.7s linear infinite; }
@@ -339,9 +339,9 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 							<label for="rv-linkedin">LinkedIn Profile URL <em>*</em></label>
 							<input id="rv-linkedin" type="url" name="linkedin" :required="currentStep === 1" placeholder="https://linkedin.com/in/username">
 						</div>
-						<div class="rv-field" style="grid-column:1/-1;">
+						<div class="rv-field" style="grid-column:1/-1; margin-top:8px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.1);">
 							<label>Bringing a vehicle? <span style="font-weight:400;">(optional)</span></label>
-							<p style="margin:0 0 10px; font-size:12.5px; line-height:1.5; color:rgba(255,255,255,0.5);">Due to limited parking space, In the first phase, we will prioritize attendees with no vehicle.</p>
+							<p style="margin:2px 0 12px; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.5);">Due to limited parking space, In the first phase, we will prioritize attendees with no vehicle.</p>
 							<div class="rv-choices" role="radiogroup" aria-label="Vehicle">
 								<label class="rv-choice">
 									<input type="radio" name="has_vehicle" value="no" x-model="hasVehicle">
@@ -387,7 +387,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					<div class="rv-progress" aria-hidden="true"><div class="rv-progress-fill" :style="'width:' + ( ( currentStep / 2 ) * 100 ) + '%'"></div></div>
 					<h2 class="rv-step-title">Almost done</h2>
 
-					<div class="rv-field" style="margin-bottom:34px;">
+					<div class="rv-field" style="margin-bottom:40px;">
 						<label id="rv-attended-label">Have you attended AWS or any community event before? <em>*</em></label>
 						<div class="rv-choices" role="radiogroup" aria-labelledby="rv-attended-label">
 							<label class="rv-choice">
@@ -401,8 +401,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 					</div>
 
-					<div class="rv-field" style="margin-bottom:28px;">
-						<div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+					<div class="rv-field" style="margin-bottom:38px;">
+						<div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;">
 							<label for="rv-why" style="margin-bottom:0;">Tell us about your last attended AWS or any community event (250 CHAR LIMIT) <em>*</em></label>
 							<span style="font-family:'Amazon Ember Mono',monospace; font-size:11px; color:rgba(255,255,255,0.45);" x-text="(250 - (whyInviteText ? whyInviteText.length : 0)) + ' left'"></span>
 						</div>
@@ -422,7 +422,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						<span class="rv-commit-text">I understand that due to limited parking capacity, attendees with no vehicle will be prioritized.<span class="rv-commit-sub" style="color:rgba(255,255,255,0.45);">We encourage using public transport OR ride-hailing (InDrive, Yango, Bykea).</span></span>
 					</label>
 
-					<div class="rv-actions" style="margin-top:32px;">
+					<div class="rv-actions" style="margin-top:44px;">
 						<button type="button" class="rv-btn rv-btn-ghost" @click="prevStep()">Back</button>
 						<button type="submit" class="rv-btn rv-btn-primary" :disabled="isSubmitting">
 							<span x-show="!isSubmitting">SUBMIT</span>

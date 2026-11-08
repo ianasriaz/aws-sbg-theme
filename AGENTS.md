@@ -34,6 +34,23 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-09 01:29 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Increase vertical breathing room and spacing across all steps of the re:Invent registration form.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` -
+  - **Step Title Separation**: Expanded bottom margin on `.rv-step-title` from 34px to generous `clamp(36px, 5vh, 48px)` with `line-height: 1.2`, eliminating visual clutter between the heading ("Tell us about yourself", "Almost done") and the first field row.
+  - **Fields Grid Gap**: Increased `.rv-fields` grid gap from 18px to `26px 20px`, ensuring ample vertical breathing space between input rows.
+  - **Label Spacing**: Increased `.rv-field label` bottom margin to 10px with `line-height: 1.45`.
+  - **Section Dividers & Subtitles**: Added explicit top border (`rgba(255,255,255,0.1)`) and 24px top padding before the vehicle section, along with refined subtitle spacing.
+  - **Step 2 Question & Action Spacing**: Expanded question margin to 40px, textarea margin to 38px, commit item vertical padding to 20px, and bottom action button margin to 44px.
+
+**Key Decisions**:
+- Generous form hierarchy: Clear vertical grouping prevents cognitive overload and prevents labels, inputs, and section headings from visually colliding on desktop and mobile screens.
+
+---
+
 ### 2026-11-09 01:20 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Streamline re:Invent registration form fields: simplify CNIC label, convert persona pills into a clean dropdown, standardize Institute/Company field, update City traveling label, add parking prioritization subtext, and refocus applicant note on last attended event with 250 character limit.
