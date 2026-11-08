@@ -611,6 +611,25 @@ aws-sbg-theme/
 
 ---
 
+### 2026-11-08 20:30 - Antigravity (Claude 3.7 Sonnet)
+
+**Task**: Safe confirmation entries deletion & bulk cleanup for testing on admin side
+
+**Files Changed**:
+- `includes/features/invite/invite-admin.php`:
+  - Added individual entry delete action in table rows with JavaScript confirmation dialog and nonce protection.
+  - Added single entry deletion handler (`aws_sbg_invite_handle_delete_entry`) that backs up deleted entries into `wp_options` (`aws_invite_recent_deleted_entries`) and deletes associated uploaded photo attachment via `wp_delete_attachment(..., true)` to prevent media clutter.
+  - Added bulk "Clear Entries…" button and modal (`#aws-invite-clear-modal`) with pre-deletion snapshot backup, optional media cleanup checkbox, and safety requirement to type `CLEAR` in capital letters before proceeding.
+  - Added bulk clear handler (`aws_sbg_invite_handle_clear_event_entries`) that validates `CLEAR` confirmation, archives all event records into `wp_options` under `aws_invite_backup_{event_id}_{timestamp}` prior to deletion, cleans orphaned test photos, and deletes rows safely.
+  - Added admin notices for successful deletion, bulk clearing with count, and mismatched confirmation code errors.
+
+**Key Decisions**:
+- Required exact typed confirmation `CLEAR` to guard against accidental clicks.
+- Preserved zero data loss: Full snapshots are saved to `wp_options` before any rows are removed.
+- Automatically cleaned up uploaded test photo attachments from the Media Library on delete.
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*
