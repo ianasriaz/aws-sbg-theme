@@ -34,6 +34,26 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-08 23:45 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Implement safe clear testing option with snapshot backup for re:Invent registrations, fix "Ready to Print" event roster preview & layout, display applicant motivation statements (user note) and internal admin notes (text not from user) in admin table, and reinforce registration flow robustness.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` -
+  - **Safe Clear Option**: Added `aws_sbg_reinvent_handle_clear_registrations()` requiring typing `CLEAR` to confirm, creating a full snapshot backup in WordPress options (`aws_reinvent_backup_YYYY-MM-DD_His`) prior to deleting entries, with optional checkbox to reset the sequential numbering table (`aws_reinvent_numbers`) back to #001. Added single-entry delete handler `aws_sbg_reinvent_handle_delete_reg()`.
+  - **Internal Admin Notes ("Text not from user")**: Added `aws_sbg_reinvent_handle_save_admin_note()`, Admin Note modal (`#aws-reinvent-note-modal`), and inline note bubbles/buttons so organizers can save private remarks per registration (searchable and exported).
+  - **Applicant Motivation Statement ("User Note")**: Added collapsible `<details>` preview in admin table displaying the applicant's qualitative motivation statement (`why_invite`) in full, along with their prior AWS event attendance badge, CNIC chip, audience badge, and clickable LinkedIn link.
+  - **Print Roster Redesign**: Removed automatic `window.onload = function(){ window.print(); };`. Created a clean on-screen document preview with a sticky toolbar featuring filter tabs (`Approved Only [Default]`, `All Applicants`, `Pending Review`), summary counters, a manual "Print Roster" button, and back navigation. Formatted the check-in sheet with `@page { size: A4 landscape; margin: 10mm 12mm; }`, repeating table headers on multi-page printouts, non-splitting rows, attendee CNIC for Air University gate security clearance, vehicle details, and physical `[   ]` check-in & signature boxes.
+  - **Registration Robustness & Email Text Visibility**: Auto-normalizes 13-digit CNIC numbers submitted without hyphens into standard `XXXXX-XXXXXXX-X` format (both in frontend Alpine formatter and backend handler). Fixed hardcoded white text (`#FFFFFF`) in applicant confirmation, admin alert, and approval emails to dark slate (`#0f172a`, `#334155`), ensuring high contrast against the light email template. Redesigned event pass card with light cyan dashed styling.
+  - **Universal Admin Search**: Upgraded query to search across applicant name (`post_title`), registration number, email, phone, CNIC, university, city, applicant statement, and admin notes.
+  - **CSV Export Upgrade**: Added `Attended AWS Event Before`, `Applicant Note (Why Invite)`, and `Admin Note (Internal)` to CSV export columns.
+
+**Key Decisions**:
+- Full data safety: Clear operation cannot be executed accidentally; it requires capital letter `CLEAR` confirmation and automatically snapshots all post records and metadata to WordPress options before removal.
+- Gate clearance compliance: Air University campus security strictly requires CNIC verification at the gate; the printable check-in sheet now clearly displays attendee CNIC, pass number, vehicle details, and physical arrival check-boxes.
+
+---
+
 ### 2026-11-08 21:46 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Remove floating side chevrons from Speaker Deck presentation canvas and remove the exclusionary subtitle ("This is an expert stage, not an open call.") from the "Who We're Looking For" slide.
