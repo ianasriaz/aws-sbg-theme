@@ -8,7 +8,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// 1. SHIELD FROM SEARCH ENGINES & WEB CRAWLERS (INVITE-ONLY)
+// 1. CLEAR 404 & SHIELD FROM SEARCH ENGINES & WEB CRAWLERS (INVITE-ONLY)
+global $wp_query;
+if ( isset( $wp_query ) && is_object( $wp_query ) ) {
+	$wp_query->is_404  = false;
+	$wp_query->is_page = true;
+}
+status_header( 200 );
 header( 'X-Robots-Tag: noindex, nofollow, noarchive, nosnippet', true );
 
 // 2. FULLSCREEN DISTRACTION-FREE CANVAS

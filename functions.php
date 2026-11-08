@@ -84,6 +84,21 @@ function aws_sbg_template_include( $template ) {
 }
 
 /**
+ * Intercept 404 for unlisted speaker deck route before WP sends 404 headers
+ */
+add_filter( 'pre_handle_404', function( $preempt, $query ) {
+	$req_uri    = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+	$clean_path = trim( (string) parse_url( $req_uri, PHP_URL_PATH ), '/' );
+	if ( 'speaker-deck' === $clean_path ) {
+		$query->is_404  = false;
+		$query->is_page = true;
+		status_header( 200 );
+		return true;
+	}
+	return $preempt;
+}, 10, 2 );
+
+/**
  * Filter template hierarchy for front-page and other special templates
  * WordPress looks for front-page.php in root, redirect to templates/pages/
  */
