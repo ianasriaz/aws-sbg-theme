@@ -44,8 +44,9 @@ function aws_sbg_invite_handle_submission() {
 	$name  = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
 	$email = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 	$phone = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
+	$cnic  = isset( $_POST['cnic'] ) ? sanitize_text_field( wp_unslash( $_POST['cnic'] ) ) : '';
 
-	if ( '' === trim( $name ) || '' === trim( $phone ) ) {
+	if ( '' === trim( $name ) || '' === trim( $phone ) || '' === trim( $cnic ) ) {
 		aws_sbg_invite_submission_error( $event_id, 'required' );
 	}
 	if ( ! is_email( $email ) ) {
@@ -73,6 +74,7 @@ function aws_sbg_invite_handle_submission() {
 	// Role-specific fields, sanitized and validated against the fixed schema.
 	$role_fields = aws_sbg_invite_role_fields()[ $role ];
 	$payload     = array(
+		'cnic'           => $cnic,
 		'vehicle'        => $has_vehicle,
 		'vehicle_type'   => $vehicle_type,
 		'vehicle_number' => $vehicle_number,
@@ -219,6 +221,7 @@ function aws_sbg_invite_send_notifications( $event_id, $to, $name, $role, $refer
 	$confirm_body = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong>,</p>'
 		. '<p style="margin:0 0 14px 0;">Your invitation to <strong style="color:#FFFFFF;">' . esc_html( $event_name ) . '</strong> is confirmed.</p>'
 		. '<p style="margin:0 0 14px 0;">Reference: <strong style="color:#00DFD8;">' . esc_html( $reference ) . '</strong></p>'
+		. ( ! empty( $payload['cnic'] ) ? '<p style="margin:0 0 14px 0;">CNIC for Gate Clearance: <strong style="color:#FFFFFF;">' . esc_html( $payload['cnic'] ) . '</strong></p>' : '' )
 		. '<p style="margin:0 0 14px 0;">' . esc_html( $meta['confirm_message'] ) . '</p>';
 
 	if ( $is_partner ) {
@@ -259,7 +262,8 @@ function aws_sbg_invite_send_notifications( $event_id, $to, $name, $role, $refer
 
 		$admin_body = '<p style="margin:0 0 12px 0;">New invitation confirmation:</p>'
 			. '<p style="margin:0 0 6px 0;"><strong style="color:#FFFFFF;">' . esc_html( $name ) . '</strong> — ' . esc_html( $role_label ) . '</p>'
-			. '<p style="margin:0 0 6px 0;">Ref: ' . esc_html( $reference ) . ' · ' . esc_html( $payload['vehicle'] ?? '' ) . '</p>'
+			. '<p style="margin:0 0 6px 0;">CNIC (Gate Clearance): <strong style="color:#FFFFFF;">' . esc_html( $payload['cnic'] ?? '—' ) . '</strong></p>'
+			. '<p style="margin:0 0 6px 0;">Ref: ' . esc_html( $reference ) . ' · Vehicle: ' . esc_html( $payload['vehicle'] ?? 'no' ) . ( ! empty( $payload['vehicle_number'] ) ? ' (' . esc_html( $payload['vehicle_number'] ) . ')' : '' ) . '</p>'
 			. $extra;
 		aws_sbg_mail_send( 'invite', $admin_to, 'New invitation confirmation — ' . esc_html( $reference ), 'New Confirmation', 'Review confirmation', $admin_body, admin_url( 'admin.php?page=aws-invite-submissions&event_id=' . $event_id ), 'Open confirmations' );
 	}

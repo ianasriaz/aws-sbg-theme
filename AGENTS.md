@@ -34,6 +34,26 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-08 20:10 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Add CNIC field for gate clearance (speaker, guest, partner), add campus parking advisory for AWS Community Partner encouraging public transport (InDrive, Yango, Bykea), and elevate form UI/UX with editorial collegiate styling to eliminate generic AI-slop aesthetic.
+
+**Files Changed**:
+- `includes/features/invite/invite-render.php` - Redesigned confirmation form with collegiate editorial structure: added distinct `Part 01`–`Part 06` section badges, tactile interactive role cards with role descriptions, dedicated CNIC field with real-time hyphen formatting (`XXXXX-XXXXXXX-X`) for campus gate clearance, campus parking advisory banner for Community Partners recommending ride-hailing options (InDrive, Yango, Bykea), and enhanced Alpine.js draft persistence (`cnic`) and validation.
+- `includes/features/invite/invite-handler.php` - Extracted, sanitized, and validated `cnic` as required for all attendees. Persisted `cnic` in JSON payload. Included CNIC in attendee confirmation and organizer notification email templates for gate clearance coordination.
+- `includes/features/invite/invite-admin.php` - Added CNIC badge to Contact column in admin confirmations list and added `CNIC (Gate Clearance)` column to CSV export.
+
+**Key Decisions**:
+- Structured the form into numbered editorial parts (`Part 01` through `Part 06`) with authentic collegiate typography (Iowan Old Style serif headers, hairline rules, tactile cards) conforming to `DESIGN.md` and `antislop` guidelines.
+- Live CNIC formatting automatically inserts hyphens at positions 5 and 12, ensuring valid Pakistani CNIC format without user friction.
+- CNIC stored directly in `payload` JSON, ensuring backward and forward schema compatibility without requiring production DB migration.
+
+**Notes for Future Agents**:
+- CNIC is required for all roles (`speaker`, `guest`, `community_partner`) to generate campus entry passes.
+- Parking notice automatically appears in Alpine.js when `role === 'community_partner' || role === 'community_leader'`.
+
+---
+
 ### 2026-11-08 20:00 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Review and update invitation confirmation form (`includes/features/invite/`): rename AWS Community Leader to AWS Community Partner, update Partner fields (university name, intro/leadership term), add Guest intro & achievements field, add WhatsApp community group invitation on submission, ensure robust zero-data-loss architecture and admin dashboard compatibility.

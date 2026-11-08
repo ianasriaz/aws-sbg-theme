@@ -329,8 +329,11 @@ function aws_sbg_invite_render_submissions_page() {
 									<span style="background:#f5f3ff;color:#7c3aed;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;"><?php echo esc_html( $roles[ $display_role ] ?? $r['role'] ); ?></span>
 								</td>
 								<td style="padding:12px 18px;color:#475569;">
-									<div><?php echo esc_html( $r['email'] ); ?></div>
-									<div style="font-size:12px;"><?php echo esc_html( $r['phone'] ); ?></div>
+									<div style="font-weight:600;color:#0f172a;"><?php echo esc_html( $r['email'] ); ?></div>
+									<div style="font-size:12px;margin-top:2px;"><?php echo esc_html( $r['phone'] ); ?></div>
+									<?php if ( ! empty( $payload['cnic'] ) ) : ?>
+										<div style="margin-top:4px;"><span style="font-size:11px;font-family:ui-monospace,monospace;background:#f1f5f9;color:#334155;padding:2px 6px;border-radius:4px;border:1px solid #e2e8f0;" title="CNIC for AU Gate Clearance">CNIC: <?php echo esc_html( $payload['cnic'] ); ?></span></div>
+									<?php endif; ?>
 								</td>
 								<td style="padding:12px 18px;color:#475569;"><?php echo $vehicle ? esc_html( $vehicle ) : '<span style="color:#cbd5e1;">—</span>'; ?></td>
 								<td style="padding:12px 18px;color:#334155;font-size:12px;">
@@ -409,7 +412,7 @@ function aws_sbg_invite_export_csv() {
 	header( 'Content-Disposition: attachment; filename=invite-confirmations-' . $event_id . '-' . gmdate( 'Y-m-d' ) . '.csv' );
 
 	$output = fopen( 'php://output', 'w' );
-	fputcsv( $output, array( 'Reference', 'Role', 'Name', 'Shield Line', 'Email', 'Phone', 'Vehicle Type', 'Vehicle Number', 'Photo URL', 'Consent', 'Topic', 'Slot', 'Comment', 'University / Institute', 'About / Bio', 'Program (Legacy)', 'Term (Legacy)', 'Status', 'Created At' ) );
+	fputcsv( $output, array( 'Reference', 'Role', 'Name', 'Shield Line', 'Email', 'Phone', 'CNIC (Gate Clearance)', 'Vehicle Type', 'Vehicle Number', 'Photo URL', 'Consent', 'Topic', 'Slot', 'Comment', 'University / Institute', 'About / Bio', 'Program (Legacy)', 'Term (Legacy)', 'Status', 'Created At' ) );
 
 	$programs = aws_sbg_invite_programs();
 	$roles    = aws_sbg_invite_roles();
@@ -429,6 +432,7 @@ function aws_sbg_invite_export_csv() {
 			$r['shield_line'],
 			$r['email'],
 			$r['phone'],
+			$payload['cnic'] ?? '',
 			$payload['vehicle_type'] ?? '',
 			$payload['vehicle_number'] ?? '',
 			$photo_url,
