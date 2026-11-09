@@ -2,7 +2,7 @@
 /**
  * AWS re:Invent Watch & Build Party — Dedicated Registration Form & Admin Manager
  *
- * Invite-only event registration for "AWS re:Invent Watch & Build Party Islamabad 2026".
+ * Free, first come first served event registration for "AWS re:Invent Watch & Build Party Islamabad 2026".
  * Registration numbers are allocated as RIV-01, RIV-02, etc.
  */
 
@@ -229,7 +229,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
 				</div>
 				<h2 style="font-weight:700; font-size:26px; margin:0 0 10px; letter-spacing:0.02em;">Application Received</h2>
-				<p style="font-size:15px; line-height:1.65; color:rgba(255,255,255,0.62);">Thanks for your interest in AWS re:Invent Watch &amp; Build Party Islamabad 2026. Only approved attendees will be informed by email.</p>
+				<p style="font-size:15px; line-height:1.65; color:rgba(255,255,255,0.62);">Thanks for registering for AWS re:Invent Watch &amp; Build Party Islamabad 2026. Your event pass and details will be shared by email.</p>
 				<div style="margin-top:26px;">
 					<a href="<?php echo esc_url( AWS_REINVENT_WHATSAPP_URL ); ?>" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; justify-content:center; gap:10px; background:#00DFD8; color:#06040C; font-family:'Amazon Ember Mono',monospace; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; text-decoration:none; padding:14px 26px; border-radius:10px;">Join WhatsApp community</a>
 					<p style="font-size:12.5px; color:rgba(255,255,255,0.45); margin:10px 0 0; line-height:1.6;">For updates &amp; announcements.</p>
@@ -240,7 +240,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 		<?php else : ?>
 
 		<?php if ( $exists ) : ?>
-		<div style="position:relative;z-index:2;padding:16px 20px;border:1px solid rgba(0,223,216,0.4);border-radius:10px;background:rgba(0,223,216,0.08);color:#FFFFFF;font-size:14px;line-height:1.6;margin-bottom:20px;">You've already submitted an application. We'll email you once your seat is approved.</div>
+		<div style="position:relative;z-index:2;padding:16px 20px;border:1px solid rgba(0,223,216,0.4);border-radius:10px;background:rgba(0,223,216,0.08);color:#FFFFFF;font-size:14px;line-height:1.6;margin-bottom:20px;">You're already registered with this email. Your event pass and details will be shared by email.</div>
 		<?php endif; ?>
 
 		<!-- Step 0: Intro -->
@@ -250,13 +250,13 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				<p class="rv-kicker">AWS Community Islamabad is bringing</p>
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
 				<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
-				<p class="rv-lede-cta">Register below to express your interest. Approved attendees will receive a confirmation email with event ticket details.</p>
+				<p class="rv-lede-cta">Registration is free and seats are limited. Register now to secure your spot.</p>
 
 				<div class="rv-perks">
 					<div class="rv-perk">
 						<span class="rv-perk-idx">01</span>
-						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.83z"/><path d="M7 7h.01"/></svg>Free Access</h3>
-						<p>Complimentary entry for approved, invited attendees.</p>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.83z"/><path d="M7 7h.01"/></svg>Free Registration</h3>
+						<p>First come, first served. Seats are limited, so register early.</p>
 					</div>
 					<div class="rv-perk">
 						<span class="rv-perk-idx">02</span>
@@ -341,7 +341,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 						<div class="rv-field" style="grid-column:1/-1; margin-top:8px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.1);">
 							<label>Bringing a vehicle? <span style="font-weight:400;">(optional)</span></label>
-							<p style="margin:2px 0 12px; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.5);">Due to limited parking space, In the first phase, we will prioritize attendees with no vehicle.</p>
+							<p style="margin:2px 0 12px; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.5);">Parking on campus is very limited. We encourage using public transport or ride-hailing (InDrive, Yango, Bykea). If you're driving, you can park at F-9 Park and walk to Gate 3 (Khyber Gate).</p>
 							<div class="rv-choices" role="radiogroup" aria-label="Vehicle">
 								<label class="rv-choice">
 									<input type="radio" name="has_vehicle" value="no" x-model="hasVehicle">
@@ -369,7 +369,6 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						<div class="rv-field" style="grid-column:1/-1;" x-show="hasVehicle === 'yes'" x-cloak>
 							<label for="rv-vehicle-number">Vehicle number</label>
 							<input id="rv-vehicle-number" type="text" name="vehicle_number" placeholder="ABC-123" :required="currentStep === 1 && hasVehicle === 'yes'">
-							<p style="margin:6px 0 0; font-size:12.5px; line-height:1.5; color:rgba(255,255,255,0.5);">Due to limited parking space, In the first phase, we will prioritize attendees with no vehicle.</p>
 						</div>
 					</div>
 
@@ -389,37 +388,34 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 					<div class="rv-field" style="margin-bottom:40px;">
 						<label id="rv-attended-label">Have you attended AWS or any community event before? <em>*</em></label>
+						<p style="margin:2px 0 12px; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.5);">First time? You're welcome too.</p>
 						<div class="rv-choices" role="radiogroup" aria-labelledby="rv-attended-label">
 							<label class="rv-choice">
-								<input type="radio" name="attended_before" value="yes" :required="currentStep === 2">
+								<input type="radio" name="attended_before" value="yes" x-model="attendedBefore" :required="currentStep === 2">
 								<span class="rv-choice-title">Yes</span>
 							</label>
 							<label class="rv-choice">
-								<input type="radio" name="attended_before" value="no" :required="currentStep === 2">
+								<input type="radio" name="attended_before" value="no" x-model="attendedBefore" :required="currentStep === 2">
 								<span class="rv-choice-title">No</span>
 							</label>
 						</div>
 					</div>
 
-					<div class="rv-field" style="margin-bottom:38px;">
+					<div class="rv-field" style="margin-bottom:38px;" x-show="attendedBefore === 'yes'" x-cloak>
 						<div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;">
 							<label for="rv-why" style="margin-bottom:0;">Tell us about your last attended AWS or any community event (250 CHAR LIMIT) <em>*</em></label>
 							<span style="font-family:'Amazon Ember Mono',monospace; font-size:11px; color:rgba(255,255,255,0.45);" x-text="(250 - (whyInviteText ? whyInviteText.length : 0)) + ' left'"></span>
 						</div>
-						<textarea id="rv-why" name="why_invite" rows="5" maxlength="250" x-model="whyInviteText" :required="currentStep === 2" placeholder="Tell us about the event, what you learned, or your community participation..."></textarea>
+						<textarea id="rv-why" name="why_invite" rows="5" maxlength="250" x-model="whyInviteText" :required="currentStep === 2 && attendedBefore === 'yes'" :disabled="attendedBefore !== 'yes'" placeholder="Tell us about the event, what you learned, or your community participation..."></textarea>
 					</div>
 
 					<label class="rv-commit">
-						<input type="checkbox" name="confirm" :required="currentStep === 2">
-						<span class="rv-commit-text">I understand this is an invite-only event. I will be notified after review if my application is approved.</span>
-					</label>
-					<label class="rv-commit">
 						<input type="checkbox" name="will_attend" value="yes" :required="currentStep === 2">
-						<span class="rv-commit-text">I will attend the event if accepted.<span class="rv-commit-sub">Seats are limited and resources are planned per attendee, so a no-show takes a seat from another builder.</span></span>
+						<span class="rv-commit-text">I will attend the event.<span class="rv-commit-sub">Seats are limited and resources are planned per attendee, so a no-show takes a seat from another builder.</span></span>
 					</label>
 					<label class="rv-commit">
 						<input type="checkbox" name="parking_policy" value="yes" :required="currentStep === 2">
-						<span class="rv-commit-text">I understand that due to limited parking capacity, attendees with no vehicle will be prioritized.<span class="rv-commit-sub" style="color:rgba(255,255,255,0.45);">We encourage using public transport OR ride-hailing (InDrive, Yango, Bykea).</span></span>
+						<span class="rv-commit-text">I understand campus parking is very limited.<span class="rv-commit-sub" style="color:rgba(255,255,255,0.45);">Public transport or ride-hailing is recommended. Drivers can park at F-9 Park and walk to Gate 3 (Khyber Gate).</span></span>
 					</label>
 
 					<div class="rv-actions" style="margin-top:44px;">
@@ -442,6 +438,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				currentStep: 0,
 				audienceType: '',
 				whyInviteText: '',
+				attendedBefore: '',
 				hasVehicle: 'no',
 				isSubmitting: false,
 				nextStep() { this.currentStep++; },
@@ -472,7 +469,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 function aws_sbg_reinvent_form_shortcode( $atts ) {
 	$atts = shortcode_atts( array(
 		'title'    => 'AWS re:Invent Watch & Build Party Islamabad 2026',
-		'subtitle' => 'An invite-only evening for builders, dreamers, and cloud enthusiasts. Apply below and we will notify you once your seat is approved.',
+		'subtitle' => 'Experience AWS re:Invent in Islamabad.',
 		'date'     => '',
 		'location' => 'Islamabad, Pakistan',
 	), $atts, 'aws_reinvent_form' );
@@ -538,7 +535,7 @@ function aws_sbg_handle_reinvent_registration() {
 
 	$valid_audience = in_array( $audience, array( 'student', 'professional', 'job_seeker' ), true );
 
-	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $cnic ) || ! preg_match( '/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/', $cnic ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) || empty( $why ) || 'yes' !== $will_attend || ! $parking_policy || ! $valid_audience ) {
+	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $cnic ) || ! preg_match( '/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/', $cnic ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) || ( 'yes' === $attended && empty( $why ) ) || 'yes' !== $will_attend || ! $parking_policy || ! $valid_audience ) {
 		wp_die( 'Please fill in all required fields. Ensure your CNIC contains 13 digits (e.g. 12345-1234567-1).' );
 	}
 

@@ -34,6 +34,18 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-10 00:25 - Antigravity
+
+**Task**: Switch re:Invent registration copy to free, first come first served; soften parking copy (F-9 Park / Gate 3 Khyber Gate); fix first-timer friction.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` - Highlight 01 now "Free Registration / First come, first served". Removed all invite-only/approval wording (lede, success, duplicate notice, shortcode subtitle, Step 2 checkbox). Parking note shown once under vehicle question; duplicate under vehicle number removed. Step 2: "First time? You're welcome too." hint; last-event textarea only shown/required when attended = Yes (backend matches). Commit checkboxes reduced from 3 to 2.
+
+**Key Decisions**:
+- Admin approval flow is untouched in the backend; only public copy changed. LinkedIn remains required (user declined change d).
+
+---
+
 ### 2026-11-09 01:29 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Increase vertical breathing room and spacing across all steps of the re:Invent registration form.
