@@ -34,6 +34,18 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-10 00:32 - Antigravity (Gemini 3.8 Flash)
+
+**Task**: Clarify parking copy to explicitly state that Gate 3 (Khyber Gate) is the F-9 Park parking entrance nearest to the venue.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` - Updated vehicle subtitle and Step 2 commitment to specify parking at `F-9 Park Gate 3 (Khyber Gate), which is nearest to the venue`.
+
+**Key Decisions**:
+- Clear navigation guidance: Removed ambiguity between university gates and park gates so drivers head directly to F-9 Park Gate 3.
+
+---
+
 ### 2026-11-10 00:25 - Antigravity
 
 **Task**: Switch re:Invent registration copy to free, first come first served; soften parking copy (F-9 Park / Gate 3 Khyber Gate); fix first-timer friction.

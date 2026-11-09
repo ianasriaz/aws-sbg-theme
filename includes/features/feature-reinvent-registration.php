@@ -341,7 +341,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 						<div class="rv-field" style="grid-column:1/-1; margin-top:8px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.1);">
 							<label>Bringing a vehicle? <span style="font-weight:400;">(optional)</span></label>
-							<p style="margin:2px 0 12px; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.5);">Parking on campus is very limited. We encourage using public transport or ride-hailing (InDrive, Yango, Bykea). If you're driving, you can park at F-9 Park and walk to Gate 3 (Khyber Gate).</p>
+							<p style="margin:2px 0 12px; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.5);">Parking on campus is very limited. We encourage using public transport or ride-hailing (InDrive, Yango, Bykea). If you're driving, you can park at F-9 Park Gate 3 (Khyber Gate), which is nearest to the venue.</p>
 							<div class="rv-choices" role="radiogroup" aria-label="Vehicle">
 								<label class="rv-choice">
 									<input type="radio" name="has_vehicle" value="no" x-model="hasVehicle">
@@ -415,7 +415,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					</label>
 					<label class="rv-commit">
 						<input type="checkbox" name="parking_policy" value="yes" :required="currentStep === 2">
-						<span class="rv-commit-text">I understand campus parking is very limited.<span class="rv-commit-sub" style="color:rgba(255,255,255,0.45);">Public transport or ride-hailing is recommended. Drivers can park at F-9 Park and walk to Gate 3 (Khyber Gate).</span></span>
+						<span class="rv-commit-text">I understand campus parking is very limited.<span class="rv-commit-sub" style="color:rgba(255,255,255,0.45);">Public transport or ride-hailing is recommended. Drivers can park at F-9 Park Gate 3 (Khyber Gate), nearest to the venue.</span></span>
 					</label>
 
 					<div class="rv-actions" style="margin-top:44px;">
