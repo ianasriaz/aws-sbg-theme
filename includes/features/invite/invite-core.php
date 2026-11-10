@@ -168,13 +168,19 @@ function aws_sbg_invite_role_fields() {
 
 function aws_sbg_invite_get_event_meta( $event_id ) {
 	$defaults = array(
-		'event_status'    => 'open',
-		'photo_required'  => 'yes',
-		'allow_guests'    => 'yes',
-		'confirm_message' => 'Thank you — your invitation is confirmed.',
-		'whatsapp_url'    => '',
-		'deadline'        => '',
-		'notify_admin'    => 'yes',
+		'event_status'                  => 'open',
+		'photo_required'                => 'yes',
+		'allow_guests'                  => 'yes',
+		'confirm_message'               => 'Thank you — your invitation is confirmed.',
+		'whatsapp_url'                  => '',
+		'deadline'                      => '',
+		'notify_admin'                  => 'yes',
+		'role_status_speaker'           => 'open',
+		'role_msg_speaker'              => 'Speaker confirmations for this event are currently closed. For inquiries, please reach out to the organizing team.',
+		'role_status_guest'             => 'open',
+		'role_msg_guest'                => 'Guest confirmations for this event are currently closed. For inquiries, please reach out to the organizing team.',
+		'role_status_community_partner' => 'open',
+		'role_msg_community_partner'    => 'Community partner confirmations for this event are currently closed. For inquiries, please reach out to the organizing team.',
 	);
 
 	$meta = array();
@@ -223,6 +229,9 @@ function aws_sbg_invite_role_allowed( $role, $event_id ) {
 	}
 	$meta = aws_sbg_invite_get_event_meta( $event_id );
 	if ( 'guest' === $role && 'yes' !== $meta['allow_guests'] ) {
+		return false;
+	}
+	if ( isset( $meta[ 'role_status_' . $role ] ) && 'closed' === $meta[ 'role_status_' . $role ] ) {
 		return false;
 	}
 	return true;

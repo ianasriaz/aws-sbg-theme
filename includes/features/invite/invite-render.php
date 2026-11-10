@@ -28,32 +28,47 @@ function aws_sbg_invite_render_form( $event_id ) {
 		'slots'    => aws_sbg_invite_slot_options(),
 	);
 
+	$role_statuses = array(
+		'speaker'           => ! empty( $meta['role_status_speaker'] ) ? $meta['role_status_speaker'] : 'open',
+		'guest'             => ! empty( $meta['role_status_guest'] ) ? $meta['role_status_guest'] : 'open',
+		'community_partner' => ! empty( $meta['role_status_community_partner'] ) ? $meta['role_status_community_partner'] : 'open',
+	);
+	$role_messages = array(
+		'speaker'           => ! empty( $meta['role_msg_speaker'] ) ? $meta['role_msg_speaker'] : '',
+		'guest'             => ! empty( $meta['role_msg_guest'] ) ? $meta['role_msg_guest'] : '',
+		'community_partner' => ! empty( $meta['role_msg_community_partner'] ) ? $meta['role_msg_community_partner'] : '',
+	);
+
 	$status = isset( $_GET['invite_status'] ) ? sanitize_key( wp_unslash( $_GET['invite_status'] ) ) : '';
 	$ref    = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref'] ) ) : '';
 	$err    = isset( $_GET['invite_error'] ) ? sanitize_key( wp_unslash( $_GET['invite_error'] ) ) : '';
 	$role_param = isset( $_GET['role'] ) ? sanitize_key( wp_unslash( $_GET['role'] ) ) : '';
+	if ( 'community_leader' === $role_param ) {
+		$role_param = 'community_partner';
+	}
 
 	$photo_required = ( 'yes' === $meta['photo_required'] );
 	$allow_guests   = ( 'yes' === $meta['allow_guests'] );
 
 	$error_messages = array(
-		'closed'    => 'This invitation is no longer accepting confirmations.',
-		'required'  => 'Please fill in all required fields.',
-		'email'     => 'Please enter a valid email address.',
-		'consent'   => 'Please confirm your invitation and consent to the name/photo usage.',
-		'vehicle'   => 'Please provide your vehicle type and number.',
-		'photo'     => 'Please upload your photo.',
-		'role'      => 'Please choose a valid role.',
-		'filesize'  => 'Your photo is too large (max 8 MB). Please choose a smaller image.',
-		'filetype'  => 'Please upload a JPG, PNG, or WebP image.',
-		'upload'    => 'We could not process your photo upload. Please try again.',
-		'spam'      => 'Submission blocked.',
-		'db'        => 'We could not save your confirmation. Please try again.',
+		'closed'      => 'This invitation is no longer accepting confirmations.',
+		'role_closed' => 'Confirmations for the selected role are currently closed.',
+		'required'    => 'Please fill in all required fields.',
+		'email'       => 'Please enter a valid email address.',
+		'consent'     => 'Please confirm your invitation and consent to the name/photo usage.',
+		'vehicle'     => 'Please provide your vehicle type and number.',
+		'photo'       => 'Please upload your photo.',
+		'role'        => 'Please choose a valid role.',
+		'filesize'    => 'Your photo is too large (max 8 MB). Please choose a smaller image.',
+		'filetype'    => 'Please upload a JPG, PNG, or WebP image.',
+		'upload'      => 'We could not process your photo upload. Please try again.',
+		'spam'        => 'Submission blocked.',
+		'db'          => 'We could not save your confirmation. Please try again.',
 	);
 
 	ob_start();
 	?>
-	<div class="inv-root" x-data="inviteForm(<?php echo $photo_required ? 'true' : 'false'; ?>, <?php echo intval( $event_id ); ?>)">
+	<div class="inv-root" x-data="inviteForm(<?php echo $photo_required ? 'true' : 'false'; ?>, <?php echo intval( $event_id ); ?>, <?php echo esc_attr( wp_json_encode( $role_statuses ) ); ?>, <?php echo esc_attr( wp_json_encode( $role_messages ) ); ?>, '<?php echo esc_js( $role_param ); ?>')">
 		<style>
 			.inv-root{
 				--ink:#0F141F;--paper:#FFFFFF;--surface:#F8FAFC;--line:#E2E8F0;--text:#334155;--muted:#475569;--brand:#7928CA;--brand-soft:#F5F3FF;--accent:#FF9900;
@@ -145,6 +160,8 @@ function aws_sbg_invite_render_form( $event_id ) {
 
 			.inv-notice{padding:14px 18px;border-radius:4px;font-size:14px;margin:0 0 22px;}
 			.inv-notice-error{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;}
+			.inv-notice-closed{background:#FFFBEB;border:1px solid #FDE68A;border-left:4px solid #F59E0B;padding:14px 16px;border-radius:6px;color:#92400E;font-size:14px;line-height:1.55;margin-top:14px;}
+			.inv-notice-closed strong{display:block;margin-bottom:3px;color:#78350F;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;}
 
 			.inv-body-center{text-align:center;padding:40px 32px;}
 			.inv-success-icon{width:60px;height:60px;border:2px solid #16A34A;border-radius:50%;color:#16A34A;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;font-weight:900;}
@@ -258,7 +275,11 @@ function aws_sbg_invite_render_form( $event_id ) {
 										<option value="" disabled selected>Select your role…</option>
 										<?php foreach ( $roles as $role_key => $role_label ) : ?>
 											<?php if ( 'guest' === $role_key && ! $allow_guests ) { continue; } ?>
-											<option value="<?php echo esc_attr( $role_key ); ?>"><?php echo esc_html( $role_label ); ?></option>
+											<?php
+											$is_closed   = isset( $role_statuses[ $role_key ] ) && 'closed' === $role_statuses[ $role_key ];
+											$label_addon = $is_closed ? ' — Closed' : '';
+											?>
+											<option value="<?php echo esc_attr( $role_key ); ?>"><?php echo esc_html( $role_label . $label_addon ); ?></option>
 										<?php endforeach; ?>
 									</select>
 									<span class="inv-select-arrow" aria-hidden="true">
@@ -267,7 +288,19 @@ function aws_sbg_invite_render_form( $event_id ) {
 										</svg>
 									</span>
 								</div>
+
+								<div class="inv-notice-closed" x-show="isRoleClosed()" x-cloak>
+									<div style="display:flex;align-items:flex-start;gap:10px;">
+										<span style="font-size:18px;line-height:1;flex-shrink:0;">&#9888;</span>
+										<div>
+											<strong>Confirmations Closed for this Role</strong>
+											<span x-text="getRoleClosedMessage()"></span>
+										</div>
+									</div>
+								</div>
 							</div>
+
+							<div x-show="!isRoleClosed()">
 
 							<div class="inv-section">
 								<p class="inv-section-label">Your details</p>
@@ -428,10 +461,11 @@ function aws_sbg_invite_render_form( $event_id ) {
 							</div>
 
 							<div class="inv-submit">
-								<button type="submit" class="inv-btn inv-btn-primary" :disabled="isSubmitting">
+								<button type="submit" class="inv-btn inv-btn-primary" :disabled="isSubmitting || isRoleClosed()">
 									<span x-show="!isSubmitting">Confirm invitation</span>
 									<span x-show="isSubmitting" x-cloak>Submitting…</span>
 								</button>
+							</div>
 							</div>
 						</form>
 					</div>
@@ -441,14 +475,33 @@ function aws_sbg_invite_render_form( $event_id ) {
 	</div>
 
 	<script>
-		function inviteForm(photoRequired, eventId) {
+		function inviteForm(photoRequired, eventId, roleStatuses, roleMessages, defaultRole) {
 			return {
-				role: '',
+				role: defaultRole || '',
 				hasVehicle: 'no',
 				isSubmitting: false,
 				photoRequired: photoRequired,
 				eventId: eventId,
+				roleStatuses: roleStatuses || {},
+				roleMessages: roleMessages || {},
 				clientError: '',
+				normalizedRole: function() {
+					var r = this.role;
+					if (r === 'community_leader') return 'community_partner';
+					return r;
+				},
+				isRoleClosed: function() {
+					var r = this.normalizedRole();
+					if (!r) return false;
+					return !!(this.roleStatuses && this.roleStatuses[r] === 'closed');
+				},
+				getRoleClosedMessage: function() {
+					var r = this.normalizedRole();
+					if (this.roleMessages && this.roleMessages[r]) {
+						return this.roleMessages[r];
+					}
+					return 'Confirmations for this role are currently closed. For inquiries, please reach out to the organizing team.';
+				},
 				init: function() {
 					try {
 						// Clean draft if success
@@ -464,7 +517,7 @@ function aws_sbg_invite_render_form( $event_id ) {
 							var draftRaw = localStorage.getItem('aws_invite_draft_' + this.eventId);
 							if (draftRaw) {
 								var data = JSON.parse(draftRaw);
-								if (data.role) this.role = data.role;
+								if (data.role && !this.role) this.role = data.role;
 								if (data.hasVehicle) this.hasVehicle = data.hasVehicle;
 								var self = this;
 								setTimeout(function() {
@@ -516,6 +569,12 @@ function aws_sbg_invite_render_form( $event_id ) {
 				},
 				handleSubmit: function(e) {
 					this.clientError = '';
+					if (this.isRoleClosed()) {
+						e.preventDefault();
+						this.clientError = this.getRoleClosedMessage();
+						this.isSubmitting = false;
+						return false;
+					}
 					var fileInput = document.getElementById('inv-photo');
 					if (fileInput && fileInput.files && fileInput.files[0]) {
 						var file = fileInput.files[0];

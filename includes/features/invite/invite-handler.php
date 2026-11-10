@@ -37,6 +37,10 @@ function aws_sbg_invite_handle_submission() {
 		$role = 'community_partner';
 	}
 	if ( ! aws_sbg_invite_role_allowed( $role, $event_id ) ) {
+		$event_meta = aws_sbg_invite_get_event_meta( $event_id );
+		if ( isset( $event_meta[ 'role_status_' . $role ] ) && 'closed' === $event_meta[ 'role_status_' . $role ] ) {
+			aws_sbg_invite_submission_error( $event_id, 'role_closed' );
+		}
 		aws_sbg_invite_submission_error( $event_id, 'role' );
 	}
 

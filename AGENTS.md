@@ -890,6 +890,34 @@ aws-sbg-theme/
 
 ---
 
+### 2026-11-10 23:55 - Antigravity (Claude 3.7 Sonnet)
+
+**Task**: Add per-role submission closing controls with custom closed notices (Option 1)
+
+**Files Changed**:
+- `includes/features/invite/invite-core.php`:
+  - Added default meta keys (`role_status_speaker`, `role_msg_speaker`, `role_status_guest`, `role_msg_guest`, `role_status_community_partner`, `role_msg_community_partner`) in `aws_sbg_invite_get_event_meta()`.
+  - Updated `aws_sbg_invite_role_allowed()` to check that the target role is not closed.
+- `includes/features/invite/invite-admin.php`:
+  - Added "Role Availability & Closed Notices" UI to the Invitation Settings metabox with Open/Closed select dropdowns and custom closed message inputs for Speaker, Guest, and Community Partner roles.
+  - Updated `aws_sbg_invite_save_meta()` to sanitize and persist `role_status_*` and `role_msg_*`.
+- `includes/features/invite/invite-handler.php`:
+  - Added server-side validation rejecting submissions for closed roles with error code `role_closed`.
+- `includes/features/invite/invite-render.php`:
+  - Appended `— Closed` indicator to closed options in the "I am joining as" dropdown (`#inv-role`).
+  - Added inline alert notice (`.inv-notice-closed`) displaying the organizer's custom closed message when a closed role is chosen.
+  - Conditionally hid subsequent form sections (`<div x-show="!isRoleClosed()">`) and disabled submit button when a closed role is selected.
+  - Added client-side guard in `handleSubmit()` to prevent submission attempts.
+  - Normalized `community_leader` query alias to `community_partner` and passed role status/message state into Alpine `x-data`.
+  - Added friendly error message for `role_closed` if server-side validation is triggered.
+
+**Key Decisions**:
+- Existing submissions in `wp_aws_invite_submissions` are completely unaffected and safe; closing a role is an intake-level gate only.
+- Roles can be toggled Open/Closed independently at any time directly from the WordPress event edit screen.
+- Form inputs remain preserved in drafts so switching between roles does not lose typed data.
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*

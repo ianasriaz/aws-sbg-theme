@@ -66,6 +66,52 @@ function aws_sbg_invite_render_settings_box( $post ) {
 		<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Confirmation message (shown after submit)</label>
 		<textarea name="confirm_message" rows="2" style="width:100%;"><?php echo esc_textarea( $m['confirm_message'] ); ?></textarea>
 	</div>
+
+	<div style="margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0;">
+		<h4 style="margin:0 0 6px 0;font-size:13px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.04em;">Role Availability &amp; Closed Notices</h4>
+		<p style="font-size:12px;color:#64748b;margin:0 0 14px 0;">Control whether specific roles accept confirmations. Closing a role displays your custom notice on the form and does not affect already received submissions.</p>
+
+		<div style="display:grid;grid-template-columns:1fr;gap:12px;">
+			<!-- Speaker -->
+			<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px 14px;">
+				<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+					<strong style="font-size:13px;color:#0f172a;">Speaker</strong>
+					<select name="role_status_speaker" style="font-weight:600;min-width:140px;">
+						<option value="open" <?php selected( $m['role_status_speaker'], 'open' ); ?>>● Open</option>
+						<option value="closed" <?php selected( $m['role_status_speaker'], 'closed' ); ?>>○ Closed</option>
+					</select>
+				</div>
+				<label style="display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;">Custom Closed Notice</label>
+				<input type="text" name="role_msg_speaker" value="<?php echo esc_attr( $m['role_msg_speaker'] ); ?>" placeholder="Notice shown when Speaker is selected..." style="width:100%;font-size:12px;">
+			</div>
+
+			<!-- Guest -->
+			<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px 14px;">
+				<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+					<strong style="font-size:13px;color:#0f172a;">Guest</strong>
+					<select name="role_status_guest" style="font-weight:600;min-width:140px;">
+						<option value="open" <?php selected( $m['role_status_guest'], 'open' ); ?>>● Open</option>
+						<option value="closed" <?php selected( $m['role_status_guest'], 'closed' ); ?>>○ Closed</option>
+					</select>
+				</div>
+				<label style="display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;">Custom Closed Notice</label>
+				<input type="text" name="role_msg_guest" value="<?php echo esc_attr( $m['role_msg_guest'] ); ?>" placeholder="Notice shown when Guest is selected..." style="width:100%;font-size:12px;">
+			</div>
+
+			<!-- AWS Community Partner -->
+			<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:12px 14px;">
+				<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;">
+					<strong style="font-size:13px;color:#0f172a;">AWS Community Partner</strong>
+					<select name="role_status_community_partner" style="font-weight:600;min-width:140px;">
+						<option value="open" <?php selected( $m['role_status_community_partner'], 'open' ); ?>>● Open</option>
+						<option value="closed" <?php selected( $m['role_status_community_partner'], 'closed' ); ?>>○ Closed</option>
+					</select>
+				</div>
+				<label style="display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;">Custom Closed Notice</label>
+				<input type="text" name="role_msg_community_partner" value="<?php echo esc_attr( $m['role_msg_community_partner'] ); ?>" placeholder="Notice shown when Community Partner is selected..." style="width:100%;font-size:12px;">
+			</div>
+		</div>
+	</div>
 	<?php
 }
 
@@ -96,10 +142,28 @@ function aws_sbg_invite_save_meta( $post_id ) {
 		return;
 	}
 
-	$select_keys = array( 'event_status', 'photo_required', 'allow_guests', 'notify_admin' );
+	$select_keys = array(
+		'event_status',
+		'photo_required',
+		'allow_guests',
+		'notify_admin',
+		'role_status_speaker',
+		'role_status_guest',
+		'role_status_community_partner',
+	);
 	foreach ( $select_keys as $key ) {
 		if ( isset( $_POST[ $key ] ) ) {
 			update_post_meta( $post_id, $key, sanitize_key( wp_unslash( $_POST[ $key ] ) ) );
+		}
+	}
+	$text_keys = array(
+		'role_msg_speaker',
+		'role_msg_guest',
+		'role_msg_community_partner',
+	);
+	foreach ( $text_keys as $key ) {
+		if ( isset( $_POST[ $key ] ) ) {
+			update_post_meta( $post_id, $key, sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) );
 		}
 	}
 	if ( isset( $_POST['deadline'] ) ) {
