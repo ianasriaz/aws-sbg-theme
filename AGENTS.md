@@ -918,6 +918,49 @@ aws-sbg-theme/
 
 ---
 
+### 2026-11-11 23:45 - Antigravity (Claude 3.7 Sonnet)
+
+**Task**: Build dedicated Call for Speakers (CFS) interest & pitch subsystem (`/speak/`)
+
+**Files Changed**:
+- `includes/features/cfs/cfs-core.php`:
+  - Created custom table `wp_aws_cfs_submissions` storing talk title, pitch, track, format, level, speaker info, and review status.
+  - Defined taxonomies: Tracks (`genai_bedrock`, `cloud_architecture`, `devops_containers`, `cloud_security`, `student_career`, `other`), Formats (`lightning`, `session`, `workshop`), Levels (`100`, `200`, `300`), and Statuses (`received`, `under_review`, `shortlisted`, `accepted`, `declined`).
+  - Implemented multi-source event resolver `aws_sbg_cfs_resolve_event()` supporting `aws_invite_event`, `aws_event`, and fallback to the latest active event.
+- `includes/features/cfs/cfs-handler.php`:
+  - Implemented secure submission processing (`admin_post_aws_sbg_cfs_submit`) with nonce verification, honeypot spam protection, and input sanitization.
+  - Automated reference generation (`CFS-XXXXXX`).
+  - Submitter confirmation and admin notification dispatching via `aws_sbg_mail_send('cfs', ...)`.
+- `includes/features/cfs/cfs-render.php`:
+  - Built rapid ~90-second ticket-style public form without file uploads or gate clearance clutter.
+  - Implemented Alpine.js reactive state: localStorage draft saving/restoring (`aws_cfs_draft_<id>`), live character counter on talk pitch (max 400 chars), experience reveals, and submission lock.
+  - Added confetti-powered celebration success screen with reference ticket badge and "what happens next" instructions.
+  - Added shortcode `[aws_cfs_form event="..."]`.
+- `includes/features/cfs/cfs-admin.php`:
+  - Added "Call for Speakers" submenu under `aws-sbg-suite` and top navigation tab.
+  - Built proposals review table with search, event filters, track filters, and status count pills.
+  - Added direct WhatsApp outreach link (`https://wa.me/...`), inline status changer, and 1-click confirmation link copy for accepted speakers.
+  - Added CSV export functionality (`cfs-proposals-<event-id>-<date>.csv`).
+  - Added CFS Intake Settings metabox to `aws_invite_event` (Open/Closed toggle, deadline, closed message, and live public pitch URL).
+- `includes/features/feature-cfs.php`:
+  - Module loader loading `cfs-core`, `cfs-handler`, `cfs-render`, and `cfs-admin`.
+- `templates/pages/page-speak.php`:
+  - Dedicated standalone full-screen page template for `/speak/`.
+- `functions.php`:
+  - Loaded `feature-cfs.php`.
+  - Added direct URL fallback for `/speak` in `aws_sbg_template_include` and `template_redirect` to guarantee 200 OK headers.
+- `includes/admin/admin-dashboard.php`:
+  - Added `cfs` tab to the shared admin top navigation bar.
+- `includes/features/invite/invite-admin.php`:
+  - Added Call for Speakers (`/speak/?event=...`) link to the event share metabox alongside the confirmation URL.
+
+**Key Decisions**:
+- Separated speaker intake (pitching ideas) from speaker onboarding (photo for shields, CNIC for gate clearance, vehicle pass) to maximize proposal submissions.
+- Used zero-friction, mobile-optimized form with no file upload hurdles.
+- Seamless bridge: Accepted speakers can immediately be sent the formal confirmation link.
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*

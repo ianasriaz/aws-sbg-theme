@@ -122,12 +122,15 @@ function aws_sbg_invite_render_share_box( $post ) {
 	}
 	$shortcode    = '[aws_invite_form event="' . $slug . '"]';
 	$standalone   = home_url( '/confirm/?event=' . $slug );
+	$speak_url    = home_url( '/speak/?event=' . $slug );
 	?>
-	<p style="font-size:12px;color:#64748b;margin-top:0;">Use either link to share this invitation.</p>
-	<p style="font-size:11px;font-weight:800;text-transform:uppercase;color:#334155;margin-bottom:4px;">Shortcode (embed in a page)</p>
-	<input type="text" readonly value="<?php echo esc_attr( $shortcode ); ?>" onclick="this.select()" style="width:100%;font-family:monospace;font-size:12px;">
-	<p style="font-size:11px;font-weight:800;text-transform:uppercase;color:#334155;margin:16px 0 4px;">Standalone page (full-screen)</p>
+	<p style="font-size:12px;color:#64748b;margin-top:0;">Use these links for your event intake &amp; onboarding.</p>
+	<p style="font-size:11px;font-weight:800;text-transform:uppercase;color:#7928ca;margin-bottom:4px;">1. Call for Speakers (Public Pitch)</p>
+	<input type="text" readonly value="<?php echo esc_url( $speak_url ); ?>" onclick="this.select()" style="width:100%;font-family:monospace;font-size:12px;">
+	<p style="font-size:11px;font-weight:800;text-transform:uppercase;color:#334155;margin:14px 0 4px;">2. Confirmation (Invited/Selected)</p>
 	<input type="text" readonly value="<?php echo esc_url( $standalone ); ?>" onclick="this.select()" style="width:100%;font-family:monospace;font-size:12px;">
+	<p style="font-size:11px;font-weight:800;text-transform:uppercase;color:#334155;margin:14px 0 4px;">3. Embed Shortcode</p>
+	<input type="text" readonly value="<?php echo esc_attr( $shortcode ); ?>" onclick="this.select()" style="width:100%;font-family:monospace;font-size:12px;">
 	<?php
 }
 

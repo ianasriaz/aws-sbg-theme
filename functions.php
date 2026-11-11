@@ -38,6 +38,9 @@ require_once get_template_directory() . '/includes/features/feature-giveaway.php
 // Load Event Invitation Confirmation System (Speaker / Guest / Community Leader)
 require_once get_template_directory() . '/includes/features/feature-invite-confirmation.php';
 
+// Load Call for Speakers Feature (/speak/)
+require_once get_template_directory() . '/includes/features/feature-cfs.php';
+
 /**
  * Filter template path to support templates in subdirectory
  * This handles templates stored in templates/pages/ while WP looks in root
@@ -60,7 +63,7 @@ function aws_sbg_template_include( $template ) {
 		}
 	}
 
-	// Direct URL fallback for unlisted /speaker-deck route
+	// Direct URL fallback for unlisted /speaker-deck and /speak routes
 	$req_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 	$clean_path = trim( (string) parse_url( $req_uri, PHP_URL_PATH ), '/' );
 	if ( 'speaker-deck' === $clean_path ) {
@@ -68,6 +71,13 @@ function aws_sbg_template_include( $template ) {
 		if ( file_exists( $deck_template ) ) {
 			status_header( 200 );
 			return $deck_template;
+		}
+	}
+	if ( 'speak' === $clean_path ) {
+		$speak_template = get_template_directory() . '/templates/pages/page-speak.php';
+		if ( file_exists( $speak_template ) ) {
+			status_header( 200 );
+			return $speak_template;
 		}
 	}
 	
@@ -84,12 +94,12 @@ function aws_sbg_template_include( $template ) {
 }
 
 /**
- * Set 200 OK header and clear 404 flags for unlisted /speaker-deck route
+ * Set 200 OK header and clear 404 flags for unlisted /speaker-deck and /speak routes
  */
 add_action( 'template_redirect', function() {
 	$req_uri    = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 	$clean_path = trim( (string) parse_url( $req_uri, PHP_URL_PATH ), '/' );
-	if ( 'speaker-deck' === $clean_path ) {
+	if ( 'speaker-deck' === $clean_path || 'speak' === $clean_path ) {
 		global $wp_query;
 		if ( isset( $wp_query ) && is_object( $wp_query ) ) {
 			$wp_query->is_404  = false;
