@@ -169,7 +169,7 @@ function aws_sbg_invite_role_fields() {
 function aws_sbg_invite_get_event_meta( $event_id ) {
 	$defaults = array(
 		'event_status'                  => 'open',
-		'photo_required'                => 'yes',
+		'photo_required'                => 'no',
 		'allow_guests'                  => 'yes',
 		'confirm_message'               => 'Thank you — your invitation is confirmed.',
 		'whatsapp_url'                  => '',
@@ -188,6 +188,18 @@ function aws_sbg_invite_get_event_meta( $event_id ) {
 		$val          = get_post_meta( $event_id, $key, true );
 		$meta[ $key ] = ( '' === $val || null === $val ) ? $default : $val;
 	}
+
+	// For re:Invent confirm forms (or if an event title/slug contains reinvent), photo is optional by default
+	$post = get_post( $event_id );
+	if ( $post ) {
+		$combined_name = strtolower( $post->post_name . ' ' . $post->post_title );
+		if ( false !== strpos( $combined_name, 'reinvent' ) || false !== strpos( $combined_name, 're:invent' ) ) {
+			if ( 'yes' !== get_post_meta( $event_id, '_photo_required_explicit', true ) ) {
+				$meta['photo_required'] = 'no';
+			}
+		}
+	}
+
 	return $meta;
 }
 

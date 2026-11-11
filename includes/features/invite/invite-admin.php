@@ -35,8 +35,8 @@ function aws_sbg_invite_render_settings_box( $post ) {
 		<div>
 			<label style="display:block;font-weight:700;font-size:12px;margin-bottom:4px;">Photo required</label>
 			<select name="photo_required" style="width:100%;">
-				<option value="yes" <?php selected( $m['photo_required'], 'yes' ); ?>>Yes</option>
-				<option value="no" <?php selected( $m['photo_required'], 'no' ); ?>>No</option>
+				<option value="no" <?php selected( $m['photo_required'], 'no' ); ?>>No (Optional)</option>
+				<option value="yes" <?php selected( $m['photo_required'], 'yes' ); ?>>Yes (Required)</option>
 			</select>
 		</div>
 		<div>
@@ -161,6 +161,9 @@ function aws_sbg_invite_save_meta( $post_id ) {
 		if ( isset( $_POST[ $key ] ) ) {
 			update_post_meta( $post_id, $key, sanitize_key( wp_unslash( $_POST[ $key ] ) ) );
 		}
+	}
+	if ( isset( $_POST['photo_required'] ) ) {
+		update_post_meta( $post_id, '_photo_required_explicit', sanitize_key( wp_unslash( $_POST['photo_required'] ) ) );
 	}
 	$text_keys = array(
 		'role_msg_speaker',

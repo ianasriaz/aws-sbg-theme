@@ -360,7 +360,7 @@ function aws_sbg_invite_render_form( $event_id ) {
 							<div class="inv-section">
 								<p class="inv-section-label">Photo</p>
 								<div class="inv-field">
-									<label for="inv-photo">Fresh portrait photo <em>*</em></label>
+									<label for="inv-photo">Fresh portrait photo <?php if ( $photo_required ) : ?><em>*</em><?php else : ?><span style="font-weight:400;color:var(--muted);">(Optional)</span><?php endif; ?></label>
 									<div class="inv-upload-zone" id="inv-upload-zone" tabindex="0" role="button" aria-label="Upload photo">
 										<input id="inv-photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp" <?php echo $photo_required ? 'required' : ''; ?> class="inv-upload-input">
 										
@@ -375,7 +375,7 @@ function aws_sbg_invite_render_form( $event_id ) {
 											<div class="inv-upload-prompt">
 												<span class="inv-upload-browse">Choose a photo</span> <span class="inv-upload-drag">or drag &amp; drop here</span>
 											</div>
-											<div class="inv-upload-meta">JPG, PNG or WebP · Up to 8 MB</div>
+											<div class="inv-upload-meta">JPG, PNG or WebP · Up to 8 MB<?php if ( ! $photo_required ) : ?> · Optional<?php endif; ?></div>
 										</div>
 
 										<div class="inv-upload-filled" id="inv-upload-filled" style="display:none;">
@@ -387,7 +387,7 @@ function aws_sbg_invite_render_form( $event_id ) {
 											<button type="button" class="inv-upload-change" id="inv-upload-change-btn">Change</button>
 										</div>
 									</div>
-									<span class="inv-help">Used for social creatives and event banners. High-resolution portrait recommended.</span>
+									<span class="inv-help">Used for social creatives and event banners. High-resolution portrait recommended.<?php if ( ! $photo_required ) : ?> Feel free to skip if you prefer not to include a photo.<?php endif; ?></span>
 								</div>
 							</div>
 
@@ -450,7 +450,7 @@ function aws_sbg_invite_render_form( $event_id ) {
 							<div class="inv-section">
 								<label class="inv-commit">
 									<input type="checkbox" name="consent" value="yes" required>
-									<span class="inv-commit-text">I confirm my invitation and consent to my name and photo being used for the recognition shield and event creatives.</span>
+									<span class="inv-commit-text"><?php echo $photo_required ? 'I confirm my invitation and consent to my name and photo being used for the recognition shield and event creatives.' : 'I confirm my invitation and consent to my name and details (including photo, if uploaded) being used for the recognition shield and event creatives.'; ?></span>
 								</label>
 								<div x-show="role === 'community_partner' || role === 'community_leader'" style="margin-top:14px;" x-cloak>
 									<label class="inv-commit">

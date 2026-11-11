@@ -34,6 +34,27 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-12 01:06 - Antigravity
+
+**Task**: Make photo upload for re:Invent invitation confirmation form optional.
+
+**Files Changed**:
+- `includes/features/invite/invite-core.php` -
+  - Changed default of `photo_required` in `aws_sbg_invite_get_event_meta()` to `'no'`.
+  - Added event name detection for re:Invent events (`reinvent` or `re:invent` in slug/title) ensuring `photo_required` resolves to `'no'` unless explicitly configured to `'yes'`.
+- `includes/features/invite/invite-render.php` -
+  - Dynamic label indicator: displays `Fresh portrait photo (Optional)` when photo upload is optional instead of hardcoding `<em>*</em>`.
+  - Updated upload zone subtitle and help text to clarify `Optional` and `Feel free to skip if you prefer not to include a photo`.
+  - Dynamically updated consent commitment text to adapt when photo upload is optional.
+- `includes/features/invite/invite-admin.php` -
+  - Updated "Photo required" dropdown in event settings to list `No (Optional)` first with clear labeling.
+  - Added explicit save tracking (`_photo_required_explicit`) on event update.
+
+**Key Decisions**:
+- Flexible confirmation flow: Making photo upload optional removes a significant friction point for busy speakers and VIP guests who may not have a portrait photo readily on hand on their mobile device, allowing them to confirm their attendance and logistics immediately.
+
+---
+
 ### 2026-11-12 00:46 - Antigravity
 
 **Task**: Add option to hide the re:Invent registration form from the public.
