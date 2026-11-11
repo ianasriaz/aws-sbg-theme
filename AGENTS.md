@@ -961,6 +961,50 @@ aws-sbg-theme/
 
 ---
 
+### 2026-11-12 00:05 - Antigravity (Claude 3.7 Sonnet)
+
+**Task**: Build dedicated Team Hiring & Volunteer System (`/join/`) with multi-campus and scope controls
+
+**Files Changed**:
+- `includes/features/team/team-core.php`:
+  - Created custom table `wp_aws_team_applications` storing applicant info, role (`event_crew` or `core_team`), university/institute, departments, pitch, and review status.
+  - Defined taxonomies: Roles (`event_crew`, `core_team`), Role-specific Departments, Statuses (`received`, `screening`, `shortlisted`, `selected`, `declined`), and Scopes (`both`, `event_crew`, `core_team`).
+  - Implemented multi-source event resolver `aws_sbg_team_resolve_event()` and role access verifier `aws_sbg_team_is_role_allowed()`.
+- `includes/features/team/team-handler.php`:
+  - Implemented secure submission processing (`admin_post_aws_sbg_team_submit`) with nonce check, honeypot trap, role-scope validation, and input sanitization.
+  - Automated reference generation (`TEAM-XXXXXX`).
+  - Dispatched confirmation email to candidate and alert email to admin via `aws_sbg_mail_send('team', ...)`.
+- `includes/features/team/team-render.php`:
+  - Built rapid ~90-second ticket-style public form at `/join/?event=<slug>`.
+  - Added multi-campus welcome copy and prominent degree/university field supporting cross-university students (NUST, FAST, Air Univ, COMSATS, Bahria, etc.).
+  - Added dynamic role pills (when Scope is `both`) or streamlined single-role layouts (when Scope is `event_crew` or `core_team`), with dynamic department updates.
+  - Added Alpine.js draft persistence (`aws_team_draft_<id>`), live 300-char pitch counter, and confetti celebration success state.
+  - Added shortcode `[aws_team_form event="..."]`.
+- `includes/features/team/team-admin.php`:
+  - Added "Team & Volunteers" submenu under `aws-sbg-suite` and top navigation tab.
+  - Built candidates roster table with prominent campus badges, search across universities, role/status filters, and live count pills.
+  - Added 1-click WhatsApp outreach link (`https://wa.me/...`) with prepopulated greeting tailored to candidate's name, role, and department.
+  - Added CSV export functionality (`team-roster-<event-id>-<date>.csv`).
+  - Added Team Hiring & Crew Intake Settings metabox to `aws_invite_event` (Scope selector, per-role Open/Closed switches, custom notices, deadline, and live `/join/` URL).
+- `includes/features/feature-team.php`:
+  - Module loader loading `team-core`, `team-handler`, `team-render`, and `team-admin`.
+- `templates/pages/page-join.php`:
+  - Dedicated standalone full-screen page template for `/join/`.
+- `functions.php`:
+  - Loaded `feature-team.php`.
+  - Added direct URL fallback for `/join` in `aws_sbg_template_include` and `template_redirect` to guarantee 200 OK headers.
+- `includes/admin/admin-dashboard.php`:
+  - Added `team` tab to the shared admin top navigation bar.
+- `includes/features/invite/invite-admin.php`:
+  - Added Team Hiring URL (`/join/?event=...`) to the event share metabox.
+
+**Key Decisions**:
+- Organizers can scope an event form to Event Crew Only, Core Team Only, or Both.
+- Event Crew and Core Team have independent Open/Closed controls and custom notices.
+- Explicitly designed to welcome and track cross-campus university representation across Islamabad/Rawalpindi.
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*

@@ -120,6 +120,7 @@ function aws_sbg_render_admin_nav_tabs( $active_tab = 'overview' ) {
 		'giveaways'     => array( 'title' => 'Giveaways', 'url' => admin_url( 'admin.php?page=aws-giveaway-submissions' ) ),
 		'invites'       => array( 'title' => 'Invitations', 'url' => admin_url( 'admin.php?page=aws-invite-submissions' ) ),
 		'cfs'           => array( 'title' => 'Call for Speakers', 'url' => admin_url( 'admin.php?page=aws-cfs-submissions' ) ),
+		'team'          => array( 'title' => 'Team & Volunteers', 'url' => admin_url( 'admin.php?page=aws-team-hiring' ) ),
 	);
 	?>
 	<div style="background:#ffffff; border-bottom:1px solid #e2e8f0; margin:-10px -20px 20px -20px; padding:12px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
