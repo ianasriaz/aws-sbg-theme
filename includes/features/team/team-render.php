@@ -114,7 +114,7 @@ function aws_sbg_team_render_form( $event_id = 0 ) {
 			.tm-section-label { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 14px; }
 
 			.tm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-			.tm-field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+			.tm-field > label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
 			.tm-field label em { font-style: normal; color: var(--brand); }
 			.tm-field .tm-help { display: block; font-size: 12px; color: var(--muted); margin-top: 5px; }
 			.tm-field input[type="text"],.tm-field input[type="email"],.tm-field input[type="tel"],.tm-field input[type="url"],.tm-field textarea,.tm-field select {
@@ -153,6 +153,27 @@ function aws_sbg_team_render_form( $event_id = 0 ) {
 			.tm-role-title { font-size: 14.5px; font-weight: 700; color: var(--ink); display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 			.tm-role-sub { font-size: 12px; color: var(--muted); line-height: 1.45; }
 
+			.tm-radio-group { display: flex; gap: 12px; }
+			.tm-radio-pill {
+				flex: 1;
+				display: flex !important;
+				align-items: center !important;
+				gap: 10px;
+				padding: 11px 16px;
+				background: var(--paper);
+				border: 1.5px solid var(--line);
+				border-radius: 6px;
+				cursor: pointer;
+				font-size: 14px;
+				font-weight: 600;
+				color: var(--ink);
+				margin: 0 !important;
+				transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+			}
+			.tm-radio-pill:hover { border-color: var(--brand); background: var(--brand-soft); }
+			.tm-radio-pill.is-active { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); box-shadow: 0 0 0 1px var(--brand); }
+			.tm-radio-pill input[type="radio"] { width: 17px; height: 17px; accent-color: var(--brand); margin: 0; flex-shrink: 0; cursor: pointer; }
+
 			.tm-select-wrap { position: relative; }
 			.tm-select-wrap select { appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer; }
 			.tm-select-arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #64748b; }
@@ -160,9 +181,30 @@ function aws_sbg_team_render_form( $event_id = 0 ) {
 			.tm-pitch-counter { display: flex; justify-content: flex-end; font-size: 11.5px; color: var(--muted); margin-top: 4px; }
 			.tm-pitch-counter.is-limit { color: #dc2626; font-weight: 600; }
 
-			.tm-commit { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
-			.tm-commit input[type="checkbox"] { accent-color: var(--brand); margin-top: 3px; }
-			.tm-commit-text { font-size: 13.5px; color: var(--text); line-height: 1.5; }
+			.tm-commit {
+				display: flex !important;
+				align-items: flex-start !important;
+				gap: 12px !important;
+				cursor: pointer;
+				margin: 0 !important;
+				padding: 4px 0;
+			}
+			.tm-commit input[type="checkbox"] {
+				width: 18px !important;
+				height: 18px !important;
+				margin: 3px 0 0 0 !important;
+				accent-color: var(--brand);
+				flex-shrink: 0 !important;
+				cursor: pointer;
+			}
+			.tm-commit-text {
+				font-size: 13.5px;
+				line-height: 1.55;
+				color: var(--text);
+				font-weight: 400;
+				flex: 1;
+				text-align: left;
+			}
 
 			.tm-submit { display: flex; align-items: center; justify-content: flex-end; padding-top: 8px; }
 			.tm-btn {
@@ -252,7 +294,6 @@ function aws_sbg_team_render_form( $event_id = 0 ) {
 					<div class="tm-stub">
 						<div class="tm-kicker">
 							<span>Join the Team</span>
-							<span class="tm-badge">Backstage Crew Access</span>
 						</div>
 						<h1 class="tm-title" x-text="getHeaderTitle()">Be the Force Behind the Event</h1>
 						<div class="tm-event-pill"><?php echo esc_html( $event->post_title ); ?></div>
@@ -324,7 +365,7 @@ function aws_sbg_team_render_form( $event_id = 0 ) {
 										<div class="tm-grid">
 											<div class="tm-field">
 												<label for="tm-name">Full Name <em>*</em></label>
-												<input id="tm-name" type="text" name="name" x-model="name" placeholder="e.g. Anas Riaz" required>
+												<input id="tm-name" type="text" name="name" x-model="name" placeholder="Your full name" required>
 											</div>
 											<div class="tm-field">
 												<label for="tm-email">Email Address <em>*</em></label>
@@ -397,18 +438,14 @@ function aws_sbg_team_render_form( $event_id = 0 ) {
 										<div class="tm-grid">
 											<div class="tm-field tm-span-2">
 												<label>Have you organized or volunteered at community/tech events before?</label>
-												<div style="display:flex;gap:12px;">
-													<label class="tm-role-card" style="flex:1;padding:10px 14px;" :class="{ 'is-active': pastExperience === 'yes' }">
-														<div style="display:flex;align-items:center;gap:8px;">
-															<input type="radio" name="past_experience" value="yes" x-model="pastExperience">
-															<span style="font-size:13.5px;font-weight:600;">Yes</span>
-														</div>
+												<div class="tm-radio-group">
+													<label class="tm-radio-pill" :class="{ 'is-active': pastExperience === 'yes' }">
+														<input type="radio" name="past_experience" value="yes" x-model="pastExperience">
+														<span>Yes</span>
 													</label>
-													<label class="tm-role-card" style="flex:1;padding:10px 14px;" :class="{ 'is-active': pastExperience === 'no' }">
-														<div style="display:flex;align-items:center;gap:8px;">
-															<input type="radio" name="past_experience" value="no" x-model="pastExperience">
-															<span style="font-size:13.5px;font-weight:600;">No (Excited to contribute!)</span>
-														</div>
+													<label class="tm-radio-pill" :class="{ 'is-active': pastExperience === 'no' }">
+														<input type="radio" name="past_experience" value="no" x-model="pastExperience">
+														<span>No (First-time contributor)</span>
 													</label>
 												</div>
 											</div>
@@ -426,7 +463,7 @@ function aws_sbg_team_render_form( $event_id = 0 ) {
 												</div>
 											</div>
 
-											<div class="tm-field tm-span-2" style="margin-top:6px;">
+											<div class="tm-span-2" style="margin-top:10px;">
 												<label class="tm-commit">
 													<input type="checkbox" name="commitment" value="yes" x-model="commitment" required>
 													<span class="tm-commit-text" x-text="getCommitmentText()"></span>

@@ -34,6 +34,25 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-12 00:26 - Antigravity
+
+**Task**: Polish Team Hiring and Call for Speakers public form UI: remove developer placeholder name, remove backstage crew top badge, redesign past-experience radio cards into pills, and fix commitment checkbox vertical overlap.
+
+**Files Changed**:
+- `includes/features/team/team-render.php` -
+  - Removed `.tm-badge` "Backstage Crew Access" from the team hiring form header stub.
+  - Replaced `placeholder="e.g. Anas Riaz"` with generic `placeholder="Your full name"`.
+  - Redesigned "Have you organized or volunteered at community/tech events before?" radio buttons into clean, responsive `.tm-radio-pill` components.
+  - Fixed CSS selector cascade bug where `.tm-field label { display: block; }` forced `.tm-commit` into a block container (causing the checkbox to sit on top of the text); scoped to `.tm-field > label`, added `display: flex !important; align-items: flex-start !important; gap: 12px !important;` to `.tm-commit`, and added fixed `18px` dimensions with `flex-shrink: 0` to the checkbox.
+- `includes/features/cfs/cfs-render.php` -
+  - Replaced `placeholder="e.g. Anas Riaz"` with generic `placeholder="Your full name"`.
+  - Scoped `.cfs-field > label` and applied identical flexbox safeguards to `.cfs-commit`.
+
+**Key Decisions**:
+- CSS specificity scoping: Scoping label rules with direct child combinator (`> label`) guarantees that nested control labels for radios and checkboxes never inherit block-level line-breaking rules.
+
+---
+
 ### 2026-11-10 00:32 - Antigravity (Gemini 3.8 Flash)
 
 **Task**: Clarify parking copy to explicitly state that Gate 3 (Khyber Gate) is the F-9 Park parking entrance nearest to the venue.

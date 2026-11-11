@@ -86,7 +86,7 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 			.cfs-section-label { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 14px; }
 
 			.cfs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-			.cfs-field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+			.cfs-field > label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
 			.cfs-field label em { font-style: normal; color: var(--brand); }
 			.cfs-field .cfs-help { display: block; font-size: 12px; color: var(--muted); margin-top: 5px; }
 			.cfs-field input[type="text"],.cfs-field input[type="email"],.cfs-field input[type="tel"],.cfs-field input[type="url"],.cfs-field textarea,.cfs-field select {
@@ -135,9 +135,30 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 			.cfs-radio-pill:hover { border-color: var(--brand); background: var(--brand-soft); }
 			.cfs-radio-pill input[type="radio"] { accent-color: var(--brand); margin: 0; }
 
-			.cfs-commit { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
-			.cfs-commit input[type="checkbox"] { accent-color: var(--brand); margin-top: 3px; }
-			.cfs-commit-text { font-size: 13.5px; color: var(--text); line-height: 1.5; }
+			.cfs-commit {
+				display: flex !important;
+				align-items: flex-start !important;
+				gap: 12px !important;
+				cursor: pointer;
+				margin: 0 !important;
+				padding: 4px 0;
+			}
+			.cfs-commit input[type="checkbox"] {
+				width: 18px !important;
+				height: 18px !important;
+				margin: 3px 0 0 0 !important;
+				accent-color: var(--brand);
+				flex-shrink: 0 !important;
+				cursor: pointer;
+			}
+			.cfs-commit-text {
+				font-size: 13.5px;
+				line-height: 1.55;
+				color: var(--text);
+				font-weight: 400;
+				flex: 1;
+				text-align: left;
+			}
 
 			.cfs-submit { display: flex; align-items: center; justify-content: flex-end; padding-top: 8px; }
 			.cfs-btn {
@@ -264,7 +285,7 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 									<div class="cfs-grid">
 										<div class="cfs-field">
 											<label for="cfs-name">Full Name <em>*</em></label>
-											<input id="cfs-name" type="text" name="name" x-model="name" placeholder="e.g. Anas Riaz" required>
+											<input id="cfs-name" type="text" name="name" x-model="name" placeholder="Your full name" required>
 										</div>
 										<div class="cfs-field">
 											<label for="cfs-email">Email Address <em>*</em></label>
@@ -377,7 +398,7 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 											<input id="cfs-link" type="url" name="experience_link" x-model="experienceLink" placeholder="https://youtube.com/... or https://slideshare.net/...">
 										</div>
 
-										<div class="cfs-field cfs-span-2" style="margin-top:6px;">
+										<div class="cfs-span-2" style="margin-top:10px;">
 											<label class="cfs-commit">
 												<input type="checkbox" name="commitment" value="yes" x-model="commitment" required>
 												<span class="cfs-commit-text">I confirm that I am available to attend and deliver this session in-person in Islamabad on event day if selected.</span>
