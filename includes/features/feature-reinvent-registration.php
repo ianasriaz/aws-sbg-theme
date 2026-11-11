@@ -71,16 +71,45 @@ function aws_sbg_allocate_reinvent_registration_number() {
 }
 
 /* ========================================================================
+ * 2.5 PUBLIC VISIBILITY HELPER FUNCTIONS
+ * ======================================================================== */
+
+/**
+ * Check whether the public re:Invent registration form is hidden from visitors.
+ *
+ * @return bool True if hidden/closed, false if visible/open.
+ */
+function aws_sbg_is_reinvent_registration_hidden() {
+	return '1' === (string) get_option( 'aws_reinvent_form_hidden', '0' );
+}
+
+/**
+ * Get the custom or fallback closed notice message shown when registration is hidden.
+ *
+ * @return string
+ */
+function aws_sbg_get_reinvent_closed_message() {
+	$msg = trim( (string) get_option( 'aws_reinvent_closed_message', '' ) );
+	if ( empty( $msg ) ) {
+		$msg = 'Public registrations for AWS re:Invent Watch & Build Party Islamabad 2026 are currently closed. Follow our official WhatsApp community for announcements and future ticket releases.';
+	}
+	return $msg;
+}
+
+/* ========================================================================
  * 3. FRONT-END FORM SHORTCODE
  * ======================================================================== */
 
 function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
-	$success = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'success';
-	$exists  = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'exists';
-	$fonts   = get_template_directory_uri() . '/assets/design-kit/fonts';
-	$skyline = get_template_directory_uri() . '/assets/design-kit/Islamabad Landmark Footer.png';
-	$aws_logo = get_template_directory_uri() . '/assets/images/AWS-Logo-White-Trim.png';
-	$sbg_logo = function_exists( 'aws_sbg_get_logo_url' ) ? aws_sbg_get_logo_url() : get_template_directory_uri() . '/assets/images/icons/SBG-Logo-White-Transparent.png';
+	$success        = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'success';
+	$exists         = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'exists';
+	$is_hidden      = aws_sbg_is_reinvent_registration_hidden();
+	$closed_message = aws_sbg_get_reinvent_closed_message();
+	$is_admin       = current_user_can( 'manage_options' );
+	$fonts          = get_template_directory_uri() . '/assets/design-kit/fonts';
+	$skyline        = get_template_directory_uri() . '/assets/design-kit/Islamabad Landmark Footer.png';
+	$aws_logo       = get_template_directory_uri() . '/assets/images/AWS-Logo-White-Trim.png';
+	$sbg_logo       = function_exists( 'aws_sbg_get_logo_url' ) ? aws_sbg_get_logo_url() : get_template_directory_uri() . '/assets/images/icons/SBG-Logo-White-Transparent.png';
 
 	ob_start();
 	?>
@@ -222,6 +251,16 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			<img class="rv-logo-sbg" src="<?php echo esc_url( $sbg_logo ); ?>" alt="AWS Student Builder Group">
 		</header>
 
+		<?php if ( $is_hidden && $is_admin ) : ?>
+		<div style="position:relative;z-index:3;margin:12px clamp(20px,5vw,48px) 0;padding:12px 18px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);border-radius:10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:13px;color:#fef3c7;">
+			<div style="display:flex;align-items:center;gap:10px;">
+				<span style="font-weight:700;color:#f59e0b;text-transform:uppercase;font-size:11px;letter-spacing:0.06em;background:rgba(245,158,11,0.2);padding:3px 8px;border-radius:4px;">Admin Notice</span>
+				<span>Public registration form is currently <strong>HIDDEN from the public</strong>. Non-admin visitors cannot register.</span>
+			</div>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-reinvent-registrations' ) ); ?>" style="font-family:'Amazon Ember Mono',monospace;font-size:11px;font-weight:700;text-decoration:none;padding:7px 14px;background:#f59e0b;color:#06040c;border-radius:6px;white-space:nowrap;">Open Admin Dashboard &rarr;</a>
+		</div>
+		<?php endif; ?>
+
 		<?php if ( $success ) : ?>
 		<div class="rv-success" x-data="reinventForm()" style="display:flex;">
 			<div class="rv-success-card">
@@ -250,7 +289,9 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				<p class="rv-kicker">AWS Community Islamabad is bringing</p>
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
 				<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
-				<p class="rv-lede-cta">Registration is free and seats are limited. Register now to secure your spot.</p>
+				<?php if ( ! $is_hidden ) : ?>
+					<p class="rv-lede-cta">Registration is free and seats are limited. Register now to secure your spot.</p>
+				<?php endif; ?>
 
 				<div class="rv-perks">
 					<div class="rv-perk">
@@ -285,10 +326,31 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					</div>
 				</div>
 
-				<button type="button" class="rv-btn rv-btn-primary" @click="nextStep()">REGISTER NOW</button>
+				<?php if ( $is_hidden ) : ?>
+					<div class="rv-closed-box" style="margin-top:32px;padding:24px 28px;border-radius:14px;border:1px solid rgba(255,255,255,0.16);background:rgba(255,255,255,0.04);max-width:580px;box-shadow:0 12px 30px rgba(0,0,0,0.3);">
+						<div style="display:inline-flex;align-items:center;gap:8px;font-family:'Amazon Ember Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#f59e0b;margin-bottom:12px;">
+							<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+							Registrations Closed
+						</div>
+						<p style="font-size:15px;line-height:1.65;color:rgba(255,255,255,0.76);margin:0 0 20px 0;">
+							<?php echo esc_html( $closed_message ); ?>
+						</p>
+						<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
+							<a href="<?php echo esc_url( AWS_REINVENT_WHATSAPP_URL ); ?>" target="_blank" rel="noopener" class="rv-btn rv-btn-primary" style="padding:13px 26px;font-size:12px;">
+								Join WhatsApp Community
+							</a>
+							<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="rv-btn rv-btn-ghost" style="padding:13px 22px;font-size:12px;">
+								Back to Home
+							</a>
+						</div>
+					</div>
+				<?php else : ?>
+					<button type="button" class="rv-btn rv-btn-primary" @click="nextStep()">REGISTER NOW</button>
+				<?php endif; ?>
 			</div>
 		</section>
 
+		<?php if ( ! $is_hidden ) : ?>
 		<!-- Steps 1 & 2 -->
 		<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" x-show="currentStep > 0" x-cloak @submit="isSubmitting = true">
 			<input type="hidden" name="action" value="submit_aws_reinvent_registration">
@@ -428,6 +490,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				</div>
 			</section>
 		</form>
+		<?php endif; ?>
 
 		<?php endif; ?>
 	</div>
@@ -497,6 +560,11 @@ function aws_sbg_handle_reinvent_registration() {
 
 	if ( ! isset( $_POST['aws_reinvent_registration_nonce'] ) || ! wp_verify_nonce( $_POST['aws_reinvent_registration_nonce'], 'aws_reinvent_registration_action' ) ) {
 		wp_die( 'Security check failed. Please refresh and try again.' );
+	}
+
+	// Check if public registration is hidden/closed
+	if ( aws_sbg_is_reinvent_registration_hidden() && ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html( aws_sbg_get_reinvent_closed_message() ), 'Registration Closed', array( 'response' => 403, 'back_link' => true ) );
 	}
 
 	$full_name  = isset( $_POST['full_name'] ) ? sanitize_text_field( wp_unslash( $_POST['full_name'] ) ) : '';
@@ -734,6 +802,54 @@ function aws_sbg_reinvent_handle_save_admin_note() {
 }
 add_action( 'admin_post_aws_sbg_reinvent_save_admin_note', 'aws_sbg_reinvent_handle_save_admin_note' );
 
+/**
+ * Handle quick toggle of public re:Invent registration visibility.
+ */
+function aws_sbg_reinvent_handle_toggle_visibility() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized', 'Error', array( 'response' => 403 ) );
+	}
+
+	check_admin_referer( 'aws_sbg_reinvent_toggle_visibility_nonce' );
+
+	$new_state = isset( $_POST['new_state'] ) && '1' === $_POST['new_state'] ? '1' : '0';
+	update_option( 'aws_reinvent_form_hidden', $new_state );
+
+	$notice   = '1' === $new_state ? 'visibility_hidden' : 'visibility_live';
+	$redirect = isset( $_POST['redirect_to'] ) && ! empty( $_POST['redirect_to'] ) ? esc_url_raw( wp_unslash( $_POST['redirect_to'] ) ) : admin_url( 'admin.php?page=aws-reinvent-registrations' );
+	$redirect = remove_query_arg( array( 'notice' ), $redirect );
+
+	wp_safe_redirect( add_query_arg( 'notice', $notice, $redirect ) );
+	exit;
+}
+add_action( 'admin_post_aws_sbg_reinvent_toggle_visibility', 'aws_sbg_reinvent_handle_toggle_visibility' );
+
+/**
+ * Handle saving re:Invent registration settings (visibility + closed message).
+ */
+function aws_sbg_reinvent_handle_save_settings() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized', 'Error', array( 'response' => 403 ) );
+	}
+
+	check_admin_referer( 'aws_sbg_reinvent_save_settings_nonce' );
+
+	$is_hidden = isset( $_POST['form_hidden'] ) && '1' === $_POST['form_hidden'] ? '1' : '0';
+	$message   = isset( $_POST['closed_message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['closed_message'] ) ) : '';
+
+	update_option( 'aws_reinvent_form_hidden', $is_hidden );
+	if ( ! empty( $message ) ) {
+		update_option( 'aws_reinvent_closed_message', $message );
+	} else {
+		delete_option( 'aws_reinvent_closed_message' );
+	}
+
+	$redirect = remove_query_arg( array( 'notice' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=aws-reinvent-registrations' ) );
+	wp_safe_redirect( add_query_arg( 'notice', 'settings_saved', $redirect ) );
+	exit;
+}
+add_action( 'admin_post_aws_sbg_reinvent_save_settings', 'aws_sbg_reinvent_handle_save_settings' );
+
 /* ========================================================================
  * 6. ADMIN: SEPARATE REGISTRATIONS TABLE
  * ======================================================================== */
@@ -861,6 +977,9 @@ function aws_sbg_render_reinvent_admin_page() {
 	$start         = $total_results ? ( ( $paged - 1 ) * $per_page ) + 1 : 0;
 	$end           = min( $start + $per_page - 1, $total_results );
 
+	$is_hidden      = aws_sbg_is_reinvent_registration_hidden();
+	$closed_message = aws_sbg_get_reinvent_closed_message();
+
 	aws_sbg_render_admin_nav_tabs( 'reinvent' );
 	?>
 	<div class="wrap rvadm">
@@ -877,6 +996,14 @@ function aws_sbg_render_reinvent_admin_page() {
 			.rvadm-btn:hover{border-color:#cbd5e1;background:var(--surface2);}
 			.rvadm-btn-danger{color:#b91c1c;border-color:#fca5a5;background:#fef2f2;}
 			.rvadm-btn-danger:hover{background:#fee2e2;border-color:#f87171;color:#991b1b;}
+
+			.rvadm-visibility-card{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 18px;margin-bottom:16px;}
+			.rvadm-vis-pill{display:inline-flex;align-items:center;gap:7px;padding:4px 10px;border-radius:9999px;font-size:11.5px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;}
+			.rvadm-vis-live{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;}
+			.rvadm-vis-hidden{background:#fef3c7;color:#b45309;border:1px solid #fde68a;}
+			.rvadm-dot-pulse{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
+			.rvadm-dot-pulse-live{background:#16a34a;box-shadow:0 0 0 2px rgba(22,163,74,0.25);}
+			.rvadm-dot-pulse-hidden{background:#d97706;}
 
 			.rvadm-filters{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:16px;width:100%;}
 			.rvadm-filters form{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;}
@@ -956,7 +1083,19 @@ function aws_sbg_render_reinvent_admin_page() {
 			@media (max-width:640px){.rvadm-stats{grid-template-columns:1fr;}}
 		</style>
 
-		<?php if ( 'reinvent_cleared' === $notice ) : ?>
+		<?php if ( 'visibility_hidden' === $notice ) : ?>
+			<div class="notice notice-warning is-dismissible" style="border-left-color:#f59e0b;margin-bottom:16px;">
+				<p><strong>Public registration form is now HIDDEN:</strong> Visitors to the registration page will see the closed notice and cannot submit registrations.</p>
+			</div>
+		<?php elseif ( 'visibility_live' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible" style="border-left-color:#16a34a;margin-bottom:16px;">
+				<p><strong>Public registration form is now LIVE:</strong> Registration is open and accepting applications from the public.</p>
+			</div>
+		<?php elseif ( 'settings_saved' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible" style="border-left-color:#16a34a;margin-bottom:16px;">
+				<p><strong>Public form visibility settings and closed notice updated successfully.</strong></p>
+			</div>
+		<?php elseif ( 'reinvent_cleared' === $notice ) : ?>
 			<div class="notice notice-success is-dismissible" style="border-left-color:#16a34a;margin-bottom:16px;">
 				<p><strong>Successfully cleared <?php echo esc_html( $n_count ); ?> registration entries.</strong> A safety snapshot backup was preserved in WordPress options (<code>aws_reinvent_backup_...</code>).</p>
 			</div>
@@ -985,6 +1124,44 @@ function aws_sbg_render_reinvent_admin_page() {
 				<?php endif; ?>
 				<a class="rvadm-btn" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'export_csv' => '1' ) ) ); ?>">Export CSV</a>
 				<a class="rvadm-btn" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'roster' => '1' ) ) ); ?>" target="_blank">Print Roster</a>
+			</div>
+		</div>
+
+		<div class="rvadm-visibility-card">
+			<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+				<?php if ( $is_hidden ) : ?>
+					<span class="rvadm-vis-pill rvadm-vis-hidden">
+						<span class="rvadm-dot-pulse rvadm-dot-pulse-hidden"></span> Public Form: Hidden (Closed)
+					</span>
+					<span style="font-size:12.5px;color:var(--muted);">Visitors cannot see registration form steps or submit applications.</span>
+				<?php else : ?>
+					<span class="rvadm-vis-pill rvadm-vis-live">
+						<span class="rvadm-dot-pulse rvadm-dot-pulse-live"></span> Public Form: Live &amp; Open
+					</span>
+					<span style="font-size:12.5px;color:var(--muted);">Registration is active and open to the public.</span>
+				<?php endif; ?>
+			</div>
+			<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin:0;">
+					<input type="hidden" name="action" value="aws_sbg_reinvent_toggle_visibility">
+					<?php wp_nonce_field( 'aws_sbg_reinvent_toggle_visibility_nonce' ); ?>
+					<input type="hidden" name="redirect_to" value="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations' ), admin_url( 'admin.php' ) ) ); ?>">
+					<?php if ( $is_hidden ) : ?>
+						<input type="hidden" name="new_state" value="0">
+						<button type="submit" class="rvadm-btn" style="border-color:#16a34a;color:#16a34a;background:#f0fdf4;">
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+							Unhide / Open Public Form
+						</button>
+					<?php else : ?>
+						<input type="hidden" name="new_state" value="1">
+						<button type="submit" class="rvadm-btn" style="border-color:#fca5a5;color:#b91c1c;background:#fef2f2;" onclick="return confirm('Hide the re:Invent registration form from public visitors?');">
+							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+							Hide Form from Public
+						</button>
+					<?php endif; ?>
+				</form>
+				<button type="button" class="rvadm-btn" onclick="document.getElementById('aws-reinvent-settings-modal').style.display='flex'">Notice Settings…</button>
+				<a class="rvadm-btn" href="<?php echo esc_url( home_url( '/reinvent/' ) ); ?>" target="_blank" title="Preview public page">View Page &#8599;</a>
 			</div>
 		</div>
 
@@ -1243,6 +1420,52 @@ function aws_sbg_render_reinvent_admin_page() {
 					<div style="display:flex;justify-content:flex-end;gap:10px;">
 						<button type="button" class="button" onclick="closeAdminNoteModal()">Cancel</button>
 						<button type="submit" class="button button-primary" style="font-weight:600;">Save Note</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<!-- Modal 3: re:Invent Visibility & Notice Settings -->
+		<div id="aws-reinvent-settings-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(3px);z-index:99999;align-items:center;justify-content:center;padding:20px;">
+			<div style="background:#ffffff;border-radius:16px;max-width:520px;width:100%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;border:1px solid #e2e8f0;">
+				<div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;">
+					<div>
+						<h3 style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">Public Form Visibility Settings</h3>
+						<div style="font-size:12px;color:#64748b;margin-top:2px;">Control public access and the closed notice message</div>
+					</div>
+					<button type="button" onclick="document.getElementById('aws-reinvent-settings-modal').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#64748b;line-height:1;">&times;</button>
+				</div>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="padding:22px 24px;">
+					<input type="hidden" name="action" value="aws_sbg_reinvent_save_settings">
+					<?php wp_nonce_field( 'aws_sbg_reinvent_save_settings_nonce' ); ?>
+
+					<div style="margin-bottom:18px;">
+						<label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#475569;margin-bottom:8px;">Form Visibility</label>
+						<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;cursor:pointer;background:<?php echo ! $is_hidden ? '#f0fdf4' : '#ffffff'; ?>;">
+							<input type="radio" name="form_hidden" value="0" <?php checked( ! $is_hidden ); ?> style="accent-color:#16a34a;">
+							<div>
+								<strong style="display:block;font-size:13px;color:#0f172a;">Open &amp; Visible to Public</strong>
+								<span style="font-size:12px;color:#64748b;">Visitors can see all form steps and submit applications.</span>
+							</div>
+						</label>
+						<label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;background:<?php echo $is_hidden ? '#fef2f2' : '#ffffff'; ?>;">
+							<input type="radio" name="form_hidden" value="1" <?php checked( $is_hidden ); ?> style="accent-color:#dc2626;">
+							<div>
+								<strong style="display:block;font-size:13px;color:#0f172a;">Hidden from Public (Closed)</strong>
+								<span style="font-size:12px;color:#64748b;">Form is hidden and visitors see the closed notice message.</span>
+							</div>
+						</label>
+					</div>
+
+					<div style="margin-bottom:20px;">
+						<label for="rvadm-closed-msg" style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#475569;margin-bottom:6px;">Closed Notice Message</label>
+						<textarea id="rvadm-closed-msg" name="closed_message" rows="4" placeholder="Message shown to public visitors when registrations are closed..." style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;line-height:1.5;color:#0f172a;background:#ffffff;box-sizing:border-box;"><?php echo esc_textarea( $closed_message ); ?></textarea>
+						<span style="display:block;font-size:11.5px;color:#64748b;margin-top:4px;">Displayed to visitors when registration is hidden.</span>
+					</div>
+
+					<div style="display:flex;justify-content:flex-end;gap:10px;">
+						<button type="button" class="button" onclick="document.getElementById('aws-reinvent-settings-modal').style.display='none'">Cancel</button>
+						<button type="submit" class="button button-primary" style="font-weight:700;padding:4px 16px;">Save Settings</button>
 					</div>
 				</form>
 			</div>

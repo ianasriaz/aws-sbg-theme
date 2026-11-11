@@ -34,6 +34,32 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-12 00:46 - Antigravity
+
+**Task**: Add option to hide the re:Invent registration form from the public.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` -
+  - **Helpers & Options**: Added `aws_sbg_is_reinvent_registration_hidden()` and `aws_sbg_get_reinvent_closed_message()` reading WordPress options `aws_reinvent_form_hidden` (default `'0'`) and `aws_reinvent_closed_message`.
+  - **Admin Action Handlers**:
+    - `aws_sbg_reinvent_handle_toggle_visibility`: One-click toggle between Public/Open and Hidden/Closed with nonce verification.
+    - `aws_sbg_reinvent_handle_save_settings`: Settings handler to update visibility status and customized closed notice copy.
+  - **Admin UI Controls**:
+    - Added `.rvadm-visibility-card` toolbar card with live status badge (`Public Form: Live & Open` vs `Public Form: Hidden (Closed)`), one-click toggle button, "Notice Settings…" modal trigger, and direct public page link.
+    - Added Modal 3 (`#aws-reinvent-settings-modal`) for setting visibility radio and custom closed notice text.
+    - Added admin notice alerts for visibility and settings changes.
+  - **Public Frontend Gate**:
+    - In `aws_sbg_render_reinvent_form()`: When hidden, public visitors see an elegant closed message box with WhatsApp Community and Home links instead of the "REGISTER NOW" CTA. The personal details form (Steps 1 & 2) is completely excluded from the HTML.
+    - Logged-in administrators viewing the page receive an amber admin notice explaining that the form is hidden from visitors with a direct link to the dashboard.
+  - **Server-Side Submission Gate**:
+    - In `aws_sbg_handle_reinvent_registration()`: Added server-side validation rejecting any unauthorized POST submissions with HTTP 403 when hidden.
+
+**Key Decisions**:
+- Complete DOM omission: Omitting the form element from the page HTML when hidden ensures no one can inspect elements or circumvent the gate via client-side scripts.
+- Instant toggle + deep settings: Providing both a 1-click toggle on the re:Invent admin table and a settings modal for custom copy gives organizers maximum agility on event day.
+
+---
+
 ### 2026-11-12 00:26 - Antigravity
 
 **Task**: Polish Team Hiring and Call for Speakers public form UI: remove developer placeholder name, remove backstage crew top badge, redesign past-experience radio cards into pills, and fix commitment checkbox vertical overlap.
