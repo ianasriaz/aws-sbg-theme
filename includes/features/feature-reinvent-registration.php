@@ -2946,7 +2946,7 @@ function aws_sbg_render_reinvent_badges() {
 				filter: brightness(0) invert(1);
 			}
 
-			/* --- 2. Badge Center Body (61%) --- */
+			/* --- 2. Badge Center Body (60%) --- */
 			.badge-body {
 				position: relative;
 				flex: 1;
@@ -2955,17 +2955,17 @@ function aws_sbg_render_reinvent_badges() {
 				flex-direction: column;
 				align-items: center;
 				justify-content: space-between;
-				padding: clamp(6px, 2.5cqi, 12px) clamp(12px, 5cqi, 24px) clamp(6px, 2cqi, 10px);
+				padding: clamp(16px, 5.8cqi, 28px) clamp(12px, 5cqi, 24px) clamp(6px, 2cqi, 10px);
 				text-align: center;
 			}
 
-			/* Tier Role Pill Wrapper (Centered between header gradient and name) */
+			/* Tier Role Pill Wrapper (Positioned gracefully down from header gradient) */
 			.badge-tier-wrap {
 				width: 100%;
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				margin: clamp(4px, 1.6cqi, 8px) 0;
+				margin: clamp(6px, 2.2cqi, 12px) 0 clamp(8px, 2.8cqi, 14px);
 			}
 
 			/* Tier Role Pill */
@@ -3075,16 +3075,13 @@ function aws_sbg_render_reinvent_badges() {
 				image-rendering: pixelated;
 			}
 
-			/* --- 3. Badge Footer Skyline Watermark (14%) --- */
+			/* --- 3. Badge Footer Skyline Watermark (15%) --- */
 			.badge-footer {
 				position: relative;
-				height: 14%;
+				height: 15%;
 				width: 100%;
 				overflow: hidden;
 				background: #FFFFFF;
-				display: flex;
-				align-items: flex-end;
-				justify-content: center;
 			}
 
 			.badge-skyline {
@@ -3092,11 +3089,10 @@ function aws_sbg_render_reinvent_badges() {
 				bottom: 0;
 				left: 0;
 				right: 0;
-				width: 100%;
-				height: 100%;
-				object-fit: contain;
-				object-position: bottom center;
-				display: block;
+				width: 100% !important;
+				min-width: 100% !important;
+				height: auto !important;
+				display: block !important;
 				opacity: 0.28;
 				filter: brightness(0);
 				pointer-events: none;
@@ -3227,7 +3223,7 @@ function aws_sbg_render_reinvent_badges() {
 						</div>
 					</div>
 
-					<!-- 2. Center Body (61%) -->
+					<!-- 2. Center Body (60%) -->
 					<div class="badge-body">
 						<div class="badge-tier-wrap">
 							<div class="badge-tier-pill <?php echo esc_attr( $tier_class ); ?>">
@@ -3245,7 +3241,7 @@ function aws_sbg_render_reinvent_badges() {
 						</div>
 					</div>
 
-					<!-- 3. Footer Skyline Watermark (10%) -->
+					<!-- 3. Footer Skyline Watermark (15%) -->
 					<div class="badge-footer">
 						<img src="<?php echo esc_url( $skyline_uri ); ?>" alt="Islamabad Skyline" class="badge-skyline">
 					</div>

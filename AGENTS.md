@@ -34,6 +34,21 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-13 00:25 - Antigravity
+
+**Task**: Make Islamabad landmark footer graphic 100% full-width covering edge-to-edge without left/right whitespace margins while keeping minarets and spires uncropped; move role badge pill downward away from header gradient bottom.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` -
+  - **Full-Width 100% Edge-to-Edge Footer**: Switched `.badge-skyline` from `object-fit: contain; object-position: bottom center;` (which caused centered letterboxing with blank left/right bars) to `width: 100% !important; min-width: 100% !important; height: auto !important; position: absolute; bottom: 0; left: 0; right: 0;`. Set `.badge-footer` to `height: 15%`, perfectly accommodating the full 13.89mm visible landmark artwork without any horizontal whitespace or vertical top clipping.
+  - **Downward Positioned Role Badge Pill**: Increased `.badge-body` `padding-top` to `clamp(16px, 5.8cqi, 28px)` and `.badge-tier-wrap` `margin` to `clamp(6px, 2.2cqi, 12px) 0 clamp(8px, 2.8cqi, 14px)`. Moves the role pill noticeably down into the white space between the header gradient and the attendee name frame.
+
+**Key Decisions**:
+- The 2172x724 graphic contains transparent headroom in its top 48% (rows 0–348), with visible artwork occupying the bottom 52% (rows 349–704). Combining `width: 100%; height: auto; bottom: 0; left: 0; right: 0;` with a 15% footer container ensures 100% full-width edge-to-edge coverage while maintaining 100% spire visibility and zero top-cropping.
+- Moving the tier pill downward eliminates proximity to the purple/cyan header line while preserving graceful vertical rhythm above the attendee name.
+
+---
+
 ### 2026-11-13 00:15 - Antigravity
 
 **Task**: Fix double QR code generation on printed attendee cards, center and highlight role pill between header and name frame, fix Islamabad skyline footer cropping, and optimize public registration form submission speed while strictly guarding against duplicate submissions.
