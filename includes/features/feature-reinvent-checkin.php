@@ -112,11 +112,16 @@ add_filter( 'query_vars', 'aws_sbg_reinvent_checkin_query_vars' );
  * Intercept template redirect for check-in terminal and verify views.
  */
 function aws_sbg_reinvent_checkin_template_redirect() {
+	global $wp_query;
 	$req_path = isset( $_SERVER['REQUEST_URI'] ) ? parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) : '';
 	$req_path = trim( (string) $req_path, '/' );
 
 	// 1. Desk Check-In Terminal (/reinvent-checkin, /checkin, or ?reinvent_checkin=1)
 	if ( get_query_var( 'aws_reinvent_checkin' ) || isset( $_GET['reinvent_checkin'] ) || 'reinvent-checkin' === $req_path || 'checkin' === $req_path ) {
+		if ( $wp_query ) {
+			$wp_query->is_404 = false;
+		}
+		status_header( 200 );
 		aws_sbg_render_reinvent_checkin_terminal();
 		exit;
 	}
@@ -130,6 +135,10 @@ function aws_sbg_reinvent_checkin_template_redirect() {
 		$verify_param = sanitize_text_field( $matches[1] );
 	}
 	if ( ! empty( $verify_param ) ) {
+		if ( $wp_query ) {
+			$wp_query->is_404 = false;
+		}
+		status_header( 200 );
 		aws_sbg_render_reinvent_mobile_pass( $verify_param );
 		exit;
 	}
