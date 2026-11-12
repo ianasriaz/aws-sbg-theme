@@ -3,8 +3,8 @@
  * AWS SBG Call for Speakers — Form Renderer
  * File: cfs-render.php
  *
- * Fast 90-second speaker pitch form with Alpine.js draft persistence,
- * live character counter, ticket styling, and celebratory success state.
+ * Clean, modern speaker proposal form with Alpine.js draft persistence,
+ * live character counter, elegant responsive selector cards, and celebratory success state.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -43,15 +43,18 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 	<div class="cfs-root" x-data="cfsForm(<?php echo intval( $event_id ); ?>)">
 		<style>
 			.cfs-root {
-				--ink: #0F141F;
+				--ink: #0F172A;
 				--paper: #FFFFFF;
 				--surface: #F8FAFC;
 				--line: #E2E8F0;
+				--line-focus: #CBD5E1;
 				--text: #334155;
 				--muted: #64748B;
 				--brand: #7928CA;
 				--brand-soft: #F5F3FF;
+				--brand-border: #DDD6FE;
 				--accent: #FF9900;
+				--accent-hover: #FFAC33;
 				font-family: 'Amazon Ember', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 				color: var(--ink);
 				background: transparent;
@@ -65,88 +68,303 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 			.cfs-root a:hover { color: #9353FF; }
 			.cfs-root :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: 4px; }
 
-			.cfs-page { max-width: 680px; margin: 0 auto; padding: 36px clamp(16px, 4vw, 36px) 64px; }
-			.cfs-ticket { position: relative; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 1px 3px rgba(15,20,31,0.04), 0 16px 40px rgba(15,20,31,0.06); }
-
-			.cfs-stub { padding: 30px 32px 24px; }
-			.cfs-kicker { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); margin-bottom: 12px; }
-			.cfs-badge-fast { background: var(--brand-soft); color: var(--brand); border: 1px solid rgba(121,40,202,0.2); padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; }
-			.cfs-title { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-weight: 700; font-size: clamp(28px, 4.5vw, 38px); line-height: 1.12; letter-spacing: -0.01em; color: var(--ink); margin-bottom: 10px; }
-			.cfs-event-pill { display: inline-block; font-size: 13.5px; font-weight: 600; color: #475569; background: var(--surface); border: 1px solid var(--line); padding: 4px 12px; border-radius: 6px; margin-bottom: 12px; }
-			.cfs-desc { font-size: 14.5px; line-height: 1.6; color: var(--text); }
-
-			.cfs-perf { position: relative; height: 1px; border-top: 1px dashed #cbd5e1; }
-			.cfs-notch { position: absolute; top: -11px; width: 22px; height: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 50%; }
-			.cfs-notch-l { left: -12px; }
-			.cfs-notch-r { right: -12px; }
-
-			.cfs-body { padding: 26px 32px 32px; }
-			.cfs-section { padding: 22px 0; border-top: 1px solid var(--line); }
-			.cfs-section:first-child { border-top: 0; padding-top: 0; }
-			.cfs-section-label { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 14px; }
-
-			.cfs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-			.cfs-field > label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-			.cfs-field label em { font-style: normal; color: var(--brand); }
-			.cfs-field .cfs-help { display: block; font-size: 12px; color: var(--muted); margin-top: 5px; }
-			.cfs-field input[type="text"],.cfs-field input[type="email"],.cfs-field input[type="tel"],.cfs-field input[type="url"],.cfs-field textarea,.cfs-field select {
-				width: 100%;
-				padding: 10px 13px;
-				font-family: inherit;
-				font-size: 15px;
-				color: var(--ink);
+			.cfs-page {
+				max-width: 740px;
+				margin: 0 auto;
+				padding: 48px clamp(16px, 4vw, 36px) 80px;
+			}
+			.cfs-card {
+				position: relative;
 				background: var(--paper);
 				border: 1px solid var(--line);
-				border-radius: 5px;
-				transition: border-color .15s ease, box-shadow .15s ease;
+				border-radius: 12px;
+				box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 20px 25px -5px rgba(15, 23, 42, 0.05);
+				overflow: hidden;
 			}
-			.cfs-field input::placeholder,.cfs-field textarea::placeholder { color: #94a3b8; }
-			.cfs-field input:focus,.cfs-field textarea:focus,.cfs-field select:focus {
-				outline: none;
-				border-color: var(--brand);
-				box-shadow: 0 0 0 3px rgba(121,40,202,0.12);
+
+			.cfs-header {
+				padding: 40px 44px 28px;
+				border-bottom: 1px solid var(--line);
+				background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFD 100%);
 			}
-			.cfs-field textarea { min-height: 95px; resize: vertical; line-height: 1.5; }
-			.cfs-span-2 { grid-column: 1 / -1; }
-
-			.cfs-select-wrap { position: relative; }
-			.cfs-select-wrap select { appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer; }
-			.cfs-select-arrow { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #64748b; }
-
-			.cfs-pitch-counter { display: flex; justify-content: flex-end; font-size: 11.5px; color: var(--muted); margin-top: 4px; }
-			.cfs-pitch-counter.is-limit { color: #dc2626; font-weight: 600; }
-
-			.cfs-radio-group { display: flex; gap: 12px; }
-			.cfs-radio-pill {
-				flex: 1;
-				display: flex;
+			.cfs-kicker {
+				display: inline-flex;
 				align-items: center;
 				gap: 8px;
-				padding: 9px 12px;
-				background: var(--paper);
+				font-size: 11.5px;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--brand);
+				margin-bottom: 10px;
+			}
+			.cfs-title {
+				font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+				font-weight: 700;
+				font-size: clamp(26px, 4.2vw, 34px);
+				line-height: 1.2;
+				letter-spacing: -0.015em;
+				color: var(--ink);
+				margin-bottom: 12px;
+			}
+			.cfs-event-pill {
+				display: inline-flex;
+				align-items: center;
+				font-size: 13px;
+				font-weight: 600;
+				color: #475569;
+				background: var(--surface);
 				border: 1px solid var(--line);
-				border-radius: 5px;
-				cursor: pointer;
-				font-size: 13.5px;
-				font-weight: 500;
+				padding: 4px 12px;
+				border-radius: 999px;
+				margin-bottom: 14px;
+			}
+			.cfs-desc {
+				font-size: 15px;
+				line-height: 1.6;
 				color: var(--text);
+				max-width: 62ch;
+			}
+
+			.cfs-body {
+				padding: 32px 44px 44px;
+			}
+			.cfs-section {
+				padding: 28px 0;
+				border-top: 1px solid #F1F5F9;
+			}
+			.cfs-section:first-child {
+				border-top: 0;
+				padding-top: 0;
+			}
+			.cfs-section-header {
+				margin-bottom: 20px;
+			}
+			.cfs-section-title {
+				font-size: 16.5px;
+				font-weight: 700;
+				color: var(--ink);
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+			.cfs-section-num {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: 24px;
+				height: 24px;
+				border-radius: 50%;
+				background: var(--brand-soft);
+				color: var(--brand);
+				font-size: 12px;
+				font-weight: 700;
+			}
+			.cfs-section-subtitle {
+				font-size: 13px;
+				color: var(--muted);
+				margin-top: 3px;
+				margin-left: 34px;
+			}
+
+			.cfs-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 20px 20px;
+			}
+			.cfs-field > label {
+				display: block;
+				font-size: 13px;
+				font-weight: 600;
+				color: #1E293B;
+				margin-bottom: 7px;
+			}
+			.cfs-field label em {
+				font-style: normal;
+				color: #DC2626;
+				margin-left: 2px;
+			}
+			.cfs-field .cfs-help {
+				display: block;
+				font-size: 12px;
+				color: var(--muted);
+				margin-top: 6px;
+				line-height: 1.45;
+			}
+			.cfs-field input[type="text"],
+			.cfs-field input[type="email"],
+			.cfs-field input[type="tel"],
+			.cfs-field input[type="url"],
+			.cfs-field textarea,
+			.cfs-field select {
+				width: 100%;
+				padding: 11px 14px;
+				font-family: inherit;
+				font-size: 14.5px;
+				color: var(--ink);
+				background: var(--paper);
+				border: 1px solid var(--line-focus);
+				border-radius: 7px;
+				transition: border-color .15s ease, box-shadow .15s ease;
+				box-sizing: border-box;
+			}
+			.cfs-field input::placeholder,
+			.cfs-field textarea::placeholder {
+				color: #94A3B8;
+			}
+			.cfs-field input:focus,
+			.cfs-field textarea:focus,
+			.cfs-field select:focus {
+				outline: none;
+				border-color: var(--brand);
+				box-shadow: 0 0 0 3px rgba(121, 40, 202, 0.12);
+			}
+			.cfs-field textarea {
+				min-height: 105px;
+				resize: vertical;
+				line-height: 1.55;
+			}
+			.cfs-span-2 {
+				grid-column: 1 / -1;
+			}
+
+			.cfs-select-wrap {
+				position: relative;
+			}
+			.cfs-select-wrap select {
+				appearance: none;
+				-webkit-appearance: none;
+				padding-right: 38px;
+				cursor: pointer;
+				background-color: var(--paper);
+			}
+			.cfs-select-arrow {
+				position: absolute;
+				right: 14px;
+				top: 50%;
+				transform: translateY(-50%);
+				pointer-events: none;
+				color: #64748B;
+				display: flex;
+				align-items: center;
+			}
+
+			.cfs-pitch-counter {
+				display: flex;
+				justify-content: flex-end;
+				font-size: 12px;
+				color: var(--muted);
+				margin-top: 5px;
+			}
+			.cfs-pitch-counter.is-limit {
+				color: #DC2626;
+				font-weight: 600;
+			}
+
+			/* Experience Selector Cards */
+			.cfs-exp-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 14px;
+			}
+			.cfs-exp-card {
+				position: relative;
+				display: flex;
+				align-items: flex-start;
+				gap: 12px;
+				padding: 14px 16px;
+				background: var(--paper);
+				border: 1.5px solid var(--line);
+				border-radius: 8px;
+				cursor: pointer;
+				transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+				user-select: none;
+			}
+			.cfs-exp-card:hover {
+				border-color: var(--line-focus);
+				background: var(--surface);
+			}
+			.cfs-exp-card.is-active {
+				border-color: var(--brand);
+				background: var(--brand-soft);
+				box-shadow: 0 0 0 1px var(--brand);
+			}
+			.cfs-sr-only {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				padding: 0;
+				margin: -1px;
+				overflow: hidden;
+				clip: rect(0, 0, 0, 0);
+				white-space: nowrap;
+				border-width: 0;
+			}
+			.cfs-exp-indicator {
+				width: 18px;
+				height: 18px;
+				border-radius: 50%;
+				border: 2px solid #CBD5E1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-shrink: 0;
+				margin-top: 2px;
+				background: #FFFFFF;
 				transition: border-color .15s ease, background-color .15s ease;
 			}
-			.cfs-radio-pill:hover { border-color: var(--brand); background: var(--brand-soft); }
-			.cfs-radio-pill input[type="radio"] { accent-color: var(--brand); margin: 0; }
+			.cfs-exp-card.is-active .cfs-exp-indicator {
+				border-color: var(--brand);
+				background: var(--brand);
+			}
+			.cfs-exp-dot {
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background: #FFFFFF;
+				display: block;
+			}
+			.cfs-exp-text {
+				flex: 1;
+			}
+			.cfs-exp-title {
+				display: block;
+				font-size: 14px;
+				font-weight: 600;
+				color: var(--ink);
+				line-height: 1.35;
+				margin-bottom: 2px;
+			}
+			.cfs-exp-desc {
+				display: block;
+				font-size: 12px;
+				color: var(--muted);
+				line-height: 1.4;
+			}
 
+			/* In-Person Availability */
+			.cfs-commit-box {
+				background: #F8FAFC;
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				padding: 14px 16px;
+				transition: border-color .15s ease;
+			}
+			.cfs-commit-box:hover {
+				border-color: #CBD5E1;
+			}
 			.cfs-commit {
 				display: flex !important;
 				align-items: flex-start !important;
 				gap: 12px !important;
 				cursor: pointer;
 				margin: 0 !important;
-				padding: 4px 0;
+				padding: 0 !important;
 			}
 			.cfs-commit input[type="checkbox"] {
 				width: 18px !important;
 				height: 18px !important;
-				margin: 3px 0 0 0 !important;
+				margin: 2px 0 0 0 !important;
 				accent-color: var(--brand);
 				flex-shrink: 0 !important;
 				cursor: pointer;
@@ -154,67 +372,167 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 			.cfs-commit-text {
 				font-size: 13.5px;
 				line-height: 1.55;
-				color: var(--text);
-				font-weight: 400;
+				color: #334155;
 				flex: 1;
 				text-align: left;
 			}
 
-			.cfs-submit { display: flex; align-items: center; justify-content: flex-end; padding-top: 8px; }
+			/* Buttons & Actions */
+			.cfs-submit {
+				display: flex;
+				align-items: center;
+				justify-content: flex-end;
+				padding-top: 12px;
+			}
 			.cfs-btn {
 				display: inline-flex;
 				align-items: center;
 				justify-content: center;
 				gap: 8px;
 				border: 0;
-				border-radius: 5px;
-				padding: 12px 28px;
+				border-radius: 7px;
+				padding: 13px 32px;
 				font-family: inherit;
-				font-size: 14.5px;
+				font-size: 15px;
 				font-weight: 700;
 				cursor: pointer;
 				text-decoration: none;
-				transition: background .18s ease, transform .18s ease;
+				transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
 			}
-			.cfs-btn-primary { background: var(--accent); color: var(--ink); }
-			.cfs-btn-primary:hover { background: #ffad33; transform: translateY(-1px); }
-			.cfs-btn-primary:disabled { opacity: 0.6; cursor: default; transform: none; }
+			.cfs-btn-primary {
+				background: var(--accent);
+				color: #0F172A;
+				box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+			}
+			.cfs-btn-primary:hover {
+				background: var(--accent-hover);
+				transform: translateY(-1px);
+				box-shadow: 0 4px 12px rgba(255, 153, 0, 0.25);
+			}
+			.cfs-btn-primary:disabled {
+				opacity: 0.6;
+				cursor: not-allowed;
+				transform: none;
+				box-shadow: none;
+			}
 
-			.cfs-notice { padding: 13px 16px; border-radius: 6px; font-size: 14px; margin-bottom: 20px; line-height: 1.5; }
-			.cfs-notice-error { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
-			.cfs-notice-closed { background: #FFFBEB; border: 1px solid #FDE68A; border-left: 4px solid #F59E0B; color: #92400E; }
-			.cfs-notice-closed strong { display: block; margin-bottom: 3px; color: #78350F; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.04em; }
+			/* Notices */
+			.cfs-notice {
+				padding: 14px 18px;
+				border-radius: 8px;
+				font-size: 14px;
+				margin-bottom: 22px;
+				line-height: 1.5;
+			}
+			.cfs-notice-error {
+				background: #FEF2F2;
+				border: 1px solid #FECACA;
+				color: #991B1B;
+			}
+			.cfs-notice-closed {
+				background: #FFFBEB;
+				border: 1px solid #FDE68A;
+				border-left: 4px solid #F59E0B;
+				color: #92400E;
+			}
+			.cfs-notice-closed strong {
+				display: block;
+				margin-bottom: 3px;
+				color: #78350F;
+				font-size: 12.5px;
+				text-transform: uppercase;
+				letter-spacing: 0.04em;
+			}
 
-			.cfs-body-success { text-align: center; padding: 44px 32px; }
-			.cfs-success-icon { width: 56px; height: 56px; border: 2px solid #16A34A; border-radius: 50%; color: #16A34A; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; font-size: 26px; font-weight: 900; }
-			.cfs-success-title { font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif; font-weight: 700; font-size: 26px; margin-bottom: 8px; color: var(--ink); }
-			.cfs-ref-box { display: inline-block; background: var(--surface); border: 1px dashed #cbd5e1; border-radius: 6px; padding: 12px 24px; margin: 18px 0; }
-			.cfs-ref-label { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px; }
-			.cfs-ref-val { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 18px; font-weight: 700; color: var(--brand); letter-spacing: 0.03em; }
+			/* Success State */
+			.cfs-body-success {
+				text-align: center;
+				padding: 48px 36px 52px;
+			}
+			.cfs-success-icon {
+				width: 58px;
+				height: 58px;
+				border: 2px solid #16A34A;
+				border-radius: 50%;
+				color: #16A34A;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin: 0 auto 18px;
+				font-size: 26px;
+				font-weight: 900;
+				background: #F0FDF4;
+			}
+			.cfs-success-title {
+				font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
+				font-weight: 700;
+				font-size: 28px;
+				margin-bottom: 8px;
+				color: var(--ink);
+			}
+			.cfs-ref-box {
+				display: inline-block;
+				background: var(--surface);
+				border: 1px dashed #CBD5E1;
+				border-radius: 8px;
+				padding: 12px 24px;
+				margin: 20px 0;
+			}
+			.cfs-ref-label {
+				font-size: 11px;
+				font-weight: 700;
+				letter-spacing: 0.08em;
+				text-transform: uppercase;
+				color: var(--muted);
+				display: block;
+				margin-bottom: 4px;
+			}
+			.cfs-ref-val {
+				font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+				font-size: 18px;
+				font-weight: 700;
+				color: var(--brand);
+				letter-spacing: 0.03em;
+			}
 
-			@media (max-width: 600px) {
-				.cfs-grid { grid-template-columns: 1fr; }
-				.cfs-stub,.cfs-body { padding-left: 20px; padding-right: 20px; }
-				.cfs-submit .cfs-btn { width: 100%; }
+			@media (max-width: 640px) {
+				.cfs-page {
+					padding: 24px 16px 48px;
+				}
+				.cfs-header {
+					padding: 28px 20px 20px;
+				}
+				.cfs-body {
+					padding: 24px 20px 32px;
+				}
+				.cfs-grid {
+					grid-template-columns: 1fr;
+					gap: 16px;
+				}
+				.cfs-exp-grid {
+					grid-template-columns: 1fr;
+					gap: 10px;
+				}
+				.cfs-submit .cfs-btn {
+					width: 100%;
+				}
 			}
 		</style>
 
 		<div class="cfs-page">
 			<?php if ( 'success' === $status ) : ?>
-				<div class="cfs-ticket">
-					<div class="cfs-stub" style="text-align:center;">
+				<div class="cfs-card">
+					<div class="cfs-header" style="text-align:center;">
 						<div class="cfs-kicker" style="justify-content:center;">
 							<span>Call for Speakers</span>
-							<span class="cfs-badge-fast">Proposal Logged</span>
 						</div>
-						<h1 class="cfs-title">Pitch Received</h1>
+						<h1 class="cfs-title">Proposal Received</h1>
 						<div class="cfs-event-pill"><?php echo esc_html( $event->post_title ); ?></div>
 					</div>
-					<div class="cfs-perf" aria-hidden="true"><span class="cfs-notch cfs-notch-l"></span><span class="cfs-notch cfs-notch-r"></span></div>
 					<div class="cfs-body cfs-body-success">
 						<div class="cfs-success-icon">&#10003;</div>
 						<h2 class="cfs-success-title">Thank You<?php echo $speak_name ? ', ' . esc_html( $speak_name ) : ''; ?>!</h2>
-						<p class="cfs-desc" style="max-width:48ch;margin:0 auto 16px;">Your session pitch has been successfully received by the AWS Student Builder Group organizing team.</p>
+						<p class="cfs-desc" style="max-width:48ch;margin:0 auto 16px;">We have received your talk pitch and our team will get back to you soon regarding the selection and next steps.</p>
 
 						<?php if ( $ref ) : ?>
 							<div class="cfs-ref-box">
@@ -223,14 +541,14 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 							</div>
 						<?php endif; ?>
 
-						<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:16px 20px;max-width:520px;margin:16px auto;text-align:left;font-size:13.5px;color:#334155;line-height:1.6;">
-							<strong style="display:block;margin-bottom:6px;color:#0f172a;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;">What happens next?</strong>
-							<p style="margin:0 0 6px 0;">1. Our selection committee reviews all talk pitches based on technical depth, relevance, and originality.</p>
-							<p style="margin:0 0 6px 0;">2. Shortlisted speakers will be contacted via WhatsApp/Email with the official speaker confirmation form to collect final shield name, badge details, and slot preferences.</p>
-							<p style="margin:0;">3. A confirmation email with your reference has been dispatched.</p>
+						<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:18px 22px;max-width:520px;margin:20px auto;text-align:left;font-size:13.5px;color:#334155;line-height:1.6;">
+							<strong style="display:block;margin-bottom:8px;color:#0F172A;font-size:12.5px;text-transform:uppercase;letter-spacing:0.05em;">What happens next?</strong>
+							<p style="margin:0 0 6px 0;">1. Our selection committee evaluates all session proposals based on technical depth, practical value, and originality.</p>
+							<p style="margin:0 0 6px 0;">2. We will contact shortlisted speakers via email/WhatsApp to confirm scheduling, speaker shield names, and logistics.</p>
+							<p style="margin:0;">3. A confirmation email with your proposal reference has been dispatched to your inbox.</p>
 						</div>
 
-						<div style="margin-top:24px;">
+						<div style="margin-top:28px;">
 							<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="cfs-btn cfs-btn-primary" style="display:inline-block;">Back to Homepage</a>
 						</div>
 					</div>
@@ -244,20 +562,17 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 					});
 				</script>
 			<?php else : ?>
-				<div class="cfs-ticket">
-					<div class="cfs-stub">
+				<div class="cfs-card">
+					<div class="cfs-header">
 						<div class="cfs-kicker">
 							<span>Call for Speakers</span>
-							<span class="cfs-badge-fast">&sim; 90-Sec Pitch</span>
 						</div>
-						<h1 class="cfs-title">Share Your Story on the AWS Stage</h1>
+						<h1 class="cfs-title">Share Your Knowledge on the AWS Stage</h1>
 						<div class="cfs-event-pill"><?php echo esc_html( $event->post_title ); ?></div>
 						<p class="cfs-desc">
-							Have an interesting AWS build, cloud architecture, or real-world lesson to share? Pitch your talk idea below. If shortlisted, our team will reach out with speaker onboarding and logistics.
+							Have a project, cloud architecture, or real-world lesson to share? Submit your session proposal below. Our team reviews all submissions and will get back to you soon.
 						</p>
 					</div>
-
-					<div class="cfs-perf" aria-hidden="true"><span class="cfs-notch cfs-notch-l"></span><span class="cfs-notch cfs-notch-r"></span></div>
 
 					<div class="cfs-body">
 						<?php if ( ! $is_open ) : ?>
@@ -279,13 +594,16 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 								<?php wp_nonce_field( 'aws_sbg_cfs_submit', 'cfs_nonce' ); ?>
 								<input type="text" name="website_url" value="" style="position:absolute;left:-9999px;" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-								<!-- Part 1: About You -->
+								<!-- Section 1: Speaker Profile -->
 								<div class="cfs-section">
-									<p class="cfs-section-label">1. About You</p>
+									<div class="cfs-section-header">
+										<p class="cfs-section-title"><span class="cfs-section-num">1</span> Speaker Profile</p>
+										<p class="cfs-section-subtitle">Tell us about yourself and how to reach you.</p>
+									</div>
 									<div class="cfs-grid">
 										<div class="cfs-field">
 											<label for="cfs-name">Full Name <em>*</em></label>
-											<input id="cfs-name" type="text" name="name" x-model="name" placeholder="Your full name" required>
+											<input id="cfs-name" type="text" name="name" x-model="name" placeholder="e.g. Alex Morgan" required>
 										</div>
 										<div class="cfs-field">
 											<label for="cfs-email">Email Address <em>*</em></label>
@@ -293,31 +611,34 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 										</div>
 										<div class="cfs-field">
 											<label for="cfs-phone">WhatsApp / Phone <em>*</em></label>
-											<input id="cfs-phone" type="tel" name="phone" x-model="phone" placeholder="0300-0000000" required>
+											<input id="cfs-phone" type="tel" name="phone" x-model="phone" placeholder="0300-1234567" required>
 										</div>
 										<div class="cfs-field">
 											<label for="cfs-city">City <em>*</em></label>
 											<input id="cfs-city" type="text" name="city" x-model="city" placeholder="e.g. Islamabad / Rawalpindi" required>
 										</div>
 										<div class="cfs-field cfs-span-2">
-											<label for="cfs-org">Organization / Institute &amp; Role <em>*</em></label>
-											<input id="cfs-org" type="text" name="organization" x-model="organization" placeholder="e.g. Cloud Engineer @ Tech Corp OR Student @ Air University" required>
+											<label for="cfs-org">Organization / University &amp; Role <em>*</em></label>
+											<input id="cfs-org" type="text" name="organization" x-model="organization" placeholder="e.g. Cloud Engineer @ Tech Corp or Student @ Air University" required>
 										</div>
 										<div class="cfs-field cfs-span-2">
 											<label for="cfs-linkedin">LinkedIn Profile URL <em>*</em></label>
 											<input id="cfs-linkedin" type="url" name="linkedin_url" x-model="linkedinUrl" placeholder="https://linkedin.com/in/username" required>
-											<span class="cfs-help">Helps the review committee learn about your background without requiring a lengthy bio.</span>
+											<span class="cfs-help">Helps our selection committee review your professional or technical background.</span>
 										</div>
 									</div>
 								</div>
 
-								<!-- Part 2: Your Session Pitch -->
+								<!-- Section 2: Session Details -->
 								<div class="cfs-section">
-									<p class="cfs-section-label">2. Your Session Pitch</p>
+									<div class="cfs-section-header">
+										<p class="cfs-section-title"><span class="cfs-section-num">2</span> Session Details</p>
+										<p class="cfs-section-subtitle">What would you like to present to the community?</p>
+									</div>
 									<div class="cfs-grid">
 										<div class="cfs-field cfs-span-2">
 											<label for="cfs-title">Proposed Talk Title <em>*</em></label>
-											<input id="cfs-title" type="text" name="talk_title" x-model="talkTitle" placeholder="e.g. Building Production-Ready RAG with Amazon Bedrock" required>
+											<input id="cfs-title" type="text" name="talk_title" x-model="talkTitle" placeholder="e.g. Building Production AI Workflows with Amazon Bedrock" required>
 										</div>
 										<div class="cfs-field cfs-span-2">
 											<label for="cfs-track">Primary Topic Track <em>*</em></label>
@@ -366,8 +687,8 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 											</div>
 										</div>
 										<div class="cfs-field cfs-span-2">
-											<label for="cfs-pitch">Talk Pitch / Summary <em>*</em></label>
-											<textarea id="cfs-pitch" name="talk_pitch" x-model="talkPitch" maxlength="400" placeholder="In 2–3 sentences, what core problem does your talk address, and what practical lessons or demo will attendees take away?" required></textarea>
+											<label for="cfs-pitch">Session Summary (2–3 sentences) <em>*</em></label>
+											<textarea id="cfs-pitch" name="talk_pitch" x-model="talkPitch" maxlength="400" placeholder="What core problem or concept does your talk address, and what practical lessons or demo will attendees take away?" required></textarea>
 											<div class="cfs-pitch-counter" :class="{ 'is-limit': talkPitch.length >= 380 }">
 												<span x-text="talkPitch.length">0</span> / 400 characters
 											</div>
@@ -375,42 +696,59 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 									</div>
 								</div>
 
-								<!-- Part 3: Experience & In-Person Availability -->
+								<!-- Section 3: Experience & Availability -->
 								<div class="cfs-section">
-									<p class="cfs-section-label">3. Experience &amp; In-Person Availability</p>
+									<div class="cfs-section-header">
+										<p class="cfs-section-title"><span class="cfs-section-num">3</span> Experience &amp; In-Person Availability</p>
+										<p class="cfs-section-subtitle">We warmly welcome both experienced and first-time speakers.</p>
+									</div>
 									<div class="cfs-grid">
 										<div class="cfs-field cfs-span-2">
-											<label>Have you spoken at a community/tech event before?</label>
-											<div class="cfs-radio-group">
-												<label class="cfs-radio-pill">
-													<input type="radio" name="past_experience" value="yes" x-model="pastExperience">
-													<span>Yes</span>
+											<label style="margin-bottom:10px;">Have you spoken at a community/tech event before?</label>
+											<div class="cfs-exp-grid">
+												<label class="cfs-exp-card" :class="{ 'is-active': pastExperience === 'yes' }">
+													<input type="radio" name="past_experience" value="yes" x-model="pastExperience" class="cfs-sr-only">
+													<span class="cfs-exp-indicator" aria-hidden="true">
+														<span class="cfs-exp-dot" x-show="pastExperience === 'yes'"></span>
+													</span>
+													<span class="cfs-exp-text">
+														<span class="cfs-exp-title">Yes, I've spoken before</span>
+														<span class="cfs-exp-desc">Meetups, conferences, workshops, or tech talks</span>
+													</span>
 												</label>
-												<label class="cfs-radio-pill">
-													<input type="radio" name="past_experience" value="no" x-model="pastExperience">
-													<span>No (First-time speaker)</span>
+												<label class="cfs-exp-card" :class="{ 'is-active': pastExperience === 'no' }">
+													<input type="radio" name="past_experience" value="no" x-model="pastExperience" class="cfs-sr-only">
+													<span class="cfs-exp-indicator" aria-hidden="true">
+														<span class="cfs-exp-dot" x-show="pastExperience === 'no'"></span>
+													</span>
+													<span class="cfs-exp-text">
+														<span class="cfs-exp-title">No, this is my first talk</span>
+														<span class="cfs-exp-desc">First-time speakers are warmly welcome &amp; supported</span>
+													</span>
 												</label>
 											</div>
 										</div>
 
 										<div class="cfs-field cfs-span-2" x-show="pastExperience === 'yes'" x-cloak>
-											<label for="cfs-link">Link to past talk, slides, or recording <span style="font-weight:400;color:var(--muted);">(Optional)</span></label>
-											<input id="cfs-link" type="url" name="experience_link" x-model="experienceLink" placeholder="https://youtube.com/... or https://slideshare.net/...">
+											<label for="cfs-link">Link to a past talk, slides, or recording <span style="font-weight:400;color:var(--muted);">(Optional)</span></label>
+											<input id="cfs-link" type="url" name="experience_link" x-model="experienceLink" placeholder="e.g. YouTube video, SlideShare, or GitHub repo">
 										</div>
 
-										<div class="cfs-span-2" style="margin-top:10px;">
-											<label class="cfs-commit">
-												<input type="checkbox" name="commitment" value="yes" x-model="commitment" required>
-												<span class="cfs-commit-text">I confirm that I am available to attend and deliver this session in-person in Islamabad on event day if selected.</span>
-											</label>
+										<div class="cfs-span-2" style="margin-top:6px;">
+											<div class="cfs-commit-box">
+												<label class="cfs-commit">
+													<input type="checkbox" name="commitment" value="yes" x-model="commitment" required>
+													<span class="cfs-commit-text">I confirm that I am available to deliver this session in-person in Islamabad on event day if selected.</span>
+												</label>
+											</div>
 										</div>
 									</div>
 								</div>
 
 								<div class="cfs-submit">
 									<button type="submit" class="cfs-btn cfs-btn-primary" :disabled="isSubmitting">
-										<span x-show="!isSubmitting">Pitch My Session</span>
-										<span x-show="isSubmitting" x-cloak>Submitting Pitch…</span>
+										<span x-show="!isSubmitting">Submit Session Proposal</span>
+										<span x-show="isSubmitting" x-cloak>Submitting Proposal…</span>
 									</button>
 								</div>
 							</form>

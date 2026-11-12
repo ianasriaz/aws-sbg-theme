@@ -167,22 +167,32 @@ function aws_sbg_cfs_handle_submission() {
 
 	// Send Submitter Confirmation Email
 	if ( function_exists( 'aws_sbg_mail_send' ) ) {
-		$subject = 'Pitch Received: ' . $talk_title . ' — ' . $event_title;
-		$body_html = '<p style="margin:0 0 12px 0;">Hi <strong style="color:#0f172a;">' . esc_html( $name ) . '</strong>,</p>'
-			. '<p style="margin:0 0 12px 0;">Thank you for pitching your session for <strong style="color:#0f172a;">' . esc_html( $event_title ) . '</strong>!</p>'
-			. '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #7928ca;border-radius:6px;padding:14px 18px;margin:16px 0;">'
-			. '<p style="margin:0 0 6px 0;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.04em;">Session Proposal</p>'
-			. '<p style="margin:0 0 6px 0;font-size:15px;font-weight:700;color:#0f172a;">' . esc_html( $talk_title ) . '</p>'
-			. '<p style="margin:0 0 4px 0;font-size:13px;color:#334155;"><strong>Track:</strong> ' . esc_html( $track_label ) . '</p>'
-			. '<p style="margin:0 0 4px 0;font-size:13px;color:#334155;"><strong>Format:</strong> ' . esc_html( $format_label ) . ' &middot; <strong>Level:</strong> ' . esc_html( $level_label ) . '</p>'
-			. '<p style="margin:8px 0 0 0;font-size:12px;color:#64748b;font-family:monospace;">Reference: ' . esc_html( $reference ) . '</p>'
+		$first_name = explode( ' ', trim( $name ) )[0];
+		$display_name = ! empty( $first_name ) ? $first_name : $name;
+
+		$subject   = 'Thank you for your speaker proposal — ' . $event_title;
+		$body_html = '<p style="margin:0 0 14px 0;font-size:15px;line-height:1.6;color:#1e293b;">Hi <strong style="color:#0f172a;">' . esc_html( $display_name ) . '</strong>,</p>'
+			. '<p style="margin:0 0 14px 0;font-size:14px;line-height:1.6;color:#334155;">Thank you for submitting your speaker proposal for <strong style="color:#0f172a;">' . esc_html( $event_title ) . '</strong>. We appreciate you taking the time to share your ideas with our community.</p>'
+			. '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid #7928ca;border-radius:6px;padding:14px 18px;margin:18px 0;">'
+			. '<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Session Proposal</div>'
+			. '<div style="font-size:15px;font-weight:700;color:#0f172a;margin-bottom:6px;">' . esc_html( $talk_title ) . '</div>'
+			. '<div style="font-size:12.5px;color:#475569;line-height:1.5;">'
+			. '<span><strong>Track:</strong> ' . esc_html( $track_label ) . '</span> &middot; '
+			. '<span><strong>Format:</strong> ' . esc_html( $format_label ) . '</span> &middot; '
+			. '<span><strong>Audience Level:</strong> ' . esc_html( $level_label ) . '</span><br>'
+			. '<span style="color:#64748b;font-family:ui-monospace,Menlo,monospace;font-size:12px;">Reference: ' . esc_html( $reference ) . '</span>'
 			. '</div>'
-			. '<p style="margin:0 0 12px 0;">Our selection committee reviews all proposals. If your pitch is shortlisted, our team will reach out directly with full speaker onboarding and logistics.</p>'
-			. '<p style="margin:0;color:#64748b;font-size:13px;">Have questions in the meantime? Simply reply to this email.</p>';
+			. '</div>'
+			. '<p style="margin:0 0 14px 0;font-size:14px;line-height:1.6;color:#334155;">We have received your pitch, and our team will get back to you soon regarding the selection and next steps.</p>'
+			. '<p style="margin:0;font-size:13px;color:#64748b;line-height:1.5;">If you have any questions or need to make adjustments in the meantime, feel free to reply directly to this email.</p>';
 
-		$closing = 'Looking forward to reviewing your session pitch!<br><strong>The AWS Student Builder Group Team</strong>';
+		$closing = 'Best regards,<br><strong>The AWS Student Builder Group Team</strong>';
 
-		aws_sbg_mail_send( 'cfs', $email, $subject, 'Call for Speakers', 'Pitch Received', $body_html, '', '', '', '', $closing );
+		try {
+			aws_sbg_mail_send( 'cfs', $email, $subject, 'Call for Speakers', 'Proposal Received', $body_html, '', '', '', '', $closing );
+		} catch ( \Throwable $e ) {
+			error_log( 'CFS submitter confirmation email error: ' . $e->getMessage() );
+		}
 	}
 
 	// Send Admin Notification Email
@@ -190,7 +200,7 @@ function aws_sbg_cfs_handle_submission() {
 	if ( 'yes' === $event_meta['notify_admin'] && function_exists( 'aws_sbg_mail_send' ) ) {
 		$admin_email = get_option( 'admin_email' );
 		if ( $admin_email ) {
-			$admin_subject = 'New Speaker Pitch: ' . $name . ' — ' . $talk_title;
+			$admin_subject = 'New Speaker Proposal: ' . $name . ' — ' . $talk_title;
 			$admin_body = '<p style="margin:0 0 12px 0;">A new session proposal was submitted for <strong style="color:#0f172a;">' . esc_html( $event_title ) . '</strong>:</p>'
 				. '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:14px 18px;margin:16px 0;">'
 				. '<p style="margin:0 0 6px 0;font-size:14px;"><strong>Speaker:</strong> ' . esc_html( $name ) . ' (' . esc_html( $organization ) . ')</p>'
@@ -202,7 +212,11 @@ function aws_sbg_cfs_handle_submission() {
 				. '</div>';
 
 			$admin_dashboard_url = admin_url( 'admin.php?page=aws-cfs-submissions&event_id=' . $event_id );
-			aws_sbg_mail_send( 'cfs', $admin_email, $admin_subject, 'Call for Speakers', 'New Session Proposal', $admin_body, $admin_dashboard_url, 'Review in Dashboard' );
+			try {
+				aws_sbg_mail_send( 'cfs', $admin_email, $admin_subject, 'Call for Speakers', 'New Session Proposal', $admin_body, $admin_dashboard_url, 'Review in Dashboard' );
+			} catch ( \Throwable $e ) {
+				error_log( 'CFS admin notification email error: ' . $e->getMessage() );
+			}
 		}
 	}
 

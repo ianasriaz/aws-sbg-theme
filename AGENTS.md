@@ -34,6 +34,27 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-12 21:55 - Antigravity
+
+**Task**: Fix Speak form UI and copy, remove crowded ticket styling and "~ 90-Sec Pitch" badge, redesign the "Have you spoken at a community/tech event before?" selector, and make the submission confirmation email clean and concise ("Hi [name], thank you and then we will get back to you soon").
+
+**Files Changed**:
+- `includes/features/cfs/cfs-render.php` -
+  - Removed crowded ticket aesthetics (dashed perforation line and circular notches) in favor of a modern, spacious card layout with generous padding and subtle shadows.
+  - Removed the `~ 90-Sec Pitch` badge from both header and success state.
+  - Redesigned the "Have you spoken at a community/tech event before?" question into responsive, accessible selector cards with clear title/subtitle and active state highlights (`Yes, I've spoken before` vs `No, this is my first talk`).
+  - Improved form copy and section hierarchy (1. Speaker Profile, 2. Session Details, 3. Experience & In-Person Availability).
+  - Protected checkbox alignment in a clean confirmation box to prevent layout jumping.
+- `includes/features/cfs/cfs-handler.php` -
+  - Rewrote the submitter confirmation email to be warm, clean, and concise: "Hi [name], thank you for submitting your speaker proposal... we will get back to you soon regarding the selection and next steps."
+  - Wrapped both submitter and admin email dispatches in `try...catch (\Throwable $e)` blocks to guarantee mail delivery issues never disrupt the submission redirection flow.
+
+**Key Decisions**:
+- Replacing unstyled radio buttons with interactive selector cards delivers an accessible, high-end experience that works cleanly across both desktop and mobile screens.
+- Email copy follows a concise, professional tone without corporate boilerplate, providing clear peace of mind to applicants.
+
+---
+
 ### 2026-11-12 02:08 - Antigravity
 
 **Task**: Fix re:Invent registration approval redirecting to a blank page with sidebar menu.
