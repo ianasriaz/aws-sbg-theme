@@ -850,6 +850,47 @@ function aws_sbg_reinvent_handle_save_settings() {
 }
 add_action( 'admin_post_aws_sbg_reinvent_save_settings', 'aws_sbg_reinvent_handle_save_settings' );
 
+/**
+ * Retrieve the badge tier / role for a re:Invent attendee.
+ * Defaults to 'ATTENDEE' if not explicitly assigned.
+ *
+ * @param int $post_id Registration post ID.
+ * @return string Badge tier (e.g. ATTENDEE, CORE TEAM, EVENT CREW, SPEAKER, VIP GUEST, ORGANIZER).
+ */
+function aws_sbg_get_reinvent_badge_tier( $post_id ) {
+	$tier = get_post_meta( $post_id, '_badge_tier', true );
+	if ( empty( $tier ) ) {
+		return 'ATTENDEE';
+	}
+	return strtoupper( trim( (string) $tier ) );
+}
+
+/**
+ * Handle saving badge tier / role from WP Admin.
+ */
+function aws_sbg_reinvent_handle_save_badge_tier() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized', 'Error', array( 'response' => 403 ) );
+	}
+
+	$reg_id = isset( $_POST['reg_id'] ) ? intval( $_POST['reg_id'] ) : 0;
+	if ( ! $reg_id || ! check_admin_referer( 'aws_reinvent_badge_tier_' . $reg_id ) ) {
+		wp_die( 'Security check failed.' );
+	}
+
+	$raw_tier = isset( $_POST['badge_tier'] ) ? sanitize_text_field( wp_unslash( $_POST['badge_tier'] ) ) : 'ATTENDEE';
+	$raw_tier = trim( strtoupper( $raw_tier ) );
+	if ( empty( $raw_tier ) ) {
+		$raw_tier = 'ATTENDEE';
+	}
+	update_post_meta( $reg_id, '_badge_tier', $raw_tier );
+
+	$redirect = remove_query_arg( array( 'action', 'reg_id', '_wpnonce' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=aws-reinvent-registrations' ) );
+	wp_safe_redirect( add_query_arg( 'notice', 'tier_saved', $redirect ) );
+	exit;
+}
+add_action( 'admin_post_aws_sbg_reinvent_save_badge_tier', 'aws_sbg_reinvent_handle_save_badge_tier' );
+
 /* ========================================================================
  * 6. ADMIN: SEPARATE REGISTRATIONS TABLE
  * ======================================================================== */
@@ -863,6 +904,10 @@ function aws_sbg_render_reinvent_admin_page() {
 
 	if ( isset( $_GET['roster'] ) ) {
 		aws_sbg_render_reinvent_roster();
+	}
+
+	if ( isset( $_GET['badges'] ) ) {
+		aws_sbg_render_reinvent_badges();
 	}
 
 	if ( isset( $_GET['action'], $_GET['reg_id'], $_GET['_wpnonce'] ) && in_array( $_GET['action'], array( 'approve', 'reject' ), true ) ) {
@@ -1065,6 +1110,19 @@ function aws_sbg_render_reinvent_admin_page() {
 			.rvadm-badge-approved{background:#d1fae5;color:#047857;}
 			.rvadm-badge-rejected{background:#fee2e2;color:#b91c1c;}
 
+			.rvadm-tier-cell{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+			.rvadm-tier-chip{display:inline-block;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:0.04em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;white-space:nowrap;line-height:1.2;}
+			.rvadm-tier-attendee{background:#0f172a;color:#ffffff;}
+			.rvadm-tier-core-team{background:#4f46e5;color:#ffffff;}
+			.rvadm-tier-event-crew,.rvadm-tier-crew{background:#0d9488;color:#ffffff;}
+			.rvadm-tier-speaker{background:#d97706;color:#ffffff;}
+			.rvadm-tier-vip-guest,.rvadm-tier-vip{background:#db2777;color:#ffffff;}
+			.rvadm-tier-organizer{background:#7c3aed;color:#ffffff;}
+			.rvadm-tier-edit-btn{background:none;border:none;cursor:pointer;font-size:12px;color:var(--muted);padding:2px 4px;border-radius:4px;transition:all .15s ease;}
+			.rvadm-tier-edit-btn:hover{color:var(--ink);background:#f1f5f9;}
+			.rvadm-tier-preset-btn{background:#f1f5f9;border:1px solid #cbd5e1;border-radius:6px;padding:6px 10px;font-size:11.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;color:#0f172a;cursor:pointer;transition:all .15s ease;}
+			.rvadm-tier-preset-btn:hover{background:#0f172a;color:#ffffff;border-color:#0f172a;}
+
 			.rvadm-row-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
 			.rvadm-approve{padding:5px 10px;border-radius:6px;border:1px solid #059669;background:#059669;color:#ffffff;font-size:12px;font-weight:600;text-decoration:none;}
 			.rvadm-approve:hover{background:#047857;border-color:#047857;}
@@ -1107,6 +1165,10 @@ function aws_sbg_render_reinvent_admin_page() {
 			<div class="notice notice-success is-dismissible" style="border-left-color:#16a34a;margin-bottom:16px;">
 				<p><strong>Admin internal note saved successfully.</strong></p>
 			</div>
+		<?php elseif ( 'tier_saved' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible" style="border-left-color:#16a34a;margin-bottom:16px;">
+				<p><strong>Badge tier / role updated successfully.</strong></p>
+			</div>
 		<?php elseif ( 'error_code_mismatch' === $notice ) : ?>
 			<div class="notice notice-error is-dismissible" style="margin-bottom:16px;">
 				<p><strong>Clear operation cancelled:</strong> You must type <code>CLEAR</code> exactly in capital letters to confirm clearing entries. No data was deleted.</p>
@@ -1124,6 +1186,7 @@ function aws_sbg_render_reinvent_admin_page() {
 				<?php endif; ?>
 				<a class="rvadm-btn" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'export_csv' => '1' ) ) ); ?>">Export CSV</a>
 				<a class="rvadm-btn" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'roster' => '1' ) ) ); ?>" target="_blank">Print Roster</a>
+				<a class="rvadm-btn" style="background:#0f172a;color:#ffffff;border-color:#0f172a;" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'badges' => '1' ) ) ); ?>" target="_blank" title="Generate print-ready attendee cards on A4 sheets for print vendor">🪪 Print Attendee Badges (PDF)</a>
 			</div>
 		</div>
 
@@ -1210,6 +1273,7 @@ function aws_sbg_render_reinvent_admin_page() {
 					<tr>
 						<th>Reg #</th>
 						<th>Applicant</th>
+						<th>Badge Tier</th>
 						<th>Contact</th>
 						<th>Institute / City</th>
 						<th>Last Attended Event (User Note)</th>
@@ -1223,7 +1287,7 @@ function aws_sbg_render_reinvent_admin_page() {
 				<tbody>
 					<?php if ( ! $query->have_posts() ) : ?>
 						<tr>
-							<td colspan="10" class="rvadm-muted" style="padding:40px; text-align:center;">No registrations found.</td>
+							<td colspan="11" class="rvadm-muted" style="padding:40px; text-align:center;">No registrations found.</td>
 						</tr>
 					<?php else : ?>
 						<?php while ( $query->have_posts() ) : $query->the_post(); ?>
@@ -1241,6 +1305,7 @@ function aws_sbg_render_reinvent_admin_page() {
 							$attended    = get_post_meta( $reg_id, 'attended_before', true );
 							$why         = get_post_meta( $reg_id, 'why_invite', true );
 							$admin_note  = get_post_meta( $reg_id, '_admin_note', true );
+							$badge_tier  = aws_sbg_get_reinvent_badge_tier( $reg_id );
 							$approval    = get_post_meta( $reg_id, 'approval_status', true ) ?: 'pending';
 							$has_vehicle = get_post_meta( $reg_id, 'has_vehicle', true );
 							$vehicle     = 'No vehicle';
@@ -1249,6 +1314,7 @@ function aws_sbg_render_reinvent_admin_page() {
 							}
 							$parking_ok  = 'yes' === get_post_meta( $reg_id, 'parking_policy', true );
 							$note_nonce  = wp_create_nonce( 'aws_reinvent_admin_note_' . $reg_id );
+							$tier_nonce  = wp_create_nonce( 'aws_reinvent_badge_tier_' . $reg_id );
 							?>
 							<tr>
 								<td class="rvadm-reg">
@@ -1267,6 +1333,14 @@ function aws_sbg_render_reinvent_admin_page() {
 									<?php if ( $linkedin ) : ?>
 										<a href="<?php echo esc_url( $linkedin ); ?>" target="_blank" rel="noopener" class="rvadm-link">LinkedIn ↗</a>
 									<?php endif; ?>
+								</td>
+								<td>
+									<div class="rvadm-tier-cell">
+										<span class="rvadm-tier-chip rvadm-tier-<?php echo esc_attr( sanitize_title( $badge_tier ) ); ?>">
+											<?php echo esc_html( $badge_tier ); ?>
+										</span>
+										<button type="button" class="rvadm-tier-edit-btn" onclick="openBadgeTierModal(<?php echo $reg_id; ?>, <?php echo esc_attr( wp_json_encode( $name ) ); ?>, <?php echo esc_attr( wp_json_encode( $badge_tier ) ); ?>, <?php echo esc_attr( wp_json_encode( $tier_nonce ) ); ?>)" title="Change badge role / tier">✎</button>
+									</div>
 								</td>
 								<td>
 									<div class="rvadm-mono"><?php echo esc_html( $email ); ?></div>
@@ -1471,6 +1545,47 @@ function aws_sbg_render_reinvent_admin_page() {
 			</div>
 		</div>
 
+		<!-- Modal 4: Badge Tier / Role Customization -->
+		<div id="aws-reinvent-tier-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(3px);z-index:99999;align-items:center;justify-content:center;padding:20px;">
+			<div style="background:#ffffff;border-radius:16px;max-width:480px;width:100%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;border:1px solid #e2e8f0;">
+				<div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;">
+					<div>
+						<h3 id="rvadm-tier-modal-title" style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">Change Badge Tier</h3>
+						<div style="font-size:12px;color:#64748b;margin-top:2px;">Printed on attendee lanyard badge (front side)</div>
+					</div>
+					<button type="button" onclick="closeBadgeTierModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#64748b;line-height:1;">&times;</button>
+				</div>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="padding:22px 24px;">
+					<input type="hidden" name="action" value="aws_sbg_reinvent_save_badge_tier">
+					<input type="hidden" id="rvadm-tier-reg-id" name="reg_id" value="">
+					<input type="hidden" id="rvadm-tier-nonce" name="_wpnonce" value="">
+
+					<div style="margin-bottom:14px;">
+						<label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#475569;margin-bottom:8px;">Quick Presets</label>
+						<div style="display:flex;flex-wrap:wrap;gap:6px;">
+							<button type="button" class="rvadm-tier-preset-btn" onclick="selectTierPreset('ATTENDEE')">ATTENDEE</button>
+							<button type="button" class="rvadm-tier-preset-btn" onclick="selectTierPreset('CORE TEAM')">CORE TEAM</button>
+							<button type="button" class="rvadm-tier-preset-btn" onclick="selectTierPreset('EVENT CREW')">EVENT CREW</button>
+							<button type="button" class="rvadm-tier-preset-btn" onclick="selectTierPreset('SPEAKER')">SPEAKER</button>
+							<button type="button" class="rvadm-tier-preset-btn" onclick="selectTierPreset('VIP GUEST')">VIP GUEST</button>
+							<button type="button" class="rvadm-tier-preset-btn" onclick="selectTierPreset('ORGANIZER')">ORGANIZER</button>
+						</div>
+					</div>
+
+					<div style="margin-bottom:18px;">
+						<label for="rvadm-tier-input" style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#475569;margin-bottom:6px;">Badge Role / Tier Text</label>
+						<input type="text" id="rvadm-tier-input" name="badge_tier" placeholder="ATTENDEE, CORE TEAM, EVENT CREW, or custom role..." style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#0f172a;background:#ffffff;box-sizing:border-box;" required>
+						<span style="display:block;font-size:11.5px;color:#64748b;margin-top:4px;">Printed in bold caps on top of the badge card.</span>
+					</div>
+
+					<div style="display:flex;justify-content:flex-end;gap:10px;">
+						<button type="button" class="button" onclick="closeBadgeTierModal()">Cancel</button>
+						<button type="submit" class="button button-primary" style="font-weight:700;padding:4px 16px;">Save Tier</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
 		<script>
 		function openAdminNoteModal(regId, name, note, nonce) {
 			document.getElementById('rvadm-note-reg-id').value = regId;
@@ -1482,6 +1597,20 @@ function aws_sbg_render_reinvent_admin_page() {
 		}
 		function closeAdminNoteModal() {
 			document.getElementById('aws-reinvent-note-modal').style.display = 'none';
+		}
+		function openBadgeTierModal(regId, name, tier, nonce) {
+			document.getElementById('rvadm-tier-reg-id').value = regId;
+			document.getElementById('rvadm-tier-nonce').value = nonce;
+			document.getElementById('rvadm-tier-input').value = tier || 'ATTENDEE';
+			document.getElementById('rvadm-tier-modal-title').textContent = 'Badge Tier: ' + name;
+			document.getElementById('aws-reinvent-tier-modal').style.display = 'flex';
+			document.getElementById('rvadm-tier-input').focus();
+		}
+		function closeBadgeTierModal() {
+			document.getElementById('aws-reinvent-tier-modal').style.display = 'none';
+		}
+		function selectTierPreset(val) {
+			document.getElementById('rvadm-tier-input').value = val;
 		}
 		</script>
 	</div>
@@ -1977,6 +2106,948 @@ function aws_sbg_render_reinvent_roster() {
 }
 
 /* ========================================================================
+ * 7B. PRINTABLE ATTENDEE BADGES (A4 SHEET PRINT STUDIO)
+ * ======================================================================== */
+
+function aws_sbg_render_reinvent_badges() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized access.' );
+	}
+
+	$tier_filter = isset( $_GET['tier'] ) ? sanitize_text_field( wp_unslash( $_GET['tier'] ) ) : '';
+
+	$args = array(
+		'post_type'      => 'aws_reinvent_reg',
+		'posts_per_page' => -1,
+		'post_status'    => 'publish',
+		'orderby'        => 'date',
+		'order'          => 'ASC',
+		'meta_query'     => array(
+			array( 'key' => 'approval_status', 'value' => 'approved' ),
+		),
+	);
+
+	$query = new WP_Query( $args );
+
+	$all_badges  = array();
+	$tier_counts = array( 'ALL' => 0 );
+
+	if ( $query->have_posts() ) {
+		while ( $query->have_posts() ) {
+			$query->the_post();
+			$id          = get_the_ID();
+			$reg_no      = get_post_meta( $id, 'registration_number', true );
+			$name        = trim( preg_replace( '/^(reinvent-#\d+|RIV-\d+)\s*[–\-]\s*/i', '', get_the_title() ) );
+			$tier        = aws_sbg_get_reinvent_badge_tier( $id );
+			$display_num = ! empty( $reg_no ) ? $reg_no : sprintf( 'RIV-%02d', $id );
+			$verify_url  = 'https://awsairuniversity.com/verify/' . rawurlencode( $display_num );
+
+			$tier_counts['ALL']++;
+			if ( ! isset( $tier_counts[ $tier ] ) ) {
+				$tier_counts[ $tier ] = 0;
+			}
+			$tier_counts[ $tier ]++;
+
+			// Apply tier filter if requested
+			if ( ! empty( $tier_filter ) && 'ALL' !== strtoupper( $tier_filter ) && strtoupper( $tier_filter ) !== strtoupper( $tier ) ) {
+				continue;
+			}
+
+			$all_badges[] = array(
+				'id'         => $id,
+				'reg_no'     => $display_num,
+				'name'       => $name,
+				'tier'       => $tier,
+				'verify_url' => $verify_url,
+			);
+		}
+		wp_reset_postdata();
+	}
+
+	// Natural sort by registration number ascending, then name
+	usort( $all_badges, function ( $a, $b ) {
+		if ( ! empty( $a['reg_no'] ) && ! empty( $b['reg_no'] ) ) {
+			return strnatcasecmp( $a['reg_no'], $b['reg_no'] );
+		}
+		if ( ! empty( $a['reg_no'] ) ) {
+			return -1;
+		}
+		if ( ! empty( $b['reg_no'] ) ) {
+			return 1;
+		}
+		return strcasecmp( $a['name'], $b['name'] );
+	} );
+
+	$total_badges = count( $all_badges );
+	$theme_uri    = get_template_directory_uri();
+	$fonts_uri    = $theme_uri . '/assets/design-kit/fonts';
+	$skyline_uri  = $theme_uri . '/assets/design-kit/Islamabad Landmark Footer.png';
+	$aws_logo_uri = $theme_uri . '/assets/images/AWS-Logo-White-Trim.png';
+	$sbg_logo_uri = function_exists( 'aws_sbg_get_logo_url' ) ? aws_sbg_get_logo_url() : $theme_uri . '/assets/images/icons/SBG-Logo-White-Transparent.png';
+	$qrcode_js    = $theme_uri . '/assets/design-kit/qrcode.min.js';
+	?>
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>AWS re:Invent 2026 — Attendee Badges Print Studio (A4)</title>
+		<style>
+			@font-face {
+				font-family: 'Amazon Ember Display';
+				src: url('<?php echo esc_url( $fonts_uri ); ?>/AmazonEmberDisplay_Md.ttf') format('truetype');
+				font-weight: 400;
+				font-style: normal;
+				font-display: swap;
+			}
+			@font-face {
+				font-family: 'Amazon Ember Display';
+				src: url('<?php echo esc_url( $fonts_uri ); ?>/AmazonEmberDisplay_Bd.ttf') format('truetype');
+				font-weight: 700;
+				font-style: normal;
+				font-display: swap;
+			}
+			@font-face {
+				font-family: 'Amazon Ember Mono';
+				src: url('<?php echo esc_url( $fonts_uri ); ?>/AmazonEmberMono_Rg.ttf') format('truetype');
+				font-weight: 400;
+				font-style: normal;
+				font-display: swap;
+			}
+			@font-face {
+				font-family: 'Amazon Ember Mono';
+				src: url('<?php echo esc_url( $fonts_uri ); ?>/AmazonEmberMono_Bd.ttf') format('truetype');
+				font-weight: 700;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@page {
+				size: A4 portrait;
+				margin: 0;
+			}
+
+			*, *::before, *::after {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+
+			body {
+				margin: 0;
+				padding: 0;
+				background: #0b0f17;
+				color: #0f172a;
+				font-family: 'Amazon Ember Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+				-webkit-print-color-adjust: exact !important;
+				print-color-adjust: exact !important;
+			}
+
+			/* Sticky Screen Control Bar */
+			.badge-screen-bar {
+				position: sticky;
+				top: 0;
+				z-index: 9999;
+				background: #0f172a;
+				color: #ffffff;
+				padding: 12px 24px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 16px;
+				flex-wrap: wrap;
+				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+				border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+			}
+
+			.badge-bar-left {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+
+			.badge-bar-pill {
+				background: #00DFD8;
+				color: #06040C;
+				font-family: 'Amazon Ember Mono', ui-monospace, monospace;
+				font-size: 11px;
+				font-weight: 800;
+				letter-spacing: 0.1em;
+				padding: 3px 8px;
+				border-radius: 4px;
+			}
+
+			.badge-bar-title {
+				font-size: 14px;
+				font-weight: 700;
+				color: #ffffff;
+				letter-spacing: 0.01em;
+			}
+
+			.badge-count-tag {
+				font-size: 12px;
+				color: #94a3b8;
+				font-family: 'Amazon Ember Mono', monospace;
+			}
+
+			/* Layout Toggle Buttons */
+			.badge-layout-switcher {
+				display: flex;
+				background: rgba(255, 255, 255, 0.08);
+				padding: 3px;
+				border-radius: 8px;
+				gap: 4px;
+			}
+
+			.badge-layout-btn {
+				background: transparent;
+				border: none;
+				color: #94a3b8;
+				font-size: 12px;
+				font-weight: 600;
+				padding: 6px 14px;
+				border-radius: 6px;
+				cursor: pointer;
+				transition: all 0.15s ease;
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+			}
+
+			.badge-layout-btn:hover {
+				color: #ffffff;
+				background: rgba(255, 255, 255, 0.05);
+			}
+
+			.badge-layout-btn.active {
+				background: #00DFD8;
+				color: #06040C;
+				font-weight: 800;
+				box-shadow: 0 2px 8px rgba(0, 223, 216, 0.3);
+			}
+
+			/* Tier Filter Dropdown */
+			.badge-tier-filter-wrap {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-size: 12px;
+				color: #cbd5e1;
+			}
+
+			.badge-tier-select {
+				background: #1e293b;
+				color: #ffffff;
+				border: 1px solid rgba(255, 255, 255, 0.2);
+				border-radius: 6px;
+				padding: 5px 10px;
+				font-size: 12px;
+				font-weight: 600;
+				cursor: pointer;
+			}
+
+			.badge-tier-select:focus {
+				outline: 2px solid #00DFD8;
+			}
+
+			/* Actions */
+			.badge-bar-actions {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+			}
+
+			.badge-btn-back {
+				color: #cbd5e1;
+				text-decoration: none;
+				font-size: 12px;
+				font-weight: 600;
+				padding: 7px 12px;
+				border: 1px solid rgba(255, 255, 255, 0.2);
+				border-radius: 6px;
+				transition: all 0.15s ease;
+			}
+
+			.badge-btn-back:hover {
+				color: #ffffff;
+				border-color: rgba(255, 255, 255, 0.4);
+				background: rgba(255, 255, 255, 0.05);
+			}
+
+			.badge-btn-print {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				background: #00DFD8;
+				color: #06040C;
+				border: none;
+				border-radius: 6px;
+				padding: 7px 18px;
+				font-size: 12.5px;
+				font-weight: 800;
+				cursor: pointer;
+				box-shadow: 0 2px 10px rgba(0, 223, 216, 0.35);
+				transition: all 0.15s ease;
+			}
+
+			.badge-btn-print:hover {
+				background: #38efea;
+				transform: translateY(-1px);
+			}
+
+			/* Print Instructions Banner */
+			.badge-vendor-tip {
+				max-width: 1000px;
+				margin: 14px auto 0;
+				background: rgba(15, 23, 42, 0.85);
+				border: 1px solid rgba(0, 223, 216, 0.3);
+				border-radius: 10px;
+				padding: 10px 18px;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 14px;
+				color: #e2e8f0;
+				font-size: 12px;
+			}
+
+			.badge-vendor-tip strong {
+				color: #00DFD8;
+			}
+
+			/* Printable A4 Sheets Container */
+			.badges-sheet-root {
+				padding: 20px 0 60px;
+			}
+
+			.a4-sheet {
+				width: 210mm;
+				min-height: 297mm;
+				height: 297mm;
+				margin: 24px auto;
+				background: #ffffff;
+				box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+				display: grid;
+				justify-content: center;
+				align-content: center;
+				position: relative;
+				box-sizing: border-box;
+				page-break-after: always;
+				break-after: page;
+				overflow: hidden;
+			}
+
+			/* Layout 4-Up (VIP Lanyard: 85mm × 119mm) */
+			.mode-4up .a4-sheet {
+				grid-template-columns: 85mm 85mm;
+				grid-template-rows: 119mm 119mm;
+				column-gap: 10mm;
+				row-gap: 10mm;
+				padding: 24.5mm 15mm;
+			}
+
+			.mode-4up .badge-card {
+				width: 85mm;
+				height: 119mm;
+			}
+
+			/* Layout 6-Up (Compact: 68mm × 95.2mm) */
+			.mode-6up .a4-sheet {
+				grid-template-columns: 68mm 68mm;
+				grid-template-rows: 95.2mm 95.2mm 95.2mm;
+				column-gap: 10mm;
+				row-gap: 4.5mm;
+				padding: 3.3mm 32mm;
+			}
+
+			.mode-6up .badge-card {
+				width: 68mm;
+				height: 95.2mm;
+			}
+
+			/* Margin crop notice outside printable area */
+			.sheet-margin-label {
+				position: absolute;
+				bottom: 5mm;
+				right: 10mm;
+				font-family: 'Amazon Ember Mono', monospace;
+				font-size: 7.5pt;
+				color: #94a3b8;
+				letter-spacing: 0.05em;
+				text-transform: uppercase;
+				pointer-events: none;
+			}
+
+			/* Badge Card Core Container (Aspect Ratio 5:7) */
+			.badge-card {
+				container-type: inline-size;
+				position: relative;
+				overflow: hidden;
+				user-select: none;
+				background: #ffffff;
+				border-radius: 6px;
+				border: 1px dashed rgba(100, 116, 139, 0.4);
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+			}
+
+			/* Corner Cutting Crop Marks */
+			.badge-crop {
+				position: absolute;
+				width: 4mm;
+				height: 4mm;
+				pointer-events: none;
+				z-index: 30;
+			}
+			.badge-crop-tl {
+				top: -1px; left: -1px;
+				border-top: 1.5px solid rgba(15, 23, 42, 0.35);
+				border-left: 1.5px solid rgba(15, 23, 42, 0.35);
+			}
+			.badge-crop-tr {
+				top: -1px; right: -1px;
+				border-top: 1.5px solid rgba(15, 23, 42, 0.35);
+				border-right: 1.5px solid rgba(15, 23, 42, 0.35);
+			}
+			.badge-crop-bl {
+				bottom: -1px; left: -1px;
+				border-bottom: 1.5px solid rgba(15, 23, 42, 0.35);
+				border-left: 1.5px solid rgba(15, 23, 42, 0.35);
+			}
+			.badge-crop-br {
+				bottom: -1px; right: -1px;
+				border-bottom: 1.5px solid rgba(15, 23, 42, 0.35);
+				border-right: 1.5px solid rgba(15, 23, 42, 0.35);
+			}
+
+			/* Lanyard Punch Hole Indicator */
+			.badge-punch-guide {
+				position: absolute;
+				top: 2.5mm;
+				left: 50%;
+				transform: translateX(-50%);
+				width: 12mm;
+				height: 3.2mm;
+				border: 0.8px dashed rgba(255, 255, 255, 0.45);
+				border-radius: 9999px;
+				pointer-events: none;
+				z-index: 20;
+			}
+
+			/* --- 1. Badge Top Canvas (26%) --- */
+			.badge-header {
+				position: relative;
+				height: 26%;
+				width: 100%;
+				overflow: hidden;
+				border-bottom: 1.5px solid rgba(6, 4, 12, 0.08);
+				background: linear-gradient(135deg, #6B45E8 0%, #2E63E0 22%, #8749DC 52%, #9462E0 70%, #1F8CC8 86%, #0A8DC0 100%);
+			}
+
+			.badge-header-mesh {
+				position: absolute;
+				inset: 0;
+				pointer-events: none;
+				background:
+					radial-gradient(120% 90% at 8% -6%, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 52%),
+					radial-gradient(90% 70% at 96% 104%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 55%),
+					repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.045) 0px, rgba(255, 255, 255, 0.045) 1px, rgba(255, 255, 255, 0) 1px, rgba(255, 255, 255, 0) 7px);
+				mix-blend-mode: screen;
+			}
+
+			.badge-header-inner {
+				position: relative;
+				z-index: 10;
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				width: 100%;
+				height: 100%;
+				padding: clamp(8px, 3.8cqi, 16px) clamp(10px, 4.2cqi, 20px) 0;
+			}
+
+			/* re:Invent Wordmark */
+			.badge-brand-stack {
+				display: inline-flex;
+				flex-direction: column;
+				color: #ffffff;
+				font-family: 'Amazon Ember Mono', monospace;
+			}
+
+			.badge-brand-row {
+				display: inline-flex;
+				align-items: baseline;
+				gap: clamp(2px, 0.8cqi, 4px);
+			}
+
+			.badge-brand-re {
+				position: relative;
+				display: inline-block;
+				font-size: clamp(11px, 4.2cqi, 15px);
+				font-weight: 400;
+				letter-spacing: -0.01em;
+				line-height: 1;
+				color: #ffffff;
+			}
+
+			.badge-brand-aws {
+				position: absolute;
+				left: 0;
+				bottom: calc(100% - 0.2cqi);
+				font-size: clamp(8px, 3.2cqi, 11px);
+				font-weight: 700;
+				letter-spacing: 0.04em;
+				line-height: 1;
+				color: #ffffff;
+			}
+
+			.badge-brand-invent {
+				font-size: clamp(19px, 7.2cqi, 27px);
+				font-weight: 400;
+				letter-spacing: -0.03em;
+				line-height: 0.95;
+				color: #ffffff;
+			}
+
+			.badge-brand-sub {
+				font-size: clamp(6.5px, 2.3cqi, 8.5px);
+				font-weight: 700;
+				letter-spacing: 0.03em;
+				color: rgba(255, 255, 255, 0.9);
+				text-transform: uppercase;
+				margin-top: clamp(2px, 0.7cqi, 4px);
+				line-height: 1;
+			}
+
+			/* Logos in Header */
+			.badge-header-logos {
+				display: flex;
+				align-items: center;
+				gap: clamp(8px, 2.8cqi, 14px);
+			}
+
+			.badge-logo-aws {
+				height: clamp(16px, 5.8cqi, 24px);
+				width: auto;
+				display: block;
+				object-fit: contain;
+			}
+
+			.badge-logo-sbg {
+				height: clamp(16px, 6.2cqi, 26px);
+				width: auto;
+				display: block;
+				object-fit: contain;
+				filter: brightness(0) invert(1);
+			}
+
+			/* --- 2. Badge Center Body (64%) --- */
+			.badge-body {
+				position: relative;
+				flex: 1;
+				background: #ffffff;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: space-between;
+				padding: clamp(8px, 3cqi, 14px) clamp(12px, 5cqi, 24px) clamp(6px, 2cqi, 10px);
+				text-align: center;
+			}
+
+			/* Tier Role Pill */
+			.badge-tier-pill {
+				border-radius: 9999px;
+				padding: clamp(3px, 1.2cqi, 6px) clamp(10px, 3.5cqi, 18px);
+				font-family: 'Amazon Ember Mono', monospace;
+				font-size: clamp(8px, 2.8cqi, 11px);
+				font-weight: 700;
+				letter-spacing: 0.2em;
+				text-transform: uppercase;
+				line-height: 1;
+				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+				white-space: nowrap;
+			}
+
+			.tier-attendee { background: #06040C; color: #FFFFFF; }
+			.tier-core-team { background: #4F46E5; color: #FFFFFF; }
+			.tier-event-crew, .tier-crew { background: #00DFD8; color: #06040C; }
+			.tier-speaker { background: #FF9900; color: #06040C; }
+			.tier-vip-guest, .tier-vip { background: #DB2777; color: #FFFFFF; }
+			.tier-organizer { background: #7C3AED; color: #FFFFFF; }
+			.tier-custom { background: #06040C; color: #FFFFFF; }
+
+			/* Attendee Name Plate with Double-Rule Frame */
+			.badge-name-frame {
+				width: 90%;
+				border-top: 2.2px solid rgba(107, 111, 118, 0.45);
+				border-bottom: 2.2px solid rgba(107, 111, 118, 0.45);
+				padding: clamp(6px, 2.4cqi, 14px) 0;
+				margin: clamp(4px, 1.5cqi, 8px) 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				min-height: clamp(38px, 15cqi, 56px);
+			}
+
+			.badge-name {
+				font-family: 'Amazon Ember Display', sans-serif;
+				font-size: clamp(14px, 5.8cqi, 20px);
+				font-weight: 700;
+				letter-spacing: -0.015em;
+				line-height: 1.1;
+				color: #06040C;
+				text-transform: uppercase;
+				margin: 0;
+				max-width: 100%;
+				word-break: break-word;
+				display: -webkit-box;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
+				overflow: hidden;
+			}
+
+			.badge-name.name-long {
+				font-size: clamp(11.5px, 4.6cqi, 16px);
+				line-height: 1.08;
+			}
+
+			/* Bottom Row: #RIV-XX and Vector QR Code */
+			.badge-bottom-row {
+				display: flex;
+				align-items: flex-end;
+				justify-content: space-between;
+				width: 92%;
+				gap: 8px;
+			}
+
+			.badge-id {
+				font-family: 'Amazon Ember Mono', monospace;
+				font-size: clamp(12px, 4.4cqi, 18px);
+				font-weight: 700;
+				letter-spacing: 0.04em;
+				color: #06040C;
+				line-height: 1;
+				text-align: left;
+				flex-shrink: 0;
+				padding-bottom: 3px;
+			}
+
+			.badge-qr-box {
+				width: clamp(44px, 17cqi, 62px);
+				height: clamp(44px, 17cqi, 62px);
+				padding: 3px;
+				background: #FFFFFF;
+				border: 1.8px solid #06040C;
+				border-radius: clamp(5px, 1.8cqi, 8px);
+				flex-shrink: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.badge-qr-box canvas,
+			.badge-qr-box img,
+			.badge-qr-box svg {
+				width: 100% !important;
+				height: 100% !important;
+				display: block !important;
+				image-rendering: pixelated;
+			}
+
+			/* --- 3. Badge Footer Skyline Watermark (10%) --- */
+			.badge-footer {
+				position: relative;
+				height: 10%;
+				width: 100%;
+				overflow: hidden;
+				background: #FFFFFF;
+			}
+
+			.badge-skyline {
+				position: absolute;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				object-position: bottom;
+				display: block;
+				opacity: 0.22;
+				filter: brightness(0);
+				pointer-events: none;
+			}
+
+			/* --- Print Media Formatting --- */
+			@media print {
+				body {
+					background: #ffffff !important;
+					padding: 0 !important;
+					margin: 0 !important;
+				}
+
+				.badge-screen-bar,
+				.badge-vendor-tip {
+					display: none !important;
+				}
+
+				.badges-sheet-root {
+					padding: 0 !important;
+					margin: 0 !important;
+				}
+
+				.a4-sheet {
+					margin: 0 !important;
+					box-shadow: none !important;
+					page-break-after: always !important;
+					break-after: page !important;
+				}
+
+				.a4-sheet:last-of-type {
+					page-break-after: auto !important;
+					break-after: auto !important;
+				}
+			}
+		</style>
+	</head>
+	<body>
+
+		<!-- Sticky Screen Controls -->
+		<div class="badge-screen-bar">
+			<div class="badge-bar-left">
+				<span class="badge-bar-pill">AWS RE:INVENT 2026</span>
+				<span class="badge-bar-title">Attendee Badges Print Studio</span>
+				<span class="badge-count-tag" id="sheet-count-indicator"><?php echo intval( $total_badges ); ?> Badges</span>
+			</div>
+
+			<!-- 4-Up vs 6-Up Layout Switcher -->
+			<div class="badge-layout-switcher">
+				<button type="button" class="badge-layout-btn active" data-layout="4up" onclick="setLayout('4up')">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>
+					4 Per Page (VIP Lanyard · 85×119mm)
+				</button>
+				<button type="button" class="badge-layout-btn" data-layout="6up" onclick="setLayout('6up')">
+					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="2" width="8" height="5.5" rx="1"/><rect x="13" y="2" width="8" height="5.5" rx="1"/><rect x="3" y="9.25" width="8" height="5.5" rx="1"/><rect x="13" y="9.25" width="8" height="5.5" rx="1"/><rect x="3" y="16.5" width="8" height="5.5" rx="1"/><rect x="13" y="16.5" width="8" height="5.5" rx="1"/></svg>
+					6 Per Page (Compact · 68×95mm)
+				</button>
+			</div>
+
+			<!-- Tier Filter Dropdown -->
+			<div class="badge-tier-filter-wrap">
+				<label for="badge-tier-filter">Filter Role:</label>
+				<select id="badge-tier-filter" class="badge-tier-select" onchange="filterByTier(this.value)">
+					<option value="ALL" <?php selected( empty( $tier_filter ) || 'ALL' === strtoupper( $tier_filter ) ); ?>>All Roles (<?php echo intval( $tier_counts['ALL'] ); ?>)</option>
+					<?php foreach ( $tier_counts as $t_name => $t_cnt ) : ?>
+						<?php if ( 'ALL' === $t_name ) continue; ?>
+						<option value="<?php echo esc_attr( $t_name ); ?>" <?php selected( strtoupper( $tier_filter ), strtoupper( $t_name ) ); ?>>
+							<?php echo esc_html( $t_name ); ?> (<?php echo intval( $t_cnt ); ?>)
+						</option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+
+			<!-- Actions -->
+			<div class="badge-bar-actions">
+				<a class="badge-btn-back" href="<?php echo esc_url( admin_url( 'admin.php?page=aws-reinvent-registrations' ) ); ?>">← Registrations</a>
+				<button type="button" class="badge-btn-print" onclick="window.print()">
+					<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+					Print / Save PDF (Ctrl + P)
+				</button>
+			</div>
+		</div>
+
+		<!-- Print Vendor Guidance Tip -->
+		<div class="badge-vendor-tip">
+			<div>
+				<strong>🖨️ Print Vendor Tip:</strong> In your browser's Print Dialog, select Destination <strong>Save as PDF</strong>, Paper Size <strong>A4</strong>, Margins <strong>None</strong> (or 0), and make sure <strong>Background graphics</strong> is <strong>CHECKED</strong>.
+			</div>
+			<div style="color:#94a3b8; font-size:11px;">
+				Front side only · Cutting guides and corner crosshairs included
+			</div>
+		</div>
+
+		<!-- Hidden Master Pool of Pre-rendered Badges -->
+		<div id="badges-pool" style="display:none;">
+			<?php foreach ( $all_badges as $b ) : ?>
+				<?php
+				$tier_class = 'tier-' . sanitize_title( $b['tier'] );
+				if ( ! in_array( $tier_class, array( 'tier-attendee', 'tier-core-team', 'tier-event-crew', 'tier-crew', 'tier-speaker', 'tier-vip-guest', 'tier-vip', 'tier-organizer' ), true ) ) {
+					$tier_class .= ' tier-custom';
+				}
+				$is_name_long = mb_strlen( $b['name'] ) > 20;
+				?>
+				<div class="badge-card" data-tier="<?php echo esc_attr( strtoupper( $b['tier'] ) ); ?>">
+					<!-- Corner Crop Marks for Cutter -->
+					<div class="badge-crop badge-crop-tl"></div>
+					<div class="badge-crop badge-crop-tr"></div>
+					<div class="badge-crop badge-crop-bl"></div>
+					<div class="badge-crop badge-crop-br"></div>
+
+					<!-- Faint Lanyard Punch Capsule Guide -->
+					<div class="badge-punch-guide" title="Lanyard Punch Guide"></div>
+
+					<!-- 1. Header Canvas (26%) -->
+					<div class="badge-header">
+						<div class="badge-header-mesh"></div>
+						<div class="badge-header-inner">
+							<div class="badge-brand-stack">
+								<div class="badge-brand-row">
+									<span class="badge-brand-re"><span class="badge-brand-aws">AWS</span>re:</span><span class="badge-brand-invent">Invent</span>
+								</div>
+								<div class="badge-brand-sub">WATCH &amp; BUILD PARTY 2026</div>
+							</div>
+							<div class="badge-header-logos">
+								<img src="<?php echo esc_url( $aws_logo_uri ); ?>" alt="AWS" class="badge-logo-aws">
+								<img src="<?php echo esc_url( $sbg_logo_uri ); ?>" alt="SBG" class="badge-logo-sbg">
+							</div>
+						</div>
+					</div>
+
+					<!-- 2. Center Body (64%) -->
+					<div class="badge-body">
+						<div class="badge-tier-pill <?php echo esc_attr( $tier_class ); ?>">
+							<?php echo esc_html( $b['tier'] ); ?>
+						</div>
+						<div class="badge-name-frame">
+							<h2 class="badge-name <?php echo $is_name_long ? 'name-long' : ''; ?>">
+								<?php echo esc_html( $b['name'] ); ?>
+							</h2>
+						</div>
+						<div class="badge-bottom-row">
+							<div class="badge-id">#<?php echo esc_html( $b['reg_no'] ); ?></div>
+							<div class="badge-qr-box" data-qr="<?php echo esc_attr( $b['verify_url'] ); ?>" title="Verify badge #<?php echo esc_attr( $b['reg_no'] ); ?>"></div>
+						</div>
+					</div>
+
+					<!-- 3. Footer Skyline Watermark (10%) -->
+					<div class="badge-footer">
+						<img src="<?php echo esc_url( $skyline_uri ); ?>" alt="Islamabad Skyline" class="badge-skyline">
+					</div>
+				</div>
+			<?php endforeach; ?>
+		</div>
+
+		<!-- Dynamic A4 Sheet Container -->
+		<div id="badges-sheet-root" class="badges-sheet-root mode-4up">
+			<?php if ( empty( $all_badges ) ) : ?>
+				<div class="a4-sheet" style="display:flex; align-items:center; justify-content:center; flex-direction:column; gap:12px; color:#64748b;">
+					<h2 style="font-size:18px; color:#0f172a;">No Approved Registrations Found</h2>
+					<p style="font-size:13px;">Approve attendee applications first to print their badges.</p>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-reinvent-registrations' ) ); ?>" class="badge-btn-back" style="color:#0f172a; border-color:#cbd5e1;">Return to Registrations</a>
+				</div>
+			<?php endif; ?>
+		</div>
+
+		<!-- Offline Pure Vector QRCode Library -->
+		<script src="<?php echo esc_url( $qrcode_js ); ?>"></script>
+
+		<script>
+		let masterBadgePool = [];
+		let currentLayoutMode = '4up';
+
+		document.addEventListener('DOMContentLoaded', function () {
+			const pool = document.getElementById('badges-pool');
+			if (!pool) return;
+
+			masterBadgePool = Array.from(pool.querySelectorAll('.badge-card'));
+
+			// Restore saved layout mode or default to 4up
+			const savedMode = localStorage.getItem('aws_sbg_badges_layout');
+			if (savedMode === '6up' || savedMode === '4up') {
+				currentLayoutMode = savedMode;
+			}
+
+			// Generate vector QR codes once for all elements in memory
+			generateAllQRCodes();
+
+			// Initial pagination render
+			setLayout(currentLayoutMode);
+		});
+
+		function setLayout(mode) {
+			currentLayoutMode = mode;
+			localStorage.setItem('aws_sbg_badges_layout', mode);
+
+			// Update button states
+			document.querySelectorAll('.badge-layout-btn').forEach(btn => {
+				btn.classList.toggle('active', btn.dataset.layout === mode);
+			});
+
+			renderPages();
+		}
+
+		function filterByTier(tier) {
+			const url = new URL(window.location.href);
+			if (!tier || tier === 'ALL') {
+				url.searchParams.delete('tier');
+			} else {
+				url.searchParams.set('tier', tier);
+			}
+			window.location.href = url.toString();
+		}
+
+		function renderPages() {
+			const root = document.getElementById('badges-sheet-root');
+			if (!root || masterBadgePool.length === 0) return;
+
+			root.className = 'badges-sheet-root mode-' + currentLayoutMode;
+			root.innerHTML = '';
+
+			const perPage = currentLayoutMode === '6up' ? 6 : 4;
+			const totalSheets = Math.ceil(masterBadgePool.length / perPage);
+
+			for (let i = 0; i < totalSheets; i++) {
+				const sheet = document.createElement('div');
+				sheet.className = 'a4-sheet';
+
+				const slice = masterBadgePool.slice(i * perPage, (i + 1) * perPage);
+				slice.forEach(card => sheet.appendChild(card));
+
+				const label = document.createElement('div');
+				label.className = 'sheet-margin-label';
+				label.textContent = 'Sheet ' + (i + 1) + ' of ' + totalSheets + ' · ' + (currentLayoutMode === '4up' ? '4-Up (VIP Lanyard · 85×119mm)' : '6-Up (Compact · 68×95mm)');
+				sheet.appendChild(label);
+
+				root.appendChild(sheet);
+			}
+
+			const indicator = document.getElementById('sheet-count-indicator');
+			if (indicator) {
+				indicator.textContent = masterBadgePool.length + ' Badges on ' + totalSheets + ' A4 ' + (totalSheets === 1 ? 'Sheet' : 'Sheets');
+			}
+		}
+
+		function generateAllQRCodes() {
+			if (typeof QRCode === 'undefined') return;
+
+			masterBadgePool.forEach(card => {
+				const qrBox = card.querySelector('.badge-qr-box');
+				if (!qrBox || qrBox.dataset.rendered === '1') return;
+
+				const text = qrBox.dataset.qr;
+				if (!text) return;
+
+				new QRCode(qrBox, {
+					text: text,
+					width: 180,
+					height: 180,
+					colorDark: '#06040C',
+					colorLight: '#FFFFFF',
+					correctLevel: QRCode.CorrectLevel.M
+				});
+
+				qrBox.dataset.rendered = '1';
+			});
+		}
+		</script>
+	</body>
+	</html>
+	<?php
+	exit;
+}
+
+/* ========================================================================
  * 8. CSV EXPORT
  * ======================================================================== */
 
@@ -2002,12 +3073,13 @@ function aws_sbg_export_reinvent_csv() {
 	header( 'Content-Disposition: attachment; filename=' . $filename );
 
 	$output = fopen( 'php://output', 'w' );
-	fputcsv( $output, array( 'Registration #', 'Name', 'Email', 'WhatsApp', 'CNIC', 'Institute/Company', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS or Community Event Before', 'Applicant Note (Last Attended Event)', 'Admin Note (Internal)', 'Will Attend', 'Vehicle', 'Parking Policy', 'Approval Status', 'Registered At' ) );
+	fputcsv( $output, array( 'Registration #', 'Name', 'Badge Tier', 'Email', 'WhatsApp', 'CNIC', 'Institute/Company', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS or Community Event Before', 'Applicant Note (Last Attended Event)', 'Admin Note (Internal)', 'Will Attend', 'Vehicle', 'Parking Policy', 'Approval Status', 'Registered At' ) );
 
 	if ( $query->have_posts() ) {
 		foreach ( $query->posts as $reg ) {
 			$title       = preg_replace( '/^(reinvent-#\d+|RIV-\d+)\s*[–\-]\s*/i', '', get_the_title( $reg->ID ) );
 			$reg_number  = get_post_meta( $reg->ID, 'registration_number', true );
+			$badge_tier  = aws_sbg_get_reinvent_badge_tier( $reg->ID );
 			$email       = get_post_meta( $reg->ID, 'email', true );
 			$whatsapp    = get_post_meta( $reg->ID, 'whatsapp', true );
 			$cnic        = get_post_meta( $reg->ID, 'cnic', true );
@@ -2028,7 +3100,7 @@ function aws_sbg_export_reinvent_csv() {
 			$approval   = get_post_meta( $reg->ID, 'approval_status', true ) ?: 'pending';
 			$registered = get_the_date( 'Y-m-d H:i:s', $reg->ID );
 
-			fputcsv( $output, array( $reg_number, $title, $email, $whatsapp, $cnic, $university, ucfirst( str_replace( '_', ' ', $audience ) ), $city, $linkedin, ucfirst( $attended ), $why, $admin_note, ucfirst( $will_attend ), $vehicle, $parking, ucfirst( $approval ), $registered ) );
+			fputcsv( $output, array( $reg_number, $title, $badge_tier, $email, $whatsapp, $cnic, $university, ucfirst( str_replace( '_', ' ', $audience ) ), $city, $linkedin, ucfirst( $attended ), $why, $admin_note, ucfirst( $will_attend ), $vehicle, $parking, ucfirst( $approval ), $registered ) );
 		}
 	}
 

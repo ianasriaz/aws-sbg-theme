@@ -34,6 +34,33 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-12 01:30 - Antigravity
+
+**Task**: Auto-generate attendee cards (as designed in the brand kit) for approved re:Invent registrations arranged on an A4 page for print vendor export with layout toggle, front-side imposition, and admin badge tier customization.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` -
+  - Added `aws_sbg_get_reinvent_badge_tier()` returning postmeta `_badge_tier` (defaulting to `'ATTENDEE'`).
+  - Added `admin_post_aws_sbg_reinvent_save_badge_tier` handler to update badge tier/role from WP Admin with nonce and capabilities checks.
+  - Added "Badge Tier" column in the admin registrations table with color-coded role chips and quick edit modal.
+  - Added quick edit modal in WP Admin with presets (`ATTENDEE`, `CORE TEAM`, `EVENT CREW`, `SPEAKER`, `VIP GUEST`, `ORGANIZER`) and custom text input.
+  - Added `🪪 Print Attendee Badges (PDF)` action button in `.rvadm-actions`.
+  - Added `aws_sbg_render_reinvent_badges()` print studio view triggered via `admin.php?page=aws-reinvent-registrations&badges=1`:
+    - Screen toolbar with stats, 4-up (VIP Lanyard · 85×119mm) vs 6-up (Compact · 68×95mm) layout toggle, role/tier filter, and print button.
+    - Single-sided A4 imposition with precise cutting guidelines and corner crop crosshairs for print vendor guillotine cutting.
+    - Card component matching `design-kit.js` component `tf`: 5:7 aspect ratio, dark gradient + radial mesh header, `re:Invent` wordmark with `WATCH & BUILD PARTY 2026` subline, white AWS smile and SBG logos, lanyard punch guide, role pill, double-rule name frame with uppercase attendee name, `#RIV-XX` badge number, framed vector QR code pointing to verification URL, and Faisal Mosque / Islamabad skyline watermark footer.
+    - Client-side dynamic repagination script preserving layout choice across sessions in `localStorage`.
+  - Added `Badge Tier` column to CSV export.
+- `assets/design-kit/qrcode.min.js` -
+  - Added lightweight, offline, dependency-free QR code vector generator library.
+
+**Key Decisions**:
+- **Grid Layout Imposition**: Provided toggle between 4-Up (VIP Lanyard: 85mm × 119mm) and 6-Up (Compact: 68mm × 95.2mm), both strictly preserving the 5:7 card aspect ratio on A4 portrait (210mm × 297mm) with safety margins to prevent page overflow in all browser print engines.
+- **Offline Vector QR Codes**: QR codes are generated client-side from the bundled offline library directly into crisp vector shapes, ensuring 1200+ DPI vector sharpness in PDF exports with zero external API calls or server dependencies.
+- **Badge Tier Customization**: Standardized on default `ATTENDEE` while empowering event organizers to update anyone to `CORE TEAM`, `EVENT CREW`, `SPEAKER`, `VIP GUEST`, or custom text with immediate visual feedback in WP Admin.
+
+---
+
 ### 2026-11-12 01:06 - Antigravity
 
 **Task**: Make photo upload for re:Invent invitation confirmation form optional.
