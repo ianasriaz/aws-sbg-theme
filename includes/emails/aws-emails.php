@@ -129,15 +129,17 @@ function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $ct
 		$body_html
 	);
 
+	$aws_logo_url = get_template_directory_uri() . '/assets/images/icons/aws-dark.png';
+
 	$cta_html = '';
 	if ( $cta_url && $cta_label ) {
 		$is_wa     = ( false !== stripos( $cta_label, 'whatsapp' ) );
-		$btn_bg    = $is_wa ? '#25D366' : '#0f172a';
+		$btn_bg    = $is_wa ? '#16a34a' : '#232F3E';
 		$btn_color = '#FFFFFF';
 
-		$cta_html = '<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:18px 0 6px 0;">'
+		$cta_html = '<table role="presentation" border="0" cellspacing="0" cellpadding="0" style="margin:18px 0 4px 0;">'
 			. '<tr><td align="left" bgcolor="' . esc_attr( $btn_bg ) . '" style="border-radius:6px;">'
-			. '<a class="email-btn" href="' . esc_url( $cta_url ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:10px 20px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.2px;color:' . esc_attr( $btn_color ) . ';text-decoration:none;border-radius:6px;white-space:nowrap;">'
+			. '<a class="email-btn" href="' . esc_url( $cta_url ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:11px 22px;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:13.5px;font-weight:600;letter-spacing:0.2px;color:' . esc_attr( $btn_color ) . ';text-decoration:none;border-radius:6px;white-space:nowrap;">'
 			. esc_html( $cta_label )
 			. '</a></td></tr>';
 
@@ -158,15 +160,19 @@ function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $ct
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="color-scheme" content="light">
 	<meta name="supported-color-schemes" content="light">
-	<title><?php echo esc_html( $title ); ?></title>
+	<title><?php echo esc_html( $title ? $title : 'AWS Student Builder Group' ); ?></title>
 	<style>
 		body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; background-color: #f4f6f8; }
 		table { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
 		@media only screen and (max-width: 560px) {
 			.email-outer-td { padding: 14px 8px !important; }
-			.email-card-td { padding: 22px 18px !important; }
-			.email-title { font-size: 17px !important; }
-			.email-body { font-size: 13.5px !important; }
+			.email-header-td { padding: 16px 20px !important; }
+			.email-card-td { padding: 24px 20px !important; }
+			.email-footer-td { padding: 16px 20px !important; }
+			.email-title { font-size: 18px !important; }
+			.email-body { font-size: 14px !important; }
+			.pass-col { display: block !important; width: 100% !important; text-align: center !important; }
+			.pass-qr-col { padding-top: 16px !important; text-align: center !important; }
 		}
 	</style>
 </head>
@@ -174,19 +180,42 @@ function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $ct
 	<table class="email-outer" width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation" style="background-color:#f4f6f8;width:100%;">
 		<tr>
 			<td class="email-outer-td" align="center" style="padding:32px 12px;">
-				<table class="email-card" width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation" style="max-width:500px;width:100%;background-color:#ffffff;border:1px solid #e2e8f0;border-radius:10px;">
+				<table class="email-card" width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation" style="max-width:580px;width:100%;background-color:#ffffff;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+					<!-- Brand Header Strip -->
 					<tr>
-						<td class="email-card-td" style="padding:28px 24px;">
+						<td class="email-header-td" style="background-color:#f8fafc;border-bottom:1px solid #e2e8f0;padding:18px 34px;">
+							<table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
+								<tr>
+									<td align="left" valign="middle">
+										<img src="<?php echo esc_url( $aws_logo_url ); ?>" alt="AWS" width="52" style="display:block;width:52px;height:auto;border:0;" />
+									</td>
+									<td align="right" valign="middle" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#64748b;">
+										STUDENT BUILDER GROUP
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<!-- Main Body -->
+					<tr>
+						<td class="email-card-td" style="padding:34px 34px 28px 34px;">
 							<?php if ( $kicker ) : ?>
 								<div class="email-kicker" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#64748b;margin-bottom:8px;"><?php echo esc_html( $kicker ); ?></div>
 							<?php endif; ?>
-							<div class="email-title" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:18px;font-weight:700;color:#0f172a;line-height:1.35;margin-bottom:14px;"><?php echo esc_html( $title ); ?></div>
-							<div class="email-body" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13.5px;color:#334155;line-height:1.6;"><?php echo $body_html; ?></div>
+							<?php if ( $title ) : ?>
+								<div class="email-title" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:19px;font-weight:700;color:#0f172a;line-height:1.35;margin-bottom:16px;"><?php echo esc_html( $title ); ?></div>
+							<?php endif; ?>
+							<div class="email-body" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14.5px;color:#1f2937;line-height:1.65;"><?php echo $body_html; ?></div>
 							<?php echo $cta_html; ?>
 							<?php if ( $closing_html ) : ?>
-								<div class="email-closing" style="margin-top:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;color:#475569;line-height:1.5;"><?php echo $closing_html; ?></div>
+								<div class="email-closing" style="margin-top:18px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13.5px;color:#475569;line-height:1.55;"><?php echo $closing_html; ?></div>
 							<?php endif; ?>
-							<div style="border-top:1px solid #e2e8f0;margin-top:22px;padding-top:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;letter-spacing:0.04em;color:#94a3b8;">AWS STUDENT BUILDER GROUP · AIR UNIVERSITY ISLAMABAD · <?php echo esc_html( date( 'Y' ) ); ?></div>
+						</td>
+					</tr>
+					<!-- Unified Footer -->
+					<tr>
+						<td class="email-footer-td" align="center" style="background-color:#f8fafc;border-top:1px solid #e2e8f0;padding:16px 34px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;font-weight:600;letter-spacing:0.08em;color:#64748b;">
+							TEAM - AWS SBG AIR UNIVERSITY ISLAMABAD
 						</td>
 					</tr>
 				</table>

@@ -1243,6 +1243,16 @@ aws-sbg-theme/
 - Zero external CDN dependencies for camera scanning ensures high reliability on venue Wi-Fi / mobile hotspots.
 - Desk Terminal UI Streamlining: Removed live check-in percentage (`0% CHECKED IN`) from the frontend volunteer interface; removed default 300+ attendee list dump on load in favor of a clean, focused search bar and camera scanner; disabled automatic check-in on QR scan so desk volunteers review attendee details and explicitly click "Confirm Check-In & Issue Badge".
 
+### 2026-11-13 - Clean Responsive Email Shell & re:Invent Email Redesign
+**Changes Made**:
+- `assets/images/icons/aws-dark.png`:
+  - Created `#232F3E` Squid Ink + `#FF9900` smile dark-lettering AWS logo asset (`602x360` RGBA) for light-mode email letterheads.
+- `includes/emails/aws-emails.php`:
+  - Redesigned `aws_sbg_email_template()` into a clean, responsive (`580px` max-width) light-mode letterhead shell inspired by minimal transactional emails: `#f8fafc` top header strip with `aws-dark.png` on the left and `STUDENT BUILDER GROUP` on the right, optional title/kicker, responsive mobile stacking rules (`.email-header-td`, `.email-footer-td`, `.pass-col`, `.pass-qr-col` at `max-width: 560px`), and unified footer (`TEAM - AWS SBG AIR UNIVERSITY ISLAMABAD`).
+- `includes/features/feature-reinvent-registration.php`:
+  - Redesigned the re:Invent registration confirmation ("Under Review") email and the approval + Digital Event Pass email to remove AI-slop bullet lists, emojis, dark/neon boxes, and redundant `"at Air University Islamabad"` copy.
+  - Replaced the approval pass with a responsive two-column light-mode table card (`#232F3E` top bar, `#f8fafc` body, tier pill, attendee name, `#RIV-XX`, `Open Mobile Pass` link, and `120x120` QR code).
+
 ---
 
 ## Active Considerations

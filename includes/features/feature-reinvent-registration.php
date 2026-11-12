@@ -740,17 +740,16 @@ function aws_sbg_handle_reinvent_registration() {
 
 	/* Applicant confirmation (under review) */
 	if ( function_exists( 'aws_sbg_mail_send' ) ) {
-		$confirm_body = '<p style="margin:0 0 12px 0; color:#334155;">Hi <strong style="color:#0f172a;">' . esc_html( $full_name ) . '</strong>,</p>'
-			. '<p style="margin:0 0 14px 0; color:#334155;">Thank you for your interest in <strong style="color:#0f172a;">AWS re:Invent Watch &amp; Build Party 2026</strong>, hosted by the AWS Student Builder Group at Air University Islamabad.</p>'
-			. '<p style="margin:0 0 14px 0; color:#334155;">Your application has been received and is now under review. If approved, you\'ll receive your official re:Invent pass and event clearance details.</p>'
-			. '<p style="margin:0 0 8px 0; font-weight:700; color:#0f172a;">What happens next</p>'
-			. '<ul style="margin:0 0 14px 20px; padding:0; color:#334155;">'
-			. '<li style="margin:0 0 7px 0;">Our organizing committee reviews your registration details.</li>'
-			. '<li style="margin:0;">You will receive an email once your seat and pass are confirmed.</li>'
-			. '</ul>'
-			. '<p style="margin:16px 0 0 0; color:#64748b; font-size:13px;">AWS Student Builder Group at Air University Islamabad<br>info@awsairuniversity.com · +923492449953</p>';
+		$confirm_body = '<p style="margin:0 0 16px 0; color:#111827;">Hi <strong>' . esc_html( $full_name ) . '</strong>,</p>'
+			. '<p style="margin:0 0 16px 0; color:#1f2937;">Thank you for registering for <strong>AWS re:Invent Watch &amp; Build Party 2026</strong>.</p>'
+			. '<p style="margin:0 0 16px 0; color:#1f2937;">We have received your application and our team is currently reviewing submissions. Due to limited seating, passes are issued upon review.</p>'
+			. '<p style="margin:0 0 22px 0; color:#1f2937;">Once your seat is confirmed, we will send your official event pass directly to this email.</p>'
+			. '<p style="margin:0 0 4px 0; color:#111827;">Best regards,</p>'
+			. '<p style="margin:0; color:#111827; font-weight:600;">AWS Student Builder Group</p>'
+			. '<div style="border-top:1px solid #e5e7eb; margin:24px 0 16px 0;"></div>'
+			. '<p style="margin:0; font-size:12.5px; color:#6b7280; line-height:1.5;">This email confirms receipt of your registration for AWS re:Invent Watch &amp; Build Party 2026. Join our WhatsApp community below for event updates.</p>';
 		try {
-			aws_sbg_mail_send( 'reinvent', $email, 'Your AWS re:Invent application is under review', 'Application Received', 'Thank you for your interest', $confirm_body, AWS_REINVENT_WHATSAPP_URL, 'Join WhatsApp Community' );
+			aws_sbg_mail_send( 'reinvent', $email, 'Your AWS re:Invent Watch & Build Party 2026 application', '', '', $confirm_body, AWS_REINVENT_WHATSAPP_URL, 'Join WhatsApp Community' );
 		} catch ( \Throwable $e ) {
 			error_log( 're:Invent applicant review email failed: ' . $e->getMessage() );
 		}
@@ -1115,38 +1114,30 @@ function aws_sbg_reinvent_handle_review_action() {
 			$pass_url   = home_url( '/verify/' . rawurlencode( $reg_no ) );
 			$qr_img_url = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=' . rawurlencode( $pass_url );
 
-			$body = '<p style="margin:0 0 12px 0; color:#334155;">Hi <strong style="color:#0f172a;">' . esc_html( $name ) . '</strong>,</p>'
-				. '<p style="margin:0 0 14px 0; color:#334155;">Congratulations, your application for <strong style="color:#0f172a;">AWS re:Invent Watch &amp; Build Party Islamabad 2026</strong> has been approved.</p>'
-				. '<div style="margin:20px 0 24px 0; background:#06040C; border:1px solid #1e293b; border-radius:16px; overflow:hidden; color:#ffffff; text-align:center; box-shadow:0 10px 25px -5px rgba(0,0,0,0.3);">'
-				. '<div style="background:linear-gradient(135deg, #6B45E8 0%, #2E63E0 35%, #00DFD8 100%); padding:16px 20px; text-align:center;">'
-				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:10px; font-weight:800; letter-spacing:0.2em; text-transform:uppercase; color:#ffffff;">OFFICIAL EVENT PASS</div>'
-				. '<div style="font-size:18px; font-weight:700; color:#ffffff; margin-top:2px;">AWS re:Invent Watch &amp; Build Party 2026</div>'
+			$body = '<p style="margin:0 0 14px 0; color:#1f2937;">Hi ' . esc_html( $name ) . ',</p>'
+				. '<p style="margin:0 0 14px 0; color:#1f2937;">Your application for <strong>AWS re:Invent Watch &amp; Build Party 2026</strong> has been approved.</p>'
+				. '<p style="margin:0 0 18px 0; color:#1f2937;">Present the pass below at the reception desk on event day to claim your printed lanyard badge. Original CNIC or B-Form matching this registration is required for campus entry at PAF Air University Gate 1.</p>'
+				. '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 22px 0; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">'
+				. '<tr><td colspan="2" style="background:#232F3E; padding:10px 18px; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#f8fafc;">Official Event Pass &middot; AWS re:Invent Watch &amp; Build Party 2026</td></tr>'
+				. '<tr>'
+				. '<td class="pass-col" style="padding:18px 20px; vertical-align:middle; text-align:left;">'
+				. '<div style="display:inline-block; background:#e2e8f0; color:#1e293b; border-radius:4px; padding:3px 9px; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px;">' . esc_html( $tier ) . '</div>'
+				. '<div style="font-size:18px; font-weight:700; color:#111827; line-height:1.3; margin-bottom:4px;">' . esc_html( $name ) . '</div>'
+				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:16px; font-weight:700; color:#232F3E; letter-spacing:0.04em; margin-bottom:12px;">#' . esc_html( $reg_no ) . '</div>'
+				. '<a href="' . esc_url( $pass_url ) . '" style="font-size:13px; font-weight:600; color:#0284c7; text-decoration:underline;">Open Mobile Pass &rarr;</a>'
+				. '</td>'
+				. '<td class="pass-qr-col" width="144" style="padding:18px 20px 18px 0; vertical-align:middle; text-align:right;">'
+				. '<div style="display:inline-block; background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:6px;">'
+				. '<img src="' . esc_url( $qr_img_url ) . '" alt="Check-in Pass QR" width="120" height="120" style="display:block; margin:0;" />'
 				. '</div>'
-				. '<div style="padding:22px 20px 24px; background:#0b0814; text-align:center;">'
-				. '<div style="display:inline-block; background:#00DFD8; color:#06040C; border-radius:999px; padding:4px 14px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:10px; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; margin-bottom:12px;">' . esc_html( $tier ) . '</div>'
-				. '<div style="font-size:22px; font-weight:700; color:#ffffff; text-transform:uppercase; margin-bottom:14px;">' . esc_html( $name ) . '</div>'
-				. '<div style="background:#ffffff; border-radius:12px; padding:8px; display:inline-block; margin-bottom:14px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">'
-				. '<img src="' . esc_url( $qr_img_url ) . '" alt="Check-in Pass QR" width="140" height="140" style="display:block; border-radius:6px; margin:0 auto;" />'
-				. '</div>'
-				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:24px; font-weight:800; color:#00DFD8; letter-spacing:0.06em;">#' . esc_html( $reg_no ) . '</div>'
-				. '<div style="font-size:11px; color:#94a3b8; margin-top:6px; max-width:320px; margin-left:auto; margin-right:auto; line-height:1.5;">Present this QR code or Pass # on your phone screen at the reception desk to claim your printed lanyard badge.</div>'
-				. '<div style="margin-top:16px;">'
-				. '<a href="' . esc_url( $pass_url ) . '" style="display:inline-block; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25); color:#ffffff; padding:9px 18px; border-radius:8px; font-size:12px; font-weight:700; text-decoration:none; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">📱 View Mobile Pass on Phone</a>'
-				. '</div>'
-				. '</div>'
-				. '</div>'
-				. '<p style="margin:0 0 8px 0; font-weight:700; color:#0f172a;">What we have for you</p>'
-				. '<ul style="margin:0 0 16px 20px; padding:0; color:#334155;">'
-				. '<li style="margin:0 0 7px 0;">Expert sessions and keynote watch party</li>'
-				. '<li style="margin:0 0 7px 0;">Refreshments (snacks, food, drinks)</li>'
-				. '<li style="margin:0;">Exclusive AWS swags (subject to participation)</li>'
-				. '</ul>'
-				. '<div style="background:#f1f5f9; border-left:3px solid #0284c7; padding:10px 14px; font-size:12px; color:#475569; margin:16px 0; border-radius:4px;">'
-				. '<strong>Important Gate Entry Note:</strong> Original CNIC/B-Form matching this pass is required for campus entry at PAF Air University Gate 1.'
-				. '</div>'
-				. '<p style="margin:16px 0 0 0; color:#64748b; font-size:13px;">AWS Student Builder Group at Air University Islamabad<br>info@awsairuniversity.com · +923492449953</p>';
+				. '</td>'
+				. '</tr>'
+				. '</table>'
+				. '<p style="margin:0 0 18px 0; color:#1f2937;">Best regards,<br>AWS Student Builder Group</p>'
+				. '<div style="border-top:1px solid #e5e7eb; margin:18px 0 14px 0;"></div>'
+				. '<p style="margin:0; font-size:12px; color:#6b7280; line-height:1.6;">Join the WhatsApp community below for event schedule updates, room details, and announcements.</p>';
 			try {
-				aws_sbg_mail_send( 'reinvent', $to_email, 'You\'re approved for AWS re:Invent Watch & Build Party', 'Application Approved', 'Congratulations', $body, AWS_REINVENT_WHATSAPP_URL, 'Join WhatsApp Community' );
+				aws_sbg_mail_send( 'reinvent', $to_email, 'Your pass for AWS re:Invent Watch & Build Party 2026', '', '', $body, AWS_REINVENT_WHATSAPP_URL, 'Join WhatsApp Community' );
 				update_post_meta( $reg_id, 'notified', 'yes' );
 			} catch ( \Throwable $e ) {
 				error_log( 're:Invent approval email failed: ' . $e->getMessage() );
