@@ -869,48 +869,6 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 				background: #10b981;
 			}
 
-			/* Stats Banner */
-			.ck-stats-card {
-				background: linear-gradient(135deg, rgba(107, 69, 232, 0.22) 0%, rgba(46, 99, 224, 0.18) 100%);
-				border: 1px solid rgba(107, 69, 232, 0.35);
-				border-radius: 14px;
-				padding: 14px 16px;
-				margin: 12px 0 16px;
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				gap: 12px;
-			}
-			.ck-stats-num {
-				font-family: 'Amazon Ember Mono', monospace;
-				font-size: 28px;
-				font-weight: 800;
-				color: #FFFFFF;
-				line-height: 1;
-			}
-			.ck-stats-num span { font-size: 16px; color: #94a3b8; font-weight: 400; }
-			.ck-stats-pct {
-				font-family: 'Amazon Ember Mono', monospace;
-				font-size: 12px;
-				color: #00DFD8;
-				font-weight: 700;
-				margin-top: 4px;
-			}
-			.ck-stats-tiers {
-				display: flex;
-				gap: 8px;
-				flex-wrap: wrap;
-				justify-content: flex-end;
-			}
-			.ck-tier-chip {
-				background: rgba(0, 0, 0, 0.4);
-				border: 1px solid rgba(255, 255, 255, 0.12);
-				border-radius: 6px;
-				padding: 4px 8px;
-				font-size: 10px;
-				font-family: 'Amazon Ember Mono', monospace;
-			}
-
 			/* Camera Scanner Box */
 			.ck-scanner-wrap {
 				background: #000000;
@@ -918,7 +876,7 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 				border-radius: 16px;
 				overflow: hidden;
 				position: relative;
-				margin-bottom: 16px;
+				margin: 14px 0 16px;
 			}
 			#ck-reader {
 				width: 100% !important;
@@ -927,6 +885,7 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 			#ck-reader video {
 				border-radius: 14px;
 				object-fit: cover !important;
+				max-height: 260px;
 			}
 			.ck-scanner-bar {
 				display: flex;
@@ -937,8 +896,24 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 				border-top: 1px solid rgba(255, 255, 255, 0.1);
 				font-size: 12px;
 			}
+			.ck-cam-status {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-size: 11px;
+				color: #cbd5e1;
+				font-family: 'Amazon Ember Mono', monospace;
+			}
+			.ck-cam-indicator {
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background: #10b981;
+				box-shadow: 0 0 8px #10b981;
+				display: inline-block;
+			}
 			.ck-scanner-btn {
-				background: rgba(255, 255, 255, 0.1);
+				background: rgba(255, 255, 255, 0.08);
 				border: 1px solid rgba(255, 255, 255, 0.18);
 				border-radius: 8px;
 				color: #FFFFFF;
@@ -947,11 +922,15 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 				font-family: 'Amazon Ember Mono', monospace;
 				font-weight: 700;
 				cursor: pointer;
+				transition: background 0.15s;
+			}
+			.ck-scanner-btn:hover {
+				background: rgba(255, 255, 255, 0.16);
 			}
 			.ck-scanner-btn.active {
-				background: #00DFD8;
-				color: #06040C;
-				border-color: #00DFD8;
+				background: rgba(0, 223, 216, 0.15);
+				color: #00DFD8;
+				border-color: rgba(0, 223, 216, 0.4);
 			}
 
 			/* Instant Search Box */
@@ -997,32 +976,74 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 				display: none;
 			}
 
-			/* Filter Tabs */
-			.ck-tabs {
+			/* Empty State & Help Guide */
+			.ck-empty-guide {
+				text-align: center;
+				padding: 34px 20px;
+				background: rgba(255, 255, 255, 0.02);
+				border: 1px dashed rgba(255, 255, 255, 0.12);
+				border-radius: 14px;
+				margin-top: 4px;
+			}
+			.ck-guide-icon {
+				width: 48px;
+				height: 48px;
+				border-radius: 50%;
+				background: rgba(0, 223, 216, 0.1);
+				color: #00DFD8;
 				display: flex;
-				gap: 8px;
-				overflow-x: auto;
-				padding-bottom: 8px;
-				margin-bottom: 12px;
-				scrollbar-width: none;
+				align-items: center;
+				justify-content: center;
+				margin: 0 auto 12px;
 			}
-			.ck-tabs::-webkit-scrollbar { display: none; }
-			.ck-tab {
-				background: rgba(255, 255, 255, 0.06);
-				border: 1px solid rgba(255, 255, 255, 0.12);
-				border-radius: 999px;
-				padding: 6px 14px;
-				font-size: 11px;
-				font-family: 'Amazon Ember Mono', monospace;
+			.ck-guide-title {
+				font-size: 15px;
 				font-weight: 700;
-				white-space: nowrap;
-				color: #94a3b8;
-				cursor: pointer;
+				color: #FFFFFF;
+				margin-bottom: 6px;
 			}
-			.ck-tab.active {
-				background: #FFFFFF;
-				color: #06040C;
-				border-color: #FFFFFF;
+			.ck-guide-desc {
+				font-size: 12px;
+				color: #94a3b8;
+				max-width: 400px;
+				margin: 0 auto;
+				line-height: 1.5;
+			}
+			.ck-guide-desc strong {
+				color: #e2e8f0;
+			}
+			.ck-badge-checked {
+				font-family: 'Amazon Ember Mono', monospace;
+				font-size: 10px;
+				font-weight: 700;
+				color: #10b981;
+				background: rgba(16, 185, 129, 0.12);
+				border: 1px solid rgba(16, 185, 129, 0.3);
+				border-radius: 999px;
+				padding: 3px 8px;
+				white-space: nowrap;
+			}
+			.ck-badge-ready {
+				font-family: 'Amazon Ember Mono', monospace;
+				font-size: 10px;
+				font-weight: 700;
+				color: #00DFD8;
+				background: rgba(0, 223, 216, 0.1);
+				border: 1px solid rgba(0, 223, 216, 0.25);
+				border-radius: 999px;
+				padding: 3px 8px;
+				white-space: nowrap;
+			}
+			.ck-btn-success {
+				background: #10b981 !important;
+				color: #FFFFFF !important;
+				border: none !important;
+				box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35) !important;
+			}
+			.ck-alert-success {
+				background: #ecfdf5 !important;
+				color: #065f46 !important;
+				border: 1.5px solid #a7f3d0 !important;
 			}
 
 			/* Attendee Roster List */
@@ -1262,49 +1283,40 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 				</div>
 			</div>
 
-			<!-- Live Stats Card -->
-			<div class="ck-stats-card">
-				<div>
-					<div class="ck-stats-num"><span id="ck-stat-checked">0</span><span> / </span><span id="ck-stat-total">0</span></div>
-					<div class="ck-stats-pct" id="ck-stat-pct">0% CHECKED IN</div>
-				</div>
-				<div class="ck-stats-tiers" id="ck-tier-breakdown">
-					<!-- Populated by JS -->
-				</div>
-			</div>
-
 			<!-- Live Camera QR Scanner -->
 			<div class="ck-scanner-wrap">
 				<div id="ck-reader"></div>
 				<div class="ck-scanner-bar">
-					<button type="button" id="ck-cam-toggle" class="ck-scanner-btn active" onclick="toggleCamera()">Pause Scanner</button>
-					<label style="display:flex; align-items:center; gap:6px; font-size:11px; cursor:pointer;">
-						<input type="checkbox" id="ck-auto-check" checked>
-						<span>Auto Check-in on Scan</span>
-					</label>
+					<div class="ck-cam-status">
+						<span class="ck-cam-indicator"></span>
+						<span id="ck-cam-status-text">Camera active · Scan pass QR</span>
+					</div>
+					<button type="button" id="ck-cam-toggle" class="ck-scanner-btn active" onclick="toggleCamera()">Pause Camera</button>
 				</div>
 			</div>
 
-			<!-- Instant Search -->
+			<!-- Instant Search (Focused by Default) -->
 			<div class="ck-search-wrap">
 				<svg class="ck-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<circle cx="11" cy="11" r="8"></circle>
 					<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
 				</svg>
-				<input type="text" id="ck-search-input" class="ck-search-input" placeholder="Search by Name, Pass # (e.g. 1 or RIV-01), or CNIC..." oninput="handleSearch(this.value)">
+				<input type="text" id="ck-search-input" class="ck-search-input" placeholder="Search by Name, Pass # (e.g. RIV-01), or CNIC..." oninput="handleSearch(this.value)" autofocus autocomplete="off">
 				<button type="button" id="ck-search-clear" class="ck-search-clear" onclick="clearSearch()">&times;</button>
 			</div>
 
-			<!-- Filter Tabs -->
-			<div class="ck-tabs" id="ck-tabs">
-				<div class="ck-tab active" data-filter="all" onclick="setTab('all')">All (<span id="ck-count-all">0</span>)</div>
-				<div class="ck-tab" data-filter="pending" onclick="setTab('pending')">Not Checked In (<span id="ck-count-pending">0</span>)</div>
-				<div class="ck-tab" data-filter="checked" onclick="setTab('checked')">Checked In (<span id="ck-count-checked">0</span>)</div>
-			</div>
-
-			<!-- Attendee List -->
+			<!-- Attendee Search Results / Empty Guide (No list by default) -->
 			<div class="ck-list" id="ck-list">
-				<div style="text-align:center; padding:40px 10px; color:#64748b; font-size:13px;">Loading approved roster...</div>
+				<div class="ck-empty-guide">
+					<div class="ck-guide-icon">
+						<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<circle cx="11" cy="11" r="8"></circle>
+							<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+						</svg>
+					</div>
+					<div class="ck-guide-title">Ready for Check-In</div>
+					<div class="ck-guide-desc">Point attendee pass QR at camera above, or search by <strong>Name</strong>, <strong>Pass # (e.g. RIV-01)</strong>, or <strong>CNIC</strong>.</div>
+				</div>
 			</div>
 		</div>
 
@@ -1339,7 +1351,7 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 					Eligible for entrance. Hand over printed lanyard badge.
 				</div>
 
-				<button type="button" id="ck-btn-primary" class="ck-btn-action ck-btn-checkin" onclick="confirmCheckin()">Check In &amp; Issue Badge</button>
+				<button type="button" id="ck-btn-primary" class="ck-btn-action ck-btn-checkin" onclick="confirmCheckin()">Confirm Check-In &amp; Issue Badge</button>
 				<button type="button" id="ck-btn-undo" class="ck-btn-action ck-btn-undo" style="display:none;" onclick="undoCheckin()">Undo Check-In</button>
 			</div>
 		</div>
@@ -1352,7 +1364,6 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 		let authToken = '<?php echo esc_js( $token ); ?>';
 		let deskName = localStorage.getItem('aws_sbg_checkin_desk') || 'Desk 1';
 		let masterRoster = [];
-		let currentTab = 'all';
 		let currentQuery = '';
 		let activeAttendee = null;
 		let html5QrScanner = null;
@@ -1475,9 +1486,13 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 		function initTerminal() {
 			loadRoster();
 			startScanner();
+			setTimeout(function () {
+				const inp = document.getElementById('ck-search-input');
+				if (inp) inp.focus();
+			}, 250);
 
-			// Auto-sync in background every 20 seconds
-			setInterval(loadRoster, 20000);
+			// Auto-sync roster silently in background every 25 seconds
+			setInterval(loadRoster, 25000);
 		}
 
 		function loadRoster() {
@@ -1490,59 +1505,50 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 				.then(data => {
 					if (data.success && data.data.roster) {
 						masterRoster = data.data.roster;
-						renderStats();
 						renderList();
 					}
 				})
 				.catch(() => {});
 		}
 
-		function renderStats() {
-			const total = masterRoster.length;
-			const checked = masterRoster.filter(a => a.attended === 'yes').length;
-			const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
-
-			document.getElementById('ck-stat-checked').textContent = checked;
-			document.getElementById('ck-stat-total').textContent = total;
-			document.getElementById('ck-stat-pct').textContent = pct + '% CHECKED IN';
-
-			document.getElementById('ck-count-all').textContent = total;
-			document.getElementById('ck-count-pending').textContent = total - checked;
-			document.getElementById('ck-count-checked').textContent = checked;
-
-			// Tier counts
-			const tiers = {};
-			masterRoster.forEach(a => {
-				tiers[a.tier] = (tiers[a.tier] || 0) + 1;
-			});
-			const breakdown = document.getElementById('ck-tier-breakdown');
-			breakdown.innerHTML = '';
-			for (const [tier, count] of Object.entries(tiers)) {
-				const chip = document.createElement('div');
-				chip.className = 'ck-tier-chip';
-				chip.textContent = tier + ': ' + count;
-				breakdown.appendChild(chip);
-			}
-		}
-
 		function renderList() {
 			const list = document.getElementById('ck-list');
 			const q = currentQuery.trim().toLowerCase();
 
+			// By default, do NOT show the full list. Keep desk view clean and focused.
+			if (!q) {
+				list.innerHTML = `
+					<div class="ck-empty-guide">
+						<div class="ck-guide-icon">
+							<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<circle cx="11" cy="11" r="8"></circle>
+								<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+							</svg>
+						</div>
+						<div class="ck-guide-title">Ready for Check-In</div>
+						<div class="ck-guide-desc">Point attendee pass QR at camera above, or search by <strong>Name</strong>, <strong>Pass # (e.g. RIV-01)</strong>, or <strong>CNIC</strong>.</div>
+					</div>
+				`;
+				return;
+			}
+
+			const cleanQ = q.replace(/[^a-z0-9]/g, '');
 			let filtered = masterRoster.filter(a => {
-				if (currentTab === 'pending' && a.attended === 'yes') return false;
-				if (currentTab === 'checked' && a.attended !== 'yes') return false;
-				if (q) {
-					const nameMatch = a.name.toLowerCase().includes(q);
-					const noMatch = a.no.toLowerCase().includes(q) || a.no.replace(/[^0-9]/g, '').includes(q);
-					const cnicMatch = a.cnic.replace(/[^0-9]/g, '').includes(q.replace(/[^0-9]/g, ''));
-					return nameMatch || noMatch || cnicMatch;
-				}
-				return true;
+				const nameMatch = a.name.toLowerCase().includes(q);
+				const noRaw = a.no.toLowerCase();
+				const noClean = noRaw.replace(/[^a-z0-9]/g, '');
+				const noMatch = noRaw.includes(q) || (cleanQ && noClean.includes(cleanQ));
+				const cnicMatch = cleanQ && a.cnic && a.cnic.replace(/[^0-9]/g, '').includes(cleanQ);
+				return nameMatch || noMatch || cnicMatch;
 			});
 
 			if (filtered.length === 0) {
-				list.innerHTML = '<div style="text-align:center; padding:36px 10px; color:#64748b; font-size:13px;">No matching attendees found.</div>';
+				list.innerHTML = `
+					<div class="ck-empty-guide">
+						<div class="ck-guide-title" style="color:#f87171;">No Matching Attendee</div>
+						<div class="ck-guide-desc">No approved attendee found matching "<strong>${escapeHtml(currentQuery)}</strong>". Please verify spelling, Pass #, or CNIC.</div>
+					</div>
+				`;
 				return;
 			}
 
@@ -1558,12 +1564,12 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 						<div class="ck-item-no">#${escapeHtml(a.no)}</div>
 						<div style="min-width:0;">
 							<div class="ck-item-name">${escapeHtml(a.name)}</div>
-							<div class="ck-item-sub">${escapeHtml(a.uni || a.city || 'Approved')}</div>
+							<div class="ck-item-sub">${escapeHtml(a.uni || a.city || 'Approved')}${a.cnic ? ' · ' + escapeHtml(a.cnic) : ''}</div>
 						</div>
 					</div>
 					<div class="ck-item-right">
 						<span class="ck-badge-pill ${tierClass}">${escapeHtml(a.tier)}</span>
-						<div class="ck-status-dot ${a.attended === 'yes' ? 'checked' : ''}" title="${a.attended === 'yes' ? 'Checked in at ' + a.time : 'Not checked in'}"></div>
+						${a.attended === 'yes' ? '<span class="ck-badge-checked">✓ Checked In</span>' : '<span class="ck-badge-ready">Ready</span>'}
 					</div>
 				`;
 				list.appendChild(item);
@@ -1577,16 +1583,12 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 		}
 
 		function clearSearch() {
-			document.getElementById('ck-search-input').value = '';
+			const inp = document.getElementById('ck-search-input');
+			if (inp) {
+				inp.value = '';
+				inp.focus();
+			}
 			handleSearch('');
-		}
-
-		function setTab(tab) {
-			currentTab = tab;
-			document.querySelectorAll('.ck-tab').forEach(t => {
-				t.classList.toggle('active', t.dataset.filter === tab);
-			});
-			renderList();
 		}
 
 		// Attendee Drawer
@@ -1607,6 +1609,9 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 			document.getElementById('ck-modal-cnic').textContent = attendee.cnic || '—';
 			document.getElementById('ck-modal-uni').textContent = attendee.uni || '—';
 
+			btnAction.className = 'ck-btn-action ck-btn-checkin';
+			btnAction.disabled = false;
+
 			if (attendee.attended === 'yes') {
 				document.getElementById('ck-modal-status').textContent = 'Checked In (' + attendee.time + ')';
 				alert.className = 'ck-modal-alert ck-alert-warn';
@@ -1617,8 +1622,9 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 			} else {
 				document.getElementById('ck-modal-status').textContent = 'Eligible (Ready)';
 				alert.className = 'ck-modal-alert ck-alert-ok';
-				alert.innerHTML = `✓ <strong>ELIGIBLE FOR ENTRY</strong><br>Verify photo ID/CNIC, then issue lanyard badge <strong>#${attendee.no}</strong>.`;
+				alert.innerHTML = `✓ <strong>ELIGIBLE FOR ENTRY</strong><br>Verify photo ID/CNIC, then tap <strong>Confirm Check-In</strong> to issue badge <strong>#${attendee.no}</strong>.`;
 				btnAction.style.display = 'block';
+				btnAction.textContent = 'Confirm Check-In & Issue Badge';
 				btnUndo.style.display = 'none';
 			}
 
@@ -1628,14 +1634,17 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 		function closeModal() {
 			document.getElementById('ck-modal').style.display = 'none';
 			activeAttendee = null;
+			const inp = document.getElementById('ck-search-input');
+			if (inp && currentQuery) inp.focus();
 		}
 
 		function confirmCheckin() {
 			if (!activeAttendee) return;
 			const id = activeAttendee.id;
+			const currentAtt = activeAttendee;
 			const btn = document.getElementById('ck-btn-primary');
 			btn.disabled = true;
-			btn.textContent = 'Checking in...';
+			btn.textContent = 'Confirming check-in...';
 
 			const fd = new FormData();
 			fd.append('action', 'aws_sbg_checkin_toggle');
@@ -1647,24 +1656,32 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 			fetch(AJAX_URL, { method: 'POST', body: fd })
 				.then(r => r.json())
 				.then(data => {
-					btn.disabled = false;
-					btn.textContent = 'Check In & Issue Badge';
 					if (data.success) {
-						activeAttendee.attended = 'yes';
-						activeAttendee.time = data.data.time;
-						activeAttendee.by = deskName;
+						currentAtt.attended = 'yes';
+						currentAtt.time = data.data.time || 'Just now';
+						currentAtt.by = deskName;
 						playSuccessChime();
-						renderStats();
-						renderList();
-						closeModal();
+
+						btn.className = 'ck-btn-action ck-btn-success';
+						btn.textContent = '✓ Check-In Confirmed!';
+						const alertBox = document.getElementById('ck-modal-alert');
+						alertBox.className = 'ck-modal-alert ck-alert-success';
+						alertBox.innerHTML = `🎉 <strong>CHECKED IN SUCCESSFULLY</strong><br>Badge #${currentAtt.no} handed over.`;
+
+						setTimeout(() => {
+							closeModal();
+							renderList();
+						}, 700);
 					} else {
+						btn.disabled = false;
+						btn.textContent = 'Confirm Check-In & Issue Badge';
 						playWarningBuzz();
 						alert(data.data.message || 'Check-in failed');
 					}
 				})
 				.catch(() => {
 					btn.disabled = false;
-					btn.textContent = 'Check In & Issue Badge';
+					btn.textContent = 'Confirm Check-In & Issue Badge';
 					alert('Network error. Check connection.');
 				});
 		}
@@ -1672,8 +1689,10 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 		function undoCheckin() {
 			if (!activeAttendee || !confirm('Are you sure you want to revert check-in for ' + activeAttendee.name + '?')) return;
 			const id = activeAttendee.id;
+			const currentAtt = activeAttendee;
 			const btn = document.getElementById('ck-btn-undo');
 			btn.disabled = true;
+			btn.textContent = 'Reverting...';
 
 			const fd = new FormData();
 			fd.append('action', 'aws_sbg_checkin_toggle');
@@ -1686,17 +1705,18 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 				.then(r => r.json())
 				.then(data => {
 					btn.disabled = false;
+					btn.textContent = 'Undo Check-In';
 					if (data.success) {
-						activeAttendee.attended = 'no';
-						activeAttendee.time = '';
-						activeAttendee.by = '';
-						renderStats();
-						renderList();
+						currentAtt.attended = 'no';
+						currentAtt.time = '';
+						currentAtt.by = '';
 						closeModal();
+						renderList();
 					}
 				})
 				.catch(() => {
 					btn.disabled = false;
+					btn.textContent = 'Undo Check-In';
 				});
 		}
 
@@ -1710,7 +1730,18 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 			html5QrScanner.start({ facingMode: 'environment' }, config, onQrSuccess, onQrError)
 				.then(() => {
 					scannerRunning = true;
-					document.getElementById('ck-cam-toggle').textContent = 'Pause Scanner';
+					const btn = document.getElementById('ck-cam-toggle');
+					if (btn) {
+						btn.textContent = 'Pause Camera';
+						btn.classList.add('active');
+					}
+					const statusText = document.getElementById('ck-cam-status-text');
+					if (statusText) statusText.textContent = 'Camera active · Scan pass QR';
+					const indicator = document.querySelector('.ck-cam-indicator');
+					if (indicator) {
+						indicator.style.background = '#10b981';
+						indicator.style.boxShadow = '0 0 8px #10b981';
+					}
 				})
 				.catch(() => {
 					// Fallback to user facing camera or ignore permission denied
@@ -1720,36 +1751,49 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 		function toggleCamera() {
 			if (!html5QrScanner) return;
 			const btn = document.getElementById('ck-cam-toggle');
+			const statusText = document.getElementById('ck-cam-status-text');
+			const indicator = document.querySelector('.ck-cam-indicator');
+
 			if (scannerRunning) {
 				html5QrScanner.stop().then(() => {
 					scannerRunning = false;
-					btn.textContent = 'Start Scanner';
+					btn.textContent = 'Resume Camera';
 					btn.classList.remove('active');
+					if (statusText) statusText.textContent = 'Camera paused';
+					if (indicator) {
+						indicator.style.background = '#64748b';
+						indicator.style.boxShadow = 'none';
+					}
 				});
 			} else {
 				startScanner();
-				btn.classList.add('active');
 			}
 		}
 
 		function onQrSuccess(decodedText) {
 			if (!decodedText) return;
 
+			// Do not re-trigger while an attendee modal is already open
+			if (activeAttendee) return;
+
 			// Extract pass number: either from URL /verify/RIV-01 or direct string RIV-01
 			let match = decodedText.match(/verify\/([A-Za-z0-9_\-]+)/i);
 			let passNo = match ? match[1] : decodedText.trim();
 			passNo = passNo.toUpperCase();
+			const passNoClean = passNo.replace(/[^A-Z0-9]/g, '');
 
-			const attendee = masterRoster.find(a => a.no.toUpperCase() === passNo || a.no.toUpperCase() === 'RIV-' + passNo);
+			const attendee = masterRoster.find(a => {
+				const aNo = a.no.toUpperCase();
+				const aClean = aNo.replace(/[^A-Z0-9]/g, '');
+				return aNo === passNo || 
+				       aNo === 'RIV-' + passNo || 
+				       (passNoClean && aClean === passNoClean);
+			});
+
 			if (attendee) {
-				const autoCheck = document.getElementById('ck-auto-check').checked;
-				if (autoCheck && attendee.attended !== 'yes') {
-					// Auto check in instantly
-					activeAttendee = attendee;
-					confirmCheckin();
-				} else {
-					openAttendee(attendee);
-				}
+				// NO auto check-in on scan!
+				// Crew MUST inspect details and explicitly click "Confirm Check-In"
+				openAttendee(attendee);
 			} else {
 				playWarningBuzz();
 				alert('Pass #' + passNo + ' not found in approved roster.');

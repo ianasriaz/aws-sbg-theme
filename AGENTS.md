@@ -1241,6 +1241,7 @@ aws-sbg-theme/
 - Frontend check-in terminal allows student volunteers to check in attendees using their smartphones or laptops without needing WordPress admin dashboard access or WP accounts.
 - Multi-desk protection: In-memory roster + optimistic locking prevents duplicate badge handovers across parallel entry queues.
 - Zero external CDN dependencies for camera scanning ensures high reliability on venue Wi-Fi / mobile hotspots.
+- Desk Terminal UI Streamlining: Removed live check-in percentage (`0% CHECKED IN`) from the frontend volunteer interface; removed default 300+ attendee list dump on load in favor of a clean, focused search bar and camera scanner; disabled automatic check-in on QR scan so desk volunteers review attendee details and explicitly click "Confirm Check-In & Issue Badge".
 
 ---
 
