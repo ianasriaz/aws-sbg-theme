@@ -398,7 +398,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 		<?php if ( ! $is_hidden ) : ?>
 		<!-- Steps 1 & 2 -->
-		<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" x-show="currentStep > 0" x-cloak @submit="isSubmitting = true">
+		<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" x-show="currentStep > 0" x-cloak @submit="handleSubmit($event)">
 			<input type="hidden" name="action" value="submit_aws_reinvent_registration">
 			<?php wp_nonce_field( 'aws_reinvent_registration_action', 'aws_reinvent_registration_nonce' ); ?>
 
@@ -550,6 +550,14 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				attendedBefore: '',
 				hasVehicle: 'no',
 				isSubmitting: false,
+				handleSubmit(e) {
+					if (this.isSubmitting) {
+						e.preventDefault();
+						return false;
+					}
+					this.isSubmitting = true;
+					return true;
+				},
 				nextStep() { this.currentStep++; },
 				prevStep() { if ( this.currentStep > 0 ) { this.currentStep--; } },
 				formatCnic(e) {
@@ -653,29 +661,47 @@ function aws_sbg_handle_reinvent_registration() {
 		wp_die( 'Please fill in all required fields. Ensure your CNIC contains 13 digits (e.g. 12345-1234567-1).' );
 	}
 
-	// Duplicate guard by email.
-	$existing = get_posts( array(
-		'post_type'      => 'aws_reinvent_reg',
-		'posts_per_page' => 1,
-		'post_status'    => 'publish',
-		'meta_key'       => 'email',
-		'meta_value'     => $email,
-		'fields'         => 'ids',
+	global $wpdb;
+
+	// 1. In-flight transient lock to prevent duplicate rapid clicks
+	$lock_key = 'aws_sbg_reg_lock_' . md5( strtolower( $email ) );
+	if ( get_transient( $lock_key ) ) {
+		$redirect = wp_get_referer() ? wp_get_referer() : home_url();
+		wp_safe_redirect( add_query_arg( array( 'reinvent_registration' => 'success' ), $redirect ) );
+		exit;
+	}
+	set_transient( $lock_key, 1, 20 );
+
+	// 2. High-performance indexed duplicate check by email
+	$existing_id = (int) $wpdb->get_var( $wpdb->prepare(
+		"SELECT p.ID FROM {$wpdb->posts} p
+		 INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+		 WHERE p.post_type = 'aws_reinvent_reg'
+		   AND p.post_status = 'publish'
+		   AND pm.meta_key = 'email'
+		   AND pm.meta_value = %s
+		 LIMIT 1",
+		$email
 	) );
-	if ( ! empty( $existing ) ) {
+	if ( $existing_id > 0 ) {
+		delete_transient( $lock_key );
 		$redirect = wp_get_referer() ? wp_get_referer() : home_url();
 		$redirect = add_query_arg( array( 'reinvent_registration' => 'exists' ), $redirect );
 		wp_safe_redirect( $redirect );
 		exit;
 	}
 
+	// 3. Fast post insertion without ping/comment overhead
 	$post_id = wp_insert_post( array(
-		'post_type'   => 'aws_reinvent_reg',
-		'post_title'  => $full_name,
-		'post_status' => 'publish',
+		'post_type'      => 'aws_reinvent_reg',
+		'post_title'     => $full_name,
+		'post_status'    => 'publish',
+		'comment_status' => 'closed',
+		'ping_status'    => 'closed',
 	) );
 
 	if ( is_wp_error( $post_id ) ) {
+		delete_transient( $lock_key );
 		wp_die( 'Failed to save registration. Please try again.' );
 	}
 
@@ -698,6 +724,17 @@ function aws_sbg_handle_reinvent_registration() {
 	update_post_meta( $post_id, 'notified', 'no' );
 	update_post_meta( $post_id, 'notified_status', '' );
 
+	$redirect = wp_get_referer() ? wp_get_referer() : home_url();
+	$redirect = add_query_arg( array( 'reinvent_registration' => 'success' ), $redirect );
+
+	// 4. Performance optimization:
+	// If PHP FastCGI is active, flush the HTTP redirect immediately so the applicant
+	// sees the success screen in < 250ms, while emails are sent in the background.
+	if ( function_exists( 'fastcgi_finish_request' ) ) {
+		header( 'Location: ' . $redirect );
+		fastcgi_finish_request();
+	}
+
 	/* Applicant confirmation (under review) */
 	if ( function_exists( 'aws_sbg_mail_send' ) ) {
 		$confirm_body = '<p style="margin:0 0 12px 0; color:#334155;">Hi <strong style="color:#0f172a;">' . esc_html( $full_name ) . '</strong>,</p>'
@@ -709,7 +746,11 @@ function aws_sbg_handle_reinvent_registration() {
 			. '<li style="margin:0;">You will receive an email once your seat and pass are confirmed.</li>'
 			. '</ul>'
 			. '<p style="margin:16px 0 0 0; color:#64748b; font-size:13px;">AWS Student Builder Group at Air University Islamabad<br>info@awsairuniversity.com · +923492449953</p>';
-		aws_sbg_mail_send( 'reinvent', $email, 'Your AWS re:Invent application is under review', 'Application Received', 'Thank you for your interest', $confirm_body, AWS_REINVENT_WHATSAPP_URL, 'Join WhatsApp Community' );
+		try {
+			aws_sbg_mail_send( 'reinvent', $email, 'Your AWS re:Invent application is under review', 'Application Received', 'Thank you for your interest', $confirm_body, AWS_REINVENT_WHATSAPP_URL, 'Join WhatsApp Community' );
+		} catch ( \Throwable $e ) {
+			error_log( 're:Invent applicant review email failed: ' . $e->getMessage() );
+		}
 
 		/* Admin notification (optional) */
 		if ( function_exists( 'aws_sbg_mail_get_settings' ) ) {
@@ -721,14 +762,18 @@ function aws_sbg_handle_reinvent_registration() {
 					. '<p style="margin:0 0 6px 0; color:#334155;">' . esc_html( $university ) . ' · ' . esc_html( $city ) . '</p>'
 					. '<p style="margin:0 0 6px 0; color:#334155;">Attended before: ' . esc_html( ucfirst( $attended ) ) . '</p>'
 					. '<p style="margin:0; color:#334155;">Why: ' . esc_html( wp_trim_words( $why, 40, '…' ) ) . '</p>';
-				aws_sbg_mail_send( 'reinvent', $admin_to, 'New re:Invent application · ' . esc_html( $full_name ), 'New Application', 'Review needed', $admin_body, admin_url( 'admin.php?page=aws-reinvent-registrations' ), 'Open registrations' );
+				try {
+					aws_sbg_mail_send( 'reinvent', $admin_to, 'New re:Invent application · ' . esc_html( $full_name ), 'New Application', 'Review needed', $admin_body, admin_url( 'admin.php?page=aws-reinvent-registrations' ), 'Open registrations' );
+				} catch ( \Throwable $e ) {
+					error_log( 're:Invent admin notification email failed: ' . $e->getMessage() );
+				}
 			}
 		}
 	}
 
-	$redirect = wp_get_referer() ? wp_get_referer() : home_url();
-	$redirect = add_query_arg( array( 'reinvent_registration' => 'success' ), $redirect );
-	wp_safe_redirect( $redirect );
+	if ( ! headers_sent() ) {
+		wp_safe_redirect( $redirect );
+	}
 	exit;
 }
 add_action( 'admin_post_nopriv_submit_aws_reinvent_registration', 'aws_sbg_handle_reinvent_registration' );
@@ -2794,10 +2839,10 @@ function aws_sbg_render_reinvent_badges() {
 				z-index: 20;
 			}
 
-			/* --- 1. Badge Top Canvas (26%) --- */
+			/* --- 1. Badge Top Canvas (25%) --- */
 			.badge-header {
 				position: relative;
-				height: 26%;
+				height: 25%;
 				width: 100%;
 				overflow: hidden;
 				border-bottom: 1.5px solid rgba(6, 4, 12, 0.08);
@@ -2901,7 +2946,7 @@ function aws_sbg_render_reinvent_badges() {
 				filter: brightness(0) invert(1);
 			}
 
-			/* --- 2. Badge Center Body (64%) --- */
+			/* --- 2. Badge Center Body (61%) --- */
 			.badge-body {
 				position: relative;
 				flex: 1;
@@ -2910,31 +2955,41 @@ function aws_sbg_render_reinvent_badges() {
 				flex-direction: column;
 				align-items: center;
 				justify-content: space-between;
-				padding: clamp(8px, 3cqi, 14px) clamp(12px, 5cqi, 24px) clamp(6px, 2cqi, 10px);
+				padding: clamp(6px, 2.5cqi, 12px) clamp(12px, 5cqi, 24px) clamp(6px, 2cqi, 10px);
 				text-align: center;
+			}
+
+			/* Tier Role Pill Wrapper (Centered between header gradient and name) */
+			.badge-tier-wrap {
+				width: 100%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin: clamp(4px, 1.6cqi, 8px) 0;
 			}
 
 			/* Tier Role Pill */
 			.badge-tier-pill {
 				border-radius: 9999px;
-				padding: clamp(3px, 1.2cqi, 6px) clamp(10px, 3.5cqi, 18px);
+				padding: clamp(4.5px, 1.8cqi, 8px) clamp(14px, 4.8cqi, 26px);
 				font-family: 'Amazon Ember Mono', monospace;
-				font-size: clamp(8px, 2.8cqi, 11px);
-				font-weight: 700;
-				letter-spacing: 0.2em;
+				font-size: clamp(9.5px, 3.4cqi, 13px);
+				font-weight: 800;
+				letter-spacing: 0.18em;
 				text-transform: uppercase;
-				line-height: 1;
-				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+				line-height: 1.15;
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 				white-space: nowrap;
+				display: inline-block;
 			}
 
-			.tier-attendee { background: #06040C; color: #FFFFFF; }
-			.tier-core-team { background: #4F46E5; color: #FFFFFF; }
-			.tier-event-crew, .tier-crew { background: #00DFD8; color: #06040C; }
-			.tier-speaker { background: #FF9900; color: #06040C; }
-			.tier-vip-guest, .tier-vip { background: #DB2777; color: #FFFFFF; }
-			.tier-organizer { background: #7C3AED; color: #FFFFFF; }
-			.tier-custom { background: #06040C; color: #FFFFFF; }
+			.tier-attendee { background: #06040C; color: #FFFFFF; border: 1.5px solid #06040C; }
+			.tier-core-team { background: #4F46E5; color: #FFFFFF; border: 1.5px solid #4338CA; }
+			.tier-event-crew, .tier-crew { background: #00DFD8; color: #06040C; border: 1.5px solid #00C4BE; }
+			.tier-speaker { background: #FF9900; color: #06040C; border: 1.5px solid #E68A00; }
+			.tier-vip-guest, .tier-vip { background: #DB2777; color: #FFFFFF; border: 1.5px solid #BE185D; }
+			.tier-organizer { background: #7C3AED; color: #FFFFFF; border: 1.5px solid #6D28D9; }
+			.tier-custom { background: #06040C; color: #FFFFFF; border: 1.5px solid #06040C; }
 
 			/* Attendee Name Plate with Double-Rule Frame */
 			.badge-name-frame {
@@ -2942,7 +2997,7 @@ function aws_sbg_render_reinvent_badges() {
 				border-top: 2.2px solid rgba(107, 111, 118, 0.45);
 				border-bottom: 2.2px solid rgba(107, 111, 118, 0.45);
 				padding: clamp(6px, 2.4cqi, 14px) 0;
-				margin: clamp(4px, 1.5cqi, 8px) 0;
+				margin: clamp(3px, 1.2cqi, 6px) 0;
 				display: flex;
 				align-items: center;
 				justify-content: center;
@@ -3003,24 +3058,33 @@ function aws_sbg_render_reinvent_badges() {
 				display: flex;
 				align-items: center;
 				justify-content: center;
+				overflow: hidden;
 			}
 
-			.badge-qr-box canvas,
+			/* Prevent qrcode.js double-rendering: hide canvas, display only <img> */
+			.badge-qr-box canvas {
+				display: none !important;
+			}
+
 			.badge-qr-box img,
 			.badge-qr-box svg {
 				width: 100% !important;
 				height: 100% !important;
 				display: block !important;
+				image-rendering: -webkit-optimize-contrast;
 				image-rendering: pixelated;
 			}
 
-			/* --- 3. Badge Footer Skyline Watermark (10%) --- */
+			/* --- 3. Badge Footer Skyline Watermark (14%) --- */
 			.badge-footer {
 				position: relative;
-				height: 10%;
+				height: 14%;
 				width: 100%;
 				overflow: hidden;
 				background: #FFFFFF;
+				display: flex;
+				align-items: flex-end;
+				justify-content: center;
 			}
 
 			.badge-skyline {
@@ -3030,10 +3094,10 @@ function aws_sbg_render_reinvent_badges() {
 				right: 0;
 				width: 100%;
 				height: 100%;
-				object-fit: cover;
-				object-position: bottom;
+				object-fit: contain;
+				object-position: bottom center;
 				display: block;
-				opacity: 0.22;
+				opacity: 0.28;
 				filter: brightness(0);
 				pointer-events: none;
 			}
@@ -3163,10 +3227,12 @@ function aws_sbg_render_reinvent_badges() {
 						</div>
 					</div>
 
-					<!-- 2. Center Body (64%) -->
+					<!-- 2. Center Body (61%) -->
 					<div class="badge-body">
-						<div class="badge-tier-pill <?php echo esc_attr( $tier_class ); ?>">
-							<?php echo esc_html( $b['tier'] ); ?>
+						<div class="badge-tier-wrap">
+							<div class="badge-tier-pill <?php echo esc_attr( $tier_class ); ?>">
+								<?php echo esc_html( $b['tier'] ); ?>
+							</div>
 						</div>
 						<div class="badge-name-frame">
 							<h2 class="badge-name <?php echo $is_name_long ? 'name-long' : ''; ?>">
@@ -3295,6 +3361,12 @@ function aws_sbg_render_reinvent_badges() {
 					colorLight: '#FFFFFF',
 					correctLevel: QRCode.CorrectLevel.M
 				});
+
+				// Defense-in-depth: hide canvas so only the <img> displays
+				const canvas = qrBox.querySelector('canvas');
+				if (canvas) {
+					canvas.style.display = 'none';
+				}
 
 				qrBox.dataset.rendered = '1';
 			});

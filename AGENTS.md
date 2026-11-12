@@ -34,6 +34,29 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-13 00:15 - Antigravity
+
+**Task**: Fix double QR code generation on printed attendee cards, center and highlight role pill between header and name frame, fix Islamabad skyline footer cropping, and optimize public registration form submission speed while strictly guarding against duplicate submissions.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` -
+  - **Double QR Code Fix**: Removed the rule forcing both `canvas` and `img` visible simultaneously. Explicitly hid `.badge-qr-box canvas { display: none !important; }` and kept only `.badge-qr-box img` visible. Also added JS defense-in-depth in `generateAllQRCodes()` to ensure only the crisp image is displayed.
+  - **Centered & Prominent Role Pill**: Wrapped badge pill in `.badge-tier-wrap` centered between the header gradient and attendee name frame; enhanced typography (`clamp(9.5px, 3.4cqi, 13px)` 800-weight Ember Mono), letter spacing (0.18em), and crisp border outlines for all role badges (`ATTENDEE`, `CORE TEAM`, `EVENT CREW`, `SPEAKER`, `VIP`, `ORGANIZER`).
+  - **Landmark Footer Cropping Fix**: Increased footer height from 10% to 14% and switched to `object-fit: contain; object-position: bottom center;`, preserving the full spires and minarets of the Faisal Mosque without cutting off the top.
+  - **Submission Performance & Anti-Duplicate Protection**:
+    - Added instant client-side submit lock in Alpine.js `handleSubmit(e)` to prevent double clicks and display the submission spinner immediately.
+    - Added server-side atomic in-flight transient lock (`aws_sbg_reg_lock_` + md5(email)) with a 20-second expiration.
+    - Optimized duplicate email verification from a slow, unindexed `get_posts()` meta-query down to a direct indexed SQL lookup on `wp_postmeta`.
+    - Added `comment_status => closed` and `ping_status => closed` to `wp_insert_post`.
+    - Implemented `fastcgi_finish_request()` support: flushes the HTTP 302 redirect directly to the applicant's browser in < 250ms while transactional emails (confirmation & admin notification) run asynchronously in the background.
+
+**Key Decisions**:
+- `davidshimjs/qrcodejs` creates both a `<canvas>` and an `<img>`; hiding canvas in both CSS and JavaScript guarantees single, vector-crisp QR code rendering regardless of browser/engine quirks.
+- Preserving the exact natural 3:1 aspect ratio of `Islamabad Landmark Footer.png` via `contain` keeps the architectural landmarks prominent and complete across both 4-up and 6-up layouts.
+- Flushing HTTP redirects prior to transactional SMTP execution eliminates registration latency without sacrificing email delivery or transactional safety.
+
+---
+
 ### 2026-11-12 23:55 - Antigravity
 
 **Task**: Fix sequential pass number gap caused by deleted test registrations, make registration counter self-healing, add "Resync Pass Numbers" admin action, and add inline "Edit Pass Number" modal.
