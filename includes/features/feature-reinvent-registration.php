@@ -3067,9 +3067,9 @@ function aws_sbg_render_reinvent_badges() {
 			}
 
 			.badge-brand-sub {
-				font-size: clamp(5px, 1.95cqi, 7.4px);
+				font-size: clamp(4.45px, 1.66cqi, 6.2px);
 				font-weight: 700;
-				letter-spacing: 0.015em;
+				letter-spacing: 0.005em;
 				color: rgba(255, 255, 255, 0.9);
 				text-transform: uppercase;
 				white-space: nowrap;
@@ -3367,11 +3367,10 @@ function aws_sbg_render_reinvent_badges() {
 								<div class="badge-brand-row">
 									<span class="badge-brand-prefix"><span class="badge-brand-aws">AWS</span><span class="badge-brand-re">re:</span></span><span class="badge-brand-invent">Invent</span>
 								</div>
-								<div class="badge-brand-sub">WATCH &amp; BUILD PARTY 2026</div>
+								<div class="badge-brand-sub">WATCH &amp; BUILD PARTY 2026 ISLAMABAD</div>
 							</div>
 							<div class="badge-header-logos">
 								<img src="<?php echo esc_url( $aws_logo_uri ); ?>" alt="AWS" class="badge-logo-aws">
-								<img src="<?php echo esc_url( $sbg_logo_uri ); ?>" alt="SBG" class="badge-logo-sbg">
 							</div>
 						</div>
 					</div>

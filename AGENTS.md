@@ -1253,7 +1253,7 @@ aws-sbg-theme/
   - Redesigned the re:Invent registration confirmation ("Under Review") email and the approval + Digital Event Pass email to remove AI-slop bullet lists, emojis, dark/neon boxes, and redundant `"at Air University Islamabad"` copy.
   - Replaced the approval pass with a responsive two-column light-mode table card (`#232F3E` top bar, `#f8fafc` body, tier pill, attendee name, `#RIV-XX`, `Open Mobile Pass` link, and `120x120` QR code).
   - Updated the form success screen (`Thank You, [Name]` via 10-minute `aws_rv_success_` transient + `"Approved attendees will receive event pass within a week."`), duplicate-registration notice, and confirmation email copy.
-  - Aligned the printable attendee badge header (`.badge-header-inner` vertically centered, `.badge-brand-prefix` stacking `AWS` + `re:` within `Invent` height, and `.badge-brand-sub` sized to stay strictly within `AWS re:Invent` bounds).
+  - Aligned the printable attendee badge header (`.badge-header-inner` vertically centered, `.badge-brand-prefix` stacking `AWS` + `re:` within `Invent` height, `.badge-brand-sub` set to `WATCH & BUILD PARTY 2026 ISLAMABAD` scaled to span 100% of `AWS re:Invent`, and right side showing only the AWS logo).
 
 ---
 
