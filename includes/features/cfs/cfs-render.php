@@ -532,7 +532,7 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 					<div class="cfs-body cfs-body-success">
 						<div class="cfs-success-icon">&#10003;</div>
 						<h2 class="cfs-success-title">Thank You<?php echo $speak_name ? ', ' . esc_html( $speak_name ) : ''; ?>!</h2>
-						<p class="cfs-desc" style="max-width:48ch;margin:0 auto 16px;">We have received your talk pitch and our team will get back to you soon regarding the selection and next steps.</p>
+						<p class="cfs-desc" style="max-width:48ch;margin:0 auto 16px;">We have received your session proposal, and our team will get back to you soon.</p>
 
 						<?php if ( $ref ) : ?>
 							<div class="cfs-ref-box">
@@ -543,8 +543,8 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 
 						<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:18px 22px;max-width:520px;margin:20px auto;text-align:left;font-size:13.5px;color:#334155;line-height:1.6;">
 							<strong style="display:block;margin-bottom:8px;color:#0F172A;font-size:12.5px;text-transform:uppercase;letter-spacing:0.05em;">What happens next?</strong>
-							<p style="margin:0 0 6px 0;">1. Our selection committee evaluates all session proposals based on technical depth, practical value, and originality.</p>
-							<p style="margin:0 0 6px 0;">2. We will contact shortlisted speakers via email/WhatsApp to confirm scheduling, speaker shield names, and logistics.</p>
+							<p style="margin:0 0 6px 0;">1. Our team reviews all incoming session proposals.</p>
+							<p style="margin:0 0 6px 0;">2. We will get back to you via email or phone regarding next steps.</p>
 							<p style="margin:0;">3. A confirmation email with your proposal reference has been dispatched to your inbox.</p>
 						</div>
 
@@ -603,7 +603,7 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 									<div class="cfs-grid">
 										<div class="cfs-field">
 											<label for="cfs-name">Full Name <em>*</em></label>
-											<input id="cfs-name" type="text" name="name" x-model="name" placeholder="e.g. Alex Morgan" required>
+											<input id="cfs-name" type="text" name="name" x-model="name" placeholder="Your full name" required>
 										</div>
 										<div class="cfs-field">
 											<label for="cfs-email">Email Address <em>*</em></label>
@@ -624,7 +624,7 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 										<div class="cfs-field cfs-span-2">
 											<label for="cfs-linkedin">LinkedIn Profile URL <em>*</em></label>
 											<input id="cfs-linkedin" type="url" name="linkedin_url" x-model="linkedinUrl" placeholder="https://linkedin.com/in/username" required>
-											<span class="cfs-help">Helps our selection committee review your professional or technical background.</span>
+											<span class="cfs-help">Helps our team learn more about your professional background.</span>
 										</div>
 									</div>
 								</div>
@@ -700,7 +700,7 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 								<div class="cfs-section">
 									<div class="cfs-section-header">
 										<p class="cfs-section-title"><span class="cfs-section-num">3</span> Experience &amp; In-Person Availability</p>
-										<p class="cfs-section-subtitle">We warmly welcome both experienced and first-time speakers.</p>
+										<p class="cfs-section-subtitle">Tell us about your speaking experience.</p>
 									</div>
 									<div class="cfs-grid">
 										<div class="cfs-field cfs-span-2">
@@ -712,8 +712,8 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 														<span class="cfs-exp-dot" x-show="pastExperience === 'yes'"></span>
 													</span>
 													<span class="cfs-exp-text">
-														<span class="cfs-exp-title">Yes, I've spoken before</span>
-														<span class="cfs-exp-desc">Meetups, conferences, workshops, or tech talks</span>
+														<span class="cfs-exp-title">Yes</span>
+														<span class="cfs-exp-desc">I have spoken at meetups or conferences</span>
 													</span>
 												</label>
 												<label class="cfs-exp-card" :class="{ 'is-active': pastExperience === 'no' }">
@@ -722,8 +722,8 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 														<span class="cfs-exp-dot" x-show="pastExperience === 'no'"></span>
 													</span>
 													<span class="cfs-exp-text">
-														<span class="cfs-exp-title">No, this is my first talk</span>
-														<span class="cfs-exp-desc">First-time speakers are warmly welcome &amp; supported</span>
+														<span class="cfs-exp-title">No</span>
+														<span class="cfs-exp-desc">I have not spoken at tech events before</span>
 													</span>
 												</label>
 											</div>
@@ -738,7 +738,7 @@ function aws_sbg_cfs_render_form( $event_id = 0 ) {
 											<div class="cfs-commit-box">
 												<label class="cfs-commit">
 													<input type="checkbox" name="commitment" value="yes" x-model="commitment" required>
-													<span class="cfs-commit-text">I confirm that I am available to deliver this session in-person in Islamabad on event day if selected.</span>
+													<span class="cfs-commit-text">I confirm that I am available to deliver this session in-person in Islamabad on event day.</span>
 												</label>
 											</div>
 										</div>

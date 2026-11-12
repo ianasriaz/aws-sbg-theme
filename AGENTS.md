@@ -34,6 +34,23 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-12 23:12 - Antigravity
+
+**Task**: Remove Alex Morgan placeholder, make confirmation email copy completely general (no mention of "selection"), and remove "first-time speakers are welcome" messaging.
+
+**Files Changed**:
+- `includes/features/cfs/cfs-render.php` -
+  - Changed full name placeholder from `e.g. Alex Morgan` to `Your full name`.
+  - Removed "first-time speakers are welcome" text; simplified options to neutral `Yes` (*I have spoken at meetups or conferences*) and `No` (*I have not spoken at tech events before*), and updated Section 3 subtitle to `Tell us about your speaking experience`.
+  - Removed references to "selection committee" / "selection" in help text, success screen, and commitment checkbox ("...available to deliver this session in-person in Islamabad on event day").
+- `includes/features/cfs/cfs-handler.php` -
+  - Streamlined email confirmation copy to keep it general: "We have received your proposal, and our team will get back to you soon." (removed "regarding the selection").
+
+**Key Decisions**:
+- Keeping copy completely neutral and general avoids setting rigid expectations around selection or qualification.
+
+---
+
 ### 2026-11-12 21:55 - Antigravity
 
 **Task**: Fix Speak form UI and copy, remove crowded ticket styling and "~ 90-Sec Pitch" badge, redesign the "Have you spoken at a community/tech event before?" selector, and make the submission confirmation email clean and concise ("Hi [name], thank you and then we will get back to you soon").

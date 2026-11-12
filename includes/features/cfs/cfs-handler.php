@@ -183,7 +183,7 @@ function aws_sbg_cfs_handle_submission() {
 			. '<span style="color:#64748b;font-family:ui-monospace,Menlo,monospace;font-size:12px;">Reference: ' . esc_html( $reference ) . '</span>'
 			. '</div>'
 			. '</div>'
-			. '<p style="margin:0 0 14px 0;font-size:14px;line-height:1.6;color:#334155;">We have received your pitch, and our team will get back to you soon regarding the selection and next steps.</p>'
+			. '<p style="margin:0 0 14px 0;font-size:14px;line-height:1.6;color:#334155;">We have received your proposal, and our team will get back to you soon.</p>'
 			. '<p style="margin:0;font-size:13px;color:#64748b;line-height:1.5;">If you have any questions or need to make adjustments in the meantime, feel free to reply directly to this email.</p>';
 
 		$closing = 'Best regards,<br><strong>The AWS Student Builder Group Team</strong>';
