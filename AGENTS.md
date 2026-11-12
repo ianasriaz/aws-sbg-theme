@@ -1252,7 +1252,7 @@ aws-sbg-theme/
 - `includes/features/feature-reinvent-registration.php`:
   - Redesigned the re:Invent registration confirmation ("Under Review") email and the approval + Digital Event Pass email to remove AI-slop bullet lists, emojis, dark/neon boxes, and redundant `"at Air University Islamabad"` copy.
   - Replaced the approval pass with a responsive two-column light-mode table card (`#232F3E` top bar, `#f8fafc` body, tier pill, attendee name, `#RIV-XX`, `Open Mobile Pass` link, and `120x120` QR code).
-  - Updated the form success screen, duplicate-registration notice, and confirmation email to use a 10-minute transient (`rv_ref`) for personalized `[NAME]` + `[email]` display without exposing PII in the URL, and aligned the review timeline copy (`7–10 days if accepted` due to limited capacity).
+  - Updated the form success screen, duplicate-registration notice, and confirmation email with clean, concise copy and the 7–10 day review timeline (`if accepted` due to limited capacity).
 
 ---
 

@@ -152,16 +152,6 @@ function aws_sbg_get_reinvent_closed_message() {
 function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 	$success        = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'success';
 	$exists         = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'exists';
-	$success_name   = '';
-	$success_email  = '';
-	if ( $success && ! empty( $_GET['rv_ref'] ) ) {
-		$rv_ref   = preg_replace( '/[^a-zA-Z0-9]/', '', wp_unslash( $_GET['rv_ref'] ) );
-		$rv_cache = $rv_ref ? get_transient( 'aws_rv_success_' . $rv_ref ) : false;
-		if ( is_array( $rv_cache ) ) {
-			$success_name  = isset( $rv_cache['name'] ) ? sanitize_text_field( $rv_cache['name'] ) : '';
-			$success_email = isset( $rv_cache['email'] ) ? sanitize_email( $rv_cache['email'] ) : '';
-		}
-	}
 	$is_hidden      = aws_sbg_is_reinvent_registration_hidden();
 	$closed_message = aws_sbg_get_reinvent_closed_message();
 	$is_admin       = current_user_can( 'manage_options' );
@@ -327,13 +317,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
 				</div>
 				<h2 style="font-weight:700; font-size:26px; margin:0 0 10px; letter-spacing:0.02em;">Application Received</h2>
-				<p style="font-size:15px; line-height:1.65; color:rgba(255,255,255,0.72);">
-					<?php if ( $success_name ) : ?>
-						Thank you, <strong style="color:#FFFFFF;"><?php echo esc_html( $success_name ); ?></strong>. We received your details for attending <strong style="color:#FFFFFF;">AWS re:Invent Watch &amp; Build Party 2026</strong>. Due to limited capacity, applications go through a review period&mdash;if accepted, your event pass will be sent to <?php echo $success_email ? '<strong style="color:#00DFD8;">' . esc_html( $success_email ) . '</strong>' : 'your registered email'; ?> within the next 7&ndash;10 days.
-					<?php else : ?>
-						Thank you. We received your details for attending <strong style="color:#FFFFFF;">AWS re:Invent Watch &amp; Build Party 2026</strong>. Due to limited capacity, applications go through a review period&mdash;if accepted, your event pass will be sent to your registered email within the next 7&ndash;10 days.
-					<?php endif; ?>
-				</p>
+				<p style="font-size:15px; line-height:1.65; color:rgba(255,255,255,0.62);">Thank you. We received your details for attending AWS re:Invent Watch &amp; Build Party 2026. Due to limited capacity, applications go through a review period&mdash;if accepted, your event pass will be sent to your registered email within the next 7&ndash;10 days.</p>
 				<div style="margin-top:26px;">
 					<a href="<?php echo esc_url( AWS_REINVENT_WHATSAPP_URL ); ?>" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; justify-content:center; gap:10px; background:#00DFD8; color:#06040C; font-family:'Amazon Ember Mono',monospace; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; text-decoration:none; padding:14px 26px; border-radius:10px;">Join WhatsApp community</a>
 					<p style="font-size:12.5px; color:rgba(255,255,255,0.45); margin:10px 0 0; line-height:1.6;">For updates &amp; announcements.</p>
@@ -743,24 +727,8 @@ function aws_sbg_handle_reinvent_registration() {
 	update_post_meta( $post_id, 'notified', 'no' );
 	update_post_meta( $post_id, 'notified_status', '' );
 
-	$rv_ref = wp_generate_password( 12, false, false );
-	set_transient(
-		'aws_rv_success_' . $rv_ref,
-		array(
-			'name'  => $full_name,
-			'email' => $email,
-		),
-		10 * MINUTE_IN_SECONDS
-	);
-
 	$redirect = wp_get_referer() ? wp_get_referer() : home_url();
-	$redirect = add_query_arg(
-		array(
-			'reinvent_registration' => 'success',
-			'rv_ref'                => $rv_ref,
-		),
-		$redirect
-	);
+	$redirect = add_query_arg( array( 'reinvent_registration' => 'success' ), $redirect );
 
 	// 4. Performance optimization:
 	// If PHP FastCGI is active, flush the HTTP redirect immediately so the applicant
