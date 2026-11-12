@@ -1210,6 +1210,40 @@ aws-sbg-theme/
 
 ---
 
+### 2026-11-13 00:40 - Antigravity
+
+**Task**: AWS re:Invent Event-Day Desk Check-In System, Digital Ticket Pass, Badge Formatting, and CFS Form Polish
+
+**Files Changed**:
+- `assets/design-kit/html5-qrcode.min.js`:
+  - Self-hosted HTML5 QR / Barcode Scanner library (v2.3.8) for 100% offline, zero-dependency camera scanning at registration desks.
+- `includes/features/feature-reinvent-checkin.php`:
+  - Created standalone check-in module handling frontend desk authentication, in-memory roster caching, duplicate handover prevention, and mobile pass verification.
+  - Implemented PIN-protected desk session with signed HMAC tokens (SHA-256) and 48-hour HttpOnly cookies. Default passcode: `RIV2026`.
+  - Added URL rewrites and `template_redirect` fallbacks for `/reinvent-checkin/`, `/checkin/`, and `/verify/{pass_number}`.
+  - Built full-screen, dark-mode Desk Check-In Terminal: live camera QR scanner, Web Audio API chime/buzz sound effects, vibration haptics, instant typeahead search across Name / Pass # / CNIC, role category tabs, and slide-over attendee detail drawer with print shortcut.
+  - Built mobile-optimized attendee pass view at `/verify/{pass_number}` displaying live ticket status, QR code, attendee details, and verified badge.
+  - AJAX endpoints: `aws_sbg_checkin_auth`, `aws_sbg_checkin_get_roster`, `aws_sbg_checkin_toggle`, and `aws_sbg_checkin_save_passcode`.
+- `includes/features/feature-reinvent-registration.php`:
+  - Required `feature-reinvent-checkin.php`.
+  - Upgraded approval email in `aws_sbg_reinvent_handle_review_action()`: sends a dark-mode branded Digital Event Pass card with QR code and mobile pass verification link.
+  - Fixed attendee badge print layout:
+    - Landmark footer image (`.badge-skyline`) styled to `position: absolute; bottom: 0; left: 0; right: 0; width: 100% !important; min-width: 100% !important; height: auto !important;` inside a `15%` height container (`.badge-footer`) to eliminate side margins while preventing top spire cropping.
+    - Repositioned role badge pill downward by increasing `.badge-body` top padding and margin spacing.
+  - Admin Dashboard enhancements:
+    - Added "Launch Check-In Terminal" quick-access button and "Desk PIN" modal launcher in admin header.
+    - Added 5th stat card: "Checked In (Event Day)" showing live count and attendance percentage (`X / Y (Z%)`).
+    - Added event check-in status badge in the registrations table.
+    - Added Desk PIN configuration modal (`#aws-reinvent-pin-modal`) with live AJAX updater.
+    - Updated CSV export (`aws_sbg_export_reinvent_csv`) to include `Event Day Check-In`, `Checked In At`, and `Checked In By` columns.
+
+**Key Decisions**:
+- Frontend check-in terminal allows student volunteers to check in attendees using their smartphones or laptops without needing WordPress admin dashboard access or WP accounts.
+- Multi-desk protection: In-memory roster + optimistic locking prevents duplicate badge handovers across parallel entry queues.
+- Zero external CDN dependencies for camera scanning ensures high reliability on venue Wi-Fi / mobile hotspots.
+
+---
+
 ## Active Considerations
 
 *None currently - add here if there are ongoing issues or things to watch out for*

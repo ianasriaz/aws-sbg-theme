@@ -14,6 +14,9 @@ if ( ! defined( 'AWS_REINVENT_WHATSAPP_URL' ) ) {
 	define( 'AWS_REINVENT_WHATSAPP_URL', 'https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI' );
 }
 
+// Load Event-Day Desk Check-In & Attendee Pass verification module
+require_once __DIR__ . '/feature-reinvent-checkin.php';
+
 /* ========================================================================
  * 1. CUSTOM POST TYPE FOR RE:INVENT REGISTRATIONS
  * ======================================================================== */
@@ -1108,12 +1111,29 @@ function aws_sbg_reinvent_handle_review_action() {
 
 		$to_email = get_post_meta( $reg_id, 'email', true );
 		if ( $to_email && function_exists( 'aws_sbg_mail_send' ) ) {
+			$tier       = aws_sbg_get_reinvent_badge_tier( $reg_id );
+			$pass_url   = home_url( '/verify/' . rawurlencode( $reg_no ) );
+			$qr_img_url = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=' . rawurlencode( $pass_url );
+
 			$body = '<p style="margin:0 0 12px 0; color:#334155;">Hi <strong style="color:#0f172a;">' . esc_html( $name ) . '</strong>,</p>'
-				. '<p style="margin:0 0 14px 0; color:#334155;">Congratulations, your application for <strong style="color:#0f172a;">AWS re:Invent Watch &amp; Build Party 2026</strong> has been approved.</p>'
-				. '<div style="margin:18px 0 22px 0; background:#f8fafc; border:2px dashed #00b4d8; border-radius:12px; padding:18px 24px; text-align:center;">'
-				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:#0284c7; margin-bottom:6px;">Official Event Pass</div>'
-				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:26px; font-weight:800; color:#0f172a; letter-spacing:0.04em;">' . esc_html( $reg_no ) . '</div>'
-				. '<div style="font-size:12px; color:#64748b; margin-top:6px;">Please present this pass at the registration desk for check-in.</div>'
+				. '<p style="margin:0 0 14px 0; color:#334155;">Congratulations, your application for <strong style="color:#0f172a;">AWS re:Invent Watch &amp; Build Party Islamabad 2026</strong> has been approved.</p>'
+				. '<div style="margin:20px 0 24px 0; background:#06040C; border:1px solid #1e293b; border-radius:16px; overflow:hidden; color:#ffffff; text-align:center; box-shadow:0 10px 25px -5px rgba(0,0,0,0.3);">'
+				. '<div style="background:linear-gradient(135deg, #6B45E8 0%, #2E63E0 35%, #00DFD8 100%); padding:16px 20px; text-align:center;">'
+				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:10px; font-weight:800; letter-spacing:0.2em; text-transform:uppercase; color:#ffffff;">OFFICIAL EVENT PASS</div>'
+				. '<div style="font-size:18px; font-weight:700; color:#ffffff; margin-top:2px;">AWS re:Invent Watch &amp; Build Party 2026</div>'
+				. '</div>'
+				. '<div style="padding:22px 20px 24px; background:#0b0814; text-align:center;">'
+				. '<div style="display:inline-block; background:#00DFD8; color:#06040C; border-radius:999px; padding:4px 14px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:10px; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; margin-bottom:12px;">' . esc_html( $tier ) . '</div>'
+				. '<div style="font-size:22px; font-weight:700; color:#ffffff; text-transform:uppercase; margin-bottom:14px;">' . esc_html( $name ) . '</div>'
+				. '<div style="background:#ffffff; border-radius:12px; padding:8px; display:inline-block; margin-bottom:14px; box-shadow:0 4px 12px rgba(0,0,0,0.25);">'
+				. '<img src="' . esc_url( $qr_img_url ) . '" alt="Check-in Pass QR" width="140" height="140" style="display:block; border-radius:6px; margin:0 auto;" />'
+				. '</div>'
+				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:24px; font-weight:800; color:#00DFD8; letter-spacing:0.06em;">#' . esc_html( $reg_no ) . '</div>'
+				. '<div style="font-size:11px; color:#94a3b8; margin-top:6px; max-width:320px; margin-left:auto; margin-right:auto; line-height:1.5;">Present this QR code or Pass # on your phone screen at the reception desk to claim your printed lanyard badge.</div>'
+				. '<div style="margin-top:16px;">'
+				. '<a href="' . esc_url( $pass_url ) . '" style="display:inline-block; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.25); color:#ffffff; padding:9px 18px; border-radius:8px; font-size:12px; font-weight:700; text-decoration:none; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">📱 View Mobile Pass on Phone</a>'
+				. '</div>'
+				. '</div>'
 				. '</div>'
 				. '<p style="margin:0 0 8px 0; font-weight:700; color:#0f172a;">What we have for you</p>'
 				. '<ul style="margin:0 0 16px 20px; padding:0; color:#334155;">'
@@ -1121,6 +1141,9 @@ function aws_sbg_reinvent_handle_review_action() {
 				. '<li style="margin:0 0 7px 0;">Refreshments (snacks, food, drinks)</li>'
 				. '<li style="margin:0;">Exclusive AWS swags (subject to participation)</li>'
 				. '</ul>'
+				. '<div style="background:#f1f5f9; border-left:3px solid #0284c7; padding:10px 14px; font-size:12px; color:#475569; margin:16px 0; border-radius:4px;">'
+				. '<strong>Important Gate Entry Note:</strong> Original CNIC/B-Form matching this pass is required for campus entry at PAF Air University Gate 1.'
+				. '</div>'
 				. '<p style="margin:16px 0 0 0; color:#64748b; font-size:13px;">AWS Student Builder Group at Air University Islamabad<br>info@awsairuniversity.com · +923492449953</p>';
 			try {
 				aws_sbg_mail_send( 'reinvent', $to_email, 'You\'re approved for AWS re:Invent Watch & Build Party', 'Application Approved', 'Congratulations', $body, AWS_REINVENT_WHATSAPP_URL, 'Join WhatsApp Community' );
@@ -1235,6 +1258,15 @@ function aws_sbg_render_reinvent_admin_page() {
 		}
 	}
 
+	$checked_in_count = (int) $wpdb->get_var(
+		"SELECT COUNT(DISTINCT pm.post_id)
+		 FROM {$wpdb->postmeta} pm
+		 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+		 WHERE p.post_type = 'aws_reinvent_reg' AND p.post_status = 'publish'
+		   AND pm.meta_key = 'event_checked_in' AND pm.meta_value = 'yes'"
+	);
+	$desk_passcode = function_exists( 'aws_sbg_reinvent_get_checkin_passcode' ) ? aws_sbg_reinvent_get_checkin_passcode() : 'RIV2026';
+
 	$total_results = (int) $query->found_posts;
 	$start         = $total_results ? ( ( $paged - 1 ) * $per_page ) + 1 : 0;
 	$end           = min( $start + $per_page - 1, $total_results );
@@ -1278,7 +1310,7 @@ function aws_sbg_render_reinvent_admin_page() {
 			.rvadm-search-btn{padding:7px 16px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:#ffffff;font-size:12.5px;font-weight:600;cursor:pointer;}
 			.rvadm-search-btn:hover{background:#1e293b;border-color:#1e293b;}
 
-			.rvadm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;width:100%;}
+			.rvadm-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;width:100%;}
 			.rvadm-stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;}
 			.rvadm-stat-num{font-size:26px;font-weight:700;color:var(--ink);line-height:1;}
 			.rvadm-stat-label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);margin-top:6px;}
@@ -1414,6 +1446,8 @@ function aws_sbg_render_reinvent_admin_page() {
 				<p class="rvadm-sub">Review, approve, or reject applications. Use the roster for a print-ready gate clearance sheet.</p>
 			</div>
 			<div class="rvadm-actions">
+				<a class="rvadm-btn" style="background:#00DFD8;color:#06040C;border-color:#00DFD8;font-weight:700;" href="<?php echo esc_url( home_url( '/reinvent-checkin/' ) ); ?>" target="_blank" title="Launch the password-protected Mobile Check-in Terminal on phone, tablet or laptop">📱 Launch Check-In Terminal &#8599;</a>
+				<button type="button" class="rvadm-btn" onclick="openDeskPinModal()" title="View or change Event Desk PIN">🔑 Desk PIN: <strong id="rvadm-pin-display"><?php echo esc_html( $desk_passcode ); ?></strong></button>
 				<a class="rvadm-btn" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_reinvent_resync_numbers' ), 'aws_reinvent_resync_numbers' ) ); ?>" onclick="return confirm('Resynchronize all approved pass numbers sequentially starting from RIV-01? This will cleanly renumber approved attendees and eliminate any gaps from deleted test submissions.');" title="Renumber approved attendees consecutively starting from RIV-01">🔄 Resync Pass Numbers</a>
 				<?php if ( $counts['total'] > 0 ) : ?>
 					<button type="button" class="rvadm-btn rvadm-btn-danger" onclick="document.getElementById('aws-reinvent-clear-modal').style.display='flex'">Clear Entries…</button>
@@ -1494,6 +1528,13 @@ function aws_sbg_render_reinvent_admin_page() {
 			<div class="rvadm-stat">
 				<div class="rvadm-stat-num"><?php echo intval( $counts['approved'] ); ?></div>
 				<div class="rvadm-stat-label"><span class="rvadm-dot rvadm-dot-approved"></span>Approved</div>
+			</div>
+			<div class="rvadm-stat" style="background:#f0fdf4;border-color:#bbf7d0;">
+				<div class="rvadm-stat-num" style="color:#15803d;">
+					<?php echo intval( $checked_in_count ); ?>
+					<span style="font-size:13px;color:#16a34a;font-weight:600;">/ <?php echo intval( $counts['approved'] ); ?> (<?php echo $counts['approved'] > 0 ? round( ( $checked_in_count / $counts['approved'] ) * 100 ) : 0; ?>%)</span>
+				</div>
+				<div class="rvadm-stat-label" style="color:#166534;"><span class="rvadm-dot" style="background:#16a34a;"></span>Checked In (Event Day)</div>
 			</div>
 			<div class="rvadm-stat">
 				<div class="rvadm-stat-num"><?php echo intval( $counts['rejected'] ); ?></div>
@@ -1629,6 +1670,21 @@ function aws_sbg_render_reinvent_admin_page() {
 								<td>
 									<?php if ( 'approved' === $approval ) : ?>
 										<span class="rvadm-badge rvadm-badge-approved">Approved</span>
+										<?php
+										$is_chk = get_post_meta( $reg_id, 'event_checked_in', true ) === 'yes';
+										$chk_tm = get_post_meta( $reg_id, 'checked_in_at', true );
+										?>
+										<?php if ( $is_chk ) : ?>
+											<div style="margin-top:4px;">
+												<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:#15803d;background:#dcfce7;border:1px solid #bbf7d0;padding:2px 6px;border-radius:4px;font-family:ui-monospace,monospace;">
+													✓ Checked In <?php echo $chk_tm ? date( 'h:i A', strtotime( $chk_tm ) ) : ''; ?>
+												</span>
+											</div>
+										<?php else : ?>
+											<div style="margin-top:4px;">
+												<span style="font-size:10.5px;color:#94a3b8;font-family:ui-monospace,monospace;">Not checked in</span>
+											</div>
+										<?php endif; ?>
 									<?php elseif ( 'rejected' === $approval ) : ?>
 										<span class="rvadm-badge rvadm-badge-rejected">Rejected</span>
 									<?php else : ?>
@@ -1879,6 +1935,38 @@ function aws_sbg_render_reinvent_admin_page() {
 			</div>
 		</div>
 
+		<!-- Modal 6: Edit Event Desk PIN -->
+		<div id="aws-reinvent-pin-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(3px);z-index:99999;align-items:center;justify-content:center;padding:20px;">
+			<div style="background:#ffffff;border-radius:16px;max-width:420px;width:100%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;border:1px solid #e2e8f0;">
+				<div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;">
+					<div>
+						<h3 style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">Desk Check-In Passcode</h3>
+						<div style="font-size:12px;color:#64748b;margin-top:2px;">PIN used by volunteers on the mobile check-in terminal</div>
+					</div>
+					<button type="button" onclick="closeDeskPinModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#64748b;line-height:1;">&times;</button>
+				</div>
+				<form id="rvadm-pin-form" onsubmit="saveDeskPin(event)" style="padding:22px 24px;">
+					<input type="hidden" id="rvadm-pin-nonce" value="<?php echo esc_attr( wp_create_nonce( 'aws_reinvent_admin_nonce' ) ); ?>">
+
+					<div style="margin-bottom:16px;">
+						<label for="rvadm-pin-input" style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#475569;margin-bottom:6px;">Desk Access PIN</label>
+						<input type="text" id="rvadm-pin-input" value="<?php echo esc_attr( $desk_passcode ); ?>" placeholder="e.g. RIV2026" style="width:100%;padding:10px 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:16px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#0f172a;background:#ffffff;box-sizing:border-box;" required minlength="4">
+						<span style="display:block;font-size:11.5px;color:#64748b;margin-top:5px;">Share this PIN with your reception volunteers to unlock <code>/reinvent-checkin/</code> on their phones.</span>
+					</div>
+
+					<div id="rvadm-pin-msg" style="display:none;font-size:12px;margin-bottom:12px;"></div>
+
+					<div style="display:flex;justify-content:space-between;align-items:center;">
+						<a href="<?php echo esc_url( home_url( '/reinvent-checkin/' ) ); ?>" target="_blank" style="font-size:12px;color:#0284c7;font-weight:600;text-decoration:none;">Open Terminal ↗</a>
+						<div style="display:flex;gap:8px;">
+							<button type="button" class="button" onclick="closeDeskPinModal()">Cancel</button>
+							<button type="submit" id="rvadm-pin-submit" class="button button-primary" style="font-weight:700;">Save PIN</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+
 		<script>
 		function openAdminNoteModal(regId, name, note, nonce) {
 			document.getElementById('rvadm-note-reg-id').value = regId;
@@ -1915,6 +2003,55 @@ function aws_sbg_render_reinvent_admin_page() {
 		}
 		function closeRegNumberModal() {
 			document.getElementById('aws-reinvent-regno-modal').style.display = 'none';
+		}
+		function openDeskPinModal() {
+			document.getElementById('aws-reinvent-pin-modal').style.display = 'flex';
+			document.getElementById('rvadm-pin-input').focus();
+		}
+		function closeDeskPinModal() {
+			document.getElementById('aws-reinvent-pin-modal').style.display = 'none';
+			document.getElementById('rvadm-pin-msg').style.display = 'none';
+		}
+		function saveDeskPin(e) {
+			e.preventDefault();
+			const pin = document.getElementById('rvadm-pin-input').value.trim();
+			const nonce = document.getElementById('rvadm-pin-nonce').value;
+			const btn = document.getElementById('rvadm-pin-submit');
+			const msg = document.getElementById('rvadm-pin-msg');
+
+			btn.disabled = true;
+			btn.textContent = 'Saving...';
+			msg.style.display = 'none';
+
+			const fd = new FormData();
+			fd.append('action', 'aws_sbg_checkin_save_passcode');
+			fd.append('passcode', pin);
+			fd.append('nonce', nonce);
+
+			fetch(ajaxurl, { method: 'POST', body: fd })
+				.then(r => r.json())
+				.then(data => {
+					btn.disabled = false;
+					btn.textContent = 'Save PIN';
+					if (data.success) {
+						document.getElementById('rvadm-pin-display').textContent = pin;
+						msg.style.color = '#15803d';
+						msg.textContent = '✓ ' + (data.data.message || 'Saved successfully');
+						msg.style.display = 'block';
+						setTimeout(closeDeskPinModal, 900);
+					} else {
+						msg.style.color = '#b91c1c';
+						msg.textContent = data.data.message || 'Failed to save';
+						msg.style.display = 'block';
+					}
+				})
+				.catch(() => {
+					btn.disabled = false;
+					btn.textContent = 'Save PIN';
+					msg.style.color = '#b91c1c';
+					msg.textContent = 'Network error. Try again.';
+					msg.style.display = 'block';
+				});
 		}
 		</script>
 	</div>
@@ -3400,7 +3537,7 @@ function aws_sbg_export_reinvent_csv() {
 	header( 'Content-Disposition: attachment; filename=' . $filename );
 
 	$output = fopen( 'php://output', 'w' );
-	fputcsv( $output, array( 'Registration #', 'Name', 'Badge Tier', 'Email', 'WhatsApp', 'CNIC', 'Institute/Company', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS or Community Event Before', 'Applicant Note (Last Attended Event)', 'Admin Note (Internal)', 'Will Attend', 'Vehicle', 'Parking Policy', 'Approval Status', 'Registered At' ) );
+	fputcsv( $output, array( 'Registration #', 'Name', 'Badge Tier', 'Email', 'WhatsApp', 'CNIC', 'Institute/Company', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS or Community Event Before', 'Applicant Note (Last Attended Event)', 'Admin Note (Internal)', 'Will Attend', 'Vehicle', 'Parking Policy', 'Approval Status', 'Event Day Check-In', 'Checked In At', 'Checked In By', 'Registered At' ) );
 
 	if ( $query->have_posts() ) {
 		foreach ( $query->posts as $reg ) {
@@ -3427,7 +3564,11 @@ function aws_sbg_export_reinvent_csv() {
 			$approval   = get_post_meta( $reg->ID, 'approval_status', true ) ?: 'pending';
 			$registered = get_the_date( 'Y-m-d H:i:s', $reg->ID );
 
-			fputcsv( $output, array( $reg_number, $title, $badge_tier, $email, $whatsapp, $cnic, $university, ucfirst( str_replace( '_', ' ', $audience ) ), $city, $linkedin, ucfirst( $attended ), $why, $admin_note, ucfirst( $will_attend ), $vehicle, $parking, ucfirst( $approval ), $registered ) );
+			$event_chk  = get_post_meta( $reg->ID, 'event_checked_in', true ) === 'yes' ? 'Yes' : 'No';
+			$chk_time   = get_post_meta( $reg->ID, 'checked_in_at', true ) ?: '';
+			$chk_by     = get_post_meta( $reg->ID, 'checked_in_by', true ) ?: '';
+
+			fputcsv( $output, array( $reg_number, $title, $badge_tier, $email, $whatsapp, $cnic, $university, ucfirst( str_replace( '_', ' ', $audience ) ), $city, $linkedin, ucfirst( $attended ), $why, $admin_note, ucfirst( $will_attend ), $vehicle, $parking, ucfirst( $approval ), $event_chk, $chk_time, $chk_by, $registered ) );
 		}
 	}
 
