@@ -34,6 +34,24 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-12 02:08 - Antigravity
+
+**Task**: Fix re:Invent registration approval redirecting to a blank page with sidebar menu.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` -
+  - Extracted review actions (approve & reject) into `aws_sbg_reinvent_handle_review_action()` hooked to `admin_init`. This executes before WordPress sends headers or loads `admin-header.php`, allowing `wp_safe_redirect()` to issue clean HTTP 302 redirects.
+  - Added Javascript `window.location.replace()` and `<meta http-equiv="refresh">` fallback if headers were already sent, ensuring it never halts mid-render.
+  - Wrapped `aws_sbg_mail_send()` in a `try...catch ( Throwable $e )` block to prevent mail server or network exceptions from terminating the request.
+  - Cleaned up approve and reject link generators to use `admin_url( 'admin.php' )` as the explicit base, preventing extraneous query args (e.g. `notice=visibility_live`) from polluting review action URLs.
+  - Added robust fallback to `aws_sbg_allocate_reinvent_registration_number()` to derive sequential numbers from existing postmeta if the sequence table insert returns 0.
+  - Added admin notices for `notice=approved` and `notice=rejected`.
+
+**Key Decisions**:
+- Running redirects on `admin_init` complies with the WordPress lifecycle standard where HTTP headers must be modified before HTML output starts.
+
+---
+
 ### 2026-11-12 01:30 - Antigravity
 
 **Task**: Auto-generate attendee cards (as designed in the brand kit) for approved re:Invent registrations arranged on an A4 page for print vendor export with layout toggle, front-side imposition, and admin badge tier customization.
