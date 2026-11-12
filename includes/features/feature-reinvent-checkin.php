@@ -214,6 +214,7 @@ function aws_sbg_ajax_checkin_get_roster() {
 		$by        = get_post_meta( $p->ID, 'checked_in_by', true ) ?: '';
 		$uni       = get_post_meta( $p->ID, 'university', true ) ?: '';
 		$city      = get_post_meta( $p->ID, 'city', true ) ?: '';
+		$email     = get_post_meta( $p->ID, 'email', true ) ?: '';
 		$cnic_raw  = get_post_meta( $p->ID, 'cnic', true ) ?: '';
 
 		// Mask CNIC for privacy: 12345-*******-1
@@ -229,6 +230,7 @@ function aws_sbg_ajax_checkin_get_roster() {
 			'no'       => strtoupper( $reg_no ),
 			'name'     => $name,
 			'tier'     => strtoupper( $tier ),
+			'email'    => $email,
 			'uni'      => $uni,
 			'city'     => $city,
 			'cnic'     => $cnic_masked,
@@ -1334,22 +1336,20 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 						<strong id="ck-modal-id">#RIV-01</strong>
 					</div>
 					<div class="ck-grid-item">
+						<span>Status</span>
+						<strong id="ck-modal-status">Ready</strong>
+					</div>
+					<div class="ck-grid-item">
 						<span>CNIC / B-Form</span>
 						<strong id="ck-modal-cnic">37405-*******-1</strong>
 					</div>
 					<div class="ck-grid-item">
-						<span>Affiliation</span>
-						<strong id="ck-modal-uni">AIR University</strong>
-					</div>
-					<div class="ck-grid-item">
-						<span>Status</span>
-						<strong id="ck-modal-status">Ready</strong>
+						<span>Email</span>
+						<strong id="ck-modal-email" style="word-break:break-all; font-size:12px;">—</strong>
 					</div>
 				</div>
 
-				<div id="ck-modal-alert" class="ck-modal-alert ck-alert-ok">
-					Eligible for entrance. Hand over printed lanyard badge.
-				</div>
+				<div id="ck-modal-alert" class="ck-modal-alert ck-alert-warn" style="display:none;"></div>
 
 				<button type="button" id="ck-btn-primary" class="ck-btn-action ck-btn-checkin" onclick="confirmCheckin()">Confirm Check-In &amp; Issue Badge</button>
 				<button type="button" id="ck-btn-undo" class="ck-btn-action ck-btn-undo" style="display:none;" onclick="undoCheckin()">Undo Check-In</button>
@@ -1539,7 +1539,8 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 				const noClean = noRaw.replace(/[^a-z0-9]/g, '');
 				const noMatch = noRaw.includes(q) || (cleanQ && noClean.includes(cleanQ));
 				const cnicMatch = cleanQ && a.cnic && a.cnic.replace(/[^0-9]/g, '').includes(cleanQ);
-				return nameMatch || noMatch || cnicMatch;
+				const emailMatch = a.email && a.email.toLowerCase().includes(q);
+				return nameMatch || noMatch || cnicMatch || emailMatch;
 			});
 
 			if (filtered.length === 0) {
@@ -1564,7 +1565,7 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 						<div class="ck-item-no">#${escapeHtml(a.no)}</div>
 						<div style="min-width:0;">
 							<div class="ck-item-name">${escapeHtml(a.name)}</div>
-							<div class="ck-item-sub">${escapeHtml(a.uni || a.city || 'Approved')}${a.cnic ? ' · ' + escapeHtml(a.cnic) : ''}</div>
+							<div class="ck-item-sub">${escapeHtml(a.email || a.uni || a.city || 'Approved')}${a.cnic ? ' · ' + escapeHtml(a.cnic) : ''}</div>
 						</div>
 					</div>
 					<div class="ck-item-right">
@@ -1607,7 +1608,7 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 			document.getElementById('ck-modal-sub').textContent = (attendee.uni || '') + (attendee.city ? ' · ' + attendee.city : '');
 			document.getElementById('ck-modal-id').textContent = '#' + attendee.no;
 			document.getElementById('ck-modal-cnic').textContent = attendee.cnic || '—';
-			document.getElementById('ck-modal-uni').textContent = attendee.uni || '—';
+			document.getElementById('ck-modal-email').textContent = attendee.email || '—';
 
 			btnAction.className = 'ck-btn-action ck-btn-checkin';
 			btnAction.disabled = false;
@@ -1616,13 +1617,14 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 				document.getElementById('ck-modal-status').textContent = 'Checked In (' + attendee.time + ')';
 				alert.className = 'ck-modal-alert ck-alert-warn';
 				alert.innerHTML = `⚠️ <strong>ALREADY CHECKED IN</strong><br>Checked in at ${attendee.time || 'earlier'} by ${attendee.by || 'Desk'}. Lanyard badge was already issued!`;
+				alert.style.display = 'block';
 				btnAction.style.display = 'none';
 				btnUndo.style.display = 'block';
 				playWarningBuzz();
 			} else {
-				document.getElementById('ck-modal-status').textContent = 'Eligible (Ready)';
-				alert.className = 'ck-modal-alert ck-alert-ok';
-				alert.innerHTML = `✓ <strong>ELIGIBLE FOR ENTRY</strong><br>Verify photo ID/CNIC, then tap <strong>Confirm Check-In</strong> to issue badge <strong>#${attendee.no}</strong>.`;
+				document.getElementById('ck-modal-status').textContent = 'Ready';
+				alert.style.display = 'none';
+				alert.innerHTML = '';
 				btnAction.style.display = 'block';
 				btnAction.textContent = 'Confirm Check-In & Issue Badge';
 				btnUndo.style.display = 'none';
@@ -1664,14 +1666,11 @@ function aws_sbg_render_reinvent_checkin_terminal() {
 
 						btn.className = 'ck-btn-action ck-btn-success';
 						btn.textContent = '✓ Check-In Confirmed!';
-						const alertBox = document.getElementById('ck-modal-alert');
-						alertBox.className = 'ck-modal-alert ck-alert-success';
-						alertBox.innerHTML = `🎉 <strong>CHECKED IN SUCCESSFULLY</strong><br>Badge #${currentAtt.no} handed over.`;
 
 						setTimeout(() => {
 							closeModal();
 							renderList();
-						}, 700);
+						}, 600);
 					} else {
 						btn.disabled = false;
 						btn.textContent = 'Confirm Check-In & Issue Badge';
