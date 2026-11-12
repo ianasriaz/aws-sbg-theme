@@ -34,6 +34,24 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-12 23:55 - Antigravity
+
+**Task**: Fix sequential pass number gap caused by deleted test registrations, make registration counter self-healing, add "Resync Pass Numbers" admin action, and add inline "Edit Pass Number" modal.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` -
+  - Added `aws_sbg_resync_reinvent_numbers_table()` helper: inspects active `registration_number` meta values. If 0 exist (e.g. after testing and clearing entries), it truncates `wp_aws_reinvent_numbers` so the sequence resets to 1; if entries remain, it cleans up ghost IDs and sets `AUTO_INCREMENT = max_existing + 1`.
+  - Updated `aws_sbg_allocate_reinvent_registration_number()` to run the auto-resync check on allocation, guaranteeing sequential numbers (`RIV-01`, `RIV-02`, etc.) without phantom jumps.
+  - Updated `aws_sbg_reinvent_handle_delete_reg()` to trigger `aws_sbg_resync_reinvent_numbers_table()` whenever any registration is deleted.
+  - Added `aws_sbg_reinvent_handle_resync_numbers()` action with a "Resync Pass Numbers" button in the admin bar: renumbers all approved attendees consecutively starting from `RIV-01` and resets the counter.
+  - Added `aws_sbg_reinvent_handle_save_reg_number()` action and modal (`#aws-reinvent-regno-modal`) with inline `✎` button on pass number cells for direct customization.
+
+**Key Decisions**:
+- Automatic self-healing on allocation ensures test submissions can be freely cleared prior to public launch without permanently burning sequential numbers.
+- Providing both a 1-click global renumbering tool and an individual pass number editor gives organizers complete control to fix existing entries (e.g. `RIV-04` back to `RIV-01`).
+
+---
+
 ### 2026-11-12 23:12 - Antigravity
 
 **Task**: Remove Alex Morgan placeholder, make confirmation email copy completely general (no mention of "selection"), and remove "first-time speakers are welcome" messaging.

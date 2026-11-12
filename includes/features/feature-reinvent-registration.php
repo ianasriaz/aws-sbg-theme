@@ -62,24 +62,57 @@ function aws_sbg_reinvent_numbers_init_db() {
 add_action( 'after_switch_theme', 'aws_sbg_reinvent_numbers_init_db' );
 add_action( 'admin_init', 'aws_sbg_reinvent_numbers_init_db', 10 );
 
+/**
+ * Synchronize the numbers tracking table with actual registrations in postmeta.
+ * Ensures that if test registrations were deleted, the counter resets back to 1
+ * or to max_existing + 1, eliminating phantom gaps.
+ *
+ * @return int The highest existing registration sequence number in postmeta (0 if none).
+ */
+function aws_sbg_resync_reinvent_numbers_table() {
+	global $wpdb;
+	$table = $wpdb->prefix . 'aws_reinvent_numbers';
+
+	// Calculate highest registration number actually existing in active postmeta
+	$max_existing = 0;
+	$existing = $wpdb->get_col( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'registration_number' AND meta_value LIKE 'RIV-%'" );
+	if ( ! empty( $existing ) ) {
+		foreach ( $existing as $val ) {
+			if ( preg_match( '/RIV-(\d+)/i', $val, $m ) ) {
+				$max_existing = max( $max_existing, intval( $m[1] ) );
+			}
+		}
+	}
+
+	if ( 0 === $max_existing ) {
+		// Clean slate: completely reset the numbers table so next insert starts at 1
+		$wpdb->query( "TRUNCATE TABLE $table" );
+		delete_option( 'aws_reinvent_next_number' );
+		delete_option( 'aws_reinvent_numbers_seeded' );
+		update_option( 'aws_reinvent_numbers_seeded', 1 );
+	} else {
+		// Test entries were deleted: purge phantom rows higher than max_existing and reset auto-increment
+		$wpdb->query( $wpdb->prepare( "DELETE FROM $table WHERE id > %d", $max_existing ) );
+		$wpdb->query( "ALTER TABLE $table AUTO_INCREMENT = " . intval( $max_existing + 1 ) );
+	}
+
+	return $max_existing;
+}
+
 function aws_sbg_allocate_reinvent_registration_number() {
 	global $wpdb;
 	$table = $wpdb->prefix . 'aws_reinvent_numbers';
+
+	// Auto-resync to catch any test entries deleted before allocation
+	$max_existing = aws_sbg_resync_reinvent_numbers_table();
+
 	$wpdb->insert( $table, array( 'created_at' => current_time( 'mysql' ) ), array( '%s' ) );
 	$num = (int) $wpdb->insert_id;
-	if ( $num <= 0 ) {
-		// Fallback: derive sequential number from existing registrations if table insert fails
-		$max_num = 0;
-		$existing = $wpdb->get_col( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = 'registration_number' AND meta_value LIKE 'RIV-%'" );
-		if ( ! empty( $existing ) ) {
-			foreach ( $existing as $val ) {
-				if ( preg_match( '/RIV-(\d+)/i', $val, $m ) ) {
-					$max_num = max( $max_num, intval( $m[1] ) );
-				}
-			}
-		}
-		$num = $max_num + 1;
+
+	if ( $num <= 0 || $num <= $max_existing ) {
+		$num = $max_existing + 1;
 	}
+
 	return 'RIV-' . str_pad( $num, 2, '0', STR_PAD_LEFT );
 }
 
@@ -787,6 +820,9 @@ function aws_sbg_reinvent_handle_delete_reg() {
 
 	wp_delete_post( $reg_id, true );
 
+	// Auto-resync sequence tracking table so deletions eliminate phantom gaps
+	aws_sbg_resync_reinvent_numbers_table();
+
 	$redirect = remove_query_arg( array( 'action', 'reg_id', '_wpnonce' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=aws-reinvent-registrations' ) );
 	wp_safe_redirect( add_query_arg( 'notice', 'entry_deleted', $redirect ) );
 	exit;
@@ -903,6 +939,91 @@ function aws_sbg_reinvent_handle_save_badge_tier() {
 	exit;
 }
 add_action( 'admin_post_aws_sbg_reinvent_save_badge_tier', 'aws_sbg_reinvent_handle_save_badge_tier' );
+
+/**
+ * Handle manually saving / editing registration pass number from WP Admin.
+ */
+function aws_sbg_reinvent_handle_save_reg_number() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized', 'Error', array( 'response' => 403 ) );
+	}
+
+	$reg_id = isset( $_POST['reg_id'] ) ? intval( $_POST['reg_id'] ) : 0;
+	if ( ! $reg_id || ! check_admin_referer( 'aws_reinvent_save_reg_no_' . $reg_id ) ) {
+		wp_die( 'Security check failed.' );
+	}
+
+	$raw_no = isset( $_POST['reg_number'] ) ? sanitize_text_field( wp_unslash( $_POST['reg_number'] ) ) : '';
+	$raw_no = trim( strtoupper( $raw_no ) );
+
+	if ( ! empty( $raw_no ) ) {
+		// Ensure standard RIV- prefix if numeric only was entered
+		if ( ! preg_match( '/^RIV-/i', $raw_no ) && is_numeric( $raw_no ) ) {
+			$raw_no = 'RIV-' . str_pad( intval( $raw_no ), 2, '0', STR_PAD_LEFT );
+		}
+		update_post_meta( $reg_id, 'registration_number', $raw_no );
+		aws_sbg_resync_reinvent_numbers_table();
+	}
+
+	$redirect = remove_query_arg( array( 'action', 'reg_id', '_wpnonce' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=aws-reinvent-registrations' ) );
+	wp_safe_redirect( add_query_arg( 'notice', 'reg_no_saved', $redirect ) );
+	exit;
+}
+add_action( 'admin_post_aws_sbg_reinvent_save_reg_number', 'aws_sbg_reinvent_handle_save_reg_number' );
+
+/**
+ * Handle renumbering and resynchronizing all approved pass numbers sequentially starting from RIV-01.
+ */
+function aws_sbg_reinvent_handle_resync_numbers() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized', 'Error', array( 'response' => 403 ) );
+	}
+
+	check_admin_referer( 'aws_reinvent_resync_numbers' );
+
+	global $wpdb;
+	$table = $wpdb->prefix . 'aws_reinvent_numbers';
+
+	// Retrieve all approved registrations ordered chronologically by ID
+	$approved_posts = get_posts( array(
+		'post_type'      => 'aws_reinvent_reg',
+		'posts_per_page' => -1,
+		'post_status'    => 'publish',
+		'meta_query'     => array(
+			array(
+				'key'     => 'approval_status',
+				'value'   => 'approved',
+				'compare' => '=',
+			),
+		),
+		'orderby'        => 'ID',
+		'order'          => 'ASC',
+	) );
+
+	// Truncate the sequence tracking table
+	$wpdb->query( "TRUNCATE TABLE $table" );
+	delete_option( 'aws_reinvent_next_number' );
+	delete_option( 'aws_reinvent_numbers_seeded' );
+	update_option( 'aws_reinvent_numbers_seeded', 1 );
+
+	$seq = 0;
+	if ( ! empty( $approved_posts ) ) {
+		foreach ( $approved_posts as $post ) {
+			$seq++;
+			$new_no = 'RIV-' . str_pad( $seq, 2, '0', STR_PAD_LEFT );
+			update_post_meta( $post->ID, 'registration_number', $new_no );
+			$wpdb->insert( $table, array( 'created_at' => current_time( 'mysql' ) ), array( '%s' ) );
+		}
+	}
+
+	$next_auto = max( 1, $seq + 1 );
+	$wpdb->query( "ALTER TABLE $table AUTO_INCREMENT = " . intval( $next_auto ) );
+
+	$redirect = remove_query_arg( array( 'action', '_wpnonce' ), wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=aws-reinvent-registrations' ) );
+	wp_safe_redirect( add_query_arg( array( 'notice' => 'numbers_resynced', 'count' => $seq ), $redirect ) );
+	exit;
+}
+add_action( 'admin_post_aws_sbg_reinvent_resync_numbers', 'aws_sbg_reinvent_handle_resync_numbers' );
 
 /**
  * Handle Approve and Reject review actions early on admin_init before headers are sent.
@@ -1220,6 +1341,14 @@ function aws_sbg_render_reinvent_admin_page() {
 			<div class="notice notice-success is-dismissible" style="border-left-color:#16a34a;margin-bottom:16px;">
 				<p><strong>Badge tier / role updated successfully.</strong></p>
 			</div>
+		<?php elseif ( 'reg_no_saved' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible" style="border-left-color:#16a34a;margin-bottom:16px;">
+				<p><strong>Registration pass number updated successfully.</strong> The sequence counter has been recalibrated.</p>
+			</div>
+		<?php elseif ( 'numbers_resynced' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible" style="border-left-color:#16a34a;margin-bottom:16px;">
+				<p><strong>Pass numbers successfully resynchronized:</strong> <?php echo esc_html( $n_count ); ?> approved registration(s) renumbered sequentially starting from <code>RIV-01</code>. The next approved attendee will receive <code>RIV-<?php echo esc_html( str_pad( $n_count + 1, 2, '0', STR_PAD_LEFT ) ); ?></code>.</p>
+			</div>
 		<?php elseif ( 'approved' === $notice ) : ?>
 			<div class="notice notice-success is-dismissible" style="border-left-color:#16a34a;margin-bottom:16px;">
 				<p><strong>Application approved successfully.</strong> Attendee has been assigned their pass number and sent an approval email.</p>
@@ -1240,6 +1369,7 @@ function aws_sbg_render_reinvent_admin_page() {
 				<p class="rvadm-sub">Review, approve, or reject applications. Use the roster for a print-ready gate clearance sheet.</p>
 			</div>
 			<div class="rvadm-actions">
+				<a class="rvadm-btn" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_reinvent_resync_numbers' ), 'aws_reinvent_resync_numbers' ) ); ?>" onclick="return confirm('Resynchronize all approved pass numbers sequentially starting from RIV-01? This will cleanly renumber approved attendees and eliminate any gaps from deleted test submissions.');" title="Renumber approved attendees consecutively starting from RIV-01">🔄 Resync Pass Numbers</a>
 				<?php if ( $counts['total'] > 0 ) : ?>
 					<button type="button" class="rvadm-btn rvadm-btn-danger" onclick="document.getElementById('aws-reinvent-clear-modal').style.display='flex'">Clear Entries…</button>
 				<?php endif; ?>
@@ -1372,12 +1502,18 @@ function aws_sbg_render_reinvent_admin_page() {
 								$vehicle = ucfirst( get_post_meta( $reg_id, 'vehicle_type', true ) ) . ' · ' . get_post_meta( $reg_id, 'vehicle_number', true );
 							}
 							$parking_ok  = 'yes' === get_post_meta( $reg_id, 'parking_policy', true );
-							$note_nonce  = wp_create_nonce( 'aws_reinvent_admin_note_' . $reg_id );
-							$tier_nonce  = wp_create_nonce( 'aws_reinvent_badge_tier_' . $reg_id );
+							$note_nonce   = wp_create_nonce( 'aws_reinvent_admin_note_' . $reg_id );
+							$tier_nonce   = wp_create_nonce( 'aws_reinvent_badge_tier_' . $reg_id );
+							$reg_no_nonce = wp_create_nonce( 'aws_reinvent_save_reg_no_' . $reg_id );
 							?>
 							<tr>
 								<td class="rvadm-reg">
-									<?php echo $reg_number ? esc_html( $reg_number ) : '<span class="rvadm-null">—</span>'; ?>
+									<div style="display:inline-flex;align-items:center;gap:6px;">
+										<span><?php echo $reg_number ? esc_html( $reg_number ) : '<span class="rvadm-null">—</span>'; ?></span>
+										<?php if ( 'approved' === $approval || $reg_number ) : ?>
+											<button type="button" class="rvadm-tier-edit-btn" onclick="openRegNumberModal(<?php echo $reg_id; ?>, <?php echo esc_attr( wp_json_encode( $name ) ); ?>, <?php echo esc_attr( wp_json_encode( $reg_number ? $reg_number : 'RIV-01' ) ); ?>, <?php echo esc_attr( wp_json_encode( $reg_no_nonce ) ); ?>)" title="Edit pass number">✎</button>
+										<?php endif; ?>
+									</div>
 								</td>
 								<td>
 									<div class="rvadm-name"><?php echo esc_html( $name ); ?></div>
@@ -1669,6 +1805,35 @@ function aws_sbg_render_reinvent_admin_page() {
 			</div>
 		</div>
 
+		<!-- Modal 5: Edit Pass Number -->
+		<div id="aws-reinvent-regno-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(3px);z-index:99999;align-items:center;justify-content:center;padding:20px;">
+			<div style="background:#ffffff;border-radius:16px;max-width:440px;width:100%;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);overflow:hidden;border:1px solid #e2e8f0;">
+				<div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;">
+					<div>
+						<h3 id="rvadm-regno-modal-title" style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">Edit Pass Number</h3>
+						<div style="font-size:12px;color:#64748b;margin-top:2px;">Unique event check-in pass ID</div>
+					</div>
+					<button type="button" onclick="closeRegNumberModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#64748b;line-height:1;">&times;</button>
+				</div>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="padding:22px 24px;">
+					<input type="hidden" name="action" value="aws_sbg_reinvent_save_reg_number">
+					<input type="hidden" id="rvadm-regno-reg-id" name="reg_id" value="">
+					<input type="hidden" id="rvadm-regno-nonce" name="_wpnonce" value="">
+
+					<div style="margin-bottom:18px;">
+						<label for="rvadm-regno-input" style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#475569;margin-bottom:6px;">Registration Pass Number</label>
+						<input type="text" id="rvadm-regno-input" name="reg_number" placeholder="e.g. RIV-01" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#0f172a;background:#ffffff;box-sizing:border-box;" required>
+						<span style="display:block;font-size:11.5px;color:#64748b;margin-top:5px;">Must follow standard <code>RIV-XX</code> format (e.g. <code>RIV-01</code>).</span>
+					</div>
+
+					<div style="display:flex;justify-content:flex-end;gap:10px;">
+						<button type="button" class="button" onclick="closeRegNumberModal()">Cancel</button>
+						<button type="submit" class="button button-primary" style="font-weight:700;padding:4px 16px;">Save Pass Number</button>
+					</div>
+				</form>
+			</div>
+		</div>
+
 		<script>
 		function openAdminNoteModal(regId, name, note, nonce) {
 			document.getElementById('rvadm-note-reg-id').value = regId;
@@ -1694,6 +1859,17 @@ function aws_sbg_render_reinvent_admin_page() {
 		}
 		function selectTierPreset(val) {
 			document.getElementById('rvadm-tier-input').value = val;
+		}
+		function openRegNumberModal(regId, name, regNo, nonce) {
+			document.getElementById('rvadm-regno-reg-id').value = regId;
+			document.getElementById('rvadm-regno-nonce').value = nonce;
+			document.getElementById('rvadm-regno-input').value = regNo || 'RIV-01';
+			document.getElementById('rvadm-regno-modal-title').textContent = 'Edit Pass: ' + name;
+			document.getElementById('aws-reinvent-regno-modal').style.display = 'flex';
+			document.getElementById('rvadm-regno-input').focus();
+		}
+		function closeRegNumberModal() {
+			document.getElementById('aws-reinvent-regno-modal').style.display = 'none';
 		}
 		</script>
 	</div>
