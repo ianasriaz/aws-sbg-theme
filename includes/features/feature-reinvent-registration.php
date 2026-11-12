@@ -3009,63 +3009,71 @@ function aws_sbg_render_reinvent_badges() {
 				position: relative;
 				z-index: 10;
 				display: flex;
-				align-items: flex-start;
+				align-items: center;
 				justify-content: space-between;
 				width: 100%;
 				height: 100%;
-				padding: clamp(8px, 3.8cqi, 16px) clamp(10px, 4.2cqi, 20px) 0;
+				padding: 0 clamp(10px, 4.2cqi, 20px);
 			}
 
 			/* re:Invent Wordmark */
 			.badge-brand-stack {
 				display: inline-flex;
 				flex-direction: column;
+				align-items: flex-start;
 				color: #ffffff;
 				font-family: 'Amazon Ember Mono', monospace;
 			}
 
 			.badge-brand-row {
 				display: inline-flex;
-				align-items: baseline;
+				align-items: flex-end;
 				gap: clamp(2px, 0.8cqi, 4px);
 			}
 
-			.badge-brand-re {
-				position: relative;
-				display: inline-block;
-				font-size: clamp(11px, 4.2cqi, 15px);
-				font-weight: 400;
-				letter-spacing: -0.01em;
+			.badge-brand-prefix {
+				display: inline-flex;
+				flex-direction: column;
+				align-items: flex-start;
+				justify-content: flex-end;
 				line-height: 1;
-				color: #ffffff;
 			}
 
 			.badge-brand-aws {
-				position: absolute;
-				left: 0;
-				bottom: calc(100% - 0.2cqi);
-				font-size: clamp(8px, 3.2cqi, 11px);
+				display: block;
+				font-size: clamp(7.5px, 2.7cqi, 10px);
 				font-weight: 700;
 				letter-spacing: 0.04em;
-				line-height: 1;
+				line-height: 0.95;
+				color: #ffffff;
+				margin-bottom: clamp(1px, 0.35cqi, 2px);
+			}
+
+			.badge-brand-re {
+				display: block;
+				font-size: clamp(10.5px, 3.9cqi, 14px);
+				font-weight: 400;
+				letter-spacing: -0.01em;
+				line-height: 0.88;
 				color: #ffffff;
 			}
 
 			.badge-brand-invent {
-				font-size: clamp(19px, 7.2cqi, 27px);
+				font-size: clamp(21px, 7.8cqi, 29px);
 				font-weight: 400;
 				letter-spacing: -0.03em;
-				line-height: 0.95;
+				line-height: 0.82;
 				color: #ffffff;
 			}
 
 			.badge-brand-sub {
-				font-size: clamp(6.5px, 2.3cqi, 8.5px);
+				font-size: clamp(5px, 1.95cqi, 7.4px);
 				font-weight: 700;
-				letter-spacing: 0.03em;
+				letter-spacing: 0.015em;
 				color: rgba(255, 255, 255, 0.9);
 				text-transform: uppercase;
-				margin-top: clamp(2px, 0.7cqi, 4px);
+				white-space: nowrap;
+				margin-top: clamp(3px, 1.1cqi, 5px);
 				line-height: 1;
 			}
 
@@ -3357,7 +3365,7 @@ function aws_sbg_render_reinvent_badges() {
 						<div class="badge-header-inner">
 							<div class="badge-brand-stack">
 								<div class="badge-brand-row">
-									<span class="badge-brand-re"><span class="badge-brand-aws">AWS</span>re:</span><span class="badge-brand-invent">Invent</span>
+									<span class="badge-brand-prefix"><span class="badge-brand-aws">AWS</span><span class="badge-brand-re">re:</span></span><span class="badge-brand-invent">Invent</span>
 								</div>
 								<div class="badge-brand-sub">WATCH &amp; BUILD PARTY 2026</div>
 							</div>
