@@ -1203,12 +1203,14 @@ function aws_sbg_render_reinvent_admin_page() {
 		aws_sbg_reinvent_handle_review_action();
 	}
 
-	$notice   = isset( $_GET['notice'] ) ? sanitize_key( $_GET['notice'] ) : '';
-	$n_count  = isset( $_GET['count'] ) ? intval( $_GET['count'] ) : 0;
-	$search   = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
-	$status   = isset( $_GET['status_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['status_filter'] ) ) : '';
-	$paged    = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
-	$per_page = 50;
+	$notice         = isset( $_GET['notice'] ) ? sanitize_key( $_GET['notice'] ) : '';
+	$n_count        = isset( $_GET['count'] ) ? intval( $_GET['count'] ) : 0;
+	$search         = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
+	$status         = isset( $_GET['status_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['status_filter'] ) ) : '';
+	$tier_filter    = isset( $_GET['tier_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['tier_filter'] ) ) : '';
+	$checkin_filter = isset( $_GET['checkin_filter'] ) ? sanitize_key( wp_unslash( $_GET['checkin_filter'] ) ) : '';
+	$paged          = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
+	$per_page       = 50;
 
 	$args = array(
 		'post_type'      => 'aws_reinvent_reg',
@@ -1219,14 +1221,46 @@ function aws_sbg_render_reinvent_admin_page() {
 		'order'          => 'DESC',
 	);
 
+	$meta_query = array();
 	if ( $status ) {
-		$args['meta_query'] = array(
+		$meta_query[] = array(
+			'key'     => 'approval_status',
+			'value'   => $status,
+			'compare' => '=',
+		);
+	}
+	if ( $tier_filter ) {
+		$meta_query[] = array(
+			'key'     => 'badge_tier',
+			'value'   => $tier_filter,
+			'compare' => '=',
+		);
+	}
+	if ( 'checked_in' === $checkin_filter ) {
+		$meta_query[] = array(
+			'key'     => 'event_checked_in',
+			'value'   => 'yes',
+			'compare' => '=',
+		);
+	} elseif ( 'not_checked_in' === $checkin_filter ) {
+		$meta_query[] = array(
+			'relation' => 'OR',
 			array(
-				'key'     => 'approval_status',
-				'value'   => $status,
-				'compare' => '=',
+				'key'     => 'event_checked_in',
+				'value'   => 'yes',
+				'compare' => '!=',
+			),
+			array(
+				'key'     => 'event_checked_in',
+				'compare' => 'NOT EXISTS',
 			),
 		);
+	}
+	if ( ! empty( $meta_query ) ) {
+		if ( count( $meta_query ) > 1 ) {
+			$meta_query['relation'] = 'AND';
+		}
+		$args['meta_query'] = $meta_query;
 	}
 
 	if ( $search ) {
@@ -1328,6 +1362,18 @@ function aws_sbg_render_reinvent_admin_page() {
 			.rvadm-dot-rejected{background:#dc2626;}
 
 			.rvadm-table-wrap{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto;width:100%;}
+			.rvadm-drawer-backdrop{position:fixed;inset:0;background:rgba(15,23,42,0.48);backdrop-filter:blur(2px);z-index:100000;display:none;justify-content:flex-end;}
+			.rvadm-drawer-backdrop.is-open{display:flex;}
+			.rvadm-drawer{width:100%;max-width:620px;height:100%;background:#ffffff;box-shadow:-12px 0 36px rgba(15,23,42,0.18);display:flex;flex-direction:column;overflow:hidden;}
+			.rvadm-drawer-head{padding:20px 24px;border-bottom:1px solid #e2e8f0;background:#f8fafc;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+			.rvadm-drawer-body{flex:1;overflow-y:auto;padding:22px 24px;}
+			.rvadm-drawer-sec{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid #f1f5f9;}
+			.rvadm-drawer-sec:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0;}
+			.rvadm-drawer-sec-title{margin:0 0 12px 0;font-size:12px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.06em;}
+			.rvadm-drawer-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+			.rvadm-drawer-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:10px 12px;}
+			.rvadm-drawer-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;display:block;margin-bottom:3px;}
+			.rvadm-drawer-val{font-size:13px;color:#0f172a;font-weight:500;word-break:break-word;}
 			.rvadm-table-wrap table{width:100%;border-collapse:collapse;font-size:13px;}
 			.rvadm-table-wrap thead th{background:var(--surface2);text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;}
 			.rvadm-table-wrap tbody td{padding:12px 14px;border-bottom:1px solid #f1f5f9;vertical-align:top;}
@@ -1517,10 +1563,34 @@ function aws_sbg_render_reinvent_admin_page() {
 					</select>
 				</div>
 				<div class="rvadm-field">
+					<label for="rvadm-tier">Badge Tier</label>
+					<select id="rvadm-tier" name="tier_filter" onchange="this.form.submit()">
+						<option value="">All tiers</option>
+						<option value="ATTENDEE" <?php selected( $tier_filter, 'ATTENDEE' ); ?>>Attendee</option>
+						<option value="SPEAKER" <?php selected( $tier_filter, 'SPEAKER' ); ?>>Speaker</option>
+						<option value="VIP" <?php selected( $tier_filter, 'VIP' ); ?>>VIP</option>
+						<option value="CORE TEAM" <?php selected( $tier_filter, 'CORE TEAM' ); ?>>Core Team</option>
+						<option value="EVENT CREW" <?php selected( $tier_filter, 'EVENT CREW' ); ?>>Event Crew</option>
+						<option value="VOLUNTEER" <?php selected( $tier_filter, 'VOLUNTEER' ); ?>>Volunteer</option>
+						<option value="ORGANIZER" <?php selected( $tier_filter, 'ORGANIZER' ); ?>>Organizer</option>
+					</select>
+				</div>
+				<div class="rvadm-field">
+					<label for="rvadm-checkin">Event Check-In</label>
+					<select id="rvadm-checkin" name="checkin_filter" onchange="this.form.submit()">
+						<option value="">All check-in states</option>
+						<option value="checked_in" <?php selected( $checkin_filter, 'checked_in' ); ?>>Checked In</option>
+						<option value="not_checked_in" <?php selected( $checkin_filter, 'not_checked_in' ); ?>>Not Checked In</option>
+					</select>
+				</div>
+				<div class="rvadm-field">
 					<label for="rvadm-search">Search</label>
 					<input id="rvadm-search" type="search" name="search" value="<?php echo esc_attr( $search ); ?>" placeholder="Name, CNIC, email, phone, university, or reg #">
 				</div>
 				<button type="submit" class="rvadm-search-btn">Search</button>
+				<?php if ( $search || $status || $tier_filter || $checkin_filter ) : ?>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-reinvent-registrations' ) ); ?>" class="rvadm-btn">Reset</a>
+				<?php endif; ?>
 			</form>
 		</div>
 
@@ -1573,6 +1643,7 @@ function aws_sbg_render_reinvent_admin_page() {
 							<td colspan="11" class="rvadm-muted" style="padding:40px; text-align:center;">No registrations found.</td>
 						</tr>
 					<?php else : ?>
+						<?php $rv_drawer_payloads = array(); ?>
 						<?php while ( $query->have_posts() ) : $query->the_post(); ?>
 							<?php
 							$reg_id      = get_the_ID();
@@ -1586,31 +1657,100 @@ function aws_sbg_render_reinvent_admin_page() {
 							$city        = get_post_meta( $reg_id, 'city', true );
 							$linkedin    = get_post_meta( $reg_id, 'linkedin', true );
 							$attended    = get_post_meta( $reg_id, 'attended_before', true );
-							$why         = get_post_meta( $reg_id, 'why_invite', true );
-							$admin_note  = get_post_meta( $reg_id, '_admin_note', true );
+							$why         = trim( (string) get_post_meta( $reg_id, 'why_invite', true ) );
+							$admin_note  = trim( (string) get_post_meta( $reg_id, '_admin_note', true ) );
 							$badge_tier  = aws_sbg_get_reinvent_badge_tier( $reg_id );
 							$approval    = get_post_meta( $reg_id, 'approval_status', true ) ?: 'pending';
 							$has_vehicle = get_post_meta( $reg_id, 'has_vehicle', true );
+							$veh_type    = get_post_meta( $reg_id, 'vehicle_type', true );
+							$veh_num     = get_post_meta( $reg_id, 'vehicle_number', true );
 							$vehicle     = 'No vehicle';
 							if ( 'yes' === $has_vehicle ) {
-								$vehicle = ucfirst( get_post_meta( $reg_id, 'vehicle_type', true ) ) . ' · ' . get_post_meta( $reg_id, 'vehicle_number', true );
+								$vehicle = ucfirst( $veh_type ) . ' · ' . $veh_num;
 							}
-							$parking_ok  = 'yes' === get_post_meta( $reg_id, 'parking_policy', true );
+							$parking_ok   = 'yes' === get_post_meta( $reg_id, 'parking_policy', true );
+							$notified     = get_post_meta( $reg_id, 'notified', true ) === 'yes';
+							$is_chk       = get_post_meta( $reg_id, 'event_checked_in', true ) === 'yes';
+							$chk_tm       = get_post_meta( $reg_id, 'checked_in_at', true );
+							$chk_by       = get_post_meta( $reg_id, 'checked_in_by', true );
 							$note_nonce   = wp_create_nonce( 'aws_reinvent_admin_note_' . $reg_id );
 							$tier_nonce   = wp_create_nonce( 'aws_reinvent_badge_tier_' . $reg_id );
 							$reg_no_nonce = wp_create_nonce( 'aws_reinvent_save_reg_no_' . $reg_id );
+
+							$wa_digits = preg_replace( '/[^0-9]/', '', (string) $phone );
+							if ( substr( $wa_digits, 0, 1 ) === '0' ) {
+								$wa_digits = '92' . substr( $wa_digits, 1 );
+							}
+							$wa_url = $wa_digits ? ( 'https://wa.me/' . $wa_digits ) : '';
+							$pass_url = ( 'approved' === $approval && $reg_number ) ? home_url( '/verify/' . rawurlencode( $reg_number ) ) : '';
+
+							$approve_url = wp_nonce_url(
+								add_query_arg(
+									array(
+										'page'   => 'aws-reinvent-registrations',
+										'action' => 'approve',
+										'reg_id' => $reg_id,
+									),
+									admin_url( 'admin.php' )
+								),
+								'aws_reinvent_review_' . $reg_id
+							);
+							$reject_url  = wp_nonce_url(
+								add_query_arg(
+									array(
+										'page'   => 'aws-reinvent-registrations',
+										'action' => 'reject',
+										'reg_id' => $reg_id,
+									),
+									admin_url( 'admin.php' )
+								),
+								'aws_reinvent_review_' . $reg_id
+							);
+
+							$rv_drawer_payloads[ $reg_id ] = array(
+								'reg_id'        => $reg_id,
+								'name'          => $name,
+								'reg_number'    => $reg_number,
+								'badge_tier'    => $badge_tier,
+								'email'         => $email,
+								'phone'         => $phone,
+								'wa_url'        => $wa_url,
+								'cnic'          => $cnic,
+								'audience'      => $audience ? ucfirst( str_replace( '_', ' ', $audience ) ) : '—',
+								'university'    => $university,
+								'city'          => $city,
+								'linkedin'      => $linkedin,
+								'attended'      => ( 'yes' === strtolower( (string) $attended ) ) ? 'Yes' : 'No',
+								'why'           => $why,
+								'admin_note'    => $admin_note,
+								'approval'      => $approval,
+								'has_vehicle'   => ( 'yes' === $has_vehicle ) ? 'Yes' : 'No',
+								'vehicle'       => $vehicle,
+								'parking_ok'    => $parking_ok ? 'Agreed' : 'Not agreed / N/A',
+								'notified'      => $notified ? 'Yes (Email sent)' : 'No',
+								'checked_in'    => $is_chk,
+								'checked_in_at' => $chk_tm ? date( 'M j, Y · g:i a', strtotime( $chk_tm ) ) : '',
+								'checked_in_by' => $chk_by,
+								'submitted_at'  => get_the_date( 'M j, Y · g:i a', $reg_id ),
+								'pass_url'      => $pass_url,
+								'note_nonce'    => $note_nonce,
+								'tier_nonce'    => $tier_nonce,
+								'reg_no_nonce'  => $reg_no_nonce,
+								'approve_url'   => $approve_url,
+								'reject_url'    => $reject_url,
+							);
 							?>
 							<tr>
 								<td class="rvadm-reg">
 									<div style="display:inline-flex;align-items:center;gap:6px;">
-										<span><?php echo $reg_number ? esc_html( $reg_number ) : '<span class="rvadm-null">—</span>'; ?></span>
+										<button type="button" onclick="openReinventDetailDrawer(<?php echo $reg_id; ?>)" style="background:none;border:0;padding:0;cursor:pointer;font:inherit;color:inherit;font-weight:700;text-align:left;"><?php echo $reg_number ? esc_html( $reg_number ) : '<span class="rvadm-null">—</span>'; ?></button>
 										<?php if ( 'approved' === $approval || $reg_number ) : ?>
 											<button type="button" class="rvadm-tier-edit-btn" onclick="openRegNumberModal(<?php echo $reg_id; ?>, <?php echo esc_attr( wp_json_encode( $name ) ); ?>, <?php echo esc_attr( wp_json_encode( $reg_number ? $reg_number : 'RIV-01' ) ); ?>, <?php echo esc_attr( wp_json_encode( $reg_no_nonce ) ); ?>)" title="Edit pass number">✎</button>
 										<?php endif; ?>
 									</div>
 								</td>
 								<td>
-									<div class="rvadm-name"><?php echo esc_html( $name ); ?></div>
+									<button type="button" class="rvadm-name" onclick="openReinventDetailDrawer(<?php echo $reg_id; ?>)" style="background:none;border:0;padding:0;cursor:pointer;text-align:left;display:block;"><?php echo esc_html( $name ); ?></button>
 									<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:4px;">
 										<?php if ( $audience ) : ?>
 											<span class="rvadm-chip rvadm-chip-<?php echo esc_attr( $audience ); ?>"><?php echo esc_html( ucfirst( str_replace( '_', ' ', $audience ) ) ); ?></span>
@@ -1632,8 +1772,14 @@ function aws_sbg_render_reinvent_admin_page() {
 									</div>
 								</td>
 								<td>
-									<div class="rvadm-mono"><?php echo esc_html( $email ); ?></div>
-									<div class="rvadm-mono" style="margin-top:3px;"><?php echo esc_html( $phone ); ?></div>
+									<div class="rvadm-mono"><a href="mailto:<?php echo esc_attr( $email ); ?>" style="color:inherit;text-decoration:none;"><?php echo esc_html( $email ); ?></a></div>
+									<div class="rvadm-mono" style="margin-top:3px;">
+										<?php if ( $wa_url ) : ?>
+											<a href="<?php echo esc_url( $wa_url ); ?>" target="_blank" rel="noopener" style="color:#15803d;font-weight:600;text-decoration:none;"><?php echo esc_html( $phone ); ?> ↗</a>
+										<?php else : ?>
+											<?php echo esc_html( $phone ); ?>
+										<?php endif; ?>
+									</div>
 								</td>
 								<td>
 									<div style="font-weight:600;color:var(--ink);"><?php echo esc_html( $university ); ?></div>
@@ -1641,18 +1787,8 @@ function aws_sbg_render_reinvent_admin_page() {
 								</td>
 								<td>
 									<?php if ( ! empty( $why ) ) : ?>
-										<details class="rvadm-statement-details">
-											<summary class="rvadm-statement-summary">
-												<span><?php echo esc_html( wp_trim_words( $why, 6, '…' ) ); ?></span>
-												<span class="rvadm-view-btn">Read Note</span>
-											</summary>
-											<div class="rvadm-statement-full">
-												<p style="margin:0 0 8px;"><?php echo nl2br( esc_html( $why ) ); ?></p>
-												<div style="font-size:11px;color:#64748b;border-top:1px dashed #cbd5e1;padding-top:6px;">
-													<strong>Attended AWS or community event:</strong> <?php echo 'yes' === strtolower( $attended ) ? '<span style="color:#059669;font-weight:700;">Yes</span>' : 'No'; ?>
-												</div>
-											</div>
-										</details>
+										<div style="font-size:12px;color:#334155;line-height:1.45;margin-bottom:4px;"><?php echo esc_html( wp_trim_words( $why, 10, '…' ) ); ?></div>
+										<button type="button" onclick="openReinventDetailDrawer(<?php echo $reg_id; ?>)" class="rvadm-view-btn" style="background:none;border:0;padding:0;cursor:pointer;font-size:11.5px;font-weight:600;color:#2563eb;">Read Full Details &rarr;</button>
 									<?php else : ?>
 										<span class="rvadm-null">—</span>
 									<?php endif; ?>
@@ -1678,10 +1814,6 @@ function aws_sbg_render_reinvent_admin_page() {
 								<td>
 									<?php if ( 'approved' === $approval ) : ?>
 										<span class="rvadm-badge rvadm-badge-approved">Approved</span>
-										<?php
-										$is_chk = get_post_meta( $reg_id, 'event_checked_in', true ) === 'yes';
-										$chk_tm = get_post_meta( $reg_id, 'checked_in_at', true );
-										?>
 										<?php if ( $is_chk ) : ?>
 											<div style="margin-top:4px;">
 												<span style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:#15803d;background:#dcfce7;border:1px solid #bbf7d0;padding:2px 6px;border-radius:4px;font-family:ui-monospace,monospace;">
@@ -1702,31 +1834,11 @@ function aws_sbg_render_reinvent_admin_page() {
 								<td class="rvadm-muted" style="white-space:nowrap;"><?php echo esc_html( get_the_date( 'M j, Y', $reg_id ) ); ?></td>
 								<td>
 									<div class="rvadm-row-actions">
+										<button type="button" class="rvadm-btn" style="padding:4px 9px;font-size:11.5px;" onclick="openReinventDetailDrawer(<?php echo $reg_id; ?>)">Details</button>
+										<?php if ( $pass_url ) : ?>
+											<a class="rvadm-btn" style="padding:4px 9px;font-size:11.5px;color:#1d4ed8;border-color:#bfdbfe;background:#eff6ff;" href="<?php echo esc_url( $pass_url ); ?>" target="_blank" rel="noopener">Pass ↗</a>
+										<?php endif; ?>
 										<?php if ( 'pending' === $approval ) : ?>
-											<?php
-											$approve_url = wp_nonce_url(
-												add_query_arg(
-													array(
-														'page'   => 'aws-reinvent-registrations',
-														'action' => 'approve',
-														'reg_id' => $reg_id,
-													),
-													admin_url( 'admin.php' )
-												),
-												'aws_reinvent_review_' . $reg_id
-											);
-											$reject_url  = wp_nonce_url(
-												add_query_arg(
-													array(
-														'page'   => 'aws-reinvent-registrations',
-														'action' => 'reject',
-														'reg_id' => $reg_id,
-													),
-													admin_url( 'admin.php' )
-												),
-												'aws_reinvent_review_' . $reg_id
-											);
-											?>
 											<a class="rvadm-approve" href="<?php echo esc_url( $approve_url ); ?>">Approve</a>
 											<a class="rvadm-reject" href="<?php echo esc_url( $reject_url ); ?>">Reject</a>
 										<?php endif; ?>
@@ -2061,7 +2173,211 @@ function aws_sbg_render_reinvent_admin_page() {
 					msg.style.display = 'block';
 				});
 		}
+
+		var rvRegistrations = <?php echo wp_json_encode( $rv_drawer_payloads ?? array() ); ?>;
+		function openReinventDetailDrawer(regId) {
+			var r = rvRegistrations[regId];
+			if (!r) return;
+
+			document.getElementById('rv-d-regno').textContent = r.reg_number ? ('#' + r.reg_number) : 'Pending Pass #';
+			document.getElementById('rv-d-tier').textContent = r.badge_tier || 'ATTENDEE';
+			document.getElementById('rv-d-submitted').textContent = r.submitted_at || '';
+			document.getElementById('rv-d-title').textContent = r.name || '';
+			document.getElementById('rv-d-audience').textContent = (r.audience || '—') + (r.university ? (' · ' + r.university) : '');
+
+			var stEl = document.getElementById('rv-d-status');
+			stEl.textContent = r.approval ? (r.approval.charAt(0).toUpperCase() + r.approval.slice(1)) : 'Pending';
+			stEl.className = 'rvadm-badge rvadm-badge-' + (r.approval || 'pending');
+
+			var chkEl = document.getElementById('rv-d-checkin');
+			if (r.checked_in) {
+				chkEl.textContent = 'Checked In' + (r.checked_in_at ? (' · ' + r.checked_in_at) : '') + (r.checked_in_by ? (' (by ' + r.checked_in_by + ')') : '');
+				chkEl.style.background = '#dcfce7';
+				chkEl.style.color = '#15803d';
+			} else {
+				chkEl.textContent = 'Not Checked In';
+				chkEl.style.background = '#f1f5f9';
+				chkEl.style.color = '#64748b';
+			}
+
+			document.getElementById('rv-d-name').textContent = r.name || '—';
+			document.getElementById('rv-d-cnic').textContent = r.cnic || '—';
+			document.getElementById('rv-d-city').textContent = r.city || '—';
+			document.getElementById('rv-d-org').textContent = r.university || '—';
+
+			var mailEl = document.getElementById('rv-d-email');
+			mailEl.innerHTML = '';
+			if (r.email) {
+				var aM = document.createElement('a');
+				aM.href = 'mailto:' + r.email;
+				aM.textContent = r.email;
+				mailEl.appendChild(aM);
+			} else {
+				mailEl.textContent = '—';
+			}
+
+			var phEl = document.getElementById('rv-d-phone');
+			phEl.innerHTML = '';
+			if (r.phone) {
+				if (r.wa_url) {
+					var aP = document.createElement('a');
+					aP.href = r.wa_url;
+					aP.target = '_blank';
+					aP.rel = 'noopener';
+					aP.style.color = '#15803d';
+					aP.style.fontWeight = '600';
+					aP.textContent = r.phone + ' (WhatsApp ↗)';
+					phEl.appendChild(aP);
+				} else {
+					phEl.textContent = r.phone;
+				}
+			} else {
+				phEl.textContent = '—';
+			}
+
+			var liEl = document.getElementById('rv-d-linkedin');
+			liEl.innerHTML = '';
+			if (r.linkedin) {
+				var aL = document.createElement('a');
+				aL.href = r.linkedin;
+				aL.target = '_blank';
+				aL.rel = 'noopener';
+				aL.textContent = r.linkedin;
+				liEl.appendChild(aL);
+			} else {
+				liEl.textContent = 'Not provided';
+			}
+
+			document.getElementById('rv-d-attended').textContent = r.attended || 'No';
+			document.getElementById('rv-d-why').textContent = r.why || 'Not provided';
+			document.getElementById('rv-d-vehicle').textContent = r.vehicle || 'No vehicle';
+			document.getElementById('rv-d-parking').textContent = r.parking_ok || '—';
+			document.getElementById('rv-d-notified').textContent = r.notified || 'No';
+
+			document.getElementById('rv-d-note-regid').value = r.reg_id;
+			document.getElementById('rv-d-note-nonce').value = r.note_nonce;
+			document.getElementById('rv-d-note-text').value = r.admin_note || '';
+
+			var approveBtn = document.getElementById('rv-d-approve-btn');
+			var rejectBtn = document.getElementById('rv-d-reject-btn');
+			if (r.approval === 'pending') {
+				approveBtn.href = r.approve_url;
+				rejectBtn.href = r.reject_url;
+				approveBtn.style.display = 'inline-flex';
+				rejectBtn.style.display = 'inline-flex';
+			} else {
+				approveBtn.style.display = 'none';
+				rejectBtn.style.display = 'none';
+			}
+
+			var passBtn = document.getElementById('rv-d-pass-btn');
+			if (r.pass_url) {
+				passBtn.href = r.pass_url;
+				passBtn.style.display = 'inline-flex';
+			} else {
+				passBtn.style.display = 'none';
+			}
+
+			document.getElementById('rv-d-tier-btn').onclick = function() {
+				closeReinventDetailDrawer();
+				openBadgeTierModal(r.reg_id, r.name, r.badge_tier, r.tier_nonce);
+			};
+
+			var regnoBtn = document.getElementById('rv-d-regno-btn');
+			if (r.approval === 'approved' || r.reg_number) {
+				regnoBtn.style.display = 'inline-flex';
+				regnoBtn.onclick = function() {
+					closeReinventDetailDrawer();
+					openRegNumberModal(r.reg_id, r.name, r.reg_number || 'RIV-01', r.reg_no_nonce);
+				};
+			} else {
+				regnoBtn.style.display = 'none';
+			}
+
+			document.getElementById('rvadm-detail-backdrop').classList.add('is-open');
+		}
+		function closeReinventDetailDrawer() {
+			document.getElementById('rvadm-detail-backdrop').classList.remove('is-open');
+		}
+		document.addEventListener('keydown', function(e) {
+			if (e.key === 'Escape') closeReinventDetailDrawer();
+		});
 		</script>
+
+		<!-- Slide-Over Application Detail Drawer -->
+		<div id="rvadm-detail-backdrop" class="rvadm-drawer-backdrop" onclick="if (event.target === this) closeReinventDetailDrawer();">
+			<div class="rvadm-drawer" role="dialog" aria-modal="true" aria-labelledby="rv-d-title">
+				<div class="rvadm-drawer-head">
+					<div>
+						<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+							<span id="rv-d-regno" style="font-family:ui-monospace,monospace;font-size:13px;font-weight:700;color:#2563eb;"></span>
+							<span id="rv-d-tier" class="rvadm-tier-chip" style="background:#f1f5f9;color:#0f172a;"></span>
+							<span id="rv-d-status" class="rvadm-badge"></span>
+							<span id="rv-d-checkin" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;"></span>
+						</div>
+						<h2 id="rv-d-title" style="margin:0;font-size:18px;font-weight:700;color:#0f172a;"></h2>
+						<div id="rv-d-audience" style="font-size:12px;color:#64748b;margin-top:3px;"></div>
+						<div style="font-size:11.5px;color:#94a3b8;margin-top:2px;">Submitted: <span id="rv-d-submitted"></span></div>
+					</div>
+					<button type="button" class="rvadm-btn" onclick="closeReinventDetailDrawer()">&times; Close</button>
+				</div>
+				<div class="rvadm-drawer-body">
+					<div class="rvadm-drawer-sec">
+						<h3 class="rvadm-drawer-sec-title">Identity &amp; Contact</h3>
+						<div class="rvadm-drawer-grid">
+							<div class="rvadm-drawer-box"><span class="rvadm-drawer-lbl">Full Name</span><div id="rv-d-name" class="rvadm-drawer-val"></div></div>
+							<div class="rvadm-drawer-box"><span class="rvadm-drawer-lbl">CNIC / B-Form</span><div id="rv-d-cnic" class="rvadm-drawer-val" style="font-family:ui-monospace,monospace;"></div></div>
+							<div class="rvadm-drawer-box"><span class="rvadm-drawer-lbl">Email Address</span><div id="rv-d-email" class="rvadm-drawer-val"></div></div>
+							<div class="rvadm-drawer-box"><span class="rvadm-drawer-lbl">Phone / WhatsApp</span><div id="rv-d-phone" class="rvadm-drawer-val"></div></div>
+							<div class="rvadm-drawer-box"><span class="rvadm-drawer-lbl">Institute / Company</span><div id="rv-d-org" class="rvadm-drawer-val"></div></div>
+							<div class="rvadm-drawer-box"><span class="rvadm-drawer-lbl">City</span><div id="rv-d-city" class="rvadm-drawer-val"></div></div>
+						</div>
+						<div class="rvadm-drawer-box" style="margin-top:12px;">
+							<span class="rvadm-drawer-lbl">LinkedIn Profile</span>
+							<div id="rv-d-linkedin" class="rvadm-drawer-val"></div>
+						</div>
+					</div>
+
+					<div class="rvadm-drawer-sec">
+						<h3 class="rvadm-drawer-sec-title">Event Background &amp; Statement</h3>
+						<div class="rvadm-drawer-grid" style="margin-bottom:12px;">
+							<div class="rvadm-drawer-box"><span class="rvadm-drawer-lbl">Attended AWS / Community Event</span><div id="rv-d-attended" class="rvadm-drawer-val"></div></div>
+							<div class="rvadm-drawer-box"><span class="rvadm-drawer-lbl">Approval Email Sent</span><div id="rv-d-notified" class="rvadm-drawer-val"></div></div>
+						</div>
+						<div class="rvadm-drawer-box">
+							<span class="rvadm-drawer-lbl">Last Attended Event / Applicant Statement</span>
+							<div id="rv-d-why" class="rvadm-drawer-val" style="white-space:pre-wrap;line-height:1.6;"></div>
+						</div>
+					</div>
+
+					<div class="rvadm-drawer-sec">
+						<h3 class="rvadm-drawer-sec-title">Vehicle &amp; Gate Security</h3>
+						<div class="rvadm-drawer-grid">
+							<div class="rvadm-drawer-box"><span class="rvadm-drawer-lbl">Vehicle Details</span><div id="rv-d-vehicle" class="rvadm-drawer-val"></div></div>
+							<div class="rvadm-drawer-box"><span class="rvadm-drawer-lbl">Parking Policy</span><div id="rv-d-parking" class="rvadm-drawer-val"></div></div>
+						</div>
+					</div>
+
+					<div class="rvadm-drawer-sec">
+						<h3 class="rvadm-drawer-sec-title">Internal Admin Note &amp; Quick Actions</h3>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-bottom:14px;">
+							<input type="hidden" name="action" value="aws_sbg_reinvent_save_note">
+							<input type="hidden" id="rv-d-note-regid" name="reg_id" value="">
+							<input type="hidden" id="rv-d-note-nonce" name="_wpnonce" value="">
+							<textarea id="rv-d-note-text" name="admin_note" rows="3" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;margin-bottom:10px;" placeholder="Add private review note (visible to admins only)..."></textarea>
+							<button type="submit" class="button button-primary">Save Admin Note</button>
+						</form>
+						<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+							<a id="rv-d-approve-btn" href="#" class="rvadm-approve" style="padding:7px 14px;font-size:12.5px;">Approve Application</a>
+							<a id="rv-d-reject-btn" href="#" class="rvadm-reject" style="padding:7px 14px;font-size:12.5px;">Reject</a>
+							<a id="rv-d-pass-btn" href="#" target="_blank" rel="noopener" class="rvadm-btn" style="color:#1d4ed8;border-color:#bfdbfe;background:#eff6ff;">Open Mobile Pass ↗</a>
+							<button type="button" id="rv-d-tier-btn" class="rvadm-btn">Edit Badge Tier</button>
+							<button type="button" id="rv-d-regno-btn" class="rvadm-btn">Edit Pass #</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 	<?php
 }
