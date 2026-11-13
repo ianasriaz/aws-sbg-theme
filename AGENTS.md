@@ -1254,6 +1254,11 @@ aws-sbg-theme/
   - Replaced the approval pass with a responsive two-column light-mode table card (`#232F3E` top bar, `#f8fafc` body, tier pill, attendee name, `#RIV-XX`, `Open Mobile Pass` link, and `120x120` QR code).
   - Updated the form success screen (`Thank You, [Name]` via 10-minute `aws_rv_success_` transient + `"Approved attendees will receive event pass within a week."`), duplicate-registration notice, and confirmation email copy.
   - Aligned the printable attendee badge header (`.badge-header-inner` vertically centered, `.badge-brand-prefix` stacking `AWS` + `re:` within `Invent` height, `.badge-brand-sub` set to `WATCH & BUILD PARTY 2026 ISLAMABAD` scaled to span 100% of `AWS re:Invent`, and right side showing only the AWS logo).
+- `includes/features/cfs/cfs-admin.php`:
+  - Fixed `white-space: pre-wrap` tab-indentation bug on `talk_pitch` previews, displayed full speaker contact details (email, phone, LinkedIn) and full audience level labels directly in the table, and polished status `<select>` styling while preserving active search/filter params across actions.
+  - Added a slide-over **Proposal Details** drawer (`awsCfsOpenDrawer`) exposing every database field (Session Proposal, Speaker Profile & Contact, Past Talk link, IP address) and an inline **Evaluation & Reviewer Notes** form (`aws_sbg_cfs_save_review`) backed by `admin_notes`, plus `Reviewer Notes` in CSV exports.
+- `includes/features/team/team-admin.php`:
+  - Fixed the same `white-space: pre-wrap` tab-indentation bug on candidate pitches and displayed candidate email and phone numbers directly in the roster table.
 
 ---
 

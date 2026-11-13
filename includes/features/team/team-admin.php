@@ -394,19 +394,19 @@ function aws_sbg_team_render_admin_page() {
 											<?php echo esc_html( $r['city'] ); ?>
 										</span>
 									</div>
-									<div style="display:flex;align-items:center;gap:8px;font-size:12px;">
-										<a href="mailto:<?php echo esc_attr( $r['email'] ); ?>" title="<?php echo esc_attr( $r['email'] ); ?>" style="text-decoration:none;color:#64748b;">
-											&#9993; Email
-										</a>
-										&middot;
-										<a href="<?php echo esc_url( $wa_url ); ?>" target="_blank" style="text-decoration:none;color:#16a34a;font-weight:600;">
-											&#128172; WhatsApp
-										</a>
+									<div style="font-size:12px;line-height:1.55;color:#334155;">
+										<div style="word-break:break-all;">
+											<a href="mailto:<?php echo esc_attr( $r['email'] ); ?>" style="text-decoration:none;color:#0f172a;font-weight:500;">&#9993; <?php echo esc_html( $r['email'] ); ?></a>
+										</div>
+										<?php if ( ! empty( $r['phone'] ) ) : ?>
+											<div style="margin-top:2px;">
+												<a href="<?php echo esc_url( $wa_url ); ?>" target="_blank" style="text-decoration:none;color:#15803d;font-weight:600;">&#128172; <?php echo esc_html( $r['phone'] ); ?></a>
+											</div>
+										<?php endif; ?>
 										<?php if ( $r['linkedin_url'] ) : ?>
-											&middot;
-											<a href="<?php echo esc_url( $r['linkedin_url'] ); ?>" target="_blank" style="text-decoration:none;color:#0077b5;font-weight:600;">
-												in
-											</a>
+											<div style="margin-top:2px;">
+												<a href="<?php echo esc_url( $r['linkedin_url'] ); ?>" target="_blank" style="text-decoration:none;color:#0077b5;font-weight:600;">LinkedIn Profile &nearr;</a>
+											</div>
 										<?php endif; ?>
 									</div>
 								</td>
@@ -436,9 +436,7 @@ function aws_sbg_team_render_admin_page() {
 
 								<!-- Pitch & Experience -->
 								<td>
-									<div style="font-size:13px;color:#334155;line-height:1.5;background:#f8fafc;padding:8px 12px;border-radius:4px;border:1px solid #e2e8f0;white-space:pre-wrap;margin-bottom:6px;">
-										<?php echo esc_html( $r['pitch'] ); ?>
-									</div>
+									<div style="font-size:13px;color:#334155;line-height:1.5;background:#f8fafc;padding:8px 12px;border-radius:4px;border:1px solid #e2e8f0;white-space:pre-wrap;text-align:left;margin-bottom:6px;"><?php echo esc_html( trim( (string) $r['pitch'] ) ); ?></div>
 									<?php if ( 'yes' === $r['past_experience'] && $r['experience_details'] ) : ?>
 										<div style="font-size:11.5px;color:#64748b;">
 											<strong>Prior exp:</strong> <?php echo esc_html( $r['experience_details'] ); ?>

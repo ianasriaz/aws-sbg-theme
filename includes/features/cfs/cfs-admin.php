@@ -204,11 +204,43 @@ function aws_sbg_cfs_render_admin_page() {
 	$levels = aws_sbg_cfs_levels();
 	$statuses = aws_sbg_cfs_statuses();
 
+	$event_map = array();
+	foreach ( $events as $ev ) {
+		$event_map[ (int) $ev->ID ] = array(
+			'title' => $ev->post_title,
+			'slug'  => $ev->post_name ? $ev->post_name : $ev->ID,
+		);
+	}
+
 	$current_event = get_post( $current_event_id );
 	$current_event_slug = ( $current_event && $current_event->post_name ) ? $current_event->post_name : $current_event_id;
+	$notice = isset( $_GET['cfs_notice'] ) ? sanitize_key( wp_unslash( $_GET['cfs_notice'] ) ) : '';
 
 	?>
-	<div class="wrap" style="max-width:1300px;margin-top:20px;">
+	<div class="wrap aws-cfs-admin" style="max-width:1360px;margin-top:20px;">
+		<style>
+			.aws-cfs-admin .aws-cfs-card { background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; box-shadow:0 1px 2px rgba(15,23,42,0.04); }
+			.aws-cfs-admin .aws-cfs-table th { font-weight:700; color:#334155; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; background:#f8fafc; border-bottom:1px solid #e2e8f0; padding:12px 14px; }
+			.aws-cfs-admin .aws-cfs-table td { padding:14px; vertical-align:top; border-bottom:1px solid #f1f5f9; }
+			.aws-cfs-admin .aws-cfs-pitch-preview { font-size:13px; color:#334155; line-height:1.55; background:#f8fafc; padding:10px 12px; border-radius:6px; border:1px solid #e2e8f0; white-space:pre-wrap; text-align:left; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+			.aws-cfs-admin .aws-cfs-select-status { height:32px; line-height:1.2; padding:4px 24px 4px 10px; font-size:12px; font-weight:700; border-radius:6px; border:1px solid rgba(15,23,42,0.12); width:100%; cursor:pointer; }
+			.aws-cfs-drawer-backdrop { position:fixed; inset:0; background:rgba(15,23,42,0.48); backdrop-filter:blur(2px); z-index:100000; display:none; justify-content:flex-end; }
+			.aws-cfs-drawer-backdrop.is-open { display:flex; }
+			.aws-cfs-drawer { width:100%; max-width:640px; height:100%; background:#ffffff; box-shadow:-12px 0 36px rgba(15,23,42,0.18); display:flex; flex-direction:column; overflow:hidden; }
+			.aws-cfs-drawer-head { padding:20px 24px; border-bottom:1px solid #e2e8f0; background:#f8fafc; display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+			.aws-cfs-drawer-body { flex:1; overflow-y:auto; padding:22px 24px; }
+			.aws-cfs-drawer-section { margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid #f1f5f9; }
+			.aws-cfs-drawer-section:last-child { border-bottom:0; margin-bottom:0; padding-bottom:0; }
+			.aws-cfs-drawer-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; margin-bottom:4px; display:block; }
+			.aws-cfs-drawer-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+			.aws-cfs-drawer-field { background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:10px 12px; }
+			.aws-cfs-drawer-val { font-size:13px; color:#0f172a; font-weight:500; word-break:break-word; }
+		</style>
+		<?php if ( 'saved' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible" style="margin:0 0 14px 0;"><p>Proposal review &amp; notes updated.</p></div>
+		<?php elseif ( 'deleted' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible" style="margin:0 0 14px 0;"><p>Proposal deleted.</p></div>
+		<?php endif; ?>
 		<?php
 		if ( function_exists( 'aws_sbg_render_admin_nav_tabs' ) ) {
 			aws_sbg_render_admin_nav_tabs( 'cfs' );
@@ -296,15 +328,15 @@ function aws_sbg_cfs_render_admin_page() {
 		</div>
 
 		<!-- Proposals Table -->
-		<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.03);">
-			<table class="wp-list-table widefat fixed striped" style="border:0;">
+		<div class="aws-cfs-card" style="overflow:hidden;">
+			<table class="wp-list-table widefat fixed striped aws-cfs-table" style="border:0;">
 				<thead>
 					<tr>
-						<th style="width:130px;font-weight:700;">Ref &amp; Date</th>
-						<th style="width:200px;font-weight:700;">Speaker</th>
-						<th style="font-weight:700;">Session Pitch</th>
-						<th style="width:140px;font-weight:700;">Status</th>
-						<th style="width:170px;text-align:right;font-weight:700;">Actions</th>
+						<th style="width:135px;">Ref &amp; Date</th>
+						<th style="width:240px;">Speaker &amp; Contact</th>
+						<th>Session Pitch</th>
+						<th style="width:145px;">Status</th>
+						<th style="width:165px;text-align:right;">Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -316,95 +348,136 @@ function aws_sbg_cfs_render_admin_page() {
 							</td>
 						</tr>
 					<?php else : ?>
-						<?php foreach ( $rows as $r ) : ?>
-							<?php
-							$wa_digits = preg_replace( '/[^0-9]/', '', $r['phone'] );
+						<?php
+						$cfs_drawer_payloads = array();
+						foreach ( $rows as $r ) :
+							$row_id       = (int) $r['id'];
+							$row_event_id = (int) $r['event_id'];
+							$ev_info      = isset( $event_map[ $row_event_id ] ) ? $event_map[ $row_event_id ] : array( 'title' => 'AWS Event', 'slug' => $current_event_slug );
+							$wa_digits    = preg_replace( '/[^0-9]/', '', $r['phone'] );
 							if ( substr( $wa_digits, 0, 1 ) === '0' ) {
 								$wa_digits = '92' . substr( $wa_digits, 1 );
 							}
-							$wa_url = 'https://wa.me/' . $wa_digits . '?text=' . rawurlencode( 'Hi ' . $r['name'] . ', thank you for submitting your speaker pitch for ' . ( $current_event ? $current_event->post_title : 'AWS Event' ) . '!' );
+							$wa_url = $wa_digits ? ( 'https://wa.me/' . $wa_digits . '?text=' . rawurlencode( 'Hi ' . $r['name'] . ', thank you for submitting your speaker pitch for ' . $ev_info['title'] . '!' ) ) : '';
 							$status_colors = array(
-								'received'     => 'background:#e2e8f0;color:#0f172a;',
+								'received'     => 'background:#f1f5f9;color:#0f172a;',
 								'under_review' => 'background:#fef3c7;color:#92400e;',
 								'shortlisted'  => 'background:#dbeafe;color:#1e40af;',
 								'accepted'     => 'background:#dcfce7;color:#166534;',
 								'declined'     => 'background:#fee2e2;color:#991b1b;',
 							);
-							$st_style = isset( $status_colors[ $r['status'] ] ) ? $status_colors[ $r['status'] ] : 'background:#e2e8f0;color:#0f172a;';
-							$track_lbl = isset( $tracks[ $r['track'] ] ) ? $tracks[ $r['track'] ] : $r['track'];
-							$format_lbl = isset( $formats[ $r['format'] ] ) ? $formats[ $r['format'] ] : $r['format'];
-							$confirm_link = home_url( '/confirm/?event=' . $current_event_slug . '&role=speaker' );
+							$st_style     = isset( $status_colors[ $r['status'] ] ) ? $status_colors[ $r['status'] ] : 'background:#f1f5f9;color:#0f172a;';
+							$st_label     = isset( $statuses[ $r['status'] ] ) ? $statuses[ $r['status'] ] : ucfirst( $r['status'] );
+							$track_lbl    = isset( $tracks[ $r['track'] ] ) ? $tracks[ $r['track'] ] : $r['track'];
+							$format_lbl   = isset( $formats[ $r['format'] ] ) ? $formats[ $r['format'] ] : $r['format'];
+							$level_lbl    = isset( $levels[ $r['audience_level'] ] ) ? $levels[ $r['audience_level'] ] : ( 'Level ' . $r['audience_level'] );
+							$confirm_link = home_url( '/confirm/?event=' . $ev_info['slug'] . '&role=speaker' );
+							$pitch_clean  = trim( (string) $r['talk_pitch'] );
+							$notes_clean  = trim( (string) ( $r['admin_notes'] ?? '' ) );
+
+							$cfs_drawer_payloads[ $row_id ] = array(
+								'id'              => $row_id,
+								'reference'       => $r['reference'],
+								'event_title'     => $ev_info['title'],
+								'created_at'      => date( 'M j, Y · g:i a', strtotime( $r['created_at'] ) ),
+								'name'            => $r['name'],
+								'email'           => $r['email'],
+								'phone'           => $r['phone'],
+								'wa_url'          => $wa_url,
+								'city'            => $r['city'],
+								'organization'    => $r['organization'],
+								'linkedin_url'    => $r['linkedin_url'],
+								'talk_title'      => $r['talk_title'],
+								'talk_pitch'      => $pitch_clean,
+								'track'           => $track_lbl,
+								'format'          => $format_lbl,
+								'audience_level'  => $level_lbl,
+								'past_experience' => ( 'yes' === $r['past_experience'] ) ? 'Yes — Experienced Speaker' : 'No — First-time Speaker',
+								'experience_link' => $r['experience_link'],
+								'status'          => $r['status'],
+								'status_label'    => $st_label,
+								'status_style'    => $st_style,
+								'admin_notes'     => $notes_clean,
+								'ip_address'      => $r['ip_address'] ?? '',
+								'confirm_link'    => $confirm_link,
+							);
 							?>
 							<tr>
 								<!-- Ref & Date -->
 								<td>
-									<strong style="font-family:monospace;font-size:13px;color:#7928ca;display:block;">
+									<button type="button" onclick="awsCfsOpenDrawer(<?php echo esc_attr( $row_id ); ?>)" style="background:none;border:0;padding:0;cursor:pointer;font-family:monospace;font-size:13px;font-weight:700;color:#7928ca;display:block;text-align:left;">
 										<?php echo esc_html( $r['reference'] ); ?>
-									</strong>
-									<span style="font-size:11.5px;color:#64748b;">
+									</button>
+									<span style="font-size:11.5px;color:#64748b;display:block;margin-top:2px;">
 										<?php echo esc_html( date( 'M j, Y', strtotime( $r['created_at'] ) ) ); ?><br>
 										<?php echo esc_html( date( 'g:i a', strtotime( $r['created_at'] ) ) ); ?>
 									</span>
+									<?php if ( 0 === $current_event_id ) : ?>
+										<span style="display:inline-block;margin-top:6px;font-size:10.5px;font-weight:600;color:#475569;background:#f1f5f9;padding:2px 6px;border-radius:4px;">
+											<?php echo esc_html( $ev_info['title'] ); ?>
+										</span>
+									<?php endif; ?>
 								</td>
 
 								<!-- Speaker Info -->
 								<td>
-									<strong style="font-size:14px;color:#0f172a;display:block;">
+									<strong style="font-size:14px;color:#0f172a;display:block;margin-bottom:2px;">
 										<?php echo esc_html( $r['name'] ); ?>
 									</strong>
-									<span style="font-size:12px;color:#475569;display:block;margin-bottom:6px;">
+									<span style="font-size:12px;color:#475569;display:block;margin-bottom:8px;">
 										<?php echo esc_html( $r['organization'] ); ?> &middot; <?php echo esc_html( $r['city'] ); ?>
 									</span>
-									<div style="display:flex;align-items:center;gap:8px;font-size:12px;">
-										<a href="mailto:<?php echo esc_attr( $r['email'] ); ?>" title="<?php echo esc_attr( $r['email'] ); ?>" style="text-decoration:none;color:#64748b;">
-											&#9993; Email
-										</a>
-										&middot;
-										<a href="<?php echo esc_url( $wa_url ); ?>" target="_blank" style="text-decoration:none;color:#16a34a;font-weight:600;">
-											&#128172; WhatsApp
-										</a>
+									<div style="font-size:12px;line-height:1.55;color:#334155;">
+										<div style="word-break:break-all;">
+											<a href="mailto:<?php echo esc_attr( $r['email'] ); ?>" style="text-decoration:none;color:#0f172a;font-weight:500;">&#9993; <?php echo esc_html( $r['email'] ); ?></a>
+										</div>
+										<?php if ( $r['phone'] ) : ?>
+											<div style="margin-top:2px;">
+												<a href="<?php echo esc_url( $wa_url ); ?>" target="_blank" style="text-decoration:none;color:#15803d;font-weight:600;">&#128172; <?php echo esc_html( $r['phone'] ); ?></a>
+											</div>
+										<?php endif; ?>
 										<?php if ( $r['linkedin_url'] ) : ?>
-											&middot;
-											<a href="<?php echo esc_url( $r['linkedin_url'] ); ?>" target="_blank" style="text-decoration:none;color:#0077b5;font-weight:600;">
-												in
-											</a>
+											<div style="margin-top:2px;">
+												<a href="<?php echo esc_url( $r['linkedin_url'] ); ?>" target="_blank" style="text-decoration:none;color:#0077b5;font-weight:600;">LinkedIn Profile &nearr;</a>
+											</div>
 										<?php endif; ?>
 									</div>
 								</td>
 
 								<!-- Session Pitch -->
 								<td>
-									<div style="margin-bottom:6px;">
-										<strong style="font-size:14.5px;color:#0f172a;">
+									<div style="margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+										<button type="button" onclick="awsCfsOpenDrawer(<?php echo esc_attr( $row_id ); ?>)" style="background:none;border:0;padding:0;cursor:pointer;text-align:left;font-size:14.5px;font-weight:700;color:#0f172a;">
 											<?php echo esc_html( $r['talk_title'] ); ?>
-										</strong>
+										</button>
+										<?php if ( '' !== $notes_clean ) : ?>
+											<span style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:999px;background:#fef3c7;color:#92400e;white-space:nowrap;">Reviewer Note</span>
+										<?php endif; ?>
 									</div>
 									<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
 										<span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#f5f3ff;color:#7928ca;border:1px solid #ddd6fe;">
 											<?php echo esc_html( $track_lbl ); ?>
 										</span>
-										<span style="font-size:11px;padding:2px 6px;border-radius:4px;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;">
+										<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;">
 											<?php echo esc_html( $format_lbl ); ?>
 										</span>
-										<span style="font-size:11px;padding:2px 6px;border-radius:4px;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;">
-											Lvl <?php echo esc_html( $r['audience_level'] ); ?>
+										<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:#f8fafc;color:#475569;border:1px solid #e2e8f0;">
+											<?php echo esc_html( $level_lbl ); ?>
 										</span>
 										<?php if ( 'yes' === $r['past_experience'] ) : ?>
-											<span style="font-size:11px;padding:2px 6px;border-radius:4px;background:#f0fdf4;color:#15803d;">
+											<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;">
 												Experienced
 											</span>
 										<?php else : ?>
-											<span style="font-size:11px;padding:2px 6px;border-radius:4px;background:#f1f5f9;color:#64748b;">
+											<span style="font-size:11px;padding:2px 7px;border-radius:4px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;">
 												First-time speaker
 											</span>
 										<?php endif; ?>
 									</div>
-									<div style="font-size:13px;color:#334155;line-height:1.5;background:#f8fafc;padding:8px 12px;border-radius:4px;border:1px solid #e2e8f0;white-space:pre-wrap;">
-										<?php echo esc_html( $r['talk_pitch'] ); ?>
-									</div>
+									<div class="aws-cfs-pitch-preview"><?php echo esc_html( $pitch_clean ); ?></div>
 									<?php if ( $r['experience_link'] ) : ?>
 										<div style="margin-top:6px;font-size:11.5px;">
-											<span style="color:#64748b;">Past talk link:</span>
+											<span style="color:#64748b;">Past talk:</span>
 											<a href="<?php echo esc_url( $r['experience_link'] ); ?>" target="_blank" style="color:#7928ca;word-break:break-all;">
 												<?php echo esc_html( $r['experience_link'] ); ?>
 											</a>
@@ -416,10 +489,13 @@ function aws_sbg_cfs_render_admin_page() {
 								<td>
 									<form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 										<input type="hidden" name="action" value="aws_sbg_cfs_update_status">
-										<input type="hidden" name="submission_id" value="<?php echo esc_attr( $r['id'] ); ?>">
+										<input type="hidden" name="submission_id" value="<?php echo esc_attr( $row_id ); ?>">
 										<input type="hidden" name="event_id" value="<?php echo esc_attr( $current_event_id ); ?>">
-										<?php wp_nonce_field( 'cfs_update_status_' . $r['id'], 'cfs_status_nonce' ); ?>
-										<select name="new_status" onchange="this.form.submit()" style="font-size:12px;font-weight:600;border-radius:4px;padding:3px 6px;<?php echo esc_attr( $st_style ); ?>">
+										<input type="hidden" name="filter_status" value="<?php echo esc_attr( $current_status ); ?>">
+										<input type="hidden" name="filter_track" value="<?php echo esc_attr( $current_track ); ?>">
+										<input type="hidden" name="filter_s" value="<?php echo esc_attr( $search_query ); ?>">
+										<?php wp_nonce_field( 'cfs_update_status_' . $row_id, 'cfs_status_nonce' ); ?>
+										<select name="new_status" onchange="this.form.submit()" class="aws-cfs-select-status" style="<?php echo esc_attr( $st_style ); ?>">
 											<?php foreach ( $statuses as $st_k => $st_lbl ) : ?>
 												<option value="<?php echo esc_attr( $st_k ); ?>" <?php selected( $r['status'], $st_k ); ?> style="background:#ffffff;color:#0f172a;">
 													<?php echo esc_html( $st_lbl ); ?>
@@ -431,19 +507,26 @@ function aws_sbg_cfs_render_admin_page() {
 
 								<!-- Actions -->
 								<td style="text-align:right;">
-									<?php if ( 'accepted' === $r['status'] ) : ?>
-										<button type="button" class="button button-small" onclick="navigator.clipboard.writeText('<?php echo esc_js( $confirm_link ); ?>'); alert('Speaker Confirmation link copied to clipboard!\n\n<?php echo esc_js( $confirm_link ); ?>');" title="Copy speaker confirmation onboarding link" style="color:#166534;font-weight:600;margin-bottom:4px;">
-											Copy Confirm Link
+									<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+										<button type="button" class="button button-secondary button-small" onclick="awsCfsOpenDrawer(<?php echo esc_attr( $row_id ); ?>)" style="font-weight:600;">
+											View Full Details
 										</button>
-										<br>
-									<?php endif; ?>
-									<form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline;" onsubmit="return confirm('Permanently delete proposal for <?php echo esc_js( $r['name'] ); ?>?');">
-										<input type="hidden" name="action" value="aws_sbg_cfs_delete_entry">
-										<input type="hidden" name="entry_id" value="<?php echo esc_attr( $r['id'] ); ?>">
-										<input type="hidden" name="event_id" value="<?php echo esc_attr( $current_event_id ); ?>">
-										<?php wp_nonce_field( 'cfs_delete_' . $r['id'], 'cfs_delete_nonce' ); ?>
-										<button type="submit" class="button button-link-delete" style="font-size:12px;color:#dc2626;">Delete</button>
-									</form>
+										<?php if ( 'accepted' === $r['status'] ) : ?>
+											<button type="button" class="button button-small" onclick="navigator.clipboard.writeText('<?php echo esc_js( $confirm_link ); ?>'); alert('Speaker Confirmation link copied to clipboard!\n\n<?php echo esc_js( $confirm_link ); ?>');" title="Copy speaker confirmation onboarding link" style="color:#166534;font-weight:600;">
+												Copy Confirm Link
+											</button>
+										<?php endif; ?>
+										<form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline;" onsubmit="return confirm('Permanently delete proposal for <?php echo esc_js( $r['name'] ); ?>?');">
+											<input type="hidden" name="action" value="aws_sbg_cfs_delete_entry">
+											<input type="hidden" name="entry_id" value="<?php echo esc_attr( $row_id ); ?>">
+											<input type="hidden" name="event_id" value="<?php echo esc_attr( $current_event_id ); ?>">
+											<input type="hidden" name="filter_status" value="<?php echo esc_attr( $current_status ); ?>">
+											<input type="hidden" name="filter_track" value="<?php echo esc_attr( $current_track ); ?>">
+											<input type="hidden" name="filter_s" value="<?php echo esc_attr( $search_query ); ?>">
+											<?php wp_nonce_field( 'cfs_delete_' . $row_id, 'cfs_delete_nonce' ); ?>
+											<button type="submit" class="button button-link-delete" style="font-size:12px;color:#dc2626;padding:0;">Delete</button>
+										</form>
+									</div>
 								</td>
 							</tr>
 						<?php endforeach; ?>
@@ -451,13 +534,255 @@ function aws_sbg_cfs_render_admin_page() {
 				</tbody>
 			</table>
 		</div>
+
+		<!-- Slide-Over Proposal Detail Drawer -->
+		<div id="aws-cfs-drawer-backdrop" class="aws-cfs-drawer-backdrop" onclick="if (event.target === this) awsCfsCloseDrawer();">
+			<div class="aws-cfs-drawer" role="dialog" aria-modal="true" aria-labelledby="aws-cfs-drawer-title">
+				<div class="aws-cfs-drawer-head">
+					<div>
+						<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+							<span id="cfs-d-ref" style="font-family:monospace;font-size:13px;font-weight:700;color:#7928ca;"></span>
+							<span id="cfs-d-status-badge" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;"></span>
+							<span id="cfs-d-date" style="font-size:12px;color:#64748b;"></span>
+						</div>
+						<h2 id="aws-cfs-drawer-title" style="margin:0;font-size:18px;font-weight:700;color:#0f172a;line-height:1.3;"></h2>
+						<div id="cfs-d-event" style="font-size:12px;color:#64748b;margin-top:4px;"></div>
+					</div>
+					<button type="button" onclick="awsCfsCloseDrawer()" class="button button-secondary" aria-label="Close details">&times; Close</button>
+				</div>
+
+				<div class="aws-cfs-drawer-body">
+					<!-- Session Details -->
+					<div class="aws-cfs-drawer-section">
+						<h3 style="margin:0 0 12px 0;font-size:13px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.05em;">Session Proposal</h3>
+						<div class="aws-cfs-drawer-grid" style="margin-bottom:14px;">
+							<div class="aws-cfs-drawer-field">
+								<span class="aws-cfs-drawer-label">Track</span>
+								<div id="cfs-d-track" class="aws-cfs-drawer-val"></div>
+							</div>
+							<div class="aws-cfs-drawer-field">
+								<span class="aws-cfs-drawer-label">Session Format</span>
+								<div id="cfs-d-format" class="aws-cfs-drawer-val"></div>
+							</div>
+							<div class="aws-cfs-drawer-field">
+								<span class="aws-cfs-drawer-label">Audience Level</span>
+								<div id="cfs-d-level" class="aws-cfs-drawer-val"></div>
+							</div>
+							<div class="aws-cfs-drawer-field">
+								<span class="aws-cfs-drawer-label">Speaking Experience</span>
+								<div id="cfs-d-exp" class="aws-cfs-drawer-val"></div>
+							</div>
+						</div>
+						<div class="aws-cfs-drawer-field">
+							<span class="aws-cfs-drawer-label">Full Talk Pitch / Abstract</span>
+							<div id="cfs-d-pitch" class="aws-cfs-drawer-val" style="white-space:pre-wrap;line-height:1.6;"></div>
+						</div>
+						<div class="aws-cfs-drawer-field" style="margin-top:12px;">
+							<span class="aws-cfs-drawer-label">Past Talk / Video / Slides Link</span>
+							<div id="cfs-d-exp-link" class="aws-cfs-drawer-val"></div>
+						</div>
+					</div>
+
+					<!-- Speaker Profile & Contact -->
+					<div class="aws-cfs-drawer-section">
+						<h3 style="margin:0 0 12px 0;font-size:13px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.05em;">Speaker Profile &amp; Contact</h3>
+						<div class="aws-cfs-drawer-grid">
+							<div class="aws-cfs-drawer-field">
+								<span class="aws-cfs-drawer-label">Full Name</span>
+								<div id="cfs-d-name" class="aws-cfs-drawer-val"></div>
+							</div>
+							<div class="aws-cfs-drawer-field">
+								<span class="aws-cfs-drawer-label">Organization / University</span>
+								<div id="cfs-d-org" class="aws-cfs-drawer-val"></div>
+							</div>
+							<div class="aws-cfs-drawer-field">
+								<span class="aws-cfs-drawer-label">City</span>
+								<div id="cfs-d-city" class="aws-cfs-drawer-val"></div>
+							</div>
+							<div class="aws-cfs-drawer-field">
+								<span class="aws-cfs-drawer-label">LinkedIn Profile</span>
+								<div id="cfs-d-linkedin" class="aws-cfs-drawer-val"></div>
+							</div>
+							<div class="aws-cfs-drawer-field">
+								<span class="aws-cfs-drawer-label">Email Address</span>
+								<div id="cfs-d-email" class="aws-cfs-drawer-val"></div>
+							</div>
+							<div class="aws-cfs-drawer-field">
+								<span class="aws-cfs-drawer-label">Phone / WhatsApp</span>
+								<div id="cfs-d-phone" class="aws-cfs-drawer-val"></div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Reviewer Evaluation & Notes -->
+					<div class="aws-cfs-drawer-section">
+						<h3 style="margin:0 0 12px 0;font-size:13px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.05em;">Evaluation &amp; Reviewer Notes</h3>
+						<form method="POST" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+							<input type="hidden" name="action" value="aws_sbg_cfs_save_review">
+							<input type="hidden" name="submission_id" id="cfs-d-form-id" value="">
+							<input type="hidden" name="event_id" value="<?php echo esc_attr( $current_event_id ); ?>">
+							<input type="hidden" name="filter_status" value="<?php echo esc_attr( $current_status ); ?>">
+							<input type="hidden" name="filter_track" value="<?php echo esc_attr( $current_track ); ?>">
+							<input type="hidden" name="filter_s" value="<?php echo esc_attr( $search_query ); ?>">
+							<?php wp_nonce_field( 'cfs_save_review', 'cfs_review_nonce' ); ?>
+
+							<div style="margin-bottom:12px;">
+								<label for="cfs-d-status-select" class="aws-cfs-drawer-label">Proposal Status</label>
+								<select id="cfs-d-status-select" name="new_status" style="width:100%;max-width:260px;">
+									<?php foreach ( $statuses as $st_k => $st_lbl ) : ?>
+										<option value="<?php echo esc_attr( $st_k ); ?>"><?php echo esc_html( $st_lbl ); ?></option>
+									<?php endforeach; ?>
+								</select>
+							</div>
+							<div style="margin-bottom:14px;">
+								<label for="cfs-d-notes" class="aws-cfs-drawer-label">Internal Reviewer Notes</label>
+								<textarea id="cfs-d-notes" name="admin_notes" rows="4" style="width:100%;" placeholder="Add internal evaluation comments, feedback, or scheduling notes..."></textarea>
+							</div>
+							<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+								<button type="submit" class="button button-primary">Save Review &amp; Notes</button>
+								<a id="cfs-d-wa-btn" href="#" target="_blank" class="button button-secondary" style="color:#15803d;">WhatsApp Speaker</a>
+								<a id="cfs-d-mail-btn" href="#" class="button button-secondary">Email Speaker</a>
+								<button type="button" id="cfs-d-confirm-btn" class="button button-secondary" style="color:#166534;display:none;" onclick="awsCfsCopyConfirmFromDrawer()">Copy Confirm Link</button>
+							</div>
+						</form>
+						<div style="margin-top:12px;font-size:11px;color:#94a3b8;">
+							Submission IP: <span id="cfs-d-ip"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<script>
+		(function() {
+			var proposals = <?php echo wp_json_encode( $cfs_drawer_payloads ?? array() ); ?>;
+			var activeConfirmLink = '';
+
+			window.awsCfsOpenDrawer = function(id) {
+				var p = proposals[id];
+				if (!p) return;
+
+				document.getElementById('cfs-d-ref').textContent = p.reference || '';
+				var badge = document.getElementById('cfs-d-status-badge');
+				badge.textContent = p.status_label || '';
+				badge.setAttribute('style', 'font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;' + (p.status_style || ''));
+				document.getElementById('cfs-d-date').textContent = p.created_at || '';
+				document.getElementById('aws-cfs-drawer-title').textContent = p.talk_title || '(Untitled Pitch)';
+				document.getElementById('cfs-d-event').textContent = p.event_title ? ('Event: ' + p.event_title) : '';
+
+				document.getElementById('cfs-d-track').textContent = p.track || '—';
+				document.getElementById('cfs-d-format').textContent = p.format || '—';
+				document.getElementById('cfs-d-level').textContent = p.audience_level || '—';
+				document.getElementById('cfs-d-exp').textContent = p.past_experience || '—';
+				document.getElementById('cfs-d-pitch').textContent = p.talk_pitch || '—';
+
+				var expLinkEl = document.getElementById('cfs-d-exp-link');
+				expLinkEl.innerHTML = '';
+				if (p.experience_link) {
+					var aExp = document.createElement('a');
+					aExp.href = p.experience_link;
+					aExp.target = '_blank';
+					aExp.rel = 'noopener';
+					aExp.textContent = p.experience_link;
+					expLinkEl.appendChild(aExp);
+				} else {
+					expLinkEl.textContent = 'Not provided';
+				}
+
+				document.getElementById('cfs-d-name').textContent = p.name || '—';
+				document.getElementById('cfs-d-org').textContent = p.organization || '—';
+				document.getElementById('cfs-d-city').textContent = p.city || '—';
+
+				var liEl = document.getElementById('cfs-d-linkedin');
+				liEl.innerHTML = '';
+				if (p.linkedin_url) {
+					var aLi = document.createElement('a');
+					aLi.href = p.linkedin_url;
+					aLi.target = '_blank';
+					aLi.rel = 'noopener';
+					aLi.textContent = p.linkedin_url;
+					liEl.appendChild(aLi);
+				} else {
+					liEl.textContent = 'Not provided';
+				}
+
+				var emailEl = document.getElementById('cfs-d-email');
+				emailEl.innerHTML = '';
+				if (p.email) {
+					var aMail = document.createElement('a');
+					aMail.href = 'mailto:' + p.email;
+					aMail.textContent = p.email;
+					emailEl.appendChild(aMail);
+				} else {
+					emailEl.textContent = '—';
+				}
+
+				document.getElementById('cfs-d-phone').textContent = p.phone || '—';
+
+				document.getElementById('cfs-d-form-id').value = p.id;
+				document.getElementById('cfs-d-status-select').value = p.status || 'received';
+				document.getElementById('cfs-d-notes').value = p.admin_notes || '';
+				document.getElementById('cfs-d-ip').textContent = p.ip_address || '—';
+
+				var waBtn = document.getElementById('cfs-d-wa-btn');
+				if (p.wa_url) {
+					waBtn.href = p.wa_url;
+					waBtn.style.display = 'inline-block';
+				} else {
+					waBtn.style.display = 'none';
+				}
+				var mailBtn = document.getElementById('cfs-d-mail-btn');
+				mailBtn.href = p.email ? ('mailto:' + p.email) : '#';
+
+				activeConfirmLink = p.confirm_link || '';
+				var confirmBtn = document.getElementById('cfs-d-confirm-btn');
+				confirmBtn.style.display = (p.status === 'accepted' && activeConfirmLink) ? 'inline-block' : 'none';
+
+				document.getElementById('aws-cfs-drawer-backdrop').classList.add('is-open');
+			};
+
+			window.awsCfsCloseDrawer = function() {
+				document.getElementById('aws-cfs-drawer-backdrop').classList.remove('is-open');
+			};
+
+			window.awsCfsCopyConfirmFromDrawer = function() {
+				if (!activeConfirmLink) return;
+				navigator.clipboard.writeText(activeConfirmLink);
+				alert('Speaker Confirmation link copied to clipboard!\n\n' + activeConfirmLink);
+			};
+
+			document.addEventListener('keydown', function(e) {
+				if (e.key === 'Escape') window.awsCfsCloseDrawer();
+			});
+		})();
+		</script>
 	</div>
 	<?php
 }
 
 /* ============================================================================
- * 5. ADMIN ACTIONS: STATUS UPDATE & DELETE
+ * 5. ADMIN ACTIONS: STATUS UPDATE, REVIEW NOTES & DELETE
  * ============================================================================ */
+
+function aws_sbg_cfs_admin_redirect_url( $event_id, $notice = '' ) {
+	$args = array(
+		'page'     => 'aws-cfs-submissions',
+		'event_id' => $event_id,
+	);
+	if ( ! empty( $_POST['filter_status'] ) ) {
+		$args['status'] = sanitize_key( wp_unslash( $_POST['filter_status'] ) );
+	}
+	if ( ! empty( $_POST['filter_track'] ) ) {
+		$args['track'] = sanitize_key( wp_unslash( $_POST['filter_track'] ) );
+	}
+	if ( isset( $_POST['filter_s'] ) && '' !== $_POST['filter_s'] ) {
+		$args['s'] = sanitize_text_field( wp_unslash( $_POST['filter_s'] ) );
+	}
+	if ( '' !== $notice ) {
+		$args['cfs_notice'] = $notice;
+	}
+	return add_query_arg( $args, admin_url( 'admin.php' ) );
+}
 
 function aws_sbg_cfs_handle_update_status() {
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -476,10 +801,39 @@ function aws_sbg_cfs_handle_update_status() {
 		$wpdb->update( $table, array( 'status' => $new_status ), array( 'id' => $id ), array( '%s' ), array( '%d' ) );
 	}
 
-	wp_safe_redirect( admin_url( 'admin.php?page=aws-cfs-submissions&event_id=' . $event_id ) );
+	wp_safe_redirect( aws_sbg_cfs_admin_redirect_url( $event_id, 'saved' ) );
 	exit;
 }
 add_action( 'admin_post_aws_sbg_cfs_update_status', 'aws_sbg_cfs_handle_update_status' );
+
+function aws_sbg_cfs_handle_save_review() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Access denied.' );
+	}
+
+	check_admin_referer( 'cfs_save_review', 'cfs_review_nonce' );
+
+	$id         = isset( $_POST['submission_id'] ) ? intval( $_POST['submission_id'] ) : 0;
+	$event_id   = isset( $_POST['event_id'] ) ? intval( $_POST['event_id'] ) : 0;
+	$new_status = isset( $_POST['new_status'] ) ? sanitize_key( wp_unslash( $_POST['new_status'] ) ) : '';
+	$notes      = isset( $_POST['admin_notes'] ) ? sanitize_textarea_field( wp_unslash( $_POST['admin_notes'] ) ) : '';
+
+	if ( $id ) {
+		global $wpdb;
+		$table  = $wpdb->prefix . 'aws_cfs_submissions';
+		$data   = array( 'admin_notes' => $notes );
+		$format = array( '%s' );
+		if ( array_key_exists( $new_status, aws_sbg_cfs_statuses() ) ) {
+			$data['status'] = $new_status;
+			$format[]       = '%s';
+		}
+		$wpdb->update( $table, $data, array( 'id' => $id ), $format, array( '%d' ) );
+	}
+
+	wp_safe_redirect( aws_sbg_cfs_admin_redirect_url( $event_id, 'saved' ) );
+	exit;
+}
+add_action( 'admin_post_aws_sbg_cfs_save_review', 'aws_sbg_cfs_handle_save_review' );
 
 function aws_sbg_cfs_handle_delete_entry() {
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -497,7 +851,7 @@ function aws_sbg_cfs_handle_delete_entry() {
 		$wpdb->delete( $table, array( 'id' => $entry_id ), array( '%d' ) );
 	}
 
-	wp_safe_redirect( admin_url( 'admin.php?page=aws-cfs-submissions&event_id=' . $event_id ) );
+	wp_safe_redirect( aws_sbg_cfs_admin_redirect_url( $event_id, 'deleted' ) );
 	exit;
 }
 add_action( 'admin_post_aws_sbg_cfs_delete_entry', 'aws_sbg_cfs_handle_delete_entry' );
@@ -554,6 +908,7 @@ function aws_sbg_cfs_handle_export_csv() {
 		'Past Speaking Experience',
 		'Past Experience Link',
 		'Status',
+		'Reviewer Notes',
 		'Submitted At',
 	) );
 
@@ -578,6 +933,7 @@ function aws_sbg_cfs_handle_export_csv() {
 			$r['past_experience'],
 			$r['experience_link'],
 			$r['status'],
+			$r['admin_notes'] ?? '',
 			$r['created_at'],
 		) );
 	}
