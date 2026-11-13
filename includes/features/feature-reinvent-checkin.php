@@ -371,7 +371,7 @@ function aws_sbg_render_reinvent_mobile_pass( $pass_no ) {
 
 	$theme_uri   = get_template_directory_uri();
 	$fonts_uri   = $theme_uri . '/assets/design-kit/fonts';
-	$aws_logo    = $theme_uri . '/assets/images/AWS-Logo-White-Trim.png';
+	$aws_logo    = $theme_uri . '/assets/images/icons/aws-dark.png';
 	$sbg_logo    = function_exists( 'aws_sbg_get_logo_url' ) ? aws_sbg_get_logo_url() : $theme_uri . '/assets/images/icons/SBG-Logo-White-Transparent.png';
 	$qrcode_js   = $theme_uri . '/assets/design-kit/qrcode.min.js';
 	$verify_url  = 'https://awsairuniversity.com/verify/' . rawurlencode( $pass_no );
@@ -383,7 +383,7 @@ function aws_sbg_render_reinvent_mobile_pass( $pass_no ) {
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-		<title><?php echo $found ? esc_html( $name . ' — Event Pass (' . $pass_no . ')' ) : 'Verify Pass — AWS re:Invent 2026'; ?></title>
+		<title><?php echo $found ? esc_html( $name . ' — Event Pass (' . $pass_no . ')' ) : 'Verify Pass — Event Entry'; ?></title>
 		<style>
 			@font-face { font-family:'Amazon Ember Display'; src:url('<?php echo esc_url( $fonts_uri ); ?>/AmazonEmberDisplay_Bd.ttf') format('truetype'); font-weight:700; font-display:swap; }
 			@font-face { font-family:'Amazon Ember Display'; src:url('<?php echo esc_url( $fonts_uri ); ?>/AmazonEmberDisplay_Md.ttf') format('truetype'); font-weight:500; font-display:swap; }
@@ -392,97 +392,48 @@ function aws_sbg_render_reinvent_mobile_pass( $pass_no ) {
 
 			* { box-sizing: border-box; margin: 0; padding: 0; }
 			body {
-				background: #06040C;
-				color: #FFFFFF;
+				background: #f1f5f9;
+				color: #0f172a;
 				font-family: 'Amazon Ember Display', system-ui, -apple-system, sans-serif;
 				min-height: 100vh;
 				display: flex;
 				flex-direction: column;
 				align-items: center;
 				justify-content: center;
-				padding: 20px 16px;
-				position: relative;
-				overflow-x: hidden;
-			}
-
-			.pass-mesh {
-				position: fixed;
-				inset: 0;
-				pointer-events: none;
-				z-index: 0;
-				background:
-					radial-gradient(60% 45% at 15% 10%, rgba(107, 69, 232, 0.45), transparent 70%),
-					radial-gradient(55% 40% at 85% 85%, rgba(0, 223, 216, 0.28), transparent 70%),
-					radial-gradient(50% 35% at 50% 50%, rgba(46, 99, 224, 0.22), transparent 75%);
+				padding: 24px 16px;
 			}
 
 			.pass-wrap {
-				position: relative;
-				z-index: 10;
 				width: 100%;
-				max-width: 380px;
+				max-width: 360px;
 				display: flex;
 				flex-direction: column;
-				gap: 16px;
+				gap: 14px;
 			}
 
 			.pass-card {
 				background: #FFFFFF;
-				border-radius: 20px;
+				border: 1px solid #cbd5e1;
+				border-radius: 18px;
 				overflow: hidden;
-				box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.1);
-				color: #06040C;
+				box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+				color: #0f172a;
 				text-align: center;
 			}
 
 			.pass-header {
-				background: linear-gradient(135deg, #6B45E8 0%, #2E63E0 25%, #8749DC 55%, #0A8DC0 100%);
-				padding: 22px 20px 20px;
-				color: #FFFFFF;
+				background: #f8fafc;
+				border-bottom: 1px solid #e2e8f0;
+				padding: 16px 22px;
 				display: flex;
 				align-items: center;
 				justify-content: space-between;
 			}
-
-			.pass-brand-re {
-				font-size: 15px;
-				font-weight: 400;
-				line-height: 1;
-				color: #FFFFFF;
-				position: relative;
-			}
-			.pass-brand-aws {
-				font-size: 10px;
-				font-weight: 700;
-				display: block;
-				margin-bottom: 2px;
-				color: #FFFFFF;
-			}
-			.pass-brand-invent {
-				font-size: 26px;
-				font-weight: 400;
-				letter-spacing: -0.03em;
-				line-height: 0.95;
-			}
-			.pass-brand-sub {
-				font-size: 8px;
-				font-weight: 700;
-				letter-spacing: 0.08em;
-				color: rgba(255, 255, 255, 0.9);
-				margin-top: 5px;
-				text-transform: uppercase;
-			}
-
-			.pass-logos {
-				display: flex;
-				align-items: center;
-				gap: 12px;
-			}
-			.pass-logo-aws { height: 22px; width: auto; }
-			.pass-logo-sbg { height: 24px; width: auto; filter: brightness(0) invert(1); }
+			.pass-logo-aws { height: 24px; width: auto; display: block; }
+			.pass-logo-sbg { height: 26px; width: auto; display: block; filter: brightness(0); }
 
 			.pass-body {
-				padding: 28px 24px 24px;
+				padding: 32px 24px 30px;
 				display: flex;
 				flex-direction: column;
 				align-items: center;
@@ -494,109 +445,90 @@ function aws_sbg_render_reinvent_mobile_pass( $pass_no ) {
 				font-family: 'Amazon Ember Mono', monospace;
 				font-size: 11px;
 				font-weight: 800;
-				letter-spacing: 0.18em;
+				letter-spacing: 0.16em;
 				text-transform: uppercase;
 				line-height: 1;
-				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 				display: inline-block;
 				margin-bottom: 18px;
 			}
-			.tier-attendee { background: #06040C; color: #FFFFFF; border: 1.5px solid #06040C; }
-			.tier-core-team { background: #4F46E5; color: #FFFFFF; border: 1.5px solid #4338CA; }
-			.tier-event-crew, .tier-crew { background: #00DFD8; color: #06040C; border: 1.5px solid #00C4BE; }
-			.tier-speaker { background: #FF9900; color: #06040C; border: 1.5px solid #E68A00; }
-			.tier-vip-guest, .tier-vip { background: #DB2777; color: #FFFFFF; border: 1.5px solid #BE185D; }
-			.tier-organizer { background: #7C3AED; color: #FFFFFF; border: 1.5px solid #6D28D9; }
-			.tier-custom { background: #06040C; color: #FFFFFF; border: 1.5px solid #06040C; }
+			.tier-attendee { background: #0f172a; color: #FFFFFF; }
+			.tier-core-team { background: #4F46E5; color: #FFFFFF; }
+			.tier-event-crew, .tier-crew { background: #00DFD8; color: #06040C; }
+			.tier-speaker { background: #FF9900; color: #06040C; }
+			.tier-vip-guest, .tier-vip { background: #DB2777; color: #FFFFFF; }
+			.tier-organizer { background: #7C3AED; color: #FFFFFF; }
+			.tier-custom { background: #0f172a; color: #FFFFFF; }
 
 			.pass-name {
 				font-size: 24px;
 				font-weight: 700;
-				line-height: 1.15;
+				line-height: 1.2;
 				text-transform: uppercase;
-				color: #06040C;
-				margin-bottom: 6px;
-				word-break: break-word;
-			}
-
-			.pass-uni {
-				font-size: 13px;
-				color: #64748b;
+				color: #0f172a;
 				margin-bottom: 22px;
-				font-weight: 500;
+				word-break: break-word;
 			}
 
 			.pass-qr-frame {
 				background: #FFFFFF;
-				border: 2px solid #06040C;
+				border: 2px solid #0f172a;
 				border-radius: 14px;
 				padding: 10px;
 				display: inline-flex;
-				margin-bottom: 16px;
-				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+				margin-bottom: 18px;
 			}
-			.pass-qr-frame img { display: block; width: 170px; height: 170px; }
+			.pass-qr-frame img { display: block; width: 176px; height: 176px; }
 
 			.pass-number {
 				font-family: 'Amazon Ember Mono', monospace;
-				font-size: 22px;
+				font-size: 24px;
 				font-weight: 800;
 				letter-spacing: 0.06em;
-				color: #06040C;
-				margin-bottom: 4px;
+				color: #0f172a;
 			}
 
-			.pass-notice {
-				font-size: 11px;
-				color: #64748b;
-				line-height: 1.5;
-				max-width: 280px;
-				margin: 0 auto;
-			}
-
-			.pass-status-pill {
+			.pass-download-btn {
+				width: 100%;
+				background: #232F3E;
+				color: #FFFFFF;
+				border: none;
+				border-radius: 10px;
+				padding: 13px 20px;
+				font-family: 'Amazon Ember Display', system-ui, sans-serif;
+				font-size: 14px;
+				font-weight: 700;
+				cursor: pointer;
 				display: inline-flex;
 				align-items: center;
+				justify-content: center;
 				gap: 8px;
-				padding: 8px 16px;
-				border-radius: 999px;
-				font-size: 12px;
-				font-weight: 700;
-				font-family: 'Amazon Ember Mono', monospace;
-				margin-top: 14px;
 			}
-			.status-ready { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
-			.status-checked { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
-			.status-invalid { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+			.pass-download-btn:hover { background: #1e293b; }
 
-			.pass-meta-box {
-				background: rgba(255, 255, 255, 0.06);
-				border: 1px solid rgba(255, 255, 255, 0.12);
-				border-radius: 14px;
-				padding: 16px;
-				font-size: 12px;
-				color: rgba(255, 255, 255, 0.75);
-				line-height: 1.6;
-				text-align: left;
+			.status-invalid { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; padding: 8px 16px; border-radius: 999px; font-size: 12px; font-weight: 700; font-family: 'Amazon Ember Mono', monospace; display: inline-flex; }
+
+			@media print {
+				@page { size: auto; margin: 12mm; }
+				body {
+					background: #FFFFFF !important;
+					padding: 0 !important;
+					min-height: auto !important;
+					-webkit-print-color-adjust: exact;
+					print-color-adjust: exact;
+				}
+				.no-print { display: none !important; }
+				.pass-wrap { max-width: 360px; margin: 20px auto 0; }
+				.pass-card { box-shadow: none !important; border: 1.5px solid #cbd5e1 !important; }
 			}
-			.pass-meta-box strong { color: #FFFFFF; }
 		</style>
 	</head>
 	<body>
-		<div class="pass-mesh"></div>
-
 		<div class="pass-wrap">
 			<?php if ( $found ) : ?>
 				<div class="pass-card">
 					<div class="pass-header">
-						<div>
-							<span class="pass-brand-re"><span class="pass-brand-aws">AWS</span>re:</span><span class="pass-brand-invent">Invent</span>
-							<div class="pass-brand-sub">WATCH &amp; BUILD PARTY 2026</div>
-						</div>
-						<div class="pass-logos">
-							<img src="<?php echo esc_url( $aws_logo ); ?>" alt="AWS" class="pass-logo-aws">
-							<img src="<?php echo esc_url( $sbg_logo ); ?>" alt="SBG" class="pass-logo-sbg">
-						</div>
+						<img src="<?php echo esc_url( $aws_logo ); ?>" alt="AWS" class="pass-logo-aws">
+						<img src="<?php echo esc_url( $sbg_logo ); ?>" alt="AWS Student Builder Group" class="pass-logo-sbg">
 					</div>
 
 					<div class="pass-body">
@@ -605,44 +537,25 @@ function aws_sbg_render_reinvent_mobile_pass( $pass_no ) {
 						</div>
 
 						<h1 class="pass-name"><?php echo esc_html( $name ); ?></h1>
-						<?php if ( $uni ) : ?>
-							<p class="pass-uni"><?php echo esc_html( $uni . ( $city ? ' · ' . $city : '' ) ); ?></p>
-						<?php endif; ?>
 
 						<div class="pass-qr-frame">
 							<div id="pass-qr" data-text="<?php echo esc_attr( $verify_url ); ?>"></div>
 						</div>
 
 						<div class="pass-number">#<?php echo esc_html( $pass_no ); ?></div>
-						<p class="pass-notice">Present this pass on your phone screen at the reception desk to collect your lanyard badge.</p>
-
-						<?php if ( 'yes' === $attended ) : ?>
-							<div class="pass-status-pill status-checked">
-								<span>✓ CHECKED IN</span>
-								<?php if ( $checkin_time ) : ?>
-									<span style="font-weight:400; opacity:0.85;">· <?php echo date( 'h:i A', strtotime( $checkin_time ) ); ?></span>
-								<?php endif; ?>
-							</div>
-						<?php else : ?>
-							<div class="pass-status-pill status-ready">
-								<span>● OFFICIAL PASS VERIFIED</span>
-							</div>
-						<?php endif; ?>
 					</div>
 				</div>
 
-				<div class="pass-meta-box">
-					<div><strong>Venue:</strong> PAF Air University Islamabad · Gate 1 Entry</div>
-					<div><strong>Event Date:</strong> December 2026 · AWS re:Invent Watch Party</div>
-					<div><strong>Security Check:</strong> Original CNIC/B-Form matching this pass is required at the campus security gate.</div>
-				</div>
+				<button type="button" class="pass-download-btn no-print" onclick="window.print()">
+					Download PDF Pass
+				</button>
 			<?php else : ?>
 				<div class="pass-card" style="padding:48px 24px;">
 					<h2 style="font-size:22px; margin-bottom:10px;">Pass Not Found</h2>
 					<p style="font-size:13px; color:#64748b; line-height:1.6; margin-bottom:20px;">
 						Pass number <strong><?php echo esc_html( $pass_no ?: 'Unknown' ); ?></strong> could not be verified or is pending review.
 					</p>
-					<div class="pass-status-pill status-invalid" style="margin:0 auto;">
+					<div class="status-invalid">
 						<span>✕ INVALID OR PENDING APPLICATION</span>
 					</div>
 				</div>
@@ -657,9 +570,9 @@ function aws_sbg_render_reinvent_mobile_pass( $pass_no ) {
 				if (qrBox && typeof QRCode !== 'undefined') {
 					new QRCode(qrBox, {
 						text: qrBox.dataset.text,
-						width: 170,
-						height: 170,
-						colorDark: '#06040C',
+						width: 176,
+						height: 176,
+						colorDark: '#0f172a',
 						colorLight: '#FFFFFF',
 						correctLevel: QRCode.CorrectLevel.M
 					});

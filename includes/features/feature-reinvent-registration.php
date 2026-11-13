@@ -1127,30 +1127,27 @@ function aws_sbg_reinvent_handle_review_action() {
 
 		$to_email = get_post_meta( $reg_id, 'email', true );
 		if ( $to_email && function_exists( 'aws_sbg_mail_send' ) ) {
-			$tier       = aws_sbg_get_reinvent_badge_tier( $reg_id );
-			$pass_url   = home_url( '/verify/' . rawurlencode( $reg_no ) );
-			$qr_img_url = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=' . rawurlencode( $pass_url );
+			$pass_url = home_url( '/verify/' . rawurlencode( $reg_no ) );
 
-			$body = '<p style="margin:0 0 14px 0; color:#1f2937;">Hi ' . esc_html( $name ) . ',</p>'
-				. '<p style="margin:0 0 14px 0; color:#1f2937;">Your application for <strong>AWS re:Invent Watch &amp; Build Party 2026</strong> has been approved.</p>'
-				. '<p style="margin:0 0 18px 0; color:#1f2937;">Present the pass below at the reception desk on event day to claim your printed lanyard badge. Original CNIC or B-Form matching this registration is required for campus entry at PAF Air University Gate 1.</p>'
-				. '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 22px 0; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden;">'
-				. '<tr><td colspan="2" style="background:#232F3E; padding:10px 18px; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#f8fafc;">Official Event Pass &middot; AWS re:Invent Watch &amp; Build Party 2026</td></tr>'
-				. '<tr>'
-				. '<td class="pass-col" style="padding:18px 20px; vertical-align:middle; text-align:left;">'
-				. '<div style="display:inline-block; background:#e2e8f0; color:#1e293b; border-radius:4px; padding:3px 9px; font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px;">' . esc_html( $tier ) . '</div>'
-				. '<div style="font-size:18px; font-weight:700; color:#111827; line-height:1.3; margin-bottom:4px;">' . esc_html( $name ) . '</div>'
-				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:16px; font-weight:700; color:#232F3E; letter-spacing:0.04em; margin-bottom:12px;">#' . esc_html( $reg_no ) . '</div>'
-				. '<a href="' . esc_url( $pass_url ) . '" style="font-size:13px; font-weight:600; color:#0284c7; text-decoration:underline;">Open Mobile Pass &rarr;</a>'
-				. '</td>'
-				. '<td class="pass-qr-col" width="144" style="padding:18px 20px 18px 0; vertical-align:middle; text-align:right;">'
-				. '<div style="display:inline-block; background:#ffffff; border:1px solid #cbd5e1; border-radius:6px; padding:6px;">'
-				. '<img src="' . esc_url( $qr_img_url ) . '" alt="Check-in Pass QR" width="120" height="120" style="display:block; margin:0;" />'
-				. '</div>'
-				. '</td>'
-				. '</tr>'
+			$body = '<p style="margin:0 0 14px 0; color:#111827;">Hi <strong>' . esc_html( $name ) . '</strong>,</p>'
+				. '<p style="margin:0 0 20px 0; color:#1f2937; line-height:1.6;">Your request to attend <strong>AWS re:Invent Watch &amp; Build Party 2026 Islamabad</strong> has been approved. Please download your entry pass below and save it to show on event day for entrance.</p>'
+				. '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 22px 0; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; overflow:hidden;">'
+				. '<tr><td style="padding:22px 20px; text-align:center;">'
+				. '<div style="font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Registration Number</div>'
+				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:28px; font-weight:800; color:#111827; letter-spacing:0.06em; line-height:1.2; margin-bottom:18px;">#' . esc_html( $reg_no ) . '</div>'
+				. '<div style="border-top:1px dashed #cbd5e1; margin:0 0 18px 0;"></div>'
+				. '<a href="' . esc_url( $pass_url ) . '" style="display:inline-block; background:#232F3E; color:#f8fafc; text-decoration:none; font-size:14px; font-weight:700; padding:12px 26px; border-radius:8px; letter-spacing:0.02em;">Download Event Pass</a>'
+				. '</td></tr>'
 				. '</table>'
-				. '<p style="margin:0 0 18px 0; color:#1f2937;">Best regards,<br>AWS Student Builder Group</p>'
+				. '<p style="margin:0 0 8px 0; font-weight:700; color:#111827;">Instructions:</p>'
+				. '<ul style="margin:0 0 20px 18px; padding:0; color:#1f2937; line-height:1.65;">'
+				. '<li style="margin:0 0 6px 0;">Please arrive 30 mins early for check-in.</li>'
+				. '<li style="margin:0 0 6px 0;">Bring your CNIC for security clearance.</li>'
+				. '<li style="margin:0 0 6px 0;">All attendees will get complimentary food &amp; drinks.</li>'
+				. '<li style="margin:0 0 6px 0;">Swags are limited and will be given based on different activities &amp; random.</li>'
+				. '<li style="margin:0;">Please bring your fully charged laptop for workshop and activities.</li>'
+				. '</ul>'
+				. '<p style="margin:0 0 18px 0; color:#1f2937; line-height:1.6;">Regards,<br><strong style="color:#111827;">Team - AWS Student Builder Group Air University Islamabad</strong></p>'
 				. '<div style="border-top:1px solid #e5e7eb; margin:18px 0 14px 0;"></div>'
 				. '<p style="margin:0; font-size:12px; color:#6b7280; line-height:1.6;">Join the WhatsApp community below for event schedule updates, room details, and announcements.</p>';
 			try {
