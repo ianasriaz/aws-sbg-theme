@@ -747,52 +747,7 @@ function aws_sbg_handle_reinvent_registration() {
 		$redirect
 	);
 
-	// 4. Performance optimization:
-	// If PHP FastCGI is active, flush the HTTP redirect immediately so the applicant
-	// sees the success screen in < 250ms, while emails are sent in the background.
-	if ( function_exists( 'fastcgi_finish_request' ) ) {
-		header( 'Location: ' . $redirect );
-		fastcgi_finish_request();
-	}
-
-	/* Applicant confirmation (under review) */
-	if ( function_exists( 'aws_sbg_mail_send' ) ) {
-		$confirm_body = '<p style="margin:0 0 16px 0; color:#111827;">Hi <strong>' . esc_html( $full_name ) . '</strong>,</p>'
-			. '<p style="margin:0 0 16px 0; color:#1f2937;">Thank you for registering for <strong>AWS re:Invent Watch &amp; Build Party 2026</strong>.</p>'
-			. '<p style="margin:0 0 16px 0; color:#1f2937;">We have received your application and our team is currently reviewing submissions. Due to limited capacity, passes are issued upon review.</p>'
-			. '<p style="margin:0 0 22px 0; color:#1f2937;">If accepted, your official event pass will be sent directly to this email within the next 7&ndash;10 days.</p>'
-			. '<p style="margin:0 0 4px 0; color:#111827;">Best regards,</p>'
-			. '<p style="margin:0; color:#111827; font-weight:600;">AWS Student Builder Group</p>'
-			. '<div style="border-top:1px solid #e5e7eb; margin:24px 0 16px 0;"></div>'
-			. '<p style="margin:0; font-size:12.5px; color:#6b7280; line-height:1.5;">This email confirms receipt of your registration for AWS re:Invent Watch &amp; Build Party 2026. Join our WhatsApp community below for event updates.</p>';
-		try {
-			aws_sbg_mail_send( 'reinvent', $email, 'Your AWS re:Invent Watch & Build Party 2026 application', '', '', $confirm_body, AWS_REINVENT_WHATSAPP_URL, 'Join WhatsApp Community' );
-		} catch ( \Throwable $e ) {
-			error_log( 're:Invent applicant review email failed: ' . $e->getMessage() );
-		}
-
-		/* Admin notification (optional) */
-		if ( function_exists( 'aws_sbg_mail_get_settings' ) ) {
-			$mail_settings = aws_sbg_mail_get_settings();
-			if ( 'yes' === ( $mail_settings['notify_admin_rsvp'] ?? 'yes' ) ) {
-				$admin_to   = ! empty( $mail_settings['admin_email'] ) ? $mail_settings['admin_email'] : get_option( 'admin_email' );
-				$admin_body = '<p style="margin:0 0 12px 0; color:#334155;">New re:Invent application:</p>'
-					. '<p style="margin:0 0 6px 0; color:#334155;"><strong style="color:#0f172a;">' . esc_html( $full_name ) . '</strong> · ' . esc_html( ucfirst( str_replace( '_', ' ', $audience ) ) ) . '</p>'
-					. '<p style="margin:0 0 6px 0; color:#334155;">' . esc_html( $university ) . ' · ' . esc_html( $city ) . '</p>'
-					. '<p style="margin:0 0 6px 0; color:#334155;">Attended before: ' . esc_html( ucfirst( $attended ) ) . '</p>'
-					. '<p style="margin:0; color:#334155;">Why: ' . esc_html( wp_trim_words( $why, 40, '…' ) ) . '</p>';
-				try {
-					aws_sbg_mail_send( 'reinvent', $admin_to, 'New re:Invent application · ' . esc_html( $full_name ), 'New Application', 'Review needed', $admin_body, admin_url( 'admin.php?page=aws-reinvent-registrations' ), 'Open registrations' );
-				} catch ( \Throwable $e ) {
-					error_log( 're:Invent admin notification email failed: ' . $e->getMessage() );
-				}
-			}
-		}
-	}
-
-	if ( ! headers_sent() ) {
-		wp_safe_redirect( $redirect );
-	}
+	wp_safe_redirect( $redirect );
 	exit;
 }
 add_action( 'admin_post_nopriv_submit_aws_reinvent_registration', 'aws_sbg_handle_reinvent_registration' );
