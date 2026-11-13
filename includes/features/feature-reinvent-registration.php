@@ -1630,7 +1630,6 @@ function aws_sbg_render_reinvent_admin_page() {
 						<th>Contact</th>
 						<th>Institute / City</th>
 						<th>Last Attended Event (User Note)</th>
-						<th>Admin Note (Internal)</th>
 						<th>Vehicle &amp; Parking</th>
 						<th>Status</th>
 						<th>Submitted</th>
@@ -1640,7 +1639,7 @@ function aws_sbg_render_reinvent_admin_page() {
 				<tbody>
 					<?php if ( ! $query->have_posts() ) : ?>
 						<tr>
-							<td colspan="11" class="rvadm-muted" style="padding:40px; text-align:center;">No registrations found.</td>
+							<td colspan="10" class="rvadm-muted" style="padding:40px; text-align:center;">No registrations found.</td>
 						</tr>
 					<?php else : ?>
 						<?php $rv_drawer_payloads = array(); ?>
@@ -1792,18 +1791,6 @@ function aws_sbg_render_reinvent_admin_page() {
 									<?php else : ?>
 										<span class="rvadm-null">—</span>
 									<?php endif; ?>
-								</td>
-								<td>
-									<div class="rvadm-admin-note-cell">
-										<?php if ( ! empty( $admin_note ) ) : ?>
-											<div class="rvadm-note-bubble">
-												<span class="rvadm-note-text"><?php echo esc_html( $admin_note ); ?></span>
-												<button type="button" class="rvadm-note-edit-btn" onclick="openAdminNoteModal(<?php echo $reg_id; ?>, <?php echo esc_attr( wp_json_encode( $name ) ); ?>, <?php echo esc_attr( wp_json_encode( $admin_note ) ); ?>, <?php echo esc_attr( wp_json_encode( $note_nonce ) ); ?>)" title="Edit internal note">✎</button>
-											</div>
-										<?php else : ?>
-											<button type="button" class="rvadm-add-note-btn" onclick="openAdminNoteModal(<?php echo $reg_id; ?>, <?php echo esc_attr( wp_json_encode( $name ) ); ?>, '', <?php echo esc_attr( wp_json_encode( $note_nonce ) ); ?>)">+ Add Note</button>
-										<?php endif; ?>
-									</div>
 								</td>
 								<td>
 									<div class="rvadm-muted" style="font-weight:600;"><?php echo esc_html( $vehicle ); ?></div>
@@ -2254,10 +2241,6 @@ function aws_sbg_render_reinvent_admin_page() {
 			document.getElementById('rv-d-parking').textContent = r.parking_ok || '—';
 			document.getElementById('rv-d-notified').textContent = r.notified || 'No';
 
-			document.getElementById('rv-d-note-regid').value = r.reg_id;
-			document.getElementById('rv-d-note-nonce').value = r.note_nonce;
-			document.getElementById('rv-d-note-text').value = r.admin_note || '';
-
 			var approveBtn = document.getElementById('rv-d-approve-btn');
 			var rejectBtn = document.getElementById('rv-d-reject-btn');
 			if (r.approval === 'pending') {
@@ -2359,14 +2342,7 @@ function aws_sbg_render_reinvent_admin_page() {
 					</div>
 
 					<div class="rvadm-drawer-sec">
-						<h3 class="rvadm-drawer-sec-title">Internal Admin Note &amp; Quick Actions</h3>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-bottom:14px;">
-							<input type="hidden" name="action" value="aws_sbg_reinvent_save_note">
-							<input type="hidden" id="rv-d-note-regid" name="reg_id" value="">
-							<input type="hidden" id="rv-d-note-nonce" name="_wpnonce" value="">
-							<textarea id="rv-d-note-text" name="admin_note" rows="3" style="width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;margin-bottom:10px;" placeholder="Add private review note (visible to admins only)..."></textarea>
-							<button type="submit" class="button button-primary">Save Admin Note</button>
-						</form>
+						<h3 class="rvadm-drawer-sec-title">Quick Actions</h3>
 						<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
 							<a id="rv-d-approve-btn" href="#" class="rvadm-approve" style="padding:7px 14px;font-size:12.5px;">Approve Application</a>
 							<a id="rv-d-reject-btn" href="#" class="rvadm-reject" style="padding:7px 14px;font-size:12.5px;">Reject</a>
