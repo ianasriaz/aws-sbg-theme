@@ -347,24 +347,24 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
 				<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
 				<?php if ( ! $is_hidden ) : ?>
-					<p class="rv-lede-cta">Registration is free and seats are limited. Register now to secure your spot.</p>
+					<p class="rv-lede-cta">Invite-only event with limited capacity. Request your pass below.</p>
 				<?php endif; ?>
 
 				<div class="rv-perks">
 					<div class="rv-perk">
 						<span class="rv-perk-idx">01</span>
-						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.83z"/><path d="M7 7h.01"/></svg>Free Registration</h3>
-						<p>First come, first served. Seats are limited, so register early.</p>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.83z"/><path d="M7 7h.01"/></svg>Invite-Only</h3>
+						<p>Due to limited capacity, only approved attendees will receive an event pass.</p>
 					</div>
 					<div class="rv-perk">
 						<span class="rv-perk-idx">02</span>
-						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a4 4 0 01-4 4H8a4 4 0 01-4-4V9z"/><path d="M16 10h1.5a2.5 2.5 0 010 5H16"/></svg>Snacks, Food &amp; Drinks</h3>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a4 4 0 01-4 4H8a4 4 0 01-4-4V9z"/><path d="M16 10h1.5a2.5 2.5 0 010 5H16"/></svg>Snacks, Food &amp; Drinks (For All)</h3>
 						<p>Enjoy complimentary snacks, food, and beverages.</p>
 					</div>
 					<div class="rv-perk">
 						<span class="rv-perk-idx">03</span>
-						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>AWS Swag</h3>
-						<p>Swag and giveaways, subject to availability and participation criteria.</p>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>Swags (Limited)</h3>
+						<p>Only based on participation and random giveaway.</p>
 					</div>
 					<div class="rv-perk">
 						<span class="rv-perk-idx">04</span>
@@ -530,11 +530,11 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 					<label class="rv-commit">
 						<input type="checkbox" name="will_attend" value="yes" :required="currentStep === 2">
-						<span class="rv-commit-text">I will attend the event.<span class="rv-commit-sub">Seats are limited and resources are planned per attendee, so a no-show takes a seat from another builder.</span></span>
+						<span class="rv-commit-text">I will attend the event if approved.<span class="rv-commit-sub">Please confirm only if you can attend, so your seat isn&rsquo;t wasted.</span></span>
 					</label>
 					<label class="rv-commit">
 						<input type="checkbox" name="parking_policy" value="yes" :required="currentStep === 2">
-						<span class="rv-commit-text">I understand campus parking is very limited.<span class="rv-commit-sub" style="color:rgba(255,255,255,0.45);">Public transport or ride-hailing is recommended. Drivers can park at F-9 Park Gate 3 (Khyber Gate), nearest to the venue.</span></span>
+						<span class="rv-commit-text">I understand campus parking is very limited.<span class="rv-commit-sub" style="color:rgba(255,255,255,0.45);">Public transport or ride-hailing is recommended.</span></span>
 					</label>
 
 					<div class="rv-actions" style="margin-top:44px;">

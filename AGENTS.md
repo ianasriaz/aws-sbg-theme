@@ -1257,6 +1257,7 @@ aws-sbg-theme/
   - Enhanced the re:Invent admin dashboard (`aws_sbg_render_reinvent_admin_page()`): added Badge Tier and Event Check-In filter dropdowns, clickable `mailto:`/`wa.me` contact links and `Pass ↗` links in the table, removed the `Admin Note (Internal)` table column and drawer form, and added a slide-over **Application Detail Drawer** (`openReinventDetailDrawer`) exposing all registration, vehicle, and check-in fields with quick actions.
   - Redesigned the approval email (`aws_sbg_reinvent_handle_review_action()`) into a mobile-first single-column ticket box showing only `Registration Number` (`#RIV-XX`) + `Download Event Pass` CTA, updated instructions, and `Team - AWS Student Builder Group Air University Islamabad` sign-off.
   - Disabled all emails on re:Invent form registration (`aws_sbg_handle_reinvent_registration()`); emails are now sent only upon approval.
+  - Updated re:Invent intro perks (`01 Invite-Only`, `02 Snacks, Food & Drinks (For All)`, `03 Swags (Limited)`) and Step 2 policy checkboxes (simplified attendance confirmation `if approved` and removed F-9 Park Gate 3 parking reference).
 - `includes/features/feature-reinvent-checkin.php`:
   - Redesigned `/verify/{pass_number}` into a clean light-mode PDF-downloadable pass (removed gradient header, re:Invent branding, supporting text, `OFFICIAL PASS VERIFIED` badge, and footer venue/date/security box; displays AWS & SBG logos, badge tier pill, attendee name, QR code, `#RIV-XX`, and a `Download PDF Pass` print button).
 - `includes/features/cfs/cfs-admin.php`:
