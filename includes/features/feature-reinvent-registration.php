@@ -343,9 +343,10 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 		<section class="rv-intro" x-show="currentStep === 0">
 			<img class="rv-skyline" src="<?php echo esc_url( $skyline ); ?>" alt="" aria-hidden="true">
 			<div class="rv-intro-inner">
-				<p class="rv-kicker">AWS Community Islamabad is bringing</p>
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
-				<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
+				<?php if ( ! empty( $subtitle ) ) : ?>
+					<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
+				<?php endif; ?>
 				<?php if ( ! $is_hidden ) : ?>
 					<p class="rv-lede-cta">Invite-only event with limited capacity. Request your pass below.</p>
 				<?php endif; ?>
@@ -358,8 +359,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					</div>
 					<div class="rv-perk">
 						<span class="rv-perk-idx">02</span>
-						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a4 4 0 01-4 4H8a4 4 0 01-4-4V9z"/><path d="M16 10h1.5a2.5 2.5 0 010 5H16"/></svg>Snacks, Food &amp; Drinks (For All)</h3>
-						<p>Enjoy complimentary snacks, food, and beverages.</p>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h12v5a4 4 0 01-4 4H8a4 4 0 01-4-4V9z"/><path d="M16 10h1.5a2.5 2.5 0 010 5H16"/></svg>Snacks, Food &amp; Drinks</h3>
+						<p>Enjoy complimentary snacks, food, and beverages (for all).</p>
 					</div>
 					<div class="rv-perk">
 						<span class="rv-perk-idx">03</span>
@@ -596,8 +597,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 function aws_sbg_reinvent_form_shortcode( $atts ) {
 	$atts = shortcode_atts( array(
-		'title'    => 'AWS re:Invent Watch & Build Party Islamabad 2026',
-		'subtitle' => 'Experience AWS re:Invent in Islamabad.',
+		'title'    => 'AWS re:Invent 2026 Watch & Build Party Islamabad',
+		'subtitle' => '',
 		'date'     => '',
 		'location' => 'Islamabad, Pakistan',
 	), $atts, 'aws_reinvent_form' );

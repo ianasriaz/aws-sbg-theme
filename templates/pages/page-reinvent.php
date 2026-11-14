@@ -19,8 +19,8 @@ add_filter( 'show_admin_bar', '__return_false' );
 </head>
 <body <?php body_class(); ?> style="margin:0; background:#06040c; color:#ffffff;">
 <?php
-$title    = 'AWS re:Invent Watch & Build Party Islamabad 2026';
-$subtitle = 'Experience AWS re:Invent in Islamabad.';
+$title    = 'AWS re:Invent 2026 Watch & Build Party Islamabad';
+$subtitle = '';
 $date     = '';
 $location = 'Islamabad, Pakistan';
 
