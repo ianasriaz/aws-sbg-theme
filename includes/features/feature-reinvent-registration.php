@@ -215,7 +215,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-wrap .rv-title { font-weight:700; font-size:clamp(34px,5.2vw,58px); line-height:1.06; letter-spacing:-0.02em; margin:0 0 24px; }
 			.rv-lede { font-size:17px; line-height:1.75; color:rgba(255,255,255,0.66); max-width:52ch; margin:0 0 16px; }
 			.rv-lede-cta { font-size:16px; line-height:1.7; font-weight:700; color:rgba(255,255,255,0.66); max-width:52ch; margin:0; }
-			.rv-perks { display:grid; grid-template-columns:1fr 1fr; gap:0 clamp(28px,5vw,64px); margin:clamp(48px,8vh,68px) 0 clamp(40px,6vh,56px); }
+			.rv-perks { display:grid; grid-template-columns:1fr 1fr; gap:0 clamp(28px,5vw,64px); margin:clamp(36px,6vh,52px) 0 clamp(40px,6vh,56px); }
 			.rv-perk { border-top:1px solid rgba(255,255,255,0.14); padding:18px 0 24px; }
 			.rv-perk-idx { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.15em; color:#00DFD8; display:block; margin:0 0 10px; }
 			.rv-perk h3 { font-size:17px; font-weight:500; margin:0 0 6px; display:flex; align-items:center; gap:9px; }
@@ -371,6 +371,11 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
 				<?php if ( ! empty( $subtitle ) ) : ?>
 					<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
+				<?php endif; ?>
+				<?php if ( ! $is_hidden ) : ?>
+					<div style="margin-top:28px;">
+						<button type="button" class="rv-btn rv-btn-primary" @click="openForm()">REGISTER NOW</button>
+					</div>
 				<?php endif; ?>
 
 				<div class="rv-perks">
