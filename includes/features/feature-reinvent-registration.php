@@ -1175,7 +1175,7 @@ function aws_sbg_reinvent_handle_review_action() {
 				. '<body style="margin:0;padding:24px;background-color:#ffffff;color:#111827;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;">'
 				. '<p style="margin:0 0 16px 0;">Hi ' . esc_html( $name ) . ',</p>'
 				. '<p style="margin:0 0 16px 0;">Great news! Your registration for <strong>AWS re:Invent Watch &amp; Build Party 2026 &ndash; Islamabad</strong> has been approved.</p>'
-				. '<p style="margin:0 0 16px 0;">We\'re looking forward to welcoming you on December 1, 2026, for a day of cloud innovation, learning, building, and connecting with the AWS community.</p>'
+				. '<p style="margin:0 0 16px 0;">We\'re looking forward to welcoming you on November 30, 2026, for a day of cloud innovation, learning, building, and connecting with the AWS community.</p>'
 				. '<p style="margin:0 0 24px 0;">Your official event pass is now ready. Please download and save it, as you\'ll need it during event check-in.</p>'
 				. '<p style="margin:0 0 4px 0;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;">YOUR EVENT PASS</p>'
 				. '<p style="margin:0 0 14px 0;font-size:18px;font-weight:700;color:#111827;">PASS NUMBER: #' . esc_html( $reg_no ) . '</p>'
