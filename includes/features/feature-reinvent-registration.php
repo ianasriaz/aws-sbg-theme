@@ -455,10 +455,10 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 						<div class="rv-field">
 							<label for="rv-whatsapp">WhatsApp Number <em>*</em></label>
-							<input id="rv-whatsapp" type="tel" name="whatsapp" required placeholder="0300-0000000">
+							<input id="rv-whatsapp" type="tel" name="whatsapp" required placeholder="030000000">
 						</div>
 						<div class="rv-field">
-							<label for="rv-cnic">CNIC (For check-in) <em>*</em></label>
+							<label for="rv-cnic">CNIC # (For check-in) <em>*</em></label>
 							<input id="rv-cnic" type="text" name="cnic" inputmode="numeric" required pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" maxlength="15" title="Format: 00000-0000000-0" placeholder="00000-0000000-0" @input="formatCnic($event)">
 						</div>
 						<div class="rv-field">
