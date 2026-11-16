@@ -357,6 +357,11 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			<img class="rv-skyline" src="<?php echo esc_url( $skyline ); ?>" alt="" aria-hidden="true">
 			<div class="rv-intro-inner">
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
+				<div style="display:flex;flex-wrap:wrap;gap:12px 28px;margin:0 0 8px 0;font-family:'Amazon Ember Mono',monospace;font-size:12px;letter-spacing:0.06em;color:rgba(255,255,255,0.78);">
+					<div><span style="color:#00DFD8;font-weight:700;text-transform:uppercase;margin-right:8px;">Date</span>November 30, 2026</div>
+					<div><span style="color:#00DFD8;font-weight:700;text-transform:uppercase;margin-right:8px;">Time</span>Daytime</div>
+					<div><span style="color:#00DFD8;font-weight:700;text-transform:uppercase;margin-right:8px;">Venue</span>Islamabad</div>
+				</div>
 				<?php if ( ! empty( $subtitle ) ) : ?>
 					<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
 				<?php endif; ?>
@@ -472,7 +477,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 						<div class="rv-field" style="grid-column:1/-1; margin-top:8px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.1);">
 							<label>Bringing a vehicle? <span style="font-weight:400;">(optional)</span></label>
-							<p style="margin:2px 0 12px; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.5);">Parking on campus is very limited. We encourage using public transport or ride-hailing (InDrive, Yango, Bykea).</p>
+							<p style="margin:2px 0 12px; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.5);">Parking at the venue is very limited. We encourage using public transport or ride-hailing (InDrive, Yango, Bykea).</p>
 							<div class="rv-choices" role="radiogroup" aria-label="Vehicle">
 								<label class="rv-choice">
 									<input type="radio" name="has_vehicle" value="no" x-model="hasVehicle">
@@ -533,7 +538,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</label>
 						<label class="rv-commit">
 							<input type="checkbox" name="parking_policy" value="yes" required>
-							<span class="rv-commit-text">I understand campus parking is very limited.<span class="rv-commit-sub" style="color:rgba(255,255,255,0.45);">Public transport or ride-hailing is recommended.</span></span>
+							<span class="rv-commit-text">I understand venue parking is very limited.<span class="rv-commit-sub" style="color:rgba(255,255,255,0.45);">Public transport or ride-hailing is recommended.</span></span>
 						</label>
 					</div>
 
