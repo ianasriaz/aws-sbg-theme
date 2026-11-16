@@ -152,6 +152,7 @@ function aws_sbg_get_reinvent_closed_message() {
 function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 	$success        = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'success';
 	$exists         = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'exists';
+	$expired        = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'expired';
 	$success_name   = '';
 	if ( $success && ! empty( $_GET['rv_ref'] ) ) {
 		$rv_ref   = preg_replace( '/[^a-zA-Z0-9]/', '', wp_unslash( $_GET['rv_ref'] ) );
@@ -342,6 +343,12 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 		</div>
 		<?php endif; ?>
 
+		<?php if ( $expired ) : ?>
+		<div class="rv-exists-wrap">
+			<div class="rv-exists-banner" role="status" style="border-color:rgba(245,158,11,0.5);background:rgba(245,158,11,0.12);color:#fef3c7;">Your session expired while the page was open. Your details have been restored&mdash;please review and click Submit again.</div>
+		</div>
+		<?php endif; ?>
+
 		<!-- Intro -->
 		<section class="rv-intro" x-show="!showForm">
 			<img class="rv-skyline" src="<?php echo esc_url( $skyline ); ?>" alt="" aria-hidden="true">
@@ -413,7 +420,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 		<?php if ( ! $is_hidden ) : ?>
 		<!-- Single-Page Registration Form -->
-		<form id="rv-register-form" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" x-show="showForm" x-cloak @submit="handleSubmit($event)">
+		<form id="rv-register-form" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" x-show="showForm" x-cloak @input.debounce.250ms="saveDraft()" @change="saveDraft()" @submit="handleSubmit($event)">
 			<input type="hidden" name="action" value="submit_aws_reinvent_registration">
 			<?php wp_nonce_field( 'aws_reinvent_registration_action', 'aws_reinvent_registration_nonce' ); ?>
 			<div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
@@ -548,19 +555,69 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 	<script>
 		function reinventForm() {
+			const DRAFT_KEY = 'aws_rv_reg_draft_v1';
 			return {
-				showForm: false,
+				showForm: <?php echo ( $expired && ! $is_hidden ) ? 'true' : 'false'; ?>,
 				audienceType: '',
 				whyInviteText: '',
 				attendedBefore: '',
 				hasVehicle: 'no',
 				isSubmitting: false,
 				init() {
+					<?php if ( $success ) : ?>
+					try { localStorage.removeItem(DRAFT_KEY); } catch (e) {}
+					<?php else : ?>
+					this.$nextTick(() => this.restoreDraft());
+					<?php endif; ?>
 					window.addEventListener('pageshow', (e) => {
 						if (e.persisted) {
 							this.isSubmitting = false;
 						}
 					});
+				},
+				saveDraft() {
+					const form = document.getElementById('rv-register-form');
+					if (!form) return;
+					try {
+						const data = {};
+						const fields = ['full_name', 'email', 'whatsapp', 'cnic', 'audience_type', 'affiliation', 'city', 'linkedin', 'has_vehicle', 'vehicle_type', 'vehicle_number', 'attended_before', 'why_invite'];
+						fields.forEach((name) => {
+							const els = form.querySelectorAll(`[name="${name}"]`);
+							if (!els.length) return;
+							if (els[0].type === 'radio') {
+								const checked = Array.from(els).find((el) => el.checked);
+								if (checked) data[name] = checked.value;
+							} else {
+								data[name] = els[0].value;
+							}
+						});
+						localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+					} catch (e) {}
+				},
+				restoreDraft() {
+					const form = document.getElementById('rv-register-form');
+					if (!form) return;
+					try {
+						const raw = localStorage.getItem(DRAFT_KEY);
+						if (!raw) return;
+						const data = JSON.parse(raw);
+						if (!data || typeof data !== 'object') return;
+						Object.keys(data).forEach((name) => {
+							const val = data[name];
+							if (typeof val !== 'string') return;
+							const els = form.querySelectorAll(`[name="${name}"]`);
+							if (!els.length) return;
+							if (els[0].type === 'radio') {
+								els.forEach((el) => { el.checked = (el.value === val); });
+							} else {
+								els[0].value = val;
+							}
+						});
+						if (data.audience_type) this.audienceType = data.audience_type;
+						if (data.has_vehicle) this.hasVehicle = data.has_vehicle;
+						if (data.attended_before) this.attendedBefore = data.attended_before;
+						if (data.why_invite) this.whyInviteText = data.why_invite;
+					} catch (e) {}
 				},
 				openForm() {
 					this.showForm = true;
@@ -630,8 +687,10 @@ function aws_sbg_handle_reinvent_registration() {
 		return;
 	}
 
-	if ( ! isset( $_POST['aws_reinvent_registration_nonce'] ) || ! wp_verify_nonce( $_POST['aws_reinvent_registration_nonce'], 'aws_reinvent_registration_action' ) ) {
-		wp_die( 'Security check failed. Please refresh and try again.' );
+	if ( ! isset( $_POST['aws_reinvent_registration_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['aws_reinvent_registration_nonce'] ), 'aws_reinvent_registration_action' ) ) {
+		$redirect = wp_get_referer() ? remove_query_arg( array( 'reinvent_registration', 'rv_ref' ), wp_get_referer() ) : home_url();
+		wp_safe_redirect( add_query_arg( array( 'reinvent_registration' => 'expired' ), $redirect ) );
+		exit;
 	}
 
 	// Check if public registration is hidden/closed
@@ -717,38 +776,39 @@ function aws_sbg_handle_reinvent_registration() {
 		exit;
 	}
 
-	// 3. Fast post insertion without ping/comment overhead
+	// 3. Fast atomic post + meta insertion without ping/comment overhead
 	$post_id = wp_insert_post( array(
 		'post_type'      => 'aws_reinvent_reg',
 		'post_title'     => $full_name,
 		'post_status'    => 'publish',
 		'comment_status' => 'closed',
 		'ping_status'    => 'closed',
+		'meta_input'     => array(
+			'full_name'       => $full_name,
+			'email'           => $email,
+			'whatsapp'        => $whatsapp,
+			'cnic'            => $cnic,
+			'university'      => $university,
+			'audience_type'   => $audience,
+			'city'            => $city,
+			'linkedin'        => $linkedin,
+			'attended_before' => $attended,
+			'why_invite'      => $why,
+			'will_attend'     => $will_attend,
+			'has_vehicle'     => $has_vehicle,
+			'vehicle_type'    => $vehicle_type,
+			'vehicle_number'  => $vehicle_number,
+			'parking_policy'  => $parking_policy ? 'yes' : 'no',
+			'approval_status' => 'pending',
+			'notified'        => 'no',
+			'notified_status' => '',
+		),
 	) );
 
 	if ( is_wp_error( $post_id ) ) {
 		delete_transient( $lock_key );
 		wp_die( 'Failed to save registration. Please try again.', 'Registration Error', array( 'response' => 500, 'back_link' => true ) );
 	}
-
-	update_post_meta( $post_id, 'full_name', $full_name );
-	update_post_meta( $post_id, 'email', $email );
-	update_post_meta( $post_id, 'whatsapp', $whatsapp );
-	update_post_meta( $post_id, 'cnic', $cnic );
-	update_post_meta( $post_id, 'university', $university );
-	update_post_meta( $post_id, 'audience_type', $audience );
-	update_post_meta( $post_id, 'city', $city );
-	update_post_meta( $post_id, 'linkedin', $linkedin );
-	update_post_meta( $post_id, 'attended_before', $attended );
-	update_post_meta( $post_id, 'why_invite', $why );
-	update_post_meta( $post_id, 'will_attend', $will_attend );
-	update_post_meta( $post_id, 'has_vehicle', $has_vehicle );
-	update_post_meta( $post_id, 'vehicle_type', $vehicle_type );
-	update_post_meta( $post_id, 'vehicle_number', $vehicle_number );
-	update_post_meta( $post_id, 'parking_policy', $parking_policy ? 'yes' : 'no' );
-	update_post_meta( $post_id, 'approval_status', 'pending' );
-	update_post_meta( $post_id, 'notified', 'no' );
-	update_post_meta( $post_id, 'notified_status', '' );
 
 	$rv_ref = wp_generate_password( 12, false, false );
 	set_transient( 'aws_rv_success_' . $rv_ref, $full_name, 10 * MINUTE_IN_SECONDS );
