@@ -209,6 +209,9 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-skyline { position:absolute; left:0; bottom:0; width:100%; height:auto; opacity:0.42; pointer-events:none; user-select:none; z-index:0; }
 			.rv-intro-inner { position:relative; z-index:1; max-width:700px; }
 			.rv-kicker { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#00DFD8; margin:0 0 26px; }
+			.rv-kicker-meta { display:flex; flex-wrap:wrap; align-items:center; gap:6px 0; margin:0 0 18px 0; font-size:clamp(10.5px,2.8vw,11.5px); letter-spacing:0.14em; color:rgba(255,255,255,0.72); line-height:1.5; }
+			.rv-kicker-item { white-space:nowrap; }
+			.rv-kicker-sep { color:rgba(255,255,255,0.24); margin:0 10px; }
 			.rv-wrap .rv-title { font-weight:700; font-size:clamp(34px,5.2vw,58px); line-height:1.06; letter-spacing:-0.02em; margin:0 0 24px; }
 			.rv-lede { font-size:17px; line-height:1.75; color:rgba(255,255,255,0.66); max-width:52ch; margin:0 0 16px; }
 			.rv-lede-cta { font-size:16px; line-height:1.7; font-weight:700; color:rgba(255,255,255,0.66); max-width:52ch; margin:0; }
@@ -298,6 +301,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				.rv-logo-aws { height:22px; }
 				.rv-logo-sbg { height:34px; }
 				.rv-intro { padding-bottom:190px; min-height:auto; }
+				.rv-kicker-meta { gap:6px 16px; letter-spacing:0.1em; }
+				.rv-kicker-sep { display:none; }
 				.rv-fields, .rv-choices { grid-template-columns:1fr; }
 				.rv-actions { flex-direction:column-reverse; }
 				.rv-actions .rv-btn { width:100%; }
@@ -356,13 +361,13 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 		<section class="rv-intro" x-show="!showForm">
 			<img class="rv-skyline" src="<?php echo esc_url( $skyline ); ?>" alt="" aria-hidden="true">
 			<div class="rv-intro-inner">
-				<p class="rv-kicker" style="margin:0 0 18px 0;font-size:11.5px;letter-spacing:0.16em;color:rgba(255,255,255,0.72);">
-					<span style="color:#00DFD8;">November 30, 2026</span>
-					<span style="color:rgba(255,255,255,0.24);margin:0 10px;" aria-hidden="true">/</span>
-					Time: Daytime
-					<span style="color:rgba(255,255,255,0.24);margin:0 10px;" aria-hidden="true">/</span>
-					Venue: Islamabad
-				</p>
+				<div class="rv-kicker rv-kicker-meta">
+					<span class="rv-kicker-item" style="color:#00DFD8;">November 30, 2026</span>
+					<span class="rv-kicker-sep" aria-hidden="true">/</span>
+					<span class="rv-kicker-item">Time: Daytime</span>
+					<span class="rv-kicker-sep" aria-hidden="true">/</span>
+					<span class="rv-kicker-item">Venue: Islamabad</span>
+				</div>
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
 				<?php if ( ! empty( $subtitle ) ) : ?>
 					<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
