@@ -209,7 +209,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-skyline { position:absolute; left:0; bottom:0; width:100%; height:auto; opacity:0.42; pointer-events:none; user-select:none; z-index:0; }
 			.rv-intro-inner { position:relative; z-index:1; max-width:700px; }
 			.rv-kicker { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#00DFD8; margin:0 0 26px; }
-			.rv-title { font-weight:700; font-size:clamp(34px,5.2vw,58px); line-height:1.06; letter-spacing:-0.02em; margin:0 0 30px; }
+			.rv-wrap .rv-title { font-weight:700; font-size:clamp(34px,5.2vw,58px); line-height:1.06; letter-spacing:-0.02em; margin:0 0 24px; }
 			.rv-lede { font-size:17px; line-height:1.75; color:rgba(255,255,255,0.66); max-width:52ch; margin:0 0 16px; }
 			.rv-lede-cta { font-size:16px; line-height:1.7; font-weight:700; color:rgba(255,255,255,0.66); max-width:52ch; margin:0; }
 			.rv-perks { display:grid; grid-template-columns:1fr 1fr; gap:0 clamp(28px,5vw,64px); margin:clamp(48px,8vh,68px) 0 clamp(40px,6vh,56px); }
@@ -357,10 +357,19 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			<img class="rv-skyline" src="<?php echo esc_url( $skyline ); ?>" alt="" aria-hidden="true">
 			<div class="rv-intro-inner">
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
-				<div style="display:flex;flex-wrap:wrap;gap:12px 28px;margin:0 0 8px 0;font-family:'Amazon Ember Mono',monospace;font-size:12px;letter-spacing:0.06em;color:rgba(255,255,255,0.78);">
-					<div><span style="color:#00DFD8;font-weight:700;text-transform:uppercase;margin-right:8px;">Date</span>November 30, 2026</div>
-					<div><span style="color:#00DFD8;font-weight:700;text-transform:uppercase;margin-right:8px;">Time</span>Daytime</div>
-					<div><span style="color:#00DFD8;font-weight:700;text-transform:uppercase;margin-right:8px;">Venue</span>Islamabad</div>
+				<div style="display:inline-flex;flex-wrap:wrap;gap:16px 36px;padding:14px 22px;margin:0;border:1px solid rgba(255,255,255,0.12);border-radius:12px;background:rgba(255,255,255,0.03);">
+					<div>
+						<div style="font-family:'Amazon Ember Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#00DFD8;margin-bottom:4px;">Date</div>
+						<div style="font-size:15px;font-weight:600;color:#FFFFFF;">November 30, 2026</div>
+					</div>
+					<div>
+						<div style="font-family:'Amazon Ember Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#00DFD8;margin-bottom:4px;">Time</div>
+						<div style="font-size:15px;font-weight:600;color:#FFFFFF;">Daytime</div>
+					</div>
+					<div>
+						<div style="font-family:'Amazon Ember Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#00DFD8;margin-bottom:4px;">Venue</div>
+						<div style="font-size:15px;font-weight:600;color:#FFFFFF;">Islamabad</div>
+					</div>
 				</div>
 				<?php if ( ! empty( $subtitle ) ) : ?>
 					<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
