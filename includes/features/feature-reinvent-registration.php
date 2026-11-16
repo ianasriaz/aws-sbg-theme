@@ -222,13 +222,14 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-btn-ghost { background:transparent; color:rgba(255,255,255,0.75); border:1px solid rgba(255,255,255,0.22); padding:15px 32px; }
 			.rv-btn-ghost:hover { border-color:rgba(255,255,255,0.5); color:#FFFFFF; }
 
-			/* Steps 1 & 2 */
-			.rv-stage { position:relative; z-index:1; padding:clamp(48px,10vh,110px) clamp(20px,6vw,72px) clamp(72px,12vh,120px); }
+			/* Single-page registration form */
+			.rv-stage { position:relative; z-index:1; padding:clamp(56px,8vh,96px) clamp(20px,6vw,72px) clamp(72px,10vh,110px); border-top:1px solid rgba(255,255,255,0.08); }
 			.rv-stage-inner { max-width:640px; margin:0 auto; }
-			.rv-step-label { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#00DFD8; display:inline-block; }
-			.rv-step-title { font-weight:700; font-size:clamp(26px,3.4vw,34px); line-height:1.2; letter-spacing:-0.01em; margin:0 0 clamp(36px,5vh,48px) 0; }
-			.rv-progress { height:4px; background:rgba(255,255,255,0.1); border-radius:99px; overflow:hidden; margin:14px 0 28px; }
-			.rv-progress-fill { height:100%; background:#00DFD8; border-radius:99px; transition:width 0.45s cubic-bezier(0.22,0.61,0.36,1); }
+			.rv-step-label { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#00DFD8; display:inline-block; margin-bottom:12px; }
+			.rv-step-title { font-weight:700; font-size:clamp(26px,3.4vw,34px); line-height:1.2; letter-spacing:-0.01em; margin:0 0 clamp(32px,4.5vh,42px) 0; }
+			.rv-section-block { margin-top:36px; padding-top:28px; border-top:1px solid rgba(255,255,255,0.1); }
+			.rv-exists-wrap { position:relative; z-index:2; padding:20px clamp(20px,6vw,72px) 0; }
+			.rv-exists-banner { max-width:700px; padding:16px 20px; border:1px solid rgba(0,223,216,0.4); border-radius:10px; background:rgba(0,223,216,0.08); color:#FFFFFF; font-size:14px; line-height:1.6; }
 
 			.rv-fields { display:grid; grid-template-columns:1fr 1fr; gap:26px 20px; }
 			.rv-field label { display:block; font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:rgba(255,255,255,0.68); margin-bottom:10px; line-height:1.45; }
@@ -319,7 +320,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 		<?php endif; ?>
 
 		<?php if ( $success ) : ?>
-		<div class="rv-success" x-data="reinventForm()" style="display:flex;">
+		<div class="rv-success" style="display:flex;">
 			<div class="rv-success-card">
 				<div class="rv-success-icon" style="animation:none;">
 					<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
@@ -327,7 +328,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				<h2 style="font-weight:700; font-size:26px; margin:0 0 10px; letter-spacing:0.02em;"><?php echo $success_name ? 'Thank You, ' . esc_html( $success_name ) : 'Thank You'; ?></h2>
 				<p style="font-size:15px; line-height:1.65; color:rgba(255,255,255,0.62);">We received your details for attending AWS re:Invent Watch &amp; Build Party 2026. Approved attendees will receive event pass within a week.</p>
 				<div style="margin-top:26px;">
-					<a href="<?php echo esc_url( AWS_REINVENT_WHATSAPP_URL ); ?>" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; justify-content:center; gap:10px; background:#00DFD8; color:#06040C; font-family:'Amazon Ember Mono',monospace; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; text-decoration:none; padding:14px 26px; border-radius:10px;">Join WhatsApp community</a>
+					<a href="<?php echo esc_url( AWS_REINVENT_WHATSAPP_URL ); ?>" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; justify-content:center; gap:10px; background:#00DFD8; color:#06040C; font-family:'Amazon Ember Mono',monospace; font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; text-decoration:none; padding:14px 26px; border-radius:10px;">Join WhatsApp community</a>
 					<p style="font-size:12.5px; color:rgba(255,255,255,0.45); margin:10px 0 0; line-height:1.6;">For updates &amp; announcements.</p>
 				</div>
 				<p style="margin:22px 0 0;"><a class="rv-success-link" href="<?php echo esc_url( home_url() ); ?>">Back to home</a></p>
@@ -336,11 +337,13 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 		<?php else : ?>
 
 		<?php if ( $exists ) : ?>
-		<div style="position:relative;z-index:2;padding:16px 20px;border:1px solid rgba(0,223,216,0.4);border-radius:10px;background:rgba(0,223,216,0.08);color:#FFFFFF;font-size:14px;line-height:1.6;margin-bottom:20px;">You're already registered with this email. Due to limited capacity, applications go through a review period&mdash;if accepted, your event pass will be sent to this email within the next 7&ndash;10 days.</div>
+		<div class="rv-exists-wrap">
+			<div class="rv-exists-banner" role="status">You're already registered with this email. Due to limited capacity, applications go through a review period&mdash;if accepted, your event pass will be sent to this email within a week.</div>
+		</div>
 		<?php endif; ?>
 
-		<!-- Step 0: Intro -->
-		<section class="rv-intro" x-show="currentStep === 0">
+		<!-- Intro -->
+		<section class="rv-intro">
 			<img class="rv-skyline" src="<?php echo esc_url( $skyline ); ?>" alt="" aria-hidden="true">
 			<div class="rv-intro-inner">
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
@@ -394,7 +397,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 							<?php echo esc_html( $closed_message ); ?>
 						</p>
 						<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;">
-							<a href="<?php echo esc_url( AWS_REINVENT_WHATSAPP_URL ); ?>" target="_blank" rel="noopener" class="rv-btn rv-btn-primary" style="padding:13px 26px;font-size:12px;">
+							<a href="<?php echo esc_url( AWS_REINVENT_WHATSAPP_URL ); ?>" target="_blank" rel="noopener noreferrer" class="rv-btn rv-btn-primary" style="padding:13px 26px;font-size:12px;">
 								Join WhatsApp Community
 							</a>
 							<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="rv-btn rv-btn-ghost" style="padding:13px 22px;font-size:12px;">
@@ -403,44 +406,46 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 					</div>
 				<?php else : ?>
-					<button type="button" class="rv-btn rv-btn-primary" @click="nextStep()">REGISTER NOW</button>
+					<button type="button" class="rv-btn rv-btn-primary" @click="scrollToForm()">REGISTER NOW</button>
 				<?php endif; ?>
 			</div>
 		</section>
 
 		<?php if ( ! $is_hidden ) : ?>
-		<!-- Steps 1 & 2 -->
-		<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" x-show="currentStep > 0" x-cloak @submit="handleSubmit($event)">
+		<!-- Single-Page Registration Form -->
+		<form id="rv-register-form" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" @submit="handleSubmit($event)">
 			<input type="hidden" name="action" value="submit_aws_reinvent_registration">
 			<?php wp_nonce_field( 'aws_reinvent_registration_action', 'aws_reinvent_registration_nonce' ); ?>
+			<div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+				<label for="rv-hp-check">Leave this field empty</label>
+				<input id="rv-hp-check" type="text" name="rv_hp_check" value="" tabindex="-1" autocomplete="new-password">
+			</div>
 
-			<!-- Step 1: Personal details -->
-			<section class="rv-stage" x-show="currentStep === 1">
+			<section class="rv-stage">
 				<div class="rv-stage-inner">
-					<span class="rv-step-label">Step 1 of 2</span>
-					<div class="rv-progress" aria-hidden="true"><div class="rv-progress-fill" :style="'width:' + ( ( currentStep / 2 ) * 100 ) + '%'"></div></div>
-					<h2 class="rv-step-title">Tell us about yourself</h2>
+					<span class="rv-step-label">Pass Request</span>
+					<h2 class="rv-step-title">Register for re:Invent 2026</h2>
 
 					<div class="rv-fields">
 						<div class="rv-field">
 							<label for="rv-full-name">Full Name <em>*</em></label>
-							<input id="rv-full-name" type="text" name="full_name" :required="currentStep === 1" placeholder="Your full name">
+							<input id="rv-full-name" type="text" name="full_name" required placeholder="Your full name">
 						</div>
 						<div class="rv-field">
 							<label for="rv-email">Email Address <em>*</em></label>
-							<input id="rv-email" type="email" name="email" :required="currentStep === 1" placeholder="youremail@domain.com">
+							<input id="rv-email" type="email" name="email" required placeholder="youremail@domain.com">
 						</div>
 						<div class="rv-field">
 							<label for="rv-whatsapp">WhatsApp Number <em>*</em></label>
-							<input id="rv-whatsapp" type="tel" name="whatsapp" :required="currentStep === 1" placeholder="0300-0000000">
+							<input id="rv-whatsapp" type="tel" name="whatsapp" required placeholder="0300-0000000">
 						</div>
 						<div class="rv-field">
 							<label for="rv-cnic">CNIC (For check-in) <em>*</em></label>
-							<input id="rv-cnic" type="text" name="cnic" inputmode="numeric" :required="currentStep === 1" pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" maxlength="15" title="Format: 00000-0000000-0" placeholder="00000-0000000-0" @input="formatCnic($event)">
+							<input id="rv-cnic" type="text" name="cnic" inputmode="numeric" required pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" maxlength="15" title="Format: 00000-0000000-0" placeholder="00000-0000000-0" @input="formatCnic($event)">
 						</div>
 						<div class="rv-field">
 							<label for="rv-audience-type">I am a <em>*</em></label>
-							<select id="rv-audience-type" name="audience_type" x-model="audienceType" :required="currentStep === 1">
+							<select id="rv-audience-type" name="audience_type" x-model="audienceType" required>
 								<option value="" disabled selected>Select an option</option>
 								<option value="student">Student</option>
 								<option value="professional">Professional</option>
@@ -449,15 +454,15 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 						<div class="rv-field">
 							<label for="rv-affiliation">Institute/Company <em>*</em></label>
-							<input id="rv-affiliation" type="text" name="affiliation" :required="currentStep === 1" placeholder="Air University Islamabad/Nayatel/Jazz">
+							<input id="rv-affiliation" type="text" name="affiliation" required placeholder="Air University Islamabad/Nayatel/Jazz">
 						</div>
 						<div class="rv-field">
 							<label for="rv-city">City (Travelling from on event day) <em>*</em></label>
-							<input id="rv-city" type="text" name="city" :required="currentStep === 1" placeholder="Your city">
+							<input id="rv-city" type="text" name="city" required placeholder="Your city">
 						</div>
 						<div class="rv-field">
 							<label for="rv-linkedin">LinkedIn Profile URL <em>*</em></label>
-							<input id="rv-linkedin" type="url" name="linkedin" :required="currentStep === 1" placeholder="https://linkedin.com/in/username">
+							<input id="rv-linkedin" type="url" name="linkedin" required placeholder="https://linkedin.com/in/username">
 						</div>
 						<div class="rv-field" style="grid-column:1/-1; margin-top:8px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.1);">
 							<label>Bringing a vehicle? <span style="font-weight:400;">(optional)</span></label>
@@ -477,69 +482,56 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 							<label>Vehicle type</label>
 							<div class="rv-choices" role="radiogroup" aria-label="Vehicle type">
 								<label class="rv-choice">
-									<input type="radio" name="vehicle_type" value="bike" :required="currentStep === 1 && hasVehicle === 'yes'">
+									<input type="radio" name="vehicle_type" value="bike" :required="hasVehicle === 'yes'" :disabled="hasVehicle !== 'yes'">
 									<span class="rv-choice-title">Bike</span>
 								</label>
 								<label class="rv-choice">
-									<input type="radio" name="vehicle_type" value="car" :required="currentStep === 1 && hasVehicle === 'yes'">
+									<input type="radio" name="vehicle_type" value="car" :required="hasVehicle === 'yes'" :disabled="hasVehicle !== 'yes'">
 									<span class="rv-choice-title">Car</span>
 								</label>
 							</div>
 						</div>
 						<div class="rv-field" style="grid-column:1/-1;" x-show="hasVehicle === 'yes'" x-cloak>
 							<label for="rv-vehicle-number">Vehicle number</label>
-							<input id="rv-vehicle-number" type="text" name="vehicle_number" placeholder="ABC-123" :required="currentStep === 1 && hasVehicle === 'yes'">
+							<input id="rv-vehicle-number" type="text" name="vehicle_number" placeholder="ABC-123" :required="hasVehicle === 'yes'" :disabled="hasVehicle !== 'yes'">
 						</div>
 					</div>
 
-					<div class="rv-actions">
-						<button type="button" class="rv-btn rv-btn-ghost" @click="prevStep()">Back</button>
-						<button type="button" class="rv-btn rv-btn-primary" @click="$el.form.reportValidity() && nextStep()">Continue</button>
-					</div>
-				</div>
-			</section>
-
-			<!-- Step 2: Finalize -->
-			<section class="rv-stage" x-show="currentStep === 2">
-				<div class="rv-stage-inner">
-					<span class="rv-step-label">Step 2 of 2</span>
-					<div class="rv-progress" aria-hidden="true"><div class="rv-progress-fill" :style="'width:' + ( ( currentStep / 2 ) * 100 ) + '%'"></div></div>
-					<h2 class="rv-step-title">Almost done</h2>
-
-					<div class="rv-field" style="margin-bottom:40px;">
-						<label id="rv-attended-label">Have you attended AWS or any community event before? <em>*</em></label>
-						<p style="margin:2px 0 12px; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.5);">First time? You're welcome too.</p>
-						<div class="rv-choices" role="radiogroup" aria-labelledby="rv-attended-label">
-							<label class="rv-choice">
-								<input type="radio" name="attended_before" value="yes" x-model="attendedBefore" :required="currentStep === 2">
-								<span class="rv-choice-title">Yes</span>
-							</label>
-							<label class="rv-choice">
-								<input type="radio" name="attended_before" value="no" x-model="attendedBefore" :required="currentStep === 2">
-								<span class="rv-choice-title">No</span>
-							</label>
+					<div class="rv-section-block">
+						<div class="rv-field" style="margin-bottom:32px;">
+							<label id="rv-attended-label">Have you attended AWS or any community event before? <em>*</em></label>
+							<p style="margin:2px 0 12px; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.5);">First time? You're welcome too.</p>
+							<div class="rv-choices" role="radiogroup" aria-labelledby="rv-attended-label">
+								<label class="rv-choice">
+									<input type="radio" name="attended_before" value="yes" x-model="attendedBefore" required>
+									<span class="rv-choice-title">Yes</span>
+								</label>
+								<label class="rv-choice">
+									<input type="radio" name="attended_before" value="no" x-model="attendedBefore" required>
+									<span class="rv-choice-title">No</span>
+								</label>
+							</div>
 						</div>
-					</div>
 
-					<div class="rv-field" style="margin-bottom:38px;" x-show="attendedBefore === 'yes'" x-cloak>
-						<div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;">
-							<label for="rv-why" style="margin-bottom:0;">Tell us about your last attended AWS or any community event (250 CHAR LIMIT) <em>*</em></label>
-							<span style="font-family:'Amazon Ember Mono',monospace; font-size:11px; color:rgba(255,255,255,0.45);" x-text="(250 - (whyInviteText ? whyInviteText.length : 0)) + ' left'"></span>
+						<div class="rv-field" style="margin-bottom:32px;" x-show="attendedBefore === 'yes'" x-cloak>
+							<div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;">
+								<label for="rv-why" style="margin-bottom:0;">Tell us about your last attended AWS or any community event (250 CHAR LIMIT) <em>*</em></label>
+								<span style="font-family:'Amazon Ember Mono',monospace; font-size:11px; color:rgba(255,255,255,0.45);" x-text="(250 - (whyInviteText ? whyInviteText.length : 0)) + ' left'"></span>
+							</div>
+							<textarea id="rv-why" name="why_invite" rows="5" maxlength="250" x-model="whyInviteText" :required="attendedBefore === 'yes'" :disabled="attendedBefore !== 'yes'" placeholder="Tell us about the event, what you learned, or your community participation..."></textarea>
 						</div>
-						<textarea id="rv-why" name="why_invite" rows="5" maxlength="250" x-model="whyInviteText" :required="currentStep === 2 && attendedBefore === 'yes'" :disabled="attendedBefore !== 'yes'" placeholder="Tell us about the event, what you learned, or your community participation..."></textarea>
+
+						<label class="rv-commit">
+							<input type="checkbox" name="will_attend" value="yes" required>
+							<span class="rv-commit-text">I will attend the event if approved.<span class="rv-commit-sub">Please confirm only if you can attend, so your seat isn&rsquo;t wasted.</span></span>
+						</label>
+						<label class="rv-commit">
+							<input type="checkbox" name="parking_policy" value="yes" required>
+							<span class="rv-commit-text">I understand campus parking is very limited.<span class="rv-commit-sub" style="color:rgba(255,255,255,0.45);">Public transport or ride-hailing is recommended.</span></span>
+						</label>
 					</div>
 
-					<label class="rv-commit">
-						<input type="checkbox" name="will_attend" value="yes" :required="currentStep === 2">
-						<span class="rv-commit-text">I will attend the event if approved.<span class="rv-commit-sub">Please confirm only if you can attend, so your seat isn&rsquo;t wasted.</span></span>
-					</label>
-					<label class="rv-commit">
-						<input type="checkbox" name="parking_policy" value="yes" :required="currentStep === 2">
-						<span class="rv-commit-text">I understand campus parking is very limited.<span class="rv-commit-sub" style="color:rgba(255,255,255,0.45);">Public transport or ride-hailing is recommended.</span></span>
-					</label>
-
-					<div class="rv-actions" style="margin-top:44px;">
-						<button type="button" class="rv-btn rv-btn-ghost" @click="prevStep()">Back</button>
+					<div class="rv-actions" style="margin-top:36px; justify-content:flex-end;">
 						<button type="submit" class="rv-btn rv-btn-primary" :disabled="isSubmitting">
 							<span x-show="!isSubmitting">SUBMIT</span>
 							<span x-show="isSubmitting" x-cloak><span class="rv-spinner"></span> Submitting</span>
@@ -556,12 +548,24 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 	<script>
 		function reinventForm() {
 			return {
-				currentStep: 0,
 				audienceType: '',
 				whyInviteText: '',
 				attendedBefore: '',
 				hasVehicle: 'no',
 				isSubmitting: false,
+				init() {
+					window.addEventListener('pageshow', (e) => {
+						if (e.persisted) {
+							this.isSubmitting = false;
+						}
+					});
+				},
+				scrollToForm() {
+					const el = document.getElementById('rv-register-form');
+					if (el) {
+						el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+					}
+				},
 				handleSubmit(e) {
 					if (this.isSubmitting) {
 						e.preventDefault();
@@ -570,8 +574,6 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					this.isSubmitting = true;
 					return true;
 				},
-				nextStep() { this.currentStep++; },
-				prevStep() { if ( this.currentStep > 0 ) { this.currentStep--; } },
 				formatCnic(e) {
 					let val = e.target.value.replace(/[^0-9]/g, '');
 					if (val.length > 13) val = val.substring(0, 13);
@@ -633,8 +635,13 @@ function aws_sbg_handle_reinvent_registration() {
 		wp_die( esc_html( aws_sbg_get_reinvent_closed_message() ), 'Registration Closed', array( 'response' => 403, 'back_link' => true ) );
 	}
 
+	// Honeypot check to block automated bot submissions
+	if ( ! empty( $_POST['rv_hp_check'] ) ) {
+		wp_die( 'Invalid submission.', 'Bad Request', array( 'response' => 400, 'back_link' => true ) );
+	}
+
 	$full_name  = isset( $_POST['full_name'] ) ? sanitize_text_field( wp_unslash( $_POST['full_name'] ) ) : '';
-	$email      = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
+	$email      = isset( $_POST['email'] ) ? strtolower( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : '';
 	$whatsapp   = isset( $_POST['whatsapp'] ) ? sanitize_text_field( wp_unslash( $_POST['whatsapp'] ) ) : '';
 	$cnic       = isset( $_POST['cnic'] ) ? sanitize_text_field( wp_unslash( $_POST['cnic'] ) ) : '';
 	$cnic_digits = preg_replace( '/[^0-9]/', '', $cnic );
@@ -644,9 +651,12 @@ function aws_sbg_handle_reinvent_registration() {
 	$university = isset( $_POST['affiliation'] ) ? sanitize_text_field( wp_unslash( $_POST['affiliation'] ) ) : '';
 	$audience   = isset( $_POST['audience_type'] ) ? sanitize_key( wp_unslash( $_POST['audience_type'] ) ) : '';
 	$city       = isset( $_POST['city'] ) ? sanitize_text_field( wp_unslash( $_POST['city'] ) ) : '';
-	$linkedin   = isset( $_POST['linkedin'] ) ? esc_url_raw( wp_unslash( $_POST['linkedin'] ) ) : '';
-	$attended   = isset( $_POST['attended_before'] ) ? sanitize_text_field( wp_unslash( $_POST['attended_before'] ) ) : '';
-	$why        = isset( $_POST['why_invite'] ) ? sanitize_textarea_field( wp_unslash( $_POST['why_invite'] ) ) : '';
+	$linkedin_raw = isset( $_POST['linkedin'] ) ? trim( wp_unslash( $_POST['linkedin'] ) ) : '';
+	$linkedin     = esc_url_raw( $linkedin_raw, array( 'http', 'https' ) );
+	$linkedin_ok  = ! empty( $linkedin ) && false !== filter_var( $linkedin, FILTER_VALIDATE_URL );
+	$attended     = isset( $_POST['attended_before'] ) ? sanitize_key( wp_unslash( $_POST['attended_before'] ) ) : '';
+	$valid_attended = in_array( $attended, array( 'yes', 'no' ), true );
+	$why          = ( 'yes' === $attended && isset( $_POST['why_invite'] ) ) ? sanitize_textarea_field( wp_unslash( $_POST['why_invite'] ) ) : '';
 	if ( function_exists( 'mb_substr' ) ) {
 		$why = mb_substr( $why, 0, 250 );
 	} else {
@@ -661,7 +671,7 @@ function aws_sbg_handle_reinvent_registration() {
 		$vehicle_type   = isset( $_POST['vehicle_type'] ) ? sanitize_key( wp_unslash( $_POST['vehicle_type'] ) ) : '';
 		$vehicle_number = isset( $_POST['vehicle_number'] ) ? sanitize_text_field( wp_unslash( $_POST['vehicle_number'] ) ) : '';
 		if ( ! in_array( $vehicle_type, array( 'bike', 'car' ), true ) || '' === trim( $vehicle_number ) ) {
-			wp_die( 'Please provide your vehicle type and number.' );
+			wp_die( 'Please provide your vehicle type and number.', 'Validation Error', array( 'response' => 400, 'back_link' => true ) );
 		}
 	}
 
@@ -669,16 +679,16 @@ function aws_sbg_handle_reinvent_registration() {
 
 	$valid_audience = in_array( $audience, array( 'student', 'professional', 'job_seeker' ), true );
 
-	if ( empty( $full_name ) || empty( $email ) || empty( $whatsapp ) || empty( $cnic ) || ! preg_match( '/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/', $cnic ) || empty( $university ) || empty( $city ) || empty( $linkedin ) || empty( $attended ) || ( 'yes' === $attended && empty( $why ) ) || 'yes' !== $will_attend || ! $parking_policy || ! $valid_audience ) {
-		wp_die( 'Please fill in all required fields. Ensure your CNIC contains 13 digits (e.g. 12345-1234567-1).' );
+	if ( empty( $full_name ) || empty( $email ) || ! is_email( $email ) || empty( $whatsapp ) || empty( $cnic ) || ! preg_match( '/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/', $cnic ) || empty( $university ) || empty( $city ) || ! $linkedin_ok || ! $valid_attended || ( 'yes' === $attended && empty( trim( $why ) ) ) || 'yes' !== $will_attend || ! $parking_policy || ! $valid_audience ) {
+		wp_die( 'Please fill in all required fields with valid details. Ensure your email, LinkedIn URL, and 13-digit CNIC (e.g. 12345-1234567-1) are valid.', 'Validation Error', array( 'response' => 400, 'back_link' => true ) );
 	}
 
 	global $wpdb;
 
 	// 1. In-flight transient lock to prevent duplicate rapid clicks
-	$lock_key = 'aws_sbg_reg_lock_' . md5( strtolower( $email ) );
+	$lock_key = 'aws_sbg_reg_lock_' . md5( $email );
 	if ( get_transient( $lock_key ) ) {
-		$redirect = wp_get_referer() ? wp_get_referer() : home_url();
+		$redirect = wp_get_referer() ? remove_query_arg( array( 'reinvent_registration', 'rv_ref' ), wp_get_referer() ) : home_url();
 		wp_safe_redirect( add_query_arg( array( 'reinvent_registration' => 'success' ), $redirect ) );
 		exit;
 	}
@@ -697,7 +707,7 @@ function aws_sbg_handle_reinvent_registration() {
 	) );
 	if ( $existing_id > 0 ) {
 		delete_transient( $lock_key );
-		$redirect = wp_get_referer() ? wp_get_referer() : home_url();
+		$redirect = wp_get_referer() ? remove_query_arg( array( 'reinvent_registration', 'rv_ref' ), wp_get_referer() ) : home_url();
 		$redirect = add_query_arg( array( 'reinvent_registration' => 'exists' ), $redirect );
 		wp_safe_redirect( $redirect );
 		exit;
@@ -714,7 +724,7 @@ function aws_sbg_handle_reinvent_registration() {
 
 	if ( is_wp_error( $post_id ) ) {
 		delete_transient( $lock_key );
-		wp_die( 'Failed to save registration. Please try again.' );
+		wp_die( 'Failed to save registration. Please try again.', 'Registration Error', array( 'response' => 500, 'back_link' => true ) );
 	}
 
 	update_post_meta( $post_id, 'full_name', $full_name );

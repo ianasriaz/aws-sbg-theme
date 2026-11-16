@@ -24,7 +24,9 @@ $subtitle = '';
 $date     = '';
 $location = 'Islamabad, Pakistan';
 
-echo aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location );
+if ( function_exists( 'aws_sbg_render_reinvent_form' ) ) {
+	echo aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location );
+}
 
 wp_footer();
 ?>

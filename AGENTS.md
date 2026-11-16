@@ -34,6 +34,28 @@
 
 ## Change Log (Newest First)
 
+### 2026-11-16 13:46 - Antigravity
+
+**Task**: Convert the re:Invent registration form from a 2-step wizard to a single-page form and harden frontend/backend validation.
+
+**Files Changed**:
+- `includes/features/feature-reinvent-registration.php` -
+  - Merged Steps 1 and 2 into a single-page `<form id="rv-register-form">` directly below the intro/perks hero, with `REGISTER NOW` smoothly scrolling to the form.
+  - Removed step-switching UI (`Step X of 2`, progress bar, `Continue`/`Back` buttons) and simplified Alpine.js `reinventForm()` state, adding a `pageshow` listener to reset `isSubmitting` on `bfcache` navigation and removing redundant nested `x-data` on `.rv-success`.
+  - Fixed `.rv-exists-banner` horizontal alignment and aligned timeline copy (*"within a week"*); added `rel="noopener noreferrer"` to external WhatsApp links.
+  - Hardened `aws_sbg_handle_reinvent_registration()` with `is_email()` + lowercase normalization, `filter_var(..., FILTER_VALIDATE_URL)` for LinkedIn URLs, strict `attended_before` (`yes`/`no`) validation with `$why` clearing when `'no'`, a hidden `rv_hp_check` honeypot field, `back_link => true` on `wp_die()` errors, and `remove_query_arg()` cleanup before redirects.
+- `templates/pages/page-reinvent.php` - Wrapped `aws_sbg_render_reinvent_form()` call in `function_exists()`.
+
+**Summary**: Converted the re:Invent registration flow into a streamlined one-page form below the hero section and fixed validation, bfcache submit-lock, and layout edge cases.
+
+**Key Decisions**:
+- Placed the unified form directly below the intro section (`#rv-register-form`) so visitors see everything on a single scrollable page while preserving the `REGISTER NOW` smooth-scroll CTA.
+
+**Notes for Future Agents**:
+- The honeypot field is named `rv_hp_check` with `autocomplete="new-password"` to avoid browser autofill false positives.
+
+---
+
 ### 2026-11-13 00:25 - Antigravity
 
 **Task**: Make Islamabad landmark footer graphic 100% full-width covering edge-to-edge without left/right whitespace margins while keeping minarets and spires uncropped; move role badge pill downward away from header gradient bottom.
