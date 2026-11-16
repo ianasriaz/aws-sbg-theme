@@ -356,21 +356,14 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 		<section class="rv-intro" x-show="!showForm">
 			<img class="rv-skyline" src="<?php echo esc_url( $skyline ); ?>" alt="" aria-hidden="true">
 			<div class="rv-intro-inner">
+				<p class="rv-kicker" style="margin:0 0 18px 0;font-size:11.5px;letter-spacing:0.16em;color:rgba(255,255,255,0.72);">
+					<span style="color:#00DFD8;">November 30, 2026</span>
+					<span style="color:rgba(255,255,255,0.24);margin:0 10px;" aria-hidden="true">/</span>
+					Time: Daytime
+					<span style="color:rgba(255,255,255,0.24);margin:0 10px;" aria-hidden="true">/</span>
+					Venue: Islamabad
+				</p>
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
-				<div style="display:inline-flex;flex-wrap:wrap;gap:16px 36px;padding:14px 22px;margin:0;border:1px solid rgba(255,255,255,0.12);border-radius:12px;background:rgba(255,255,255,0.03);">
-					<div>
-						<div style="font-family:'Amazon Ember Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#00DFD8;margin-bottom:4px;">Date</div>
-						<div style="font-size:15px;font-weight:600;color:#FFFFFF;">November 30, 2026</div>
-					</div>
-					<div>
-						<div style="font-family:'Amazon Ember Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#00DFD8;margin-bottom:4px;">Time</div>
-						<div style="font-size:15px;font-weight:600;color:#FFFFFF;">Daytime</div>
-					</div>
-					<div>
-						<div style="font-family:'Amazon Ember Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#00DFD8;margin-bottom:4px;">Venue</div>
-						<div style="font-size:15px;font-weight:600;color:#FFFFFF;">Islamabad</div>
-					</div>
-				</div>
 				<?php if ( ! empty( $subtitle ) ) : ?>
 					<p class="rv-lede"><?php echo esc_html( $subtitle ); ?></p>
 				<?php endif; ?>
