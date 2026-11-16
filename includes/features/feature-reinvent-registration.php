@@ -223,7 +223,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			.rv-btn-ghost:hover { border-color:rgba(255,255,255,0.5); color:#FFFFFF; }
 
 			/* Single-page registration form */
-			.rv-stage { position:relative; z-index:1; padding:clamp(56px,8vh,96px) clamp(20px,6vw,72px) clamp(72px,10vh,110px); border-top:1px solid rgba(255,255,255,0.08); }
+			.rv-stage { position:relative; z-index:1; padding:clamp(48px,8vh,96px) clamp(20px,6vw,72px) clamp(72px,10vh,110px); }
 			.rv-stage-inner { max-width:640px; margin:0 auto; }
 			.rv-step-label { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#00DFD8; display:inline-block; margin-bottom:12px; }
 			.rv-step-title { font-weight:700; font-size:clamp(26px,3.4vw,34px); line-height:1.2; letter-spacing:-0.01em; margin:0 0 clamp(32px,4.5vh,42px) 0; }
@@ -343,7 +343,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 		<?php endif; ?>
 
 		<!-- Intro -->
-		<section class="rv-intro">
+		<section class="rv-intro" x-show="!showForm">
 			<img class="rv-skyline" src="<?php echo esc_url( $skyline ); ?>" alt="" aria-hidden="true">
 			<div class="rv-intro-inner">
 				<h1 class="rv-title"><?php echo esc_html( $title ); ?></h1>
@@ -406,14 +406,14 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</div>
 					</div>
 				<?php else : ?>
-					<button type="button" class="rv-btn rv-btn-primary" @click="scrollToForm()">REGISTER NOW</button>
+					<button type="button" class="rv-btn rv-btn-primary" @click="openForm()">REGISTER NOW</button>
 				<?php endif; ?>
 			</div>
 		</section>
 
 		<?php if ( ! $is_hidden ) : ?>
 		<!-- Single-Page Registration Form -->
-		<form id="rv-register-form" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" @submit="handleSubmit($event)">
+		<form id="rv-register-form" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" x-show="showForm" x-cloak @submit="handleSubmit($event)">
 			<input type="hidden" name="action" value="submit_aws_reinvent_registration">
 			<?php wp_nonce_field( 'aws_reinvent_registration_action', 'aws_reinvent_registration_nonce' ); ?>
 			<div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
@@ -531,7 +531,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						</label>
 					</div>
 
-					<div class="rv-actions" style="margin-top:36px; justify-content:flex-end;">
+					<div class="rv-actions" style="margin-top:36px;">
+						<button type="button" class="rv-btn rv-btn-ghost" @click="closeForm()">Back</button>
 						<button type="submit" class="rv-btn rv-btn-primary" :disabled="isSubmitting">
 							<span x-show="!isSubmitting">SUBMIT</span>
 							<span x-show="isSubmitting" x-cloak><span class="rv-spinner"></span> Submitting</span>
@@ -548,6 +549,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 	<script>
 		function reinventForm() {
 			return {
+				showForm: false,
 				audienceType: '',
 				whyInviteText: '',
 				attendedBefore: '',
@@ -560,11 +562,13 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						}
 					});
 				},
-				scrollToForm() {
-					const el = document.getElementById('rv-register-form');
-					if (el) {
-						el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-					}
+				openForm() {
+					this.showForm = true;
+					window.scrollTo({ top: 0, behavior: 'smooth' });
+				},
+				closeForm() {
+					this.showForm = false;
+					window.scrollTo({ top: 0, behavior: 'smooth' });
 				},
 				handleSubmit(e) {
 					if (this.isSubmitting) {
