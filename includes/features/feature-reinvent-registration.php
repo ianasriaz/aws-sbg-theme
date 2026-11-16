@@ -533,10 +533,10 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 						<div class="rv-field" style="margin-bottom:32px;" x-show="attendedBefore === 'yes'" x-cloak>
 							<div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px;">
-								<label for="rv-why" style="margin-bottom:0;">Tell us about your last attended AWS or any community event (250 CHAR LIMIT) <em>*</em></label>
+								<label for="rv-why" style="margin-bottom:0;">Name of last attended AWS or any community event <em>*</em></label>
 								<span style="font-family:'Amazon Ember Mono',monospace; font-size:11px; color:rgba(255,255,255,0.45);" x-text="(250 - (whyInviteText ? whyInviteText.length : 0)) + ' left'"></span>
 							</div>
-							<textarea id="rv-why" name="why_invite" rows="5" maxlength="250" x-model="whyInviteText" :required="attendedBefore === 'yes'" :disabled="attendedBefore !== 'yes'" placeholder="Tell us about the event, what you learned, or your community participation..."></textarea>
+							<textarea id="rv-why" name="why_invite" rows="2" maxlength="250" x-model="whyInviteText" :required="attendedBefore === 'yes'" :disabled="attendedBefore !== 'yes'" placeholder="Enter the event name"></textarea>
 						</div>
 
 						<label class="rv-commit">
