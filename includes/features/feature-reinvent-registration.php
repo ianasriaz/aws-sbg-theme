@@ -1160,7 +1160,7 @@ function aws_sbg_reinvent_handle_review_action() {
 
 		$to_email = get_post_meta( $reg_id, 'email', true );
 		if ( $to_email && function_exists( 'aws_sbg_mail_send' ) ) {
-			$pass_url = home_url( '/verify/' . rawurlencode( $reg_no ) );
+			$pass_url = function_exists( 'aws_sbg_get_reinvent_pass_url' ) ? aws_sbg_get_reinvent_pass_url( $reg_id, $reg_no ) : home_url( '/verify/' . rawurlencode( $reg_no ) );
 
 			$body = '<p style="margin:0 0 12px 0; color:#0f172a;">Hi <strong>' . esc_html( $name ) . '</strong>,</p>'
 				. '<p style="margin:0 0 22px 0; color:#334155; line-height:1.6;">Your registration for <strong>AWS re:Invent Watch &amp; Build Party 2026 Islamabad</strong> is approved. Download and save your pass below to show at check-in.</p>'
@@ -1718,7 +1718,7 @@ function aws_sbg_render_reinvent_admin_page() {
 								$wa_digits = '92' . substr( $wa_digits, 1 );
 							}
 							$wa_url = $wa_digits ? ( 'https://wa.me/' . $wa_digits ) : '';
-							$pass_url = ( 'approved' === $approval && $reg_number ) ? home_url( '/verify/' . rawurlencode( $reg_number ) ) : '';
+							$pass_url = ( 'approved' === $approval && $reg_number ) ? ( function_exists( 'aws_sbg_get_reinvent_pass_url' ) ? aws_sbg_get_reinvent_pass_url( $reg_id, $reg_number ) : home_url( '/verify/' . rawurlencode( $reg_number ) ) ) : '';
 
 							$approve_url = wp_nonce_url(
 								add_query_arg(

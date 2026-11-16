@@ -337,8 +337,26 @@ add_action( 'wp_ajax_aws_sbg_checkin_save_passcode', 'aws_sbg_ajax_checkin_save_
  * 4. PUBLIC ATTENDEE MOBILE PASS VIEW (/verify/{pass_number})
  * ======================================================================== */
 
+function aws_sbg_get_reinvent_pass_token( $post_id ) {
+	$token = get_post_meta( $post_id, '_pass_token', true );
+	if ( empty( $token ) ) {
+		$token = wp_generate_password( 16, false, false );
+		update_post_meta( $post_id, '_pass_token', $token );
+	}
+	return $token;
+}
+
+function aws_sbg_get_reinvent_pass_url( $post_id, $reg_no ) {
+	return add_query_arg(
+		't',
+		aws_sbg_get_reinvent_pass_token( $post_id ),
+		home_url( '/verify/' . rawurlencode( $reg_no ) )
+	);
+}
+
 function aws_sbg_render_reinvent_mobile_pass( $pass_no ) {
-	$pass_no = strtoupper( sanitize_text_field( trim( $pass_no ) ) );
+	$pass_no        = strtoupper( sanitize_text_field( trim( $pass_no ) ) );
+	$provided_token = isset( $_GET['t'] ) ? sanitize_text_field( wp_unslash( $_GET['t'] ) ) : '';
 
 	// Lookup post by registration_number meta
 	global $wpdb;
@@ -359,14 +377,22 @@ function aws_sbg_render_reinvent_mobile_pass( $pass_no ) {
 	if ( $post_id > 0 ) {
 		$status = get_post_meta( $post_id, 'approval_status', true );
 		if ( 'approved' === $status ) {
-			$found = true;
-			$name  = preg_replace( '/^(reinvent-#\d+|RIV-\d+)\s*[–\-]\s*/i', '', get_the_title( $post_id ) );
-			$tier  = aws_sbg_get_reinvent_badge_tier( $post_id );
-			$uni   = get_post_meta( $post_id, 'university', true );
-			$city  = get_post_meta( $post_id, 'city', true );
-			$attended = get_post_meta( $post_id, 'event_checked_in', true ) ?: 'no';
-			$checkin_time = get_post_meta( $post_id, 'checked_in_at', true );
+			$expected_token = aws_sbg_get_reinvent_pass_token( $post_id );
+			$is_authorized  = aws_sbg_reinvent_is_checkin_authenticated() || ( '' !== $provided_token && hash_equals( $expected_token, $provided_token ) );
+			if ( $is_authorized ) {
+				$found = true;
+				$name  = preg_replace( '/^(reinvent-#\d+|RIV-\d+)\s*[–\-]\s*/i', '', get_the_title( $post_id ) );
+				$tier  = aws_sbg_get_reinvent_badge_tier( $post_id );
+				$uni   = get_post_meta( $post_id, 'university', true );
+				$city  = get_post_meta( $post_id, 'city', true );
+				$attended = get_post_meta( $post_id, 'event_checked_in', true ) ?: 'no';
+				$checkin_time = get_post_meta( $post_id, 'checked_in_at', true );
+			}
 		}
+	}
+
+	if ( ! $found ) {
+		status_header( 403 );
 	}
 
 	$theme_uri   = get_template_directory_uri();
@@ -374,7 +400,7 @@ function aws_sbg_render_reinvent_mobile_pass( $pass_no ) {
 	$aws_logo    = $theme_uri . '/assets/images/icons/aws-dark.png';
 	$sbg_logo    = function_exists( 'aws_sbg_get_logo_url' ) ? aws_sbg_get_logo_url() : $theme_uri . '/assets/images/icons/SBG-Logo-White-Transparent.png';
 	$qrcode_js   = $theme_uri . '/assets/design-kit/qrcode.min.js';
-	$verify_url  = 'https://awsairuniversity.com/verify/' . rawurlencode( $pass_no );
+	$verify_url  = $found ? aws_sbg_get_reinvent_pass_url( $post_id, $pass_no ) : home_url( '/verify/' . rawurlencode( $pass_no ) );
 
 	$tier_class = 'tier-' . sanitize_title( $tier );
 	?>
