@@ -364,7 +364,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				<div class="rv-kicker rv-kicker-meta">
 					<span class="rv-kicker-item" style="color:#00DFD8;">November 30, 2026</span>
 					<span class="rv-kicker-sep" aria-hidden="true">/</span>
-					<span class="rv-kicker-item">Time: Daytime</span>
+					<span class="rv-kicker-item">Time: 11 AM - 4 PM</span>
 					<span class="rv-kicker-sep" aria-hidden="true">/</span>
 					<span class="rv-kicker-item">Venue: Islamabad</span>
 				</div>
