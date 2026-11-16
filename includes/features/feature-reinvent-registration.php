@@ -1179,7 +1179,7 @@ function aws_sbg_reinvent_handle_review_action() {
 				. '<p style="margin:0 0 24px 0;">Your official event pass is now ready. Please download and save it, as you\'ll need it during event check-in.</p>'
 				. '<p style="margin:0 0 4px 0;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;">YOUR EVENT PASS</p>'
 				. '<p style="margin:0 0 14px 0;font-size:18px;font-weight:700;color:#111827;">PASS NUMBER: #' . esc_html( $reg_no ) . '</p>'
-				. '<p style="margin:0 0 28px 0;"><a href="' . esc_url( $pass_url ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;background-color:#232F3E;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:6px;">Download Your Event Pass</a></p>'
+				. '<p style="margin:0 0 28px 0;"><a href="' . esc_url( $pass_url ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;background-color:#FF9900;color:#111827;text-decoration:none;font-size:14px;font-weight:700;padding:11px 24px;border-radius:6px;">Download</a></p>'
 				. '<p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#111827;">Before You Arrive</p>'
 				. '<p style="margin:0 0 12px 0;">A few things to keep in mind to make your event experience smooth:</p>'
 				. '<ul style="margin:0 0 26px 20px;padding:0;">'
@@ -1190,7 +1190,7 @@ function aws_sbg_reinvent_handle_review_action() {
 				. '</ul>'
 				. '<p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#111827;">Stay Connected with the Community</p>'
 				. '<p style="margin:0 0 14px 0;">Join our exclusive Approved Attendees WhatsApp Group to receive important event announcements, venue information, schedule updates, and other event-day details.</p>'
-				. '<p style="margin:0 0 14px 0;"><a href="' . esc_url( AWS_REINVENT_APPROVED_WHATSAPP_URL ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;background-color:#16a34a;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:6px;">Join Approved Attendees WhatsApp Group</a></p>'
+				. '<p style="margin:0 0 14px 0;"><a href="' . esc_url( AWS_REINVENT_APPROVED_WHATSAPP_URL ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;background-color:#16a34a;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:6px;">WhatsApp Group</a></p>'
 				. '<p style="margin:0 0 22px 0;font-size:13px;color:#475569;">Please note that this group is exclusively for confirmed attendees.</p>'
 				. '<p style="margin:0;font-size:13px;color:#64748b;">November 30, 2026 &middot; Air University Islamabad, E9 Campus &middot; 11:00 AM - 4:00 PM</p>'
 				. '</body></html>';
