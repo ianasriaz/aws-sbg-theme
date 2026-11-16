@@ -523,7 +523,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 						<label class="rv-commit">
 							<input type="checkbox" name="will_attend" value="yes" required>
-							<span class="rv-commit-text">I will attend the event if approved.<span class="rv-commit-sub">Please confirm only if you can attend, so your seat isn&rsquo;t wasted.</span></span>
+							<span class="rv-commit-text">I confirmed my schedule &amp; available to attend if approved.<span class="rv-commit-sub">Please confirm only if you can attend, so your seat isn&rsquo;t wasted.</span></span>
 						</label>
 						<label class="rv-commit">
 							<input type="checkbox" name="parking_policy" value="yes" required>
