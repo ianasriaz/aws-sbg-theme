@@ -430,8 +430,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 			<section class="rv-stage">
 				<div class="rv-stage-inner">
-					<span class="rv-step-label">Pass Request</span>
-					<h2 class="rv-step-title">Register for re:Invent 2026</h2>
+					<h2 class="rv-step-title">REGISTER NOW</h2>
 
 					<div class="rv-fields">
 						<div class="rv-field">
