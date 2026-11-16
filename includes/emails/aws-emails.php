@@ -232,7 +232,7 @@ function aws_sbg_email_template( $kicker, $title, $body_html, $cta_url = '', $ct
  * 5. CONTEXT-AWARE SENDER + MAIL LOG
  * ======================================================================== */
 
-function aws_sbg_mail_send( $context, $to, $subject, $kicker, $title, $body_html, $cta_url = '', $cta_label = '', $connection_id = '', $cta_sub = '', $closing_html = '' ) {
+function aws_sbg_mail_deliver( $context, $to, $subject, $html, $connection_id = '' ) {
 	$conn = null;
 
 	// Subject must always be plain text without HTML entities (&amp;, &#039;, etc.)
@@ -250,9 +250,7 @@ function aws_sbg_mail_send( $context, $to, $subject, $kicker, $title, $body_html
 	}
 
 	$conn_label = $conn ? ( ! empty( $conn['label'] ) ? $conn['label'] : $conn['host'] ) : 'wp-native';
-
-	$html    = aws_sbg_email_template( $kicker, $title, $body_html, $cta_url, $cta_label, $cta_sub, $closing_html );
-	$headers = array( 'Content-Type: text/html; charset=UTF-8' );
+	$headers    = array( 'Content-Type: text/html; charset=UTF-8' );
 
 	$hook = null;
 	if ( $conn && ! empty( $conn['host'] ) && ! empty( $conn['username'] ) ) {
@@ -314,4 +312,13 @@ function aws_sbg_mail_send( $context, $to, $subject, $kicker, $title, $body_html
 	}
 
 	return $ok;
+}
+
+function aws_sbg_mail_send_raw( $context, $to, $subject, $html, $connection_id = '' ) {
+	return aws_sbg_mail_deliver( $context, $to, $subject, $html, $connection_id );
+}
+
+function aws_sbg_mail_send( $context, $to, $subject, $kicker, $title, $body_html, $cta_url = '', $cta_label = '', $connection_id = '', $cta_sub = '', $closing_html = '' ) {
+	$html = aws_sbg_email_template( $kicker, $title, $body_html, $cta_url, $cta_label, $cta_sub, $closing_html );
+	return aws_sbg_mail_deliver( $context, $to, $subject, $html, $connection_id );
 }

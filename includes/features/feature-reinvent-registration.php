@@ -1159,39 +1159,40 @@ function aws_sbg_reinvent_handle_review_action() {
 		}
 
 		$to_email = get_post_meta( $reg_id, 'email', true );
-		if ( $to_email && function_exists( 'aws_sbg_mail_send' ) ) {
+		if ( $to_email && ( function_exists( 'aws_sbg_mail_send_raw' ) || function_exists( 'aws_sbg_mail_send' ) ) ) {
 			$pass_url = function_exists( 'aws_sbg_get_reinvent_pass_url' ) ? aws_sbg_get_reinvent_pass_url( $reg_id, $reg_no ) : home_url( '/verify/' . rawurlencode( $reg_no ) );
+			$subject  = "You're Invited! AWS re:Invent 2026 Watch & Build Party Islamabad 🎉";
 
-			$body = '<p style="margin:0 0 12px 0; color:#0f172a;">Hi <strong>' . esc_html( $name ) . '</strong>,</p>'
-				. '<p style="margin:0 0 22px 0; color:#334155; line-height:1.6;">Your registration for <strong>AWS re:Invent Watch &amp; Build Party 2026 Islamabad</strong> is approved. Download and save your pass below to show at check-in.</p>'
-				. '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 24px 0; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">'
-				. '<tr><td style="padding:24px 20px; text-align:center;">'
-				. '<div style="font-size:10.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Pass Number</div>'
-				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:28px; font-weight:800; color:#0f172a; letter-spacing:0.06em; line-height:1.2; margin-bottom:18px;">#' . esc_html( $reg_no ) . '</div>'
-				. '<a href="' . esc_url( $pass_url ) . '" style="display:inline-block; background:#232F3E; color:#ffffff; text-decoration:none; font-size:13.5px; font-weight:600; padding:11px 24px; border-radius:6px; letter-spacing:0.2px;">Download Event Pass</a>'
-				. '</td></tr>'
-				. '</table>'
-				. '<div style="font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#475569; margin:0 0 10px 0;">Event-Day Checklist</div>'
-				. '<ul style="margin:0 0 22px 18px; padding:0; color:#334155; font-size:13.5px; line-height:1.65;">'
-				. '<li style="margin:0 0 6px 0;">Arrive <strong>30 minutes early</strong> for check-in.</li>'
-				. '<li style="margin:0 0 6px 0;">Bring your <strong>original CNIC</strong> for security clearance.</li>'
-				. '<li style="margin:0 0 6px 0;">Bring a <strong>fully charged laptop</strong> for the workshop and activities.</li>'
-				. '<li style="margin:0;">Complimentary food &amp; drinks are provided for all attendees; swag is limited and awarded via activities &amp; giveaways.</li>'
+			$html = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
+				. '<body style="margin:0;padding:24px;background-color:#ffffff;color:#111827;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;">'
+				. '<p style="margin:0 0 16px 0;">Hi ' . esc_html( $name ) . ',</p>'
+				. '<p style="margin:0 0 16px 0;">Great news! Your registration for <strong>AWS re:Invent Watch &amp; Build Party 2026 &ndash; Islamabad</strong> has been approved.</p>'
+				. '<p style="margin:0 0 16px 0;">We\'re looking forward to welcoming you on December 1, 2026, for a day of cloud innovation, learning, building, and connecting with the AWS community.</p>'
+				. '<p style="margin:0 0 24px 0;">Your official event pass is now ready. Please download and save it, as you\'ll need it during event check-in.</p>'
+				. '<p style="margin:0 0 4px 0;font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#64748b;">YOUR EVENT PASS</p>'
+				. '<p style="margin:0 0 14px 0;font-size:18px;font-weight:700;color:#111827;">PASS NUMBER: #' . esc_html( $reg_no ) . '</p>'
+				. '<p style="margin:0 0 28px 0;"><a href="' . esc_url( $pass_url ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;background-color:#232F3E;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:6px;">Download Your Event Pass</a></p>'
+				. '<p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#111827;">Before You Arrive</p>'
+				. '<p style="margin:0 0 12px 0;">A few things to keep in mind to make your event experience smooth:</p>'
+				. '<ul style="margin:0 0 26px 20px;padding:0;">'
+				. '<li style="margin:0 0 8px 0;"><strong>Arrive 30 minutes early:</strong> Allow enough time for registration and security check-in.</li>'
+				. '<li style="margin:0 0 8px 0;"><strong>Bring your original CNIC:</strong> Required for identity verification at the venue.</li>'
+				. '<li style="margin:0 0 8px 0;"><strong>Bring your laptop:</strong> A fully charged laptop is recommended for hands-on workshops and building activities.</li>'
+				. '<li style="margin:0;"><strong>Stay for the experience:</strong> Be ready for AWS sessions, community interactions, activities, and giveaways.</li>'
 				. '</ul>'
-				. '<div style="border-top:1px solid #e2e8f0; padding-top:16px; margin:0; font-size:13.5px; color:#334155; line-height:1.6;">Join the <strong>approved attendees-only</strong> WhatsApp group below for event updates, room details, and announcements.</div>';
+				. '<p style="margin:0 0 8px 0;font-size:16px;font-weight:700;color:#111827;">Stay Connected with the Community</p>'
+				. '<p style="margin:0 0 14px 0;">Join our exclusive Approved Attendees WhatsApp Group to receive important event announcements, venue information, schedule updates, and other event-day details.</p>'
+				. '<p style="margin:0 0 14px 0;"><a href="' . esc_url( AWS_REINVENT_APPROVED_WHATSAPP_URL ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;background-color:#16a34a;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:6px;">Join Approved Attendees WhatsApp Group</a></p>'
+				. '<p style="margin:0 0 22px 0;font-size:13px;color:#475569;">Please note that this group is exclusively for confirmed attendees.</p>'
+				. '<p style="margin:0;font-size:13px;color:#64748b;">November 30, 2026 &middot; Air University Islamabad, E9 Campus &middot; 11:00 AM - 4:00 PM</p>'
+				. '</body></html>';
+
 			try {
-				aws_sbg_mail_send(
-					'reinvent',
-					$to_email,
-					'Your pass for AWS re:Invent Watch & Build Party 2026',
-					'AWS re:Invent 2026 · Islamabad',
-					'Your Event Pass is Confirmed',
-					$body,
-					AWS_REINVENT_APPROVED_WHATSAPP_URL,
-					'Join Approved Attendees WhatsApp',
-					'',
-					'Only for approved attendees — updates & announcements.'
-				);
+				if ( function_exists( 'aws_sbg_mail_send_raw' ) ) {
+					aws_sbg_mail_send_raw( 'reinvent', $to_email, $subject, $html );
+				} else {
+					aws_sbg_mail_send( 'reinvent', $to_email, $subject, '', '', $html );
+				}
 				update_post_meta( $reg_id, 'notified', 'yes' );
 			} catch ( \Throwable $e ) {
 				error_log( 're:Invent approval email failed: ' . $e->getMessage() );
