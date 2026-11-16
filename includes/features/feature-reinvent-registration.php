@@ -225,8 +225,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 			/* Single-page registration form */
 			.rv-stage { position:relative; z-index:1; padding:clamp(48px,8vh,96px) clamp(20px,6vw,72px) clamp(72px,10vh,110px); }
 			.rv-stage-inner { max-width:640px; margin:0 auto; }
-			.rv-step-label { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#00DFD8; display:inline-block; margin-bottom:12px; }
-			.rv-step-title { font-weight:700; font-size:clamp(26px,3.4vw,34px); line-height:1.2; letter-spacing:-0.01em; margin:0 0 clamp(32px,4.5vh,42px) 0; }
+			.rv-wrap .rv-step-label { font-family:'Amazon Ember Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#00DFD8; display:inline-block; margin-bottom:10px; }
+			.rv-wrap .rv-step-title { font-weight:700; font-size:clamp(26px,3.4vw,34px); line-height:1.2; letter-spacing:-0.01em; margin:0 0 clamp(36px,5vh,48px) 0; }
 			.rv-section-block { margin-top:36px; padding-top:28px; border-top:1px solid rgba(255,255,255,0.1); }
 			.rv-exists-wrap { position:relative; z-index:2; padding:20px clamp(20px,6vw,72px) 0; }
 			.rv-exists-banner { max-width:700px; padding:16px 20px; border:1px solid rgba(0,223,216,0.4); border-radius:10px; background:rgba(0,223,216,0.08); color:#FFFFFF; font-size:14px; line-height:1.6; }
