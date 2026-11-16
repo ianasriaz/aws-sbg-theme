@@ -381,8 +381,8 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				<div class="rv-perks">
 					<div class="rv-perk">
 						<span class="rv-perk-idx">01</span>
-						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.83z"/><path d="M7 7h.01"/></svg>Invite-Only</h3>
-						<p>Due to limited capacity, only approved attendees will receive an event pass.</p>
+						<h3><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.83z"/><path d="M7 7h.01"/></svg>Limited Seats</h3>
+						<p>Free registration &mdash; apply early to secure your spot; passes are sent to confirmed attendees via email.</p>
 					</div>
 					<div class="rv-perk">
 						<span class="rv-perk-idx">02</span>
