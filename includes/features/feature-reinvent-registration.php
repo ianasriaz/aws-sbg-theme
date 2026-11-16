@@ -13,6 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! defined( 'AWS_REINVENT_WHATSAPP_URL' ) ) {
 	define( 'AWS_REINVENT_WHATSAPP_URL', 'https://chat.whatsapp.com/JMahpu2U86iBXoBuGWG2tI' );
 }
+if ( ! defined( 'AWS_REINVENT_APPROVED_WHATSAPP_URL' ) ) {
+	define( 'AWS_REINVENT_APPROVED_WHATSAPP_URL', 'https://chat.whatsapp.com/G5pGU9UiAU25PJc3moNtXP?s=cl&p=a&iam=2' );
+}
 
 // Load Event-Day Desk Check-In & Attendee Pass verification module
 require_once __DIR__ . '/feature-reinvent-checkin.php';
@@ -1159,29 +1162,36 @@ function aws_sbg_reinvent_handle_review_action() {
 		if ( $to_email && function_exists( 'aws_sbg_mail_send' ) ) {
 			$pass_url = home_url( '/verify/' . rawurlencode( $reg_no ) );
 
-			$body = '<p style="margin:0 0 14px 0; color:#111827;">Hi <strong>' . esc_html( $name ) . '</strong>,</p>'
-				. '<p style="margin:0 0 20px 0; color:#1f2937; line-height:1.6;">Your request to attend <strong>AWS re:Invent Watch &amp; Build Party 2026 Islamabad</strong> has been approved. Please download your entry pass below and save it to show on event day for entrance.</p>'
-				. '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 22px 0; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; overflow:hidden;">'
-				. '<tr><td style="padding:22px 20px; text-align:center;">'
-				. '<div style="font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Registration Number</div>'
-				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:28px; font-weight:800; color:#111827; letter-spacing:0.06em; line-height:1.2; margin-bottom:18px;">#' . esc_html( $reg_no ) . '</div>'
-				. '<div style="border-top:1px dashed #cbd5e1; margin:0 0 18px 0;"></div>'
-				. '<a href="' . esc_url( $pass_url ) . '" style="display:inline-block; background:#232F3E; color:#f8fafc; text-decoration:none; font-size:14px; font-weight:700; padding:12px 26px; border-radius:8px; letter-spacing:0.02em;">Download Event Pass</a>'
+			$body = '<p style="margin:0 0 12px 0; color:#0f172a;">Hi <strong>' . esc_html( $name ) . '</strong>,</p>'
+				. '<p style="margin:0 0 22px 0; color:#334155; line-height:1.6;">Your registration for <strong>AWS re:Invent Watch &amp; Build Party 2026 Islamabad</strong> is approved. Download and save your pass below to show at check-in.</p>'
+				. '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 24px 0; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">'
+				. '<tr><td style="padding:24px 20px; text-align:center;">'
+				. '<div style="font-size:10.5px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#64748b; margin-bottom:6px;">Pass Number</div>'
+				. '<div style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:28px; font-weight:800; color:#0f172a; letter-spacing:0.06em; line-height:1.2; margin-bottom:18px;">#' . esc_html( $reg_no ) . '</div>'
+				. '<a href="' . esc_url( $pass_url ) . '" style="display:inline-block; background:#232F3E; color:#ffffff; text-decoration:none; font-size:13.5px; font-weight:600; padding:11px 24px; border-radius:6px; letter-spacing:0.2px;">Download Event Pass</a>'
 				. '</td></tr>'
 				. '</table>'
-				. '<p style="margin:0 0 8px 0; font-weight:700; color:#111827;">Instructions:</p>'
-				. '<ul style="margin:0 0 20px 18px; padding:0; color:#1f2937; line-height:1.65;">'
-				. '<li style="margin:0 0 6px 0;">Please arrive 30 mins early for check-in.</li>'
-				. '<li style="margin:0 0 6px 0;">Bring your CNIC for security clearance.</li>'
-				. '<li style="margin:0 0 6px 0;">All attendees will get complimentary food &amp; drinks.</li>'
-				. '<li style="margin:0 0 6px 0;">Swags are limited and will be given based on different activities &amp; random.</li>'
-				. '<li style="margin:0;">Please bring your fully charged laptop for workshop and activities.</li>'
+				. '<div style="font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; color:#475569; margin:0 0 10px 0;">Event-Day Checklist</div>'
+				. '<ul style="margin:0 0 22px 18px; padding:0; color:#334155; font-size:13.5px; line-height:1.65;">'
+				. '<li style="margin:0 0 6px 0;">Arrive <strong>30 minutes early</strong> for check-in.</li>'
+				. '<li style="margin:0 0 6px 0;">Bring your <strong>original CNIC</strong> for security clearance.</li>'
+				. '<li style="margin:0 0 6px 0;">Bring a <strong>fully charged laptop</strong> for the workshop and activities.</li>'
+				. '<li style="margin:0;">Complimentary food &amp; drinks are provided for all attendees; swag is limited and awarded via activities &amp; giveaways.</li>'
 				. '</ul>'
-				. '<p style="margin:0 0 18px 0; color:#1f2937; line-height:1.6;">Regards,<br><strong style="color:#111827;">Team - AWS Student Builder Group Air University Islamabad</strong></p>'
-				. '<div style="border-top:1px solid #e5e7eb; margin:18px 0 14px 0;"></div>'
-				. '<p style="margin:0; font-size:12px; color:#6b7280; line-height:1.6;">Join the WhatsApp community below for event schedule updates, room details, and announcements.</p>';
+				. '<div style="border-top:1px solid #e2e8f0; padding-top:16px; margin:0; font-size:13.5px; color:#334155; line-height:1.6;">Join the <strong>approved attendees-only</strong> WhatsApp group below for event updates, room details, and announcements.</div>';
 			try {
-				aws_sbg_mail_send( 'reinvent', $to_email, 'Your pass for AWS re:Invent Watch & Build Party 2026', '', '', $body, AWS_REINVENT_WHATSAPP_URL, 'Join WhatsApp Community' );
+				aws_sbg_mail_send(
+					'reinvent',
+					$to_email,
+					'Your pass for AWS re:Invent Watch & Build Party 2026',
+					'AWS re:Invent 2026 · Islamabad',
+					'Your Event Pass is Confirmed',
+					$body,
+					AWS_REINVENT_APPROVED_WHATSAPP_URL,
+					'Join Approved Attendees WhatsApp',
+					'',
+					'Only for approved attendees — updates & announcements.'
+				);
 				update_post_meta( $reg_id, 'notified', 'yes' );
 			} catch ( \Throwable $e ) {
 				error_log( 're:Invent approval email failed: ' . $e->getMessage() );
