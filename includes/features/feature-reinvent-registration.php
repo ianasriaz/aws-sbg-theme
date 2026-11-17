@@ -440,7 +440,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 				<div class="rv-kicker rv-kicker-meta">
 					<span class="rv-kicker-item" style="color:#00DFD8;">November 30, 2026</span>
 					<span class="rv-kicker-sep" aria-hidden="true">/</span>
-					<span class="rv-kicker-item">Time: 11 AM - 4 PM</span>
+					<span class="rv-kicker-item">Time: 10 AM - 4 PM</span>
 					<span class="rv-kicker-sep" aria-hidden="true">/</span>
 					<span class="rv-kicker-item">Venue: Islamabad</span>
 				</div>
@@ -629,7 +629,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 
 						<label class="rv-commit">
 							<input type="checkbox" name="will_attend" value="yes" required>
-							<span class="rv-commit-text">I&rsquo;ve confirmed my schedule and will be available to attend on November 30 at 11:00 AM.<span class="rv-commit-sub">Please confirm only if you can attend, so your seat isn&rsquo;t wasted.</span></span>
+							<span class="rv-commit-text">I&rsquo;ve confirmed my schedule and will be available to attend on November 30 at 10:00 AM.<span class="rv-commit-sub">Please confirm only if you can attend, so your seat isn&rsquo;t wasted.</span></span>
 						</label>
 						<label class="rv-commit">
 							<input type="checkbox" name="parking_policy" value="yes" required>
@@ -1487,7 +1487,7 @@ function aws_sbg_reinvent_handle_review_action() {
 				. '<p style="margin:0 0 14px 0;">Join our exclusive Approved Attendees WhatsApp Group to receive important event announcements, venue information, schedule updates, and other event-day details.</p>'
 				. '<p style="margin:0 0 14px 0;"><a href="' . esc_url( AWS_REINVENT_APPROVED_WHATSAPP_URL ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;background-color:#16a34a;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:6px;">WhatsApp Group</a></p>'
 				. '<p style="margin:0 0 22px 0;font-size:13px;color:#475569;">Please note that this group is exclusively for confirmed attendees.</p>'
-				. '<p style="margin:0;font-size:13px;color:#64748b;">November 30, 2026 &middot; Air University Islamabad, E9 Campus &middot; 11:00 AM - 4:00 PM</p>'
+				. '<p style="margin:0;font-size:13px;color:#64748b;">November 30, 2026 &middot; Air University Islamabad, E9 Campus &middot; 10:00 AM - 4:00 PM</p>'
 				. '</body></html>';
 
 			try {
