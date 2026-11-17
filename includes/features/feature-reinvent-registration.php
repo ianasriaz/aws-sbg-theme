@@ -1136,6 +1136,124 @@ function aws_sbg_reinvent_handle_resync_numbers() {
 add_action( 'admin_post_aws_sbg_reinvent_resync_numbers', 'aws_sbg_reinvent_handle_resync_numbers' );
 
 /**
+ * Handle manual registration submission from WP Admin (creates a standard pending entry).
+ */
+function aws_sbg_reinvent_handle_manual_add() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized.' );
+	}
+	check_admin_referer( 'aws_reinvent_manual_add_action', 'aws_reinvent_manual_add_nonce' );
+
+	$base_redirect = admin_url( 'admin.php?page=aws-reinvent-registrations' );
+
+	$full_name   = isset( $_POST['full_name'] ) ? sanitize_text_field( wp_unslash( $_POST['full_name'] ) ) : '';
+	$email       = isset( $_POST['email'] ) ? strtolower( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : '';
+	$whatsapp    = isset( $_POST['whatsapp'] ) ? sanitize_text_field( wp_unslash( $_POST['whatsapp'] ) ) : '';
+	$cnic        = isset( $_POST['cnic'] ) ? sanitize_text_field( wp_unslash( $_POST['cnic'] ) ) : '';
+	$cnic_digits = preg_replace( '/[^0-9]/', '', $cnic );
+	if ( 13 === strlen( $cnic_digits ) ) {
+		$cnic = substr( $cnic_digits, 0, 5 ) . '-' . substr( $cnic_digits, 5, 7 ) . '-' . substr( $cnic_digits, 12, 1 );
+	}
+	$university  = isset( $_POST['affiliation'] ) ? sanitize_text_field( wp_unslash( $_POST['affiliation'] ) ) : '';
+	$audience    = isset( $_POST['audience_type'] ) ? sanitize_key( wp_unslash( $_POST['audience_type'] ) ) : '';
+	$city        = isset( $_POST['city'] ) ? sanitize_text_field( wp_unslash( $_POST['city'] ) ) : '';
+	$linkedin_raw = isset( $_POST['linkedin'] ) ? trim( wp_unslash( $_POST['linkedin'] ) ) : '';
+	$linkedin     = $linkedin_raw ? esc_url_raw( $linkedin_raw, array( 'http', 'https' ) ) : '';
+	if ( $linkedin_raw && ( empty( $linkedin ) || false === filter_var( $linkedin, FILTER_VALIDATE_URL ) ) ) {
+		wp_safe_redirect( add_query_arg( 'notice', 'manual_invalid', $base_redirect ) );
+		exit;
+	}
+
+	$attended       = isset( $_POST['attended_before'] ) ? sanitize_key( wp_unslash( $_POST['attended_before'] ) ) : 'no';
+	$valid_attended = in_array( $attended, array( 'yes', 'no' ), true );
+	$why            = ( 'yes' === $attended && isset( $_POST['why_invite'] ) ) ? sanitize_textarea_field( wp_unslash( $_POST['why_invite'] ) ) : '';
+	$why            = function_exists( 'mb_substr' ) ? mb_substr( $why, 0, 250 ) : substr( $why, 0, 250 );
+
+	$has_vehicle    = ( isset( $_POST['has_vehicle'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['has_vehicle'] ) ) ) ? 'yes' : 'no';
+	$vehicle_type   = '';
+	$vehicle_number = '';
+	if ( 'yes' === $has_vehicle ) {
+		$vehicle_type   = isset( $_POST['vehicle_type'] ) ? sanitize_key( wp_unslash( $_POST['vehicle_type'] ) ) : '';
+		$vehicle_number = isset( $_POST['vehicle_number'] ) ? sanitize_text_field( wp_unslash( $_POST['vehicle_number'] ) ) : '';
+		if ( ! in_array( $vehicle_type, array( 'bike', 'car' ), true ) || '' === trim( $vehicle_number ) ) {
+			wp_safe_redirect( add_query_arg( 'notice', 'manual_invalid', $base_redirect ) );
+			exit;
+		}
+	}
+
+	$badge_tier = isset( $_POST['badge_tier'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_POST['badge_tier'] ) ) ) : 'ATTENDEE';
+	if ( '' === $badge_tier ) {
+		$badge_tier = 'ATTENDEE';
+	}
+
+	$valid_audience = in_array( $audience, array( 'student', 'professional', 'job_seeker' ), true );
+
+	if ( empty( $full_name ) || empty( $email ) || ! is_email( $email ) || empty( $whatsapp ) || ! preg_match( '/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/', $cnic ) || empty( $university ) || empty( $city ) || ! $valid_audience || ! $valid_attended || ( 'yes' === $attended && empty( trim( $why ) ) ) ) {
+		wp_safe_redirect( add_query_arg( 'notice', 'manual_invalid', $base_redirect ) );
+		exit;
+	}
+
+	global $wpdb;
+	$existing_id = (int) $wpdb->get_var( $wpdb->prepare(
+		"SELECT p.ID FROM {$wpdb->posts} p
+		 INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+		 WHERE p.post_type = 'aws_reinvent_reg'
+		   AND p.post_status = 'publish'
+		   AND pm.meta_key = 'email'
+		   AND pm.meta_value = %s
+		 LIMIT 1",
+		$email
+	) );
+	if ( $existing_id > 0 ) {
+		wp_safe_redirect( add_query_arg( 'notice', 'manual_exists', $base_redirect ) );
+		exit;
+	}
+
+	$meta_input = array(
+		'full_name'            => $full_name,
+		'email'                => $email,
+		'whatsapp'             => $whatsapp,
+		'cnic'                 => $cnic,
+		'university'           => $university,
+		'audience_type'        => $audience,
+		'city'                 => $city,
+		'linkedin'             => $linkedin,
+		'attended_before'      => $attended,
+		'why_invite'           => $why,
+		'will_attend'          => 'yes',
+		'has_vehicle'          => $has_vehicle,
+		'vehicle_type'         => $vehicle_type,
+		'vehicle_number'       => $vehicle_number,
+		'parking_policy'       => 'yes',
+		'approval_status'      => 'pending',
+		'notified'             => 'no',
+		'notified_status'      => '',
+		'_registration_source' => 'manual',
+	);
+	if ( 'ATTENDEE' !== $badge_tier ) {
+		$meta_input['_badge_tier'] = $badge_tier;
+	}
+
+	$post_id = wp_insert_post( array(
+		'post_type'      => 'aws_reinvent_reg',
+		'post_title'     => $full_name,
+		'post_status'    => 'publish',
+		'comment_status' => 'closed',
+		'ping_status'    => 'closed',
+		'meta_input'     => $meta_input,
+	) );
+
+	if ( is_wp_error( $post_id ) ) {
+		wp_safe_redirect( add_query_arg( 'notice', 'manual_invalid', $base_redirect ) );
+		exit;
+	}
+
+	wp_safe_redirect( add_query_arg( 'notice', 'manual_added', $base_redirect ) );
+	exit;
+}
+add_action( 'admin_post_aws_sbg_reinvent_manual_add', 'aws_sbg_reinvent_handle_manual_add' );
+
+/**
  * Handle Approve and Reject review actions early on admin_init before headers are sent.
  */
 function aws_sbg_reinvent_handle_review_action() {
@@ -1539,6 +1657,18 @@ function aws_sbg_render_reinvent_admin_page() {
 			<div class="notice notice-info is-dismissible" style="margin-bottom:16px;">
 				<p><strong>Application marked as rejected.</strong></p>
 			</div>
+		<?php elseif ( 'manual_added' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible" style="border-left-color:#16a34a;margin-bottom:16px;">
+				<p><strong>Manual registration added.</strong> Entry is now in the list as <code>Pending</code> — click Approve when ready to issue their pass &amp; email.</p>
+			</div>
+		<?php elseif ( 'manual_exists' === $notice ) : ?>
+			<div class="notice notice-warning is-dismissible" style="margin-bottom:16px;">
+				<p><strong>Duplicate email:</strong> A registration with that email address already exists in the sheet.</p>
+			</div>
+		<?php elseif ( 'manual_invalid' === $notice ) : ?>
+			<div class="notice notice-error is-dismissible" style="margin-bottom:16px;">
+				<p><strong>Could not save manual registration:</strong> Please ensure all required fields, email, LinkedIn URL (if provided), and 13-digit CNIC are valid.</p>
+			</div>
 		<?php elseif ( 'error_code_mismatch' === $notice ) : ?>
 			<div class="notice notice-error is-dismissible" style="margin-bottom:16px;">
 				<p><strong>Clear operation cancelled:</strong> You must type <code>CLEAR</code> exactly in capital letters to confirm clearing entries. No data was deleted.</p>
@@ -1551,6 +1681,7 @@ function aws_sbg_render_reinvent_admin_page() {
 				<p class="rvadm-sub">Review, approve, or reject applications. Use the roster for a print-ready gate clearance sheet.</p>
 			</div>
 			<div class="rvadm-actions">
+				<button type="button" class="rvadm-btn" style="background:#7c3aed;color:#ffffff;border-color:#7c3aed;font-weight:700;" onclick="openManualAddModal()" title="Manually add a speaker, guest, or attendee into the registration sheet">+ Add Registration</button>
 				<a class="rvadm-btn" style="background:#00DFD8;color:#06040C;border-color:#00DFD8;font-weight:700;" href="<?php echo esc_url( home_url( '/reinvent-checkin/' ) ); ?>" target="_blank" title="Launch the password-protected Mobile Check-in Terminal on phone, tablet or laptop">📱 Launch Check-In Terminal &#8599;</a>
 				<button type="button" class="rvadm-btn" onclick="openDeskPinModal()" title="View or change Event Desk PIN">🔑 Desk PIN: <strong id="rvadm-pin-display"><?php echo esc_html( $desk_passcode ); ?></strong></button>
 				<a class="rvadm-btn" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_reinvent_resync_numbers' ), 'aws_reinvent_resync_numbers' ) ); ?>" onclick="return confirm('Resynchronize all approved pass numbers sequentially starting from RIV-01? This will cleanly renumber approved attendees and eliminate any gaps from deleted test submissions.');" title="Renumber approved attendees consecutively starting from RIV-01">🔄 Resync Pass Numbers</a>
@@ -1906,6 +2037,148 @@ function aws_sbg_render_reinvent_admin_page() {
 				<?php endif; ?>
 			</div>
 		</div>
+
+		<!-- Modal 0: Manual Registration (Speakers, Guests, Attendees) -->
+		<div id="aws-reinvent-manual-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(3px);z-index:99999;align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+			<div style="background:#ffffff;border-radius:16px;max-width:640px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);border:1px solid #e2e8f0;margin:auto;">
+				<div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:2;">
+					<div>
+						<h3 style="margin:0;font-size:17px;font-weight:800;color:#0f172a;">Add Manual Registration</h3>
+						<div style="font-size:12px;color:#64748b;margin-top:2px;">Adds a standard registration entry (speakers, guests, crew, or attendees) into the unified sheet.</div>
+					</div>
+					<button type="button" onclick="closeManualAddModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#64748b;line-height:1;">&times;</button>
+				</div>
+				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="padding:24px;">
+					<?php wp_nonce_field( 'aws_reinvent_manual_add_action', 'aws_reinvent_manual_add_nonce' ); ?>
+					<input type="hidden" name="action" value="aws_sbg_reinvent_manual_add">
+
+					<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+						<div>
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">Full Name *</label>
+							<input type="text" name="full_name" required placeholder="Full name" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+						</div>
+						<div>
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">Email Address *</label>
+							<input type="email" name="email" required placeholder="name@domain.com" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+						</div>
+						<div>
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">WhatsApp Number *</label>
+							<input type="tel" name="whatsapp" required placeholder="030000000" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+						</div>
+						<div>
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">CNIC # *</label>
+							<input type="text" id="rv-manual-cnic" name="cnic" required pattern="[0-9]{5}-[0-9]{7}-[0-9]{1}" maxlength="15" placeholder="00000-0000000-0" oninput="formatManualCnic(this)" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+						</div>
+						<div>
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">I am a *</label>
+							<select name="audience_type" required style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+								<option value="" disabled selected>Select an option</option>
+								<option value="student">Student</option>
+								<option value="professional">Professional</option>
+								<option value="job_seeker">Job Seeker</option>
+							</select>
+						</div>
+						<div>
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">Role / Badge Tier *</label>
+							<select name="badge_tier" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+								<option value="ATTENDEE" selected>ATTENDEE</option>
+								<option value="SPEAKER">SPEAKER</option>
+								<option value="VIP">VIP</option>
+								<option value="CORE TEAM">CORE TEAM</option>
+								<option value="EVENT CREW">EVENT CREW</option>
+								<option value="ORGANIZER">ORGANIZER</option>
+							</select>
+						</div>
+						<div>
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">Institute / Company *</label>
+							<input type="text" name="affiliation" required placeholder="Air University Islamabad/Nayatel/Jazz" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+						</div>
+						<div>
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">City *</label>
+							<input type="text" name="city" required value="Islamabad" placeholder="City" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+						</div>
+						<div style="grid-column:1/-1;">
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">LinkedIn Profile URL <span style="font-weight:400;color:#64748b;">(optional)</span></label>
+							<input type="url" name="linkedin" placeholder="https://linkedin.com/in/username" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+						</div>
+						<div>
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">Bringing a vehicle?</label>
+							<select name="has_vehicle" id="rv-manual-has-vehicle" onchange="toggleManualVehicle(this.value)" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+								<option value="no" selected>No</option>
+								<option value="yes">Yes</option>
+							</select>
+						</div>
+						<div>
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">Attended AWS / community event before?</label>
+							<select name="attended_before" id="rv-manual-attended" onchange="toggleManualAttended(this.value)" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+								<option value="no" selected>No</option>
+								<option value="yes">Yes</option>
+							</select>
+						</div>
+						<div id="rv-manual-veh-wrap" style="display:none;grid-column:1/-1;background:#f8fafc;padding:12px;border-radius:8px;border:1px solid #e2e8f0;gap:12px;grid-template-columns:1fr 1fr;">
+							<div>
+								<label style="display:block;font-size:11px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:4px;">Vehicle Type *</label>
+								<select name="vehicle_type" id="rv-manual-veh-type" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;">
+									<option value="car">Car</option>
+									<option value="bike">Bike</option>
+								</select>
+							</div>
+							<div>
+								<label style="display:block;font-size:11px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:4px;">Vehicle Number *</label>
+								<input type="text" name="vehicle_number" id="rv-manual-veh-num" placeholder="ABC-123" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;">
+							</div>
+						</div>
+						<div id="rv-manual-why-wrap" style="display:none;grid-column:1/-1;">
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">Name of last attended AWS or any community event *</label>
+							<textarea name="why_invite" id="rv-manual-why" rows="2" maxlength="250" placeholder="Enter the event name" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;"></textarea>
+						</div>
+					</div>
+
+					<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0;">
+						<button type="button" class="button" onclick="closeManualAddModal()">Cancel</button>
+						<button type="submit" class="button button-primary" style="background:#7c3aed;border-color:#6d28d9;font-weight:700;padding:4px 18px;">Add Registration</button>
+					</div>
+				</form>
+			</div>
+		</div>
+		<script>
+			function openManualAddModal() {
+				document.getElementById('aws-reinvent-manual-modal').style.display = 'flex';
+			}
+			function closeManualAddModal() {
+				document.getElementById('aws-reinvent-manual-modal').style.display = 'none';
+			}
+			function toggleManualVehicle(val) {
+				var wrap = document.getElementById('rv-manual-veh-wrap');
+				var num = document.getElementById('rv-manual-veh-num');
+				if (val === 'yes') {
+					wrap.style.display = 'grid';
+					num.required = true;
+				} else {
+					wrap.style.display = 'none';
+					num.required = false;
+				}
+			}
+			function toggleManualAttended(val) {
+				var wrap = document.getElementById('rv-manual-why-wrap');
+				var why = document.getElementById('rv-manual-why');
+				if (val === 'yes') {
+					wrap.style.display = 'block';
+					why.required = true;
+				} else {
+					wrap.style.display = 'none';
+					why.required = false;
+				}
+			}
+			function formatManualCnic(input) {
+				var val = input.value.replace(/[^0-9]/g, '').substring(0, 13);
+				if (val.length > 5) {
+					input.value = val.substring(0, 5) + '-' + (val.length > 12 ? val.substring(5, 12) + '-' + val.substring(12) : val.substring(5));
+				} else {
+					input.value = val;
+				}
+			}
+		</script>
 
 		<!-- Modal 1: Safe Clear Registrations -->
 		<div id="aws-reinvent-clear-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(3px);z-index:99999;align-items:center;justify-content:center;padding:20px;">
