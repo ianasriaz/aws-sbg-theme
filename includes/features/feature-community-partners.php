@@ -39,7 +39,22 @@ add_action( 'init', 'aws_sbg_register_partner_app_post_type' );
  * 2. FRONT-END FORM & SHORTCODE
  * ======================================================================== */
 
-function aws_sbg_render_community_partner_form() {
+function aws_sbg_render_community_partner_form( $atts = array() ) {
+	$atts = shortcode_atts( array(
+		'event'    => 'AWS re:Invent 2026 Watch & Build Party Islamabad',
+		'kicker'   => 'Community Partner Call',
+		'title'    => 'Become a Community Partner',
+		'subtitle' => '',
+	), $atts, 'aws_community_partner_form' );
+
+	$event_name   = sanitize_text_field( $atts['event'] );
+	$kicker       = sanitize_text_field( $atts['kicker'] );
+	$form_title   = sanitize_text_field( $atts['title'] );
+	$subtitle     = sanitize_text_field( $atts['subtitle'] );
+	if ( '' === $subtitle ) {
+		$subtitle = 'Partner with AWS Student Builder Group to co-promote ' . $event_name . ' within your community and receive a dedicated referral tracking code.';
+	}
+
 	$status       = isset( $_GET['partner_status'] ) ? sanitize_key( wp_unslash( $_GET['partner_status'] ) ) : '';
 	$err_code     = isset( $_GET['partner_error'] ) ? sanitize_key( wp_unslash( $_GET['partner_error'] ) ) : '';
 	$success      = ( 'success' === $status );
@@ -163,16 +178,19 @@ function aws_sbg_render_community_partner_form() {
 						<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
 					</div>
 					<h2 style="font-weight:700;font-size:26px;margin:0 0 12px;"><?php echo $success_name ? 'Thank You, ' . esc_html( $success_name ) : 'Application Received'; ?></h2>
-					<p style="font-size:15px;line-height:1.65;color:rgba(255,255,255,0.68);">Your Community Partner application has been submitted. Once reviewed and approved, you will receive an email with your unique referral code and the Community Partners WhatsApp group link.</p>
+					<p style="font-size:15px;line-height:1.65;color:rgba(255,255,255,0.68);">Your Community Partner application for <strong><?php echo esc_html( $event_name ); ?></strong> has been submitted. Once reviewed and approved, you will receive an email with your unique referral code and the Community Partners WhatsApp group link.</p>
 					<p><a class="cp-success-link" href="<?php echo esc_url( home_url() ); ?>">Back to home</a></p>
 				</div>
 			</div>
 		<?php else : ?>
 			<section class="cp-stage">
 				<div class="cp-inner">
-					<p class="cp-kicker">Community Partnership</p>
-					<h1 class="cp-title">Become a Community Partner</h1>
-					<p class="cp-sub">Partner with AWS Student Builder Group to co-promote our events within your community and receive a dedicated referral tracking code.</p>
+					<p class="cp-kicker"><?php echo esc_html( $kicker ); ?></p>
+					<h1 class="cp-title"><?php echo esc_html( $form_title ); ?></h1>
+					<div style="display:inline-flex;align-items:center;gap:8px;padding:6px 12px;margin:0 0 18px 0;border-radius:8px;border:1px solid rgba(0,223,216,0.32);background:rgba(0,223,216,0.08);font-family:'Amazon Ember Mono',monospace;font-size:clamp(10.5px,2.8vw,12px);font-weight:700;color:#00DFD8;line-height:1.4;max-width:100%;">
+						<?php echo esc_html( $event_name ); ?>
+					</div>
+					<p class="cp-sub"><?php echo esc_html( $subtitle ); ?></p>
 
 					<?php if ( $exists ) : ?>
 						<div class="cp-banner cp-banner-info" role="status">An application with this email address has already been submitted. Our team will review it and reach out via email.</div>
@@ -184,6 +202,7 @@ function aws_sbg_render_community_partner_form() {
 
 					<form id="cp-partner-form" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="POST" enctype="multipart/form-data" @input.debounce.250ms="saveDraft()" @submit="handleSubmit($event)">
 						<input type="hidden" name="action" value="submit_aws_partner_app">
+						<input type="hidden" name="event_name" value="<?php echo esc_attr( $event_name ); ?>">
 						<?php wp_nonce_field( 'aws_partner_app_action', 'aws_partner_app_nonce' ); ?>
 						<div aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
 							<label for="cp-hp-check">Leave empty</label>
@@ -336,6 +355,7 @@ function aws_sbg_handle_partner_app_submission() {
 	}
 
 	$community_name = isset( $_POST['community_name'] ) ? sanitize_text_field( wp_unslash( $_POST['community_name'] ) ) : '';
+	$event_name     = isset( $_POST['event_name'] ) && '' !== trim( $_POST['event_name'] ) ? sanitize_text_field( wp_unslash( $_POST['event_name'] ) ) : 'AWS re:Invent 2026 Watch & Build Party Islamabad';
 	$institute      = isset( $_POST['institute'] ) ? sanitize_text_field( wp_unslash( $_POST['institute'] ) ) : '';
 	$city           = isset( $_POST['city'] ) ? sanitize_text_field( wp_unslash( $_POST['city'] ) ) : '';
 	$lead_name      = isset( $_POST['lead_name'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_name'] ) ) : '';
@@ -404,6 +424,7 @@ function aws_sbg_handle_partner_app_submission() {
 		'comment_status' => 'closed',
 		'ping_status'    => 'closed',
 		'meta_input'     => array(
+			'event_name'     => $event_name,
 			'community_name' => $community_name,
 			'institute'      => $institute,
 			'city'           => $city,
@@ -477,6 +498,7 @@ function aws_sbg_partner_handle_review_action() {
 
 	if ( 'approved' === $new_status && 'approved' !== $prev_status ) {
 		$community_name = get_post_meta( $app_id, 'community_name', true ) ?: get_the_title( $app_id );
+		$event_name     = get_post_meta( $app_id, 'event_name', true ) ?: 'AWS re:Invent 2026 Watch & Build Party Islamabad';
 		$lead_name      = get_post_meta( $app_id, 'lead_name', true );
 		$to_email       = get_post_meta( $app_id, 'email', true );
 		$partner_code   = get_post_meta( $app_id, 'partner_code', true );
@@ -507,7 +529,7 @@ function aws_sbg_partner_handle_review_action() {
 			$html         = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
 				. '<body style="margin:0;padding:24px;background-color:#ffffff;color:#111827;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;">'
 				. '<p style="margin:0 0 16px 0;">Hi ' . esc_html( $lead_name ? $lead_name : $community_name ) . ',</p>'
-				. '<p style="margin:0 0 16px 0;">Great news! <strong>' . esc_html( $community_name ) . '</strong> has been approved as an official <strong>Community Partner</strong> with AWS Student Builder Group.</p>'
+				. '<p style="margin:0 0 16px 0;">Great news! <strong>' . esc_html( $community_name ) . '</strong> has been approved as an official <strong>Community Partner</strong> for <strong>' . esc_html( $event_name ) . '</strong>.</p>'
 				. ( $partner_code ? '<p style="margin:0 0 8px 0;"><strong>Your Partner Referral Code:</strong> <code>' . esc_html( $partner_code ) . '</code></p><p style="margin:0 0 22px 0;"><strong>Your Shareable Registration Link:</strong><br><a href="' . esc_url( $partner_link ) . '" target="_blank" rel="noopener noreferrer" style="color:#2563eb;">' . esc_html( $partner_link ) . '</a></p>' : '' )
 				. '<p style="margin:0 0 14px 0;">Please join our exclusive <strong>Community Partners WhatsApp Group</strong> below to coordinate announcements, creatives, and event updates:</p>'
 				. '<p style="margin:0 0 22px 0;"><a href="' . esc_url( AWS_PARTNER_WHATSAPP_URL ) . '" target="_blank" rel="noopener noreferrer" style="display:inline-block;background-color:#16a34a;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:11px 22px;border-radius:6px;">Join Community Partners WhatsApp Group</a></p>'
@@ -572,7 +594,7 @@ function aws_sbg_export_partner_apps_csv() {
 
 	$output = fopen( 'php://output', 'w' );
 	fwrite( $output, "\xEF\xBB\xBF" );
-	fputcsv( $output, array( 'Community Name', 'Institute', 'City', 'Lead Name', 'Lead WhatsApp', 'Email', 'Partner Code', 'Logo URL', 'Status', 'Submitted At' ) );
+	fputcsv( $output, array( 'Event', 'Community Name', 'Institute', 'City', 'Lead Name', 'Lead WhatsApp', 'Email', 'Partner Code', 'Logo URL', 'Status', 'Submitted At' ) );
 
 	$csv_safe = static function( $val ) {
 		$str = (string) $val;
@@ -586,6 +608,7 @@ function aws_sbg_export_partner_apps_csv() {
 		$logo_id  = (int) get_post_meta( $app->ID, 'logo_id', true );
 		$logo_url = $logo_id ? wp_get_attachment_url( $logo_id ) : '';
 		fputcsv( $output, array_map( $csv_safe, array(
+			get_post_meta( $app->ID, 'event_name', true ) ?: 'AWS re:Invent 2026 Watch & Build Party Islamabad',
 			get_post_meta( $app->ID, 'community_name', true ),
 			get_post_meta( $app->ID, 'institute', true ),
 			get_post_meta( $app->ID, 'city', true ),
@@ -648,6 +671,7 @@ function aws_sbg_render_partner_apps_admin_page() {
 					<tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">
 						<th style="padding:12px 14px;">Logo</th>
 						<th style="padding:12px 14px;">Community &amp; Institute</th>
+						<th style="padding:12px 14px;">Event</th>
 						<th style="padding:12px 14px;">City</th>
 						<th style="padding:12px 14px;">Lead &amp; Contact</th>
 						<th style="padding:12px 14px;">Partner Code</th>
@@ -657,11 +681,12 @@ function aws_sbg_render_partner_apps_admin_page() {
 				</thead>
 				<tbody>
 					<?php if ( empty( $apps ) ) : ?>
-						<tr><td colspan="7" style="padding:36px;text-align:center;color:#64748b;">No community partner applications yet.</td></tr>
+						<tr><td colspan="8" style="padding:36px;text-align:center;color:#64748b;">No community partner applications yet.</td></tr>
 					<?php else : ?>
 						<?php foreach ( $apps as $app ) :
 							$id       = $app->ID;
 							$c_name   = get_post_meta( $id, 'community_name', true );
+							$ev_name  = get_post_meta( $id, 'event_name', true ) ?: 'AWS re:Invent 2026 Watch & Build Party Islamabad';
 							$inst     = get_post_meta( $id, 'institute', true );
 							$city     = get_post_meta( $id, 'city', true );
 							$lead     = get_post_meta( $id, 'lead_name', true );
@@ -694,6 +719,7 @@ function aws_sbg_render_partner_apps_admin_page() {
 									<div style="font-weight:700;color:#0f172a;"><?php echo esc_html( $c_name ); ?></div>
 									<div style="font-size:12px;color:#64748b;"><?php echo esc_html( $inst ); ?></div>
 								</td>
+								<td style="padding:12px 14px;font-size:12px;color:#475569;"><?php echo esc_html( $ev_name ); ?></td>
 								<td style="padding:12px 14px;"><?php echo esc_html( $city ); ?></td>
 								<td style="padding:12px 14px;">
 									<div style="font-weight:600;color:#0f172a;"><?php echo esc_html( $lead ); ?></div>
