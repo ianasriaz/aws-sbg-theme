@@ -148,6 +148,78 @@ function aws_sbg_get_reinvent_closed_message() {
 	return $msg;
 }
 
+/**
+ * Get all configured Community Partners keyed by uppercase code.
+ *
+ * @return array<string, array{code:string,name:string,active:bool,created_at:string}>
+ */
+function aws_sbg_get_reinvent_partners() {
+	$partners = get_option( 'aws_reinvent_partners', array() );
+	return is_array( $partners ) ? $partners : array();
+}
+
+/**
+ * Generate a unique uppercase partner code from a partner name.
+ */
+function aws_sbg_generate_reinvent_partner_code( $name, $existing = array() ) {
+	$base = strtoupper( preg_replace( '/[^a-zA-Z0-9]/', '', (string) $name ) );
+	$base = substr( $base, 0, 8 );
+	if ( strlen( $base ) < 3 ) {
+		$base = 'PARTNER';
+	}
+	$code = $base;
+	$n    = 2;
+	while ( isset( $existing[ $code ] ) ) {
+		$code = substr( $base, 0, 6 ) . $n;
+		$n++;
+	}
+	return $code;
+}
+
+/**
+ * Resolve an active partner code into its metadata, or null if invalid/inactive.
+ */
+function aws_sbg_resolve_reinvent_partner( $raw_code ) {
+	$code = strtoupper( preg_replace( '/[^a-zA-Z0-9_-]/', '', trim( (string) $raw_code ) ) );
+	if ( '' === $code ) {
+		return null;
+	}
+	$partners = aws_sbg_get_reinvent_partners();
+	if ( isset( $partners[ $code ] ) && ! empty( $partners[ $code ]['active'] ) ) {
+		return $partners[ $code ];
+	}
+	return null;
+}
+
+/**
+ * Aggregate total and approved registration counts per partner code.
+ */
+function aws_sbg_get_reinvent_partner_counts() {
+	global $wpdb;
+	$rows = $wpdb->get_results(
+		"SELECT pm_code.meta_value AS partner_code,
+		        COUNT(*) AS total_count,
+		        SUM( CASE WHEN pm_status.meta_value = 'approved' THEN 1 ELSE 0 END ) AS approved_count
+		 FROM {$wpdb->posts} p
+		 INNER JOIN {$wpdb->postmeta} pm_code ON p.ID = pm_code.post_id AND pm_code.meta_key = 'partner_code'
+		 LEFT JOIN {$wpdb->postmeta} pm_status ON p.ID = pm_status.post_id AND pm_status.meta_key = 'approval_status'
+		 WHERE p.post_type = 'aws_reinvent_reg'
+		   AND p.post_status = 'publish'
+		   AND pm_code.meta_value != ''
+		 GROUP BY pm_code.meta_value"
+	);
+	$counts = array();
+	if ( $rows ) {
+		foreach ( $rows as $r ) {
+			$counts[ strtoupper( $r->partner_code ) ] = array(
+				'total'    => (int) $r->total_count,
+				'approved' => (int) $r->approved_count,
+			);
+		}
+	}
+	return $counts;
+}
+
 /* ========================================================================
  * 3. FRONT-END FORM SHORTCODE
  * ======================================================================== */
@@ -156,6 +228,10 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 	$success        = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'success';
 	$exists         = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'exists';
 	$expired        = isset( $_GET['reinvent_registration'] ) && $_GET['reinvent_registration'] === 'expired';
+	$url_partner_raw  = isset( $_GET['partner'] ) ? sanitize_text_field( wp_unslash( $_GET['partner'] ) ) : '';
+	$prefill_partner  = $url_partner_raw ? aws_sbg_resolve_reinvent_partner( $url_partner_raw ) : null;
+	$prefill_p_code   = $prefill_partner ? $prefill_partner['code'] : '';
+	$prefill_p_name   = $prefill_partner ? $prefill_partner['name'] : '';
 	$success_name   = '';
 	if ( $success && ! empty( $_GET['rv_ref'] ) ) {
 		$rv_ref   = preg_replace( '/[^a-zA-Z0-9]/', '', wp_unslash( $_GET['rv_ref'] ) );
@@ -487,6 +563,13 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 							<label for="rv-linkedin">LinkedIn Profile URL <em>*</em></label>
 							<input id="rv-linkedin" type="url" name="linkedin" required placeholder="https://linkedin.com/in/username">
 						</div>
+						<div class="rv-field" style="grid-column:1/-1;">
+							<label for="rv-partner-code">Community Partner Code <span style="font-weight:400;">(optional)</span></label>
+							<input id="rv-partner-code" type="text" name="partner_code" value="<?php echo esc_attr( $prefill_p_code ); ?>" maxlength="32" placeholder="Enter partner code if you have one" style="text-transform:uppercase;">
+							<?php if ( $prefill_p_name ) : ?>
+								<p style="margin:6px 0 0; font-size:12.5px; color:#00DFD8;">Community Partner: <strong><?php echo esc_html( $prefill_p_name ); ?></strong></p>
+							<?php endif; ?>
+						</div>
 						<div class="rv-field" style="grid-column:1/-1; margin-top:8px; padding-top:24px; border-top:1px solid rgba(255,255,255,0.1);">
 							<label>Bringing a vehicle? <span style="font-weight:400;">(optional)</span></label>
 							<p style="margin:2px 0 12px; font-size:12.5px; line-height:1.55; color:rgba(255,255,255,0.5);">Parking at the venue is very limited. We encourage using public transport or ride-hailing (InDrive, Yango, Bykea).</p>
@@ -596,7 +679,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 					if (!form) return;
 					try {
 						const data = {};
-						const fields = ['full_name', 'email', 'whatsapp', 'cnic', 'audience_type', 'affiliation', 'city', 'linkedin', 'has_vehicle', 'vehicle_type', 'vehicle_number', 'attended_before', 'why_invite'];
+						const fields = ['full_name', 'email', 'whatsapp', 'cnic', 'audience_type', 'affiliation', 'city', 'linkedin', 'partner_code', 'has_vehicle', 'vehicle_type', 'vehicle_number', 'attended_before', 'why_invite'];
 						fields.forEach((name) => {
 							const els = form.querySelectorAll(`[name="${name}"]`);
 							if (!els.length) return;
@@ -619,6 +702,7 @@ function aws_sbg_render_reinvent_form( $title, $subtitle, $date, $location ) {
 						const data = JSON.parse(raw);
 						if (!data || typeof data !== 'object') return;
 						Object.keys(data).forEach((name) => {
+							if (name === 'partner_code' && <?php echo $prefill_p_code ? 'true' : 'false'; ?>) return;
 							const val = data[name];
 							if (typeof val !== 'string') return;
 							const els = form.querySelectorAll(`[name="${name}"]`);
@@ -755,6 +839,10 @@ function aws_sbg_handle_reinvent_registration() {
 	}
 
 	$parking_policy = ( isset( $_POST['parking_policy'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['parking_policy'] ) ) );
+	$partner_raw    = isset( $_POST['partner_code'] ) ? sanitize_text_field( wp_unslash( $_POST['partner_code'] ) ) : '';
+	$partner        = aws_sbg_resolve_reinvent_partner( $partner_raw );
+	$partner_code   = $partner ? $partner['code'] : '';
+	$partner_name   = $partner ? $partner['name'] : '';
 
 	$valid_audience = in_array( $audience, array( 'student', 'professional', 'job_seeker' ), true );
 
@@ -818,6 +906,8 @@ function aws_sbg_handle_reinvent_registration() {
 			'approval_status' => 'pending',
 			'notified'        => 'no',
 			'notified_status' => '',
+			'partner_code'    => $partner_code,
+			'partner_name'    => $partner_name,
 		),
 	) );
 
@@ -1186,6 +1276,11 @@ function aws_sbg_reinvent_handle_manual_add() {
 		$badge_tier = 'ATTENDEE';
 	}
 
+	$partner_raw  = isset( $_POST['partner_code'] ) ? sanitize_text_field( wp_unslash( $_POST['partner_code'] ) ) : '';
+	$partner      = aws_sbg_resolve_reinvent_partner( $partner_raw );
+	$partner_code = $partner ? $partner['code'] : '';
+	$partner_name = $partner ? $partner['name'] : '';
+
 	$valid_audience = in_array( $audience, array( 'student', 'professional', 'job_seeker' ), true );
 
 	if ( empty( $full_name ) || empty( $email ) || ! is_email( $email ) || empty( $whatsapp ) || ! preg_match( '/^[0-9]{5}-[0-9]{7}-[0-9]{1}$/', $cnic ) || empty( $university ) || empty( $city ) || ! $valid_audience || ! $valid_attended || ( 'yes' === $attended && empty( trim( $why ) ) ) ) {
@@ -1228,6 +1323,8 @@ function aws_sbg_reinvent_handle_manual_add() {
 		'approval_status'      => 'pending',
 		'notified'             => 'no',
 		'notified_status'      => '',
+		'partner_code'         => $partner_code,
+		'partner_name'         => $partner_name,
 		'_registration_source' => 'manual',
 	);
 	if ( 'ATTENDEE' !== $badge_tier ) {
@@ -1252,6 +1349,81 @@ function aws_sbg_reinvent_handle_manual_add() {
 	exit;
 }
 add_action( 'admin_post_aws_sbg_reinvent_manual_add', 'aws_sbg_reinvent_handle_manual_add' );
+
+/**
+ * Add a new Community Partner and generate/validate its unique code.
+ */
+function aws_sbg_reinvent_handle_save_partner() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized.' );
+	}
+	check_admin_referer( 'aws_reinvent_save_partner_action', 'aws_reinvent_save_partner_nonce' );
+
+	$base_redirect = admin_url( 'admin.php?page=aws-reinvent-registrations' );
+	$name          = isset( $_POST['partner_name'] ) ? sanitize_text_field( wp_unslash( $_POST['partner_name'] ) ) : '';
+	$raw_code      = isset( $_POST['partner_code'] ) ? strtoupper( preg_replace( '/[^a-zA-Z0-9_-]/', '', wp_unslash( $_POST['partner_code'] ) ) ) : '';
+
+	if ( '' === trim( $name ) ) {
+		wp_safe_redirect( add_query_arg( 'notice', 'partner_invalid', $base_redirect ) );
+		exit;
+	}
+
+	$partners = aws_sbg_get_reinvent_partners();
+	if ( '' === $raw_code ) {
+		$code = aws_sbg_generate_reinvent_partner_code( $name, $partners );
+	} else {
+		$code = substr( $raw_code, 0, 24 );
+		if ( isset( $partners[ $code ] ) ) {
+			wp_safe_redirect( add_query_arg( 'notice', 'partner_duplicate', $base_redirect ) );
+			exit;
+		}
+	}
+
+	$partners[ $code ] = array(
+		'code'       => $code,
+		'name'       => $name,
+		'active'     => true,
+		'created_at' => current_time( 'mysql' ),
+	);
+	update_option( 'aws_reinvent_partners', $partners, false );
+
+	wp_safe_redirect( add_query_arg( 'notice', 'partner_saved', $base_redirect ) );
+	exit;
+}
+add_action( 'admin_post_aws_sbg_reinvent_save_partner', 'aws_sbg_reinvent_handle_save_partner' );
+
+/**
+ * Toggle or delete a Community Partner (does not alter existing registration meta).
+ */
+function aws_sbg_reinvent_handle_partner_action() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized.' );
+	}
+	$op   = isset( $_GET['op'] ) ? sanitize_key( $_GET['op'] ) : '';
+	$code = isset( $_GET['code'] ) ? strtoupper( preg_replace( '/[^a-zA-Z0-9_-]/', '', wp_unslash( $_GET['code'] ) ) ) : '';
+	check_admin_referer( 'aws_reinvent_partner_' . $op . '_' . $code );
+
+	$partners = aws_sbg_get_reinvent_partners();
+	if ( $code && isset( $partners[ $code ] ) ) {
+		if ( 'toggle' === $op ) {
+			$partners[ $code ]['active'] = empty( $partners[ $code ]['active'] );
+			update_option( 'aws_reinvent_partners', $partners, false );
+			$notice = 'partner_updated';
+		} elseif ( 'delete' === $op ) {
+			unset( $partners[ $code ] );
+			update_option( 'aws_reinvent_partners', $partners, false );
+			$notice = 'partner_deleted';
+		} else {
+			$notice = 'partner_invalid';
+		}
+	} else {
+		$notice = 'partner_invalid';
+	}
+
+	wp_safe_redirect( add_query_arg( 'notice', $notice, admin_url( 'admin.php?page=aws-reinvent-registrations' ) ) );
+	exit;
+}
+add_action( 'admin_post_aws_sbg_reinvent_partner_action', 'aws_sbg_reinvent_handle_partner_action' );
 
 /**
  * Handle Approve and Reject review actions early on admin_init before headers are sent.
@@ -1378,6 +1550,7 @@ function aws_sbg_render_reinvent_admin_page() {
 	$status         = isset( $_GET['status_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['status_filter'] ) ) : '';
 	$tier_filter    = isset( $_GET['tier_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['tier_filter'] ) ) : '';
 	$checkin_filter = isset( $_GET['checkin_filter'] ) ? sanitize_key( wp_unslash( $_GET['checkin_filter'] ) ) : '';
+	$partner_filter = isset( $_GET['partner_filter'] ) ? strtoupper( preg_replace( '/[^a-zA-Z0-9_-]/', '', wp_unslash( $_GET['partner_filter'] ) ) ) : '';
 	$paged          = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
 	$per_page       = 50;
 
@@ -1424,6 +1597,28 @@ function aws_sbg_render_reinvent_admin_page() {
 				'compare' => 'NOT EXISTS',
 			),
 		);
+	}
+	if ( $partner_filter ) {
+		if ( '__DIRECT' === $partner_filter ) {
+			$meta_query[] = array(
+				'relation' => 'OR',
+				array(
+					'key'     => 'partner_code',
+					'value'   => '',
+					'compare' => '=',
+				),
+				array(
+					'key'     => 'partner_code',
+					'compare' => 'NOT EXISTS',
+				),
+			);
+		} else {
+			$meta_query[] = array(
+				'key'     => 'partner_code',
+				'value'   => $partner_filter,
+				'compare' => '=',
+			);
+		}
 	}
 	if ( ! empty( $meta_query ) ) {
 		if ( count( $meta_query ) > 1 ) {
@@ -1484,6 +1679,9 @@ function aws_sbg_render_reinvent_admin_page() {
 
 	$is_hidden      = aws_sbg_is_reinvent_registration_hidden();
 	$closed_message = aws_sbg_get_reinvent_closed_message();
+	$partners       = aws_sbg_get_reinvent_partners();
+	$partner_counts = aws_sbg_get_reinvent_partner_counts();
+	$reg_page_url   = home_url( '/aws-reinvent/' );
 
 	aws_sbg_render_admin_nav_tabs( 'reinvent' );
 	?>
@@ -1669,6 +1867,26 @@ function aws_sbg_render_reinvent_admin_page() {
 			<div class="notice notice-error is-dismissible" style="margin-bottom:16px;">
 				<p><strong>Could not save manual registration:</strong> Please ensure all required fields, email, LinkedIn URL (if provided), and 13-digit CNIC are valid.</p>
 			</div>
+		<?php elseif ( 'partner_saved' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible" style="border-left-color:#16a34a;margin-bottom:16px;">
+				<p><strong>Community Partner added.</strong> Share their unique code or <code>?partner=CODE</code> link to track registrations.</p>
+			</div>
+		<?php elseif ( 'partner_duplicate' === $notice ) : ?>
+			<div class="notice notice-warning is-dismissible" style="margin-bottom:16px;">
+				<p><strong>Partner code already exists.</strong> Please use a different code or leave it blank to auto-generate one.</p>
+			</div>
+		<?php elseif ( 'partner_updated' === $notice ) : ?>
+			<div class="notice notice-info is-dismissible" style="margin-bottom:16px;">
+				<p><strong>Community Partner status updated.</strong></p>
+			</div>
+		<?php elseif ( 'partner_deleted' === $notice ) : ?>
+			<div class="notice notice-info is-dismissible" style="margin-bottom:16px;">
+				<p><strong>Community Partner removed.</strong> Existing registrations keep their recorded partner attribution.</p>
+			</div>
+		<?php elseif ( 'partner_invalid' === $notice ) : ?>
+			<div class="notice notice-error is-dismissible" style="margin-bottom:16px;">
+				<p><strong>Invalid partner request.</strong> Please enter a valid partner name.</p>
+			</div>
 		<?php elseif ( 'error_code_mismatch' === $notice ) : ?>
 			<div class="notice notice-error is-dismissible" style="margin-bottom:16px;">
 				<p><strong>Clear operation cancelled:</strong> You must type <code>CLEAR</code> exactly in capital letters to confirm clearing entries. No data was deleted.</p>
@@ -1682,6 +1900,7 @@ function aws_sbg_render_reinvent_admin_page() {
 			</div>
 			<div class="rvadm-actions">
 				<button type="button" class="rvadm-btn" style="background:#7c3aed;color:#ffffff;border-color:#7c3aed;font-weight:700;" onclick="openManualAddModal()" title="Manually add a speaker, guest, or attendee into the registration sheet">+ Add Registration</button>
+				<button type="button" class="rvadm-btn" style="background:#f8fafc;color:#0f172a;border-color:#cbd5e1;font-weight:700;" onclick="openPartnersModal()" title="Create and track Community Partner referral codes">🤝 Community Partners (<?php echo intval( count( $partners ) ); ?>)</button>
 				<a class="rvadm-btn" style="background:#00DFD8;color:#06040C;border-color:#00DFD8;font-weight:700;" href="<?php echo esc_url( home_url( '/reinvent-checkin/' ) ); ?>" target="_blank" title="Launch the password-protected Mobile Check-in Terminal on phone, tablet or laptop">📱 Launch Check-In Terminal &#8599;</a>
 				<button type="button" class="rvadm-btn" onclick="openDeskPinModal()" title="View or change Event Desk PIN">🔑 Desk PIN: <strong id="rvadm-pin-display"><?php echo esc_html( $desk_passcode ); ?></strong></button>
 				<a class="rvadm-btn" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_reinvent_resync_numbers' ), 'aws_reinvent_resync_numbers' ) ); ?>" onclick="return confirm('Resynchronize all approved pass numbers sequentially starting from RIV-01? This will cleanly renumber approved attendees and eliminate any gaps from deleted test submissions.');" title="Renumber approved attendees consecutively starting from RIV-01">🔄 Resync Pass Numbers</a>
@@ -1766,11 +1985,23 @@ function aws_sbg_render_reinvent_admin_page() {
 					</select>
 				</div>
 				<div class="rvadm-field">
+					<label for="rvadm-partner">Community Partner</label>
+					<select id="rvadm-partner" name="partner_filter" onchange="this.form.submit()">
+						<option value="">All partners</option>
+						<option value="__DIRECT" <?php selected( $partner_filter, '__DIRECT' ); ?>>Direct / None</option>
+						<?php foreach ( $partners as $p_code => $p_info ) : ?>
+							<option value="<?php echo esc_attr( $p_code ); ?>" <?php selected( $partner_filter, $p_code ); ?>>
+								<?php echo esc_html( $p_info['name'] . ' (' . $p_code . ')' ); ?>
+							</option>
+						<?php endforeach; ?>
+					</select>
+				</div>
+				<div class="rvadm-field">
 					<label for="rvadm-search">Search</label>
 					<input id="rvadm-search" type="search" name="search" value="<?php echo esc_attr( $search ); ?>" placeholder="Name, CNIC, email, phone, university, or reg #">
 				</div>
 				<button type="submit" class="rvadm-search-btn">Search</button>
-				<?php if ( $search || $status || $tier_filter || $checkin_filter ) : ?>
+				<?php if ( $search || $status || $tier_filter || $checkin_filter || $partner_filter ) : ?>
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-reinvent-registrations' ) ); ?>" class="rvadm-btn">Reset</a>
 				<?php endif; ?>
 			</form>
@@ -2101,6 +2332,16 @@ function aws_sbg_render_reinvent_admin_page() {
 							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">LinkedIn Profile URL <span style="font-weight:400;color:#64748b;">(optional)</span></label>
 							<input type="url" name="linkedin" placeholder="https://linkedin.com/in/username" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
 						</div>
+						<div style="grid-column:1/-1;">
+							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">Community Partner Code <span style="font-weight:400;color:#64748b;">(optional)</span></label>
+							<select name="partner_code" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
+								<option value="">Direct / None</option>
+								<?php foreach ( $partners as $p_code => $p_info ) : ?>
+									<?php if ( empty( $p_info['active'] ) ) continue; ?>
+									<option value="<?php echo esc_attr( $p_code ); ?>"><?php echo esc_html( $p_info['name'] . ' (' . $p_code . ')' ); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</div>
 						<div>
 							<label style="display:block;font-size:11.5px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:5px;">Bringing a vehicle?</label>
 							<select name="has_vehicle" id="rv-manual-has-vehicle" onchange="toggleManualVehicle(this.value)" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;">
@@ -2176,6 +2417,96 @@ function aws_sbg_render_reinvent_admin_page() {
 					input.value = val.substring(0, 5) + '-' + (val.length > 12 ? val.substring(5, 12) + '-' + val.substring(12) : val.substring(5));
 				} else {
 					input.value = val;
+				}
+			}
+		</script>
+
+		<!-- Modal 0B: Community Partners Manager -->
+		<div id="aws-reinvent-partners-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);backdrop-filter:blur(3px);z-index:99999;align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+			<div style="background:#ffffff;border-radius:16px;max-width:740px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);border:1px solid #e2e8f0;margin:auto;">
+				<div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:2;">
+					<div>
+						<h3 style="margin:0;font-size:17px;font-weight:800;color:#0f172a;">Community Partners &amp; Referral Codes</h3>
+						<div style="font-size:12px;color:#64748b;margin-top:2px;">Create unique partner codes and shareable <code>?partner=CODE</code> registration links.</div>
+					</div>
+					<button type="button" onclick="closePartnersModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#64748b;line-height:1;">&times;</button>
+				</div>
+				<div style="padding:24px;">
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:grid;grid-template-columns:1.5fr 1fr auto;gap:10px;align-items:end;background:#f8fafc;padding:14px;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:20px;">
+						<?php wp_nonce_field( 'aws_reinvent_save_partner_action', 'aws_reinvent_save_partner_nonce' ); ?>
+						<input type="hidden" name="action" value="aws_sbg_reinvent_save_partner">
+						<div>
+							<label style="display:block;font-size:11px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:4px;">Community / Partner Name *</label>
+							<input type="text" name="partner_name" required placeholder="e.g. GDG Islamabad" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;">
+						</div>
+						<div>
+							<label style="display:block;font-size:11px;font-weight:700;color:#334155;text-transform:uppercase;margin-bottom:4px;">Code <span style="font-weight:400;color:#64748b;">(auto if blank)</span></label>
+							<input type="text" name="partner_code" maxlength="24" placeholder="e.g. GDGISB" style="width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;text-transform:uppercase;">
+						</div>
+						<button type="submit" class="button button-primary" style="height:36px;font-weight:700;padding:0 16px;">+ Add Partner</button>
+					</form>
+
+					<?php if ( empty( $partners ) ) : ?>
+						<p style="margin:0;color:#64748b;font-size:13px;text-align:center;padding:24px 0;">No community partners added yet. Add one above to generate its unique tracking code and link.</p>
+					<?php else : ?>
+						<table style="width:100%;border-collapse:collapse;font-size:13px;">
+							<thead>
+								<tr style="border-bottom:1px solid #e2e8f0;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">
+									<th style="padding:8px 10px;">Partner</th>
+									<th style="padding:8px 10px;">Code</th>
+									<th style="padding:8px 10px;">Total</th>
+									<th style="padding:8px 10px;">Approved</th>
+									<th style="padding:8px 10px;">Status</th>
+									<th style="padding:8px 10px;text-align:right;">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php foreach ( $partners as $p_code => $p_info ) :
+									$p_cnt  = isset( $partner_counts[ $p_code ] ) ? $partner_counts[ $p_code ] : array( 'total' => 0, 'approved' => 0 );
+									$p_link = add_query_arg( 'partner', $p_code, $reg_page_url );
+									$is_act = ! empty( $p_info['active'] );
+									$tgl_url = wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_reinvent_partner_action&op=toggle&code=' . rawurlencode( $p_code ) ), 'aws_reinvent_partner_toggle_' . $p_code );
+									$del_url = wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_reinvent_partner_action&op=delete&code=' . rawurlencode( $p_code ) ), 'aws_reinvent_partner_delete_' . $p_code );
+									?>
+									<tr style="border-bottom:1px solid #f1f5f9;">
+										<td style="padding:10px;font-weight:700;color:#0f172a;"><?php echo esc_html( $p_info['name'] ); ?></td>
+										<td style="padding:10px;"><code><?php echo esc_html( $p_code ); ?></code></td>
+										<td style="padding:10px;font-weight:700;"><?php echo intval( $p_cnt['total'] ); ?></td>
+										<td style="padding:10px;color:#059669;font-weight:700;"><?php echo intval( $p_cnt['approved'] ); ?></td>
+										<td style="padding:10px;">
+											<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;<?php echo $is_act ? 'background:#dcfce7;color:#15803d;' : 'background:#f1f5f9;color:#64748b;'; ?>">
+												<?php echo $is_act ? 'Active' : 'Paused'; ?>
+											</span>
+										</td>
+										<td style="padding:10px;text-align:right;white-space:nowrap;">
+											<button type="button" class="button button-small" onclick="copyPartnerLink(this, '<?php echo esc_js( $p_link ); ?>')">Copy Link</button>
+											<a class="button button-small" href="<?php echo esc_url( $tgl_url ); ?>"><?php echo $is_act ? 'Pause' : 'Enable'; ?></a>
+											<a class="button button-small" style="color:#dc2626;" href="<?php echo esc_url( $del_url ); ?>" onclick="return confirm('Remove this partner? Existing registrations will keep their recorded partner name/code.');">Delete</a>
+										</td>
+									</tr>
+								<?php endforeach; ?>
+							</tbody>
+						</table>
+					<?php endif; ?>
+				</div>
+			</div>
+		</div>
+		<script>
+			function openPartnersModal() {
+				document.getElementById('aws-reinvent-partners-modal').style.display = 'flex';
+			}
+			function closePartnersModal() {
+				document.getElementById('aws-reinvent-partners-modal').style.display = 'none';
+			}
+			function copyPartnerLink(btn, url) {
+				if (navigator.clipboard && navigator.clipboard.writeText) {
+					navigator.clipboard.writeText(url).then(function() {
+						var orig = btn.textContent;
+						btn.textContent = 'Copied!';
+						setTimeout(function() { btn.textContent = orig; }, 1500);
+					});
+				} else {
+					window.prompt('Copy partner registration link:', url);
 				}
 			}
 		</script>
@@ -4168,7 +4499,7 @@ function aws_sbg_export_reinvent_csv() {
 	header( 'Content-Disposition: attachment; filename=' . $filename );
 
 	$output = fopen( 'php://output', 'w' );
-	fputcsv( $output, array( 'Registration #', 'Name', 'Badge Tier', 'Email', 'WhatsApp', 'CNIC', 'Institute/Company', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS or Community Event Before', 'Applicant Note (Last Attended Event)', 'Admin Note (Internal)', 'Will Attend', 'Vehicle', 'Parking Policy', 'Approval Status', 'Event Day Check-In', 'Checked In At', 'Checked In By', 'Registered At' ) );
+	fputcsv( $output, array( 'Registration #', 'Name', 'Badge Tier', 'Email', 'WhatsApp', 'CNIC', 'Institute/Company', 'Audience Type', 'City', 'LinkedIn', 'Attended AWS or Community Event Before', 'Applicant Note (Last Attended Event)', 'Admin Note (Internal)', 'Will Attend', 'Vehicle', 'Parking Policy', 'Approval Status', 'Event Day Check-In', 'Checked In At', 'Checked In By', 'Partner Code', 'Community Partner', 'Registered At' ) );
 
 	if ( $query->have_posts() ) {
 		foreach ( $query->posts as $reg ) {
@@ -4195,11 +4526,21 @@ function aws_sbg_export_reinvent_csv() {
 			$approval   = get_post_meta( $reg->ID, 'approval_status', true ) ?: 'pending';
 			$registered = get_the_date( 'Y-m-d H:i:s', $reg->ID );
 
-			$event_chk  = get_post_meta( $reg->ID, 'event_checked_in', true ) === 'yes' ? 'Yes' : 'No';
-			$chk_time   = get_post_meta( $reg->ID, 'checked_in_at', true ) ?: '';
-			$chk_by     = get_post_meta( $reg->ID, 'checked_in_by', true ) ?: '';
+			$event_chk    = get_post_meta( $reg->ID, 'event_checked_in', true ) === 'yes' ? 'Yes' : 'No';
+			$chk_time     = get_post_meta( $reg->ID, 'checked_in_at', true ) ?: '';
+			$chk_by       = get_post_meta( $reg->ID, 'checked_in_by', true ) ?: '';
+			$partner_code = get_post_meta( $reg->ID, 'partner_code', true ) ?: '';
+			$partner_name = get_post_meta( $reg->ID, 'partner_name', true ) ?: '';
 
-			fputcsv( $output, array( $reg_number, $title, $badge_tier, $email, $whatsapp, $cnic, $university, ucfirst( str_replace( '_', ' ', $audience ) ), $city, $linkedin, ucfirst( $attended ), $why, $admin_note, ucfirst( $will_attend ), $vehicle, $parking, ucfirst( $approval ), $event_chk, $chk_time, $chk_by, $registered ) );
+			$csv_safe = static function( $val ) {
+				$str = (string) $val;
+				if ( '' !== $str && in_array( $str[0], array( '=', '+', '-', '@', "\t", "\r" ), true ) ) {
+					return "'" . $str;
+				}
+				return $str;
+			};
+
+			fputcsv( $output, array_map( $csv_safe, array( $reg_number, $title, $badge_tier, $email, $whatsapp, $cnic, $university, ucfirst( str_replace( '_', ' ', $audience ) ), $city, $linkedin, ucfirst( $attended ), $why, $admin_note, ucfirst( $will_attend ), $vehicle, $parking, ucfirst( $approval ), $event_chk, $chk_time, $chk_by, $partner_code, $partner_name, $registered ) ) );
 		}
 	}
 
