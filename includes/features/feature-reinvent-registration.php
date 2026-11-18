@@ -1551,6 +1551,7 @@ function aws_sbg_render_reinvent_admin_page() {
 	$tier_filter    = isset( $_GET['tier_filter'] ) ? sanitize_text_field( wp_unslash( $_GET['tier_filter'] ) ) : '';
 	$checkin_filter = isset( $_GET['checkin_filter'] ) ? sanitize_key( wp_unslash( $_GET['checkin_filter'] ) ) : '';
 	$partner_filter = isset( $_GET['partner_filter'] ) ? strtoupper( preg_replace( '/[^a-zA-Z0-9_-]/', '', wp_unslash( $_GET['partner_filter'] ) ) ) : '';
+	$source_filter  = isset( $_GET['source_filter'] ) ? sanitize_key( wp_unslash( $_GET['source_filter'] ) ) : '';
 	$paged          = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
 	$per_page       = 50;
 
@@ -1616,6 +1617,20 @@ function aws_sbg_render_reinvent_admin_page() {
 			$meta_query[] = array(
 				'key'     => 'partner_code',
 				'value'   => $partner_filter,
+				'compare' => '=',
+			);
+		}
+	}
+	if ( $source_filter ) {
+		if ( 'public' === $source_filter ) {
+			$meta_query[] = array(
+				'key'     => '_registration_source',
+				'compare' => 'NOT EXISTS',
+			);
+		} else {
+			$meta_query[] = array(
+				'key'     => '_registration_source',
+				'value'   => $source_filter,
 				'compare' => '=',
 			);
 		}
@@ -1997,11 +2012,20 @@ function aws_sbg_render_reinvent_admin_page() {
 					</select>
 				</div>
 				<div class="rvadm-field">
+					<label for="rvadm-source">Source</label>
+					<select id="rvadm-source" name="source_filter" onchange="this.form.submit()">
+						<option value="">All sources</option>
+						<option value="public" <?php selected( $source_filter, 'public' ); ?>>Public Form</option>
+						<option value="guest_form" <?php selected( $source_filter, 'guest_form' ); ?>>Guest Form</option>
+						<option value="manual" <?php selected( $source_filter, 'manual' ); ?>>Manual</option>
+					</select>
+				</div>
+				<div class="rvadm-field">
 					<label for="rvadm-search">Search</label>
 					<input id="rvadm-search" type="search" name="search" value="<?php echo esc_attr( $search ); ?>" placeholder="Name, CNIC, email, phone, university, or reg #">
 				</div>
 				<button type="submit" class="rvadm-search-btn">Search</button>
-				<?php if ( $search || $status || $tier_filter || $checkin_filter || $partner_filter ) : ?>
+				<?php if ( $search || $status || $tier_filter || $checkin_filter || $partner_filter || $source_filter ) : ?>
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-reinvent-registrations' ) ); ?>" class="rvadm-btn">Reset</a>
 				<?php endif; ?>
 			</form>

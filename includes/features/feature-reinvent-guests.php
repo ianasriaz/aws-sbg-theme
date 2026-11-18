@@ -430,9 +430,9 @@ function aws_sbg_handle_reinvent_guest_submission() {
 			'has_vehicle'     => $has_vehicle,
 			'vehicle_type'    => $vehicle_type,
 			'vehicle_number'  => $vehicle_number,
-			'approval_status' => 'pending',
-			'guest_number'    => '',
-			'notified'        => 'no',
+			'_badge_tier'     => 'VIP',
+			'merged_reg_id'   => 0,
+			'merged_reg_no'   => '',
 		),
 	) );
 
@@ -467,80 +467,159 @@ function aws_sbg_register_reinvent_guests_admin_menu() {
 }
 add_action( 'admin_menu', 'aws_sbg_register_reinvent_guests_admin_menu', 12 );
 
-function aws_sbg_guest_allocate_number() {
-	$next = (int) get_option( 'aws_reinvent_guest_next_no', 1 );
-	update_option( 'aws_reinvent_guest_next_no', $next + 1, false );
-	return 'GUEST-' . str_pad( $next, 2, '0', STR_PAD_LEFT );
-}
-
-function aws_sbg_guest_handle_review_action() {
-	if ( ! is_admin() || ! current_user_can( 'manage_options' ) ) {
-		return;
+/**
+ * Save Role / Badge Tier tag on a guest record (and sync to merged registration if already merged).
+ */
+function aws_sbg_guest_handle_save_tag() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized.' );
 	}
-	if ( ! isset( $_GET['page'] ) || 'aws-reinvent-guests' !== $_GET['page'] ) {
-		return;
-	}
-	if ( ! isset( $_GET['action'], $_GET['guest_id'], $_GET['_wpnonce'] ) || ! in_array( $_GET['action'], array( 'approve', 'reject' ), true ) ) {
-		return;
-	}
+	$guest_id = isset( $_POST['guest_id'] ) ? intval( $_POST['guest_id'] ) : 0;
+	check_admin_referer( 'aws_guest_save_tag_' . $guest_id, 'aws_guest_tag_nonce' );
 
-	$guest_id = intval( $_GET['guest_id'] );
-	if ( $guest_id <= 0 || 'aws_reinvent_guest' !== get_post_type( $guest_id ) ) {
-		wp_die( 'Invalid guest record.' );
-	}
-
-	$action = sanitize_key( $_GET['action'] );
-	if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'aws_guest_review_' . $action . '_' . $guest_id ) ) {
-		wp_die( 'Security check failed.' );
-	}
-
-	$prev_status = get_post_meta( $guest_id, 'approval_status', true );
-	$new_status  = ( 'approve' === $action ) ? 'approved' : 'rejected';
-	update_post_meta( $guest_id, 'approval_status', $new_status );
-
-	if ( 'approved' === $new_status && 'approved' !== $prev_status ) {
-		$name     = get_post_meta( $guest_id, 'full_name', true ) ?: get_the_title( $guest_id );
-		$to_email = get_post_meta( $guest_id, 'email', true );
-		$guest_no = get_post_meta( $guest_id, 'guest_number', true );
-		if ( empty( $guest_no ) ) {
-			$guest_no = aws_sbg_guest_allocate_number();
-			update_post_meta( $guest_id, 'guest_number', $guest_no );
+	if ( $guest_id > 0 && 'aws_reinvent_guest' === get_post_type( $guest_id ) ) {
+		$tag = isset( $_POST['badge_tier'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_POST['badge_tier'] ) ) ) : 'VIP';
+		if ( '' === $tag ) {
+			$tag = 'VIP';
 		}
+		update_post_meta( $guest_id, '_badge_tier', $tag );
 
-		if ( $to_email && ( function_exists( 'aws_sbg_mail_send_raw' ) || function_exists( 'aws_sbg_mail_send' ) ) ) {
-			$subject = "You're Invited! Guest Pass for AWS re:Invent 2026 Watch & Build Party Islamabad";
-			$html    = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
-				. '<body style="margin:0;padding:24px;background-color:#ffffff;color:#111827;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;">'
-				. '<p style="margin:0 0 16px 0;">Hi ' . esc_html( $name ) . ',</p>'
-				. '<p style="margin:0 0 16px 0;">We\'re delighted to confirm your <strong>Guest Pass</strong> for <strong>AWS re:Invent 2026 Watch &amp; Build Party Islamabad</strong>.</p>'
-				. '<p style="margin:0 0 20px 0;"><strong>Guest Pass Number:</strong> #' . esc_html( $guest_no ) . '</p>'
-				. '<p style="margin:0 0 8px 0;font-weight:700;color:#111827;">Event Details</p>'
-				. '<ul style="margin:0 0 22px 20px;padding:0;">'
-				. '<li style="margin:0 0 6px 0;"><strong>Date:</strong> November 30, 2026</li>'
-				. '<li style="margin:0 0 6px 0;"><strong>Time:</strong> 10:00 AM - 4:00 PM</li>'
-				. '<li style="margin:0 0 6px 0;"><strong>Venue:</strong> Air University Islamabad, E9 Campus</li>'
-				. '<li style="margin:0;"><strong>Security Check-in:</strong> Please bring your original CNIC for gate clearance.</li>'
-				. '</ul>'
-				. '<p style="margin:0;font-size:13px;color:#475569;">We look forward to welcoming you!</p>'
-				. '</body></html>';
-
-			try {
-				if ( function_exists( 'aws_sbg_mail_send_raw' ) ) {
-					aws_sbg_mail_send_raw( 'reinvent', $to_email, $subject, $html );
-				} else {
-					aws_sbg_mail_send( 'reinvent', $to_email, $subject, '', '', $html );
-				}
-				update_post_meta( $guest_id, 'notified', 'yes' );
-			} catch ( \Throwable $e ) {
-				error_log( 're:Invent guest approval email failed: ' . $e->getMessage() );
-			}
+		$merged_id = (int) get_post_meta( $guest_id, 'merged_reg_id', true );
+		if ( $merged_id > 0 && 'aws_reinvent_reg' === get_post_type( $merged_id ) ) {
+			update_post_meta( $merged_id, '_badge_tier', $tag );
 		}
 	}
 
-	wp_safe_redirect( add_query_arg( 'notice', $new_status, admin_url( 'admin.php?page=aws-reinvent-guests' ) ) );
+	wp_safe_redirect( add_query_arg( 'notice', 'tag_saved', admin_url( 'admin.php?page=aws-reinvent-guests' ) ) );
 	exit;
 }
-add_action( 'admin_init', 'aws_sbg_guest_handle_review_action' );
+add_action( 'admin_post_aws_sbg_guest_save_tag', 'aws_sbg_guest_handle_save_tag' );
+
+/**
+ * Merge a single guest record into `aws_reinvent_reg` (approved for check-in & badge printing, no email sent).
+ *
+ * @return string 'merged' | 'already' | 'duplicate' | 'error'
+ */
+function aws_sbg_guest_merge_single( $guest_id ) {
+	if ( $guest_id <= 0 || 'aws_reinvent_guest' !== get_post_type( $guest_id ) ) {
+		return 'error';
+	}
+	if ( (int) get_post_meta( $guest_id, 'merged_reg_id', true ) > 0 ) {
+		return 'already';
+	}
+
+	$full_name   = get_post_meta( $guest_id, 'full_name', true ) ?: get_the_title( $guest_id );
+	$email       = strtolower( (string) get_post_meta( $guest_id, 'email', true ) );
+	$whatsapp    = (string) get_post_meta( $guest_id, 'whatsapp', true );
+	$cnic        = (string) get_post_meta( $guest_id, 'cnic', true );
+	$affiliation = (string) get_post_meta( $guest_id, 'affiliation', true );
+	$city        = (string) get_post_meta( $guest_id, 'city', true );
+	$has_vehicle = (string) get_post_meta( $guest_id, 'has_vehicle', true ) ?: 'no';
+	$veh_type    = (string) get_post_meta( $guest_id, 'vehicle_type', true );
+	$veh_num     = (string) get_post_meta( $guest_id, 'vehicle_number', true );
+	$badge_tier  = get_post_meta( $guest_id, '_badge_tier', true ) ?: 'VIP';
+
+	global $wpdb;
+	if ( $email ) {
+		$existing_id = (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT p.ID FROM {$wpdb->posts} p
+			 INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+			 WHERE p.post_type = 'aws_reinvent_reg'
+			   AND p.post_status = 'publish'
+			   AND pm.meta_key = 'email'
+			   AND pm.meta_value = %s
+			 LIMIT 1",
+			$email
+		) );
+		if ( $existing_id > 0 ) {
+			return 'duplicate';
+		}
+	}
+
+	$reg_no = function_exists( 'aws_sbg_allocate_reinvent_registration_number' )
+		? aws_sbg_allocate_reinvent_registration_number()
+		: 'RIV-' . str_pad( $guest_id, 2, '0', STR_PAD_LEFT );
+
+	$reg_id = wp_insert_post( array(
+		'post_type'      => 'aws_reinvent_reg',
+		'post_title'     => $full_name,
+		'post_status'    => 'publish',
+		'comment_status' => 'closed',
+		'ping_status'    => 'closed',
+		'meta_input'     => array(
+			'full_name'            => $full_name,
+			'email'                => $email,
+			'whatsapp'             => $whatsapp,
+			'cnic'                 => $cnic,
+			'university'           => $affiliation,
+			'audience_type'        => 'professional',
+			'city'                 => $city,
+			'linkedin'             => '',
+			'attended_before'      => 'no',
+			'why_invite'           => '',
+			'will_attend'          => 'yes',
+			'has_vehicle'          => $has_vehicle,
+			'vehicle_type'         => $veh_type,
+			'vehicle_number'       => $veh_num,
+			'parking_policy'       => 'yes',
+			'approval_status'      => 'approved',
+			'registration_number'  => $reg_no,
+			'_badge_tier'          => $badge_tier,
+			'_registration_source' => 'guest_form',
+			'notified'             => 'no',
+			'notified_status'      => '',
+		),
+	) );
+
+	if ( is_wp_error( $reg_id ) ) {
+		return 'error';
+	}
+
+	update_post_meta( $guest_id, 'merged_reg_id', (int) $reg_id );
+	update_post_meta( $guest_id, 'merged_reg_no', $reg_no );
+	return 'merged';
+}
+
+/**
+ * Handle single or bulk merge of guests into `aws_reinvent_reg`.
+ */
+function aws_sbg_guest_handle_merge() {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized.' );
+	}
+
+	$base_redirect = admin_url( 'admin.php?page=aws-reinvent-guests' );
+
+	if ( ! empty( $_GET['bulk'] ) ) {
+		check_admin_referer( 'aws_guest_merge_all' );
+		$guests = get_posts( array(
+			'post_type'      => 'aws_reinvent_guest',
+			'posts_per_page' => -1,
+			'post_status'    => 'publish',
+			'fields'         => 'ids',
+		) );
+		$merged_cnt = 0;
+		$dup_cnt    = 0;
+		foreach ( $guests as $gid ) {
+			$res = aws_sbg_guest_merge_single( (int) $gid );
+			if ( 'merged' === $res ) {
+				$merged_cnt++;
+			} elseif ( 'duplicate' === $res ) {
+				$dup_cnt++;
+			}
+		}
+		wp_safe_redirect( add_query_arg( array( 'notice' => 'bulk_merged', 'count' => $merged_cnt, 'dups' => $dup_cnt ), $base_redirect ) );
+		exit;
+	}
+
+	$guest_id = isset( $_GET['guest_id'] ) ? intval( $_GET['guest_id'] ) : 0;
+	check_admin_referer( 'aws_guest_merge_' . $guest_id );
+	$res = aws_sbg_guest_merge_single( $guest_id );
+
+	wp_safe_redirect( add_query_arg( 'notice', $res, $base_redirect ) );
+	exit;
+}
+add_action( 'admin_post_aws_sbg_guest_merge', 'aws_sbg_guest_handle_merge' );
 
 function aws_sbg_guest_handle_delete() {
 	if ( ! current_user_can( 'manage_options' ) ) {
@@ -578,7 +657,7 @@ function aws_sbg_export_reinvent_guests_csv() {
 
 	$output = fopen( 'php://output', 'w' );
 	fwrite( $output, "\xEF\xBB\xBF" );
-	fputcsv( $output, array( 'Guest #', 'Full Name', 'Email', 'WhatsApp', 'CNIC', 'Community / Organization', 'City', 'Vehicle', 'Approval Status', 'Submitted At' ) );
+	fputcsv( $output, array( 'Role Tag', 'Full Name', 'Email', 'WhatsApp', 'CNIC', 'Community / Organization', 'City', 'Vehicle', 'Merged Pass #', 'Submitted At' ) );
 
 	$csv_safe = static function( $val ) {
 		$str = (string) $val;
@@ -592,7 +671,7 @@ function aws_sbg_export_reinvent_guests_csv() {
 		$has_v = get_post_meta( $g->ID, 'has_vehicle', true );
 		$veh   = ( 'yes' === $has_v ) ? ucfirst( get_post_meta( $g->ID, 'vehicle_type', true ) ) . ' · ' . get_post_meta( $g->ID, 'vehicle_number', true ) : 'No';
 		fputcsv( $output, array_map( $csv_safe, array(
-			get_post_meta( $g->ID, 'guest_number', true ),
+			get_post_meta( $g->ID, '_badge_tier', true ) ?: 'VIP',
 			get_post_meta( $g->ID, 'full_name', true ) ?: get_the_title( $g->ID ),
 			get_post_meta( $g->ID, 'email', true ),
 			get_post_meta( $g->ID, 'whatsapp', true ),
@@ -600,7 +679,7 @@ function aws_sbg_export_reinvent_guests_csv() {
 			get_post_meta( $g->ID, 'affiliation', true ),
 			get_post_meta( $g->ID, 'city', true ),
 			$veh,
-			ucfirst( get_post_meta( $g->ID, 'approval_status', true ) ?: 'pending' ),
+			get_post_meta( $g->ID, 'merged_reg_no', true ) ?: 'Not Merged',
 			get_the_date( 'Y-m-d H:i:s', $g->ID ),
 		) ) );
 	}
@@ -615,8 +694,10 @@ function aws_sbg_render_reinvent_guests_admin_page() {
 		wp_die( 'Unauthorized.' );
 	}
 
-	$notice = isset( $_GET['notice'] ) ? sanitize_key( $_GET['notice'] ) : '';
-	$guests = get_posts( array(
+	$notice   = isset( $_GET['notice'] ) ? sanitize_key( $_GET['notice'] ) : '';
+	$n_count  = isset( $_GET['count'] ) ? intval( $_GET['count'] ) : 0;
+	$n_dups   = isset( $_GET['dups'] ) ? intval( $_GET['dups'] ) : 0;
+	$guests   = get_posts( array(
 		'post_type'      => 'aws_reinvent_guest',
 		'posts_per_page' => 250,
 		'post_status'    => 'publish',
@@ -624,15 +705,26 @@ function aws_sbg_render_reinvent_guests_admin_page() {
 		'order'          => 'DESC',
 	) );
 
+	$unmerged_count = 0;
+	foreach ( $guests as $g_item ) {
+		if ( (int) get_post_meta( $g_item->ID, 'merged_reg_id', true ) <= 0 ) {
+			$unmerged_count++;
+		}
+	}
+
 	if ( function_exists( 'aws_sbg_render_admin_nav_tabs' ) ) {
 		aws_sbg_render_admin_nav_tabs( 'reinvent_guests' );
 	}
 	?>
 	<div class="wrap" style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:1400px;">
-		<?php if ( 'approved' === $notice ) : ?>
-			<div class="notice notice-success is-dismissible"><p><strong>Guest approved!</strong> Guest pass number assigned and confirmation email sent.</p></div>
-		<?php elseif ( 'rejected' === $notice ) : ?>
-			<div class="notice notice-info is-dismissible"><p><strong>Guest entry marked as rejected.</strong></p></div>
+		<?php if ( 'tag_saved' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible"><p><strong>Role tag updated.</strong></p></div>
+		<?php elseif ( 'merged' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible"><p><strong>Guest merged into re:Invent Registrations!</strong> Ready for Check-In and Badge printing (no email was sent).</p></div>
+		<?php elseif ( 'bulk_merged' === $notice ) : ?>
+			<div class="notice notice-success is-dismissible"><p><strong>Bulk merge complete:</strong> <?php echo intval( $n_count ); ?> guest(s) merged into re:Invent Registrations<?php echo $n_dups ? ' (' . intval( $n_dups ) . ' skipped due to duplicate email)' : ''; ?>.</p></div>
+		<?php elseif ( 'duplicate' === $notice ) : ?>
+			<div class="notice notice-warning is-dismissible"><p><strong>Already in re:Invent Registrations:</strong> A registration with this email already exists in the main sheet.</p></div>
 		<?php elseif ( 'deleted' === $notice ) : ?>
 			<div class="notice notice-info is-dismissible"><p><strong>Guest entry deleted.</strong></p></div>
 		<?php endif; ?>
@@ -640,11 +732,15 @@ function aws_sbg_render_reinvent_guests_admin_page() {
 		<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin:14px 0 18px;">
 			<div>
 				<h1 style="margin:0;font-size:22px;font-weight:800;color:#0f172a;">re:Invent Invited Guests &amp; Community Leaders</h1>
-				<p style="margin:4px 0 0;font-size:13px;color:#64748b;">Separate guest form: <a href="<?php echo esc_url( home_url( '/aws-reinvent-guests/' ) ); ?>" target="_blank"><?php echo esc_html( home_url( '/aws-reinvent-guests/' ) ); ?></a></p>
+				<p style="margin:4px 0 0;font-size:13px;color:#64748b;">Confirmed guest details for check-in &amp; badge printing (no approval emails). Form: <a href="<?php echo esc_url( home_url( '/aws-reinvent-guests/' ) ); ?>" target="_blank"><?php echo esc_html( home_url( '/aws-reinvent-guests/' ) ); ?></a></p>
 			</div>
-			<div style="display:flex;gap:8px;">
+			<div style="display:flex;gap:8px;flex-wrap:wrap;">
+				<?php if ( $unmerged_count > 0 ) : ?>
+					<a class="button button-primary" style="background:#7c3aed;border-color:#6d28d9;" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_guest_merge&bulk=1' ), 'aws_guest_merge_all' ) ); ?>" onclick="return confirm('Merge all <?php echo intval( $unmerged_count ); ?> unmerged guests into re:Invent Registrations for check-in & badge printing? No emails will be sent.');">Merge All Unmerged (<?php echo intval( $unmerged_count ); ?>)</a>
+				<?php endif; ?>
+				<a class="button" href="<?php echo esc_url( admin_url( 'admin.php?page=aws-reinvent-registrations&badges=1' ) ); ?>" target="_blank">🪪 Print Badges (PDF)</a>
 				<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin.php?page=aws-reinvent-guests&export_csv=1' ), 'aws_reinvent_guests_export_csv' ) ); ?>">Export CSV</a>
-				<a class="button button-primary" href="<?php echo esc_url( home_url( '/aws-reinvent-guests/' ) ); ?>" target="_blank">Open Guest Form ↗</a>
+				<a class="button" href="<?php echo esc_url( home_url( '/aws-reinvent-guests/' ) ); ?>" target="_blank">Open Guest Form ↗</a>
 			</div>
 		</div>
 
@@ -652,13 +748,13 @@ function aws_sbg_render_reinvent_guests_admin_page() {
 			<table style="width:100%;border-collapse:collapse;font-size:13px;">
 				<thead>
 					<tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;text-align:left;font-size:11px;text-transform:uppercase;color:#64748b;">
-						<th style="padding:12px 14px;">Guest #</th>
+						<th style="padding:12px 14px;">Role / Tag</th>
 						<th style="padding:12px 14px;">Name &amp; Organization</th>
 						<th style="padding:12px 14px;">Contact</th>
 						<th style="padding:12px 14px;">CNIC</th>
 						<th style="padding:12px 14px;">City</th>
 						<th style="padding:12px 14px;">Vehicle</th>
-						<th style="padding:12px 14px;">Status</th>
+						<th style="padding:12px 14px;">Sheet Status</th>
 						<th style="padding:12px 14px;text-align:right;">Actions</th>
 					</tr>
 				</thead>
@@ -666,30 +762,44 @@ function aws_sbg_render_reinvent_guests_admin_page() {
 					<?php if ( empty( $guests ) ) : ?>
 						<tr><td colspan="8" style="padding:36px;text-align:center;color:#64748b;">No guest submissions yet.</td></tr>
 					<?php else : ?>
-						<?php foreach ( $guests as $g ) :
-							$id       = $g->ID;
-							$g_no     = get_post_meta( $id, 'guest_number', true );
-							$name     = get_post_meta( $id, 'full_name', true ) ?: get_the_title( $id );
-							$aff      = get_post_meta( $id, 'affiliation', true );
-							$wa       = get_post_meta( $id, 'whatsapp', true );
-							$email    = get_post_meta( $id, 'email', true );
-							$cnic     = get_post_meta( $id, 'cnic', true );
-							$city     = get_post_meta( $id, 'city', true );
-							$has_v    = get_post_meta( $id, 'has_vehicle', true );
-							$veh      = ( 'yes' === $has_v ) ? ucfirst( get_post_meta( $id, 'vehicle_type', true ) ) . ' · ' . get_post_meta( $id, 'vehicle_number', true ) : '—';
-							$status   = get_post_meta( $id, 'approval_status', true ) ?: 'pending';
+						<?php
+						$tag_options = array( 'VIP', 'SPEAKER', 'CORE TEAM', 'EVENT CREW', 'ORGANIZER', 'ATTENDEE' );
+						foreach ( $guests as $g ) :
+							$id        = $g->ID;
+							$tag       = get_post_meta( $id, '_badge_tier', true ) ?: 'VIP';
+							$name      = get_post_meta( $id, 'full_name', true ) ?: get_the_title( $id );
+							$aff       = get_post_meta( $id, 'affiliation', true );
+							$wa        = get_post_meta( $id, 'whatsapp', true );
+							$email     = get_post_meta( $id, 'email', true );
+							$cnic      = get_post_meta( $id, 'cnic', true );
+							$city      = get_post_meta( $id, 'city', true );
+							$has_v     = get_post_meta( $id, 'has_vehicle', true );
+							$veh       = ( 'yes' === $has_v ) ? ucfirst( get_post_meta( $id, 'vehicle_type', true ) ) . ' · ' . get_post_meta( $id, 'vehicle_number', true ) : '—';
+							$merged_id = (int) get_post_meta( $id, 'merged_reg_id', true );
+							$merged_no = get_post_meta( $id, 'merged_reg_no', true );
 
 							$wa_digits = preg_replace( '/[^0-9]/', '', (string) $wa );
 							if ( substr( $wa_digits, 0, 1 ) === '0' ) {
 								$wa_digits = '92' . substr( $wa_digits, 1 );
 							}
-							$app_url = wp_nonce_url( admin_url( 'admin.php?page=aws-reinvent-guests&action=approve&guest_id=' . $id ), 'aws_guest_review_approve_' . $id );
-							$rej_url = wp_nonce_url( admin_url( 'admin.php?page=aws-reinvent-guests&action=reject&guest_id=' . $id ), 'aws_guest_review_reject_' . $id );
-							$del_url = wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_guest_delete&guest_id=' . $id ), 'aws_guest_delete_' . $id );
+							$merge_url = wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_guest_merge&guest_id=' . $id ), 'aws_guest_merge_' . $id );
+							$del_url   = wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_guest_delete&guest_id=' . $id ), 'aws_guest_delete_' . $id );
 							?>
 							<tr style="border-bottom:1px solid #f1f5f9;">
 								<td style="padding:12px 14px;">
-									<?php echo $g_no ? '<code>' . esc_html( $g_no ) . '</code>' : '<span style="color:#94a3b8;">Pending</span>'; ?>
+									<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin:0;display:inline-flex;gap:4px;align-items:center;">
+										<?php wp_nonce_field( 'aws_guest_save_tag_' . $id, 'aws_guest_tag_nonce' ); ?>
+										<input type="hidden" name="action" value="aws_sbg_guest_save_tag">
+										<input type="hidden" name="guest_id" value="<?php echo intval( $id ); ?>">
+										<select name="badge_tier" onchange="this.form.submit()" style="font-size:11.5px;font-weight:700;padding:3px 6px;border-radius:6px;border:1px solid #cbd5e1;">
+											<?php foreach ( $tag_options as $opt ) : ?>
+												<option value="<?php echo esc_attr( $opt ); ?>" <?php selected( strtoupper( $tag ), $opt ); ?>><?php echo esc_html( $opt ); ?></option>
+											<?php endforeach; ?>
+											<?php if ( ! in_array( strtoupper( $tag ), $tag_options, true ) ) : ?>
+												<option value="<?php echo esc_attr( $tag ); ?>" selected><?php echo esc_html( $tag ); ?></option>
+											<?php endif; ?>
+										</select>
+									</form>
 								</td>
 								<td style="padding:12px 14px;">
 									<div style="font-weight:700;color:#0f172a;"><?php echo esc_html( $name ); ?></div>
@@ -709,20 +819,15 @@ function aws_sbg_render_reinvent_guests_admin_page() {
 								<td style="padding:12px 14px;"><?php echo esc_html( $city ); ?></td>
 								<td style="padding:12px 14px;font-size:12px;color:#475569;"><?php echo esc_html( $veh ); ?></td>
 								<td style="padding:12px 14px;">
-									<?php
-									$badge_style = 'background:#fef3c7;color:#b45309;';
-									if ( 'approved' === $status ) {
-										$badge_style = 'background:#dcfce7;color:#15803d;';
-									} elseif ( 'rejected' === $status ) {
-										$badge_style = 'background:#fee2e2;color:#b91c1c;';
-									}
-									?>
-									<span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;<?php echo esc_attr( $badge_style ); ?>"><?php echo esc_html( $status ); ?></span>
+									<?php if ( $merged_id > 0 ) : ?>
+										<span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;background:#dcfce7;color:#15803d;">Merged (<?php echo esc_html( $merged_no ?: 'Yes' ); ?>)</span>
+									<?php else : ?>
+										<span style="display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;background:#f1f5f9;color:#475569;">Separate</span>
+									<?php endif; ?>
 								</td>
 								<td style="padding:12px 14px;text-align:right;white-space:nowrap;">
-									<?php if ( 'pending' === $status ) : ?>
-										<a class="button button-small button-primary" href="<?php echo esc_url( $app_url ); ?>">Approve</a>
-										<a class="button button-small" href="<?php echo esc_url( $rej_url ); ?>">Reject</a>
+									<?php if ( $merged_id <= 0 ) : ?>
+										<a class="button button-small button-primary" href="<?php echo esc_url( $merge_url ); ?>">Merge to Sheet</a>
 									<?php endif; ?>
 									<a class="button button-small" style="color:#dc2626;" href="<?php echo esc_url( $del_url ); ?>" onclick="return confirm('Delete this guest record?');">Delete</a>
 								</td>
