@@ -77,6 +77,7 @@ function aws_sbg_render_community_partner_form( $atts = array() ) {
 	$error_messages = array(
 		'required' => 'Please fill in all required fields and accept the promotion commitment.',
 		'email'    => 'Please enter a valid email address.',
+		'url'      => 'Please enter valid URLs (starting with https://) for LinkedIn and your Community WhatsApp Group link.',
 		'logo_req' => 'Please upload your community logo (PNG, JPG, or WEBP, max 2 MB).',
 		'logo_ext' => 'Invalid logo file. Only PNG, JPG, or WEBP images up to 2 MB are allowed.',
 		'save'     => 'Could not save your application. Please try again.',
@@ -124,7 +125,8 @@ function aws_sbg_render_community_partner_form( $atts = array() ) {
 			.cp-field label em { font-style:normal; color:#00DFD8; }
 			.cp-field input[type="text"],
 			.cp-field input[type="email"],
-			.cp-field input[type="tel"] { width:100%; padding:14px 16px; font-family:inherit; font-size:16px; color:#FFFFFF; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.16); border-radius:10px; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
+			.cp-field input[type="tel"],
+			.cp-field input[type="url"] { width:100%; padding:14px 16px; font-family:inherit; font-size:16px; color:#FFFFFF; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.16); border-radius:10px; transition:border-color 0.15s ease, box-shadow 0.15s ease; }
 			.cp-field input:focus { outline:none; border-color:#00DFD8; box-shadow:0 0 0 3px rgba(0,223,216,0.14); }
 			.cp-field input::placeholder { color:rgba(255,255,255,0.32); }
 
@@ -234,6 +236,14 @@ function aws_sbg_render_community_partner_form( $atts = array() ) {
 								<label for="cp-email">Email <em>*</em></label>
 								<input id="cp-email" type="email" name="email" required placeholder="lead@community.org">
 							</div>
+							<div class="cp-field">
+								<label for="cp-linkedin">LinkedIn URL <em>*</em></label>
+								<input id="cp-linkedin" type="url" name="linkedin_url" required placeholder="https://linkedin.com/in/username">
+							</div>
+							<div class="cp-field">
+								<label for="cp-community-wa">Community WhatsApp Group Link <em>*</em></label>
+								<input id="cp-community-wa" type="url" name="community_whatsapp" required placeholder="https://chat.whatsapp.com/...">
+							</div>
 							<div class="cp-field" style="grid-column:1/-1;">
 								<label for="cp-logo">Community Logo <em>*</em></label>
 								<div class="cp-upload">
@@ -292,7 +302,7 @@ function aws_sbg_render_community_partner_form( $atts = array() ) {
 					if (!form) return;
 					try {
 						const data = {};
-						['community_name', 'institute', 'city', 'lead_name', 'lead_whatsapp', 'email'].forEach((name) => {
+						['community_name', 'institute', 'city', 'lead_name', 'lead_whatsapp', 'email', 'linkedin_url', 'community_whatsapp'].forEach((name) => {
 							const el = form.querySelector(`[name="${name}"]`);
 							if (el) data[name] = el.value;
 						});
@@ -359,16 +369,24 @@ function aws_sbg_handle_partner_app_submission() {
 	$institute      = isset( $_POST['institute'] ) ? sanitize_text_field( wp_unslash( $_POST['institute'] ) ) : '';
 	$city           = isset( $_POST['city'] ) ? sanitize_text_field( wp_unslash( $_POST['city'] ) ) : '';
 	$lead_name      = isset( $_POST['lead_name'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_name'] ) ) : '';
-	$lead_whatsapp  = isset( $_POST['lead_whatsapp'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_whatsapp'] ) ) : '';
-	$email          = isset( $_POST['email'] ) ? strtolower( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : '';
-	$promote_commit = ( isset( $_POST['promote_commit'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['promote_commit'] ) ) );
+	$lead_whatsapp      = isset( $_POST['lead_whatsapp'] ) ? sanitize_text_field( wp_unslash( $_POST['lead_whatsapp'] ) ) : '';
+	$email              = isset( $_POST['email'] ) ? strtolower( sanitize_email( wp_unslash( $_POST['email'] ) ) ) : '';
+	$linkedin_raw       = isset( $_POST['linkedin_url'] ) ? trim( wp_unslash( $_POST['linkedin_url'] ) ) : '';
+	$linkedin_url       = $linkedin_raw ? esc_url_raw( $linkedin_raw, array( 'http', 'https' ) ) : '';
+	$comm_wa_raw        = isset( $_POST['community_whatsapp'] ) ? trim( wp_unslash( $_POST['community_whatsapp'] ) ) : '';
+	$community_whatsapp = $comm_wa_raw ? esc_url_raw( $comm_wa_raw, array( 'http', 'https' ) ) : '';
+	$promote_commit     = ( isset( $_POST['promote_commit'] ) && 'yes' === sanitize_key( wp_unslash( $_POST['promote_commit'] ) ) );
 
-	if ( empty( $community_name ) || empty( $institute ) || empty( $city ) || empty( $lead_name ) || empty( $lead_whatsapp ) || ! $promote_commit ) {
+	if ( empty( $community_name ) || empty( $institute ) || empty( $city ) || empty( $lead_name ) || empty( $lead_whatsapp ) || empty( $linkedin_raw ) || empty( $comm_wa_raw ) || ! $promote_commit ) {
 		aws_sbg_partner_redirect_back( array( 'partner_status' => 'error', 'partner_error' => 'required' ) );
 	}
 
 	if ( empty( $email ) || ! is_email( $email ) ) {
 		aws_sbg_partner_redirect_back( array( 'partner_status' => 'error', 'partner_error' => 'email' ) );
+	}
+
+	if ( empty( $linkedin_url ) || false === filter_var( $linkedin_url, FILTER_VALIDATE_URL ) || empty( $community_whatsapp ) || false === filter_var( $community_whatsapp, FILTER_VALIDATE_URL ) ) {
+		aws_sbg_partner_redirect_back( array( 'partner_status' => 'error', 'partner_error' => 'url' ) );
 	}
 
 	// Validate logo upload strictly before touching DB
@@ -428,10 +446,12 @@ function aws_sbg_handle_partner_app_submission() {
 			'community_name' => $community_name,
 			'institute'      => $institute,
 			'city'           => $city,
-			'lead_name'      => $lead_name,
-			'lead_whatsapp'  => $lead_whatsapp,
-			'email'          => $email,
-			'logo_id'        => (int) $logo_id,
+			'lead_name'          => $lead_name,
+			'lead_whatsapp'      => $lead_whatsapp,
+			'email'              => $email,
+			'linkedin_url'       => $linkedin_url,
+			'community_whatsapp' => $community_whatsapp,
+			'logo_id'            => (int) $logo_id,
 			'promote_commit' => 'yes',
 			'approval_status'=> 'pending',
 			'partner_code'   => '',
@@ -594,7 +614,7 @@ function aws_sbg_export_partner_apps_csv() {
 
 	$output = fopen( 'php://output', 'w' );
 	fwrite( $output, "\xEF\xBB\xBF" );
-	fputcsv( $output, array( 'Event', 'Community Name', 'Institute', 'City', 'Lead Name', 'Lead WhatsApp', 'Email', 'Partner Code', 'Logo URL', 'Status', 'Submitted At' ) );
+	fputcsv( $output, array( 'Event', 'Community Name', 'Institute', 'City', 'Lead Name', 'Lead WhatsApp', 'Email', 'LinkedIn URL', 'Community WhatsApp Group', 'Partner Code', 'Logo URL', 'Status', 'Submitted At' ) );
 
 	$csv_safe = static function( $val ) {
 		$str = (string) $val;
@@ -615,6 +635,8 @@ function aws_sbg_export_partner_apps_csv() {
 			get_post_meta( $app->ID, 'lead_name', true ),
 			get_post_meta( $app->ID, 'lead_whatsapp', true ),
 			get_post_meta( $app->ID, 'email', true ),
+			get_post_meta( $app->ID, 'linkedin_url', true ),
+			get_post_meta( $app->ID, 'community_whatsapp', true ),
 			get_post_meta( $app->ID, 'partner_code', true ),
 			$logo_url,
 			ucfirst( get_post_meta( $app->ID, 'approval_status', true ) ?: 'pending' ),
@@ -692,6 +714,8 @@ function aws_sbg_render_partner_apps_admin_page() {
 							$lead     = get_post_meta( $id, 'lead_name', true );
 							$wa       = get_post_meta( $id, 'lead_whatsapp', true );
 							$email    = get_post_meta( $id, 'email', true );
+							$li_url   = get_post_meta( $id, 'linkedin_url', true );
+							$comm_wa  = get_post_meta( $id, 'community_whatsapp', true );
 							$logo_id  = (int) get_post_meta( $id, 'logo_id', true );
 							$logo_url = $logo_id ? wp_get_attachment_image_url( $logo_id, 'thumbnail' ) : '';
 							$p_code   = get_post_meta( $id, 'partner_code', true );
@@ -729,6 +753,16 @@ function aws_sbg_render_partner_apps_admin_page() {
 										<?php endif; ?>
 										<?php echo esc_html( $email ); ?>
 									</div>
+									<?php if ( $li_url || $comm_wa ) : ?>
+										<div style="font-size:11.5px;margin-top:4px;display:flex;gap:10px;flex-wrap:wrap;">
+											<?php if ( $li_url ) : ?>
+												<a href="<?php echo esc_url( $li_url ); ?>" target="_blank" rel="noopener noreferrer" style="color:#2563eb;text-decoration:none;">LinkedIn ↗</a>
+											<?php endif; ?>
+											<?php if ( $comm_wa ) : ?>
+												<a href="<?php echo esc_url( $comm_wa ); ?>" target="_blank" rel="noopener noreferrer" style="color:#16a34a;text-decoration:none;">Community WA Group ↗</a>
+											<?php endif; ?>
+										</div>
+									<?php endif; ?>
 								</td>
 								<td style="padding:12px 14px;">
 									<?php if ( $p_code ) : ?>
