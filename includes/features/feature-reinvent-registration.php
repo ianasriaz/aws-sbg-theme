@@ -1704,46 +1704,60 @@ function aws_sbg_render_reinvent_admin_page() {
 		<style>
 			.rvadm{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--surface:#ffffff;--surface2:#f8fafc;--brand:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--ink);width:100%;max-width:none;margin:10px 0 30px 0;padding-right:20px;box-sizing:border-box;}
 			.rvadm *{box-sizing:border-box;}
-			.rvadm h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-0.01em;color:var(--ink);}
-			.rvadm .rvadm-sub{font-size:13px;color:var(--muted);margin-top:3px;}
+			.rvadm h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-0.02em;color:var(--ink);line-height:1.2;}
+			.rvadm .rvadm-sub{font-size:13px;color:var(--muted);margin-top:5px;font-weight:500;}
 
-			.rvadm-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px;}
+			.rvadm-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 22px;box-shadow:0 1px 3px rgba(15,23,42,0.04);}
+			.rvadm-title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 			.rvadm-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
 
-			.rvadm-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:12.5px;font-weight:600;text-decoration:none;cursor:pointer;transition:border-color .15s ease,background .15s ease;}
+			.rvadm-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:12.5px;font-weight:600;text-decoration:none;cursor:pointer;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;}
 			.rvadm-btn:hover{border-color:#cbd5e1;background:var(--surface2);}
+			.rvadm-btn-primary{background:#0f172a;color:#ffffff;border-color:#0f172a;}
+			.rvadm-btn-primary:hover{background:#1e293b;border-color:#1e293b;color:#ffffff;}
 			.rvadm-btn-danger{color:#b91c1c;border-color:#fca5a5;background:#fef2f2;}
 			.rvadm-btn-danger:hover{background:#fee2e2;border-color:#f87171;color:#991b1b;}
 
-			.rvadm-visibility-card{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 18px;margin-bottom:16px;}
-			.rvadm-vis-pill{display:inline-flex;align-items:center;gap:7px;padding:4px 10px;border-radius:9999px;font-size:11.5px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;}
+			.rvadm-settings-wrap{position:relative;}
+			.rvadm-settings-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);width:268px;background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 20px 40px -12px rgba(15,23,42,0.18),0 4px 12px rgba(15,23,42,0.06);padding:6px;z-index:9999;}
+			.rvadm-settings-menu.is-open{display:block;}
+			.rvadm-menu-label{padding:6px 10px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#94a3b8;}
+			.rvadm-menu-item{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:8px 10px;border:0;background:transparent;border-radius:7px;font-size:12.5px;font-weight:600;color:#0f172a;text-decoration:none;text-align:left;cursor:pointer;transition:background .12s ease;}
+			.rvadm-menu-item:hover{background:#f1f5f9;color:#0f172a;}
+			.rvadm-menu-item-danger{color:#dc2626;}
+			.rvadm-menu-item-danger:hover{background:#fef2f2;color:#b91c1c;}
+			.rvadm-menu-div{height:1px;background:#f1f5f9;margin:5px 4px;}
+			.rvadm-menu-badge{font-size:11px;font-weight:700;background:#f1f5f9;color:#475569;padding:1px 7px;border-radius:999px;}
+
+			.rvadm-vis-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:9999px;font-size:11px;font-weight:700;letter-spacing:0.02em;white-space:nowrap;}
 			.rvadm-vis-live{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;}
 			.rvadm-vis-hidden{background:#fef3c7;color:#b45309;border:1px solid #fde68a;}
 			.rvadm-dot-pulse{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;}
 			.rvadm-dot-pulse-live{background:#16a34a;box-shadow:0 0 0 2px rgba(22,163,74,0.25);}
 			.rvadm-dot-pulse-hidden{background:#d97706;}
 
-			.rvadm-filters{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:16px;width:100%;}
-			.rvadm-filters form{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;}
-			.rvadm-field{display:flex;flex-direction:column;gap:5px;}
-			.rvadm-field label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--muted);}
-			.rvadm-field select,.rvadm-field input{padding:7px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;color:var(--ink);background:var(--surface);}
-			.rvadm-field select{min-width:160px;}
-			.rvadm-field input{min-width:260px;}
+			.rvadm-filters{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:16px;width:100%;box-shadow:0 1px 2px rgba(15,23,42,0.03);}
+			.rvadm-filters form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;}
+			.rvadm-field{display:flex;flex-direction:column;gap:4px;}
+			.rvadm-field label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);}
+			.rvadm-field select,.rvadm-field input{padding:7px 10px;border:1px solid var(--line);border-radius:7px;font-size:12.5px;color:var(--ink);background:var(--surface);}
+			.rvadm-field select{min-width:138px;}
+			.rvadm-field input{min-width:220px;}
 			.rvadm-field select:focus,.rvadm-field input:focus{outline:2px solid var(--ink);outline-offset:1px;border-color:var(--ink);}
-			.rvadm-search-btn{padding:7px 16px;border-radius:6px;border:1px solid var(--ink);background:var(--ink);color:#ffffff;font-size:12.5px;font-weight:600;cursor:pointer;}
+			.rvadm-search-btn{padding:7px 16px;border-radius:7px;border:1px solid var(--ink);background:var(--ink);color:#ffffff;font-size:12.5px;font-weight:600;cursor:pointer;}
 			.rvadm-search-btn:hover{background:#1e293b;border-color:#1e293b;}
 
-			.rvadm-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;width:100%;}
-			.rvadm-stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px;}
-			.rvadm-stat-num{font-size:26px;font-weight:700;color:var(--ink);line-height:1;}
-			.rvadm-stat-label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);margin-top:6px;}
+			.rvadm-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px;width:100%;}
+			.rvadm-stat{background:var(--surface);border:1px solid var(--line);border-top:3px solid #cbd5e1;border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(15,23,42,0.04);}
+			.rvadm-stat-num{font-size:28px;font-weight:800;color:var(--ink);line-height:1;letter-spacing:-0.02em;}
+			.rvadm-stat-meta{font-size:12px;font-weight:600;color:var(--muted);margin-left:6px;}
+			.rvadm-stat-label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);margin-top:8px;}
 			.rvadm-dot{width:8px;height:8px;border-radius:50%;background:#cbd5e1;flex-shrink:0;}
 			.rvadm-dot-pending{background:#d97706;}
 			.rvadm-dot-approved{background:#059669;}
 			.rvadm-dot-rejected{background:#dc2626;}
 
-			.rvadm-table-wrap{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto;width:100%;}
+			.rvadm-table-wrap{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow-x:auto;width:100%;box-shadow:0 1px 3px rgba(15,23,42,0.04);}
 			.rvadm-drawer-backdrop{position:fixed;inset:0;background:rgba(15,23,42,0.48);backdrop-filter:blur(2px);z-index:100000;display:none;justify-content:flex-end;}
 			.rvadm-drawer-backdrop.is-open{display:flex;}
 			.rvadm-drawer{width:100%;max-width:620px;height:100%;background:#ffffff;box-shadow:-12px 0 36px rgba(15,23,42,0.18);display:flex;flex-direction:column;overflow:hidden;}
@@ -1910,59 +1924,111 @@ function aws_sbg_render_reinvent_admin_page() {
 
 		<div class="rvadm-head">
 			<div>
-				<h1>re:Invent Watch &amp; Build Party Registrations</h1>
-				<p class="rvadm-sub">Review, approve, or reject applications. Use the roster for a print-ready gate clearance sheet.</p>
+				<div class="rvadm-title-row">
+					<h1>AWS re:Invent 2026 Watch &amp; Build Party</h1>
+					<?php if ( $is_hidden ) : ?>
+						<span class="rvadm-vis-pill rvadm-vis-hidden"><span class="rvadm-dot-pulse rvadm-dot-pulse-hidden"></span>Hidden (Closed)</span>
+					<?php else : ?>
+						<span class="rvadm-vis-pill rvadm-vis-live"><span class="rvadm-dot-pulse rvadm-dot-pulse-live"></span>Live &amp; Open</span>
+					<?php endif; ?>
+				</div>
+				<p class="rvadm-sub">Islamabad &middot; November 30, 2026 &middot; 10:00 AM &ndash; 4:00 PM &middot; Registrations &amp; Operations</p>
 			</div>
 			<div class="rvadm-actions">
-				<button type="button" class="rvadm-btn" style="background:#7c3aed;color:#ffffff;border-color:#7c3aed;font-weight:700;" onclick="openManualAddModal()" title="Manually add a speaker, guest, or attendee into the registration sheet">+ Add Registration</button>
-				<button type="button" class="rvadm-btn" style="background:#f8fafc;color:#0f172a;border-color:#cbd5e1;font-weight:700;" onclick="openPartnersModal()" title="Create and track Community Partner referral codes">🤝 Community Partners (<?php echo intval( count( $partners ) ); ?>)</button>
-				<a class="rvadm-btn" style="background:#00DFD8;color:#06040C;border-color:#00DFD8;font-weight:700;" href="<?php echo esc_url( home_url( '/reinvent-checkin/' ) ); ?>" target="_blank" title="Launch the password-protected Mobile Check-in Terminal on phone, tablet or laptop">📱 Launch Check-In Terminal &#8599;</a>
-				<button type="button" class="rvadm-btn" onclick="openDeskPinModal()" title="View or change Event Desk PIN">🔑 Desk PIN: <strong id="rvadm-pin-display"><?php echo esc_html( $desk_passcode ); ?></strong></button>
-				<a class="rvadm-btn" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_reinvent_resync_numbers' ), 'aws_reinvent_resync_numbers' ) ); ?>" onclick="return confirm('Resynchronize all approved pass numbers sequentially starting from RIV-01? This will cleanly renumber approved attendees and eliminate any gaps from deleted test submissions.');" title="Renumber approved attendees consecutively starting from RIV-01">🔄 Resync Pass Numbers</a>
-				<?php if ( $counts['total'] > 0 ) : ?>
-					<button type="button" class="rvadm-btn rvadm-btn-danger" onclick="document.getElementById('aws-reinvent-clear-modal').style.display='flex'">Clear Entries…</button>
-				<?php endif; ?>
-				<a class="rvadm-btn" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'export_csv' => '1' ) ) ); ?>">Export CSV</a>
-				<a class="rvadm-btn" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'roster' => '1' ) ) ); ?>" target="_blank">Print Roster</a>
-				<a class="rvadm-btn" style="background:#0f172a;color:#ffffff;border-color:#0f172a;" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'badges' => '1' ) ) ); ?>" target="_blank" title="Generate print-ready attendee cards on A4 sheets for print vendor">🪪 Print Attendee Badges (PDF)</a>
+				<div class="rvadm-settings-wrap">
+					<button type="button" class="rvadm-btn rvadm-btn-primary" id="rvadm-settings-toggle" onclick="toggleRvSettingsMenu(event)">
+						&#9881;&#65039; Settings &#9662;
+					</button>
+					<div class="rvadm-settings-menu" id="rvadm-settings-menu">
+						<div class="rvadm-menu-label">Registrations &amp; Partners</div>
+						<button type="button" class="rvadm-menu-item" onclick="closeRvSettingsMenu(); openManualAddModal();">+ Add Registration</button>
+						<button type="button" class="rvadm-menu-item" onclick="closeRvSettingsMenu(); openPartnersModal();">
+							<span>&#129309; Community Partners</span>
+							<span class="rvadm-menu-badge"><?php echo intval( count( $partners ) ); ?></span>
+						</button>
+						<div class="rvadm-menu-div"></div>
+						<div class="rvadm-menu-label">Event Day &amp; Badges</div>
+						<a class="rvadm-menu-item" href="<?php echo esc_url( home_url( '/reinvent-checkin/' ) ); ?>" target="_blank" onclick="closeRvSettingsMenu()">&#128241; Check-In Terminal &#8599;</a>
+						<a class="rvadm-menu-item" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'badges' => '1' ) ) ); ?>" target="_blank" onclick="closeRvSettingsMenu()">&#129706; Print Badges (PDF)</a>
+						<button type="button" class="rvadm-menu-item" onclick="closeRvSettingsMenu(); openDeskPinModal();">
+							<span>&#128273; Desk PIN</span>
+							<span class="rvadm-menu-badge" id="rvadm-pin-display"><?php echo esc_html( $desk_passcode ); ?></span>
+						</button>
+						<div class="rvadm-menu-div"></div>
+						<div class="rvadm-menu-label">Exports &amp; Tools</div>
+						<a class="rvadm-menu-item" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'export_csv' => '1' ) ) ); ?>" onclick="closeRvSettingsMenu()">&#128229; Export CSV</a>
+						<a class="rvadm-menu-item" href="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations', 'roster' => '1' ) ) ); ?>" target="_blank" onclick="closeRvSettingsMenu()">&#128424;&#65039; Print Roster</a>
+						<a class="rvadm-menu-item" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=aws_sbg_reinvent_resync_numbers' ), 'aws_reinvent_resync_numbers' ) ); ?>" onclick="closeRvSettingsMenu(); return confirm('Resynchronize all approved pass numbers sequentially starting from RIV-01? This will cleanly renumber approved attendees and eliminate any gaps from deleted test submissions.');">&#128260; Resync Pass Numbers</a>
+						<div class="rvadm-menu-div"></div>
+						<div class="rvadm-menu-label">Public Form</div>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin:0;">
+							<input type="hidden" name="action" value="aws_sbg_reinvent_toggle_visibility">
+							<?php wp_nonce_field( 'aws_sbg_reinvent_toggle_visibility_nonce' ); ?>
+							<input type="hidden" name="redirect_to" value="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations' ), admin_url( 'admin.php' ) ) ); ?>">
+							<?php if ( $is_hidden ) : ?>
+								<input type="hidden" name="new_state" value="0">
+								<button type="submit" class="rvadm-menu-item" style="color:#15803d;">&#128065;&#65039; Unhide / Open Public Form</button>
+							<?php else : ?>
+								<input type="hidden" name="new_state" value="1">
+								<button type="submit" class="rvadm-menu-item" style="color:#b45309;" onclick="return confirm('Hide the re:Invent registration form from public visitors?');">&#128065;&#65039; Hide Form from Public</button>
+							<?php endif; ?>
+						</form>
+						<button type="button" class="rvadm-menu-item" onclick="closeRvSettingsMenu(); document.getElementById('aws-reinvent-settings-modal').style.display='flex';">&#128221; Notice Settings…</button>
+						<a class="rvadm-menu-item" href="<?php echo esc_url( home_url( '/aws-reinvent/' ) ); ?>" target="_blank" onclick="closeRvSettingsMenu()">&#8599; View Public Page</a>
+						<?php if ( $counts['total'] > 0 ) : ?>
+							<div class="rvadm-menu-div"></div>
+							<button type="button" class="rvadm-menu-item rvadm-menu-item-danger" onclick="closeRvSettingsMenu(); document.getElementById('aws-reinvent-clear-modal').style.display='flex';">&#128465;&#65039; Clear Entries…</button>
+						<?php endif; ?>
+					</div>
+				</div>
 			</div>
 		</div>
+		<script>
+			function toggleRvSettingsMenu(e) {
+				e.stopPropagation();
+				document.getElementById('rvadm-settings-menu').classList.toggle('is-open');
+			}
+			function closeRvSettingsMenu() {
+				var menu = document.getElementById('rvadm-settings-menu');
+				if (menu) menu.classList.remove('is-open');
+			}
+			document.addEventListener('click', function(e) {
+				var wrap = document.querySelector('.rvadm-settings-wrap');
+				if (wrap && !wrap.contains(e.target)) {
+					closeRvSettingsMenu();
+				}
+			});
+			document.addEventListener('keydown', function(e) {
+				if (e.key === 'Escape') closeRvSettingsMenu();
+			});
+		</script>
 
-		<div class="rvadm-visibility-card">
-			<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-				<?php if ( $is_hidden ) : ?>
-					<span class="rvadm-vis-pill rvadm-vis-hidden">
-						<span class="rvadm-dot-pulse rvadm-dot-pulse-hidden"></span> Public Form: Hidden (Closed)
-					</span>
-					<span style="font-size:12.5px;color:var(--muted);">Visitors cannot see registration form steps or submit applications.</span>
-				<?php else : ?>
-					<span class="rvadm-vis-pill rvadm-vis-live">
-						<span class="rvadm-dot-pulse rvadm-dot-pulse-live"></span> Public Form: Live &amp; Open
-					</span>
-					<span style="font-size:12.5px;color:var(--muted);">Registration is active and open to the public.</span>
-				<?php endif; ?>
+		<div class="rvadm-stats">
+			<div class="rvadm-stat" style="border-top-color:#0f172a;">
+				<div class="rvadm-stat-num"><?php echo intval( $counts['total'] ); ?></div>
+				<div class="rvadm-stat-label"><span class="rvadm-dot" style="background:#0f172a;"></span>Total Registrations</div>
 			</div>
-			<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-				<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin:0;">
-					<input type="hidden" name="action" value="aws_sbg_reinvent_toggle_visibility">
-					<?php wp_nonce_field( 'aws_sbg_reinvent_toggle_visibility_nonce' ); ?>
-					<input type="hidden" name="redirect_to" value="<?php echo esc_url( add_query_arg( array( 'page' => 'aws-reinvent-registrations' ), admin_url( 'admin.php' ) ) ); ?>">
-					<?php if ( $is_hidden ) : ?>
-						<input type="hidden" name="new_state" value="0">
-						<button type="submit" class="rvadm-btn" style="border-color:#16a34a;color:#16a34a;background:#f0fdf4;">
-							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-							Unhide / Open Public Form
-						</button>
-					<?php else : ?>
-						<input type="hidden" name="new_state" value="1">
-						<button type="submit" class="rvadm-btn" style="border-color:#fca5a5;color:#b91c1c;background:#fef2f2;" onclick="return confirm('Hide the re:Invent registration form from public visitors?');">
-							<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-							Hide Form from Public
-						</button>
-					<?php endif; ?>
-				</form>
-				<button type="button" class="rvadm-btn" onclick="document.getElementById('aws-reinvent-settings-modal').style.display='flex'">Notice Settings…</button>
-				<a class="rvadm-btn" href="<?php echo esc_url( home_url( '/reinvent/' ) ); ?>" target="_blank" title="Preview public page">View Page &#8599;</a>
+			<div class="rvadm-stat" style="border-top-color:#d97706;">
+				<div class="rvadm-stat-num"><?php echo intval( $counts['pending'] ); ?></div>
+				<div class="rvadm-stat-label"><span class="rvadm-dot rvadm-dot-pending"></span>Pending Review</div>
+			</div>
+			<div class="rvadm-stat" style="border-top-color:#059669;">
+				<div class="rvadm-stat-num">
+					<?php echo intval( $counts['approved'] ); ?>
+					<span class="rvadm-stat-meta"><?php echo $counts['total'] > 0 ? round( ( $counts['approved'] / $counts['total'] ) * 100 ) : 0; ?>%</span>
+				</div>
+				<div class="rvadm-stat-label"><span class="rvadm-dot rvadm-dot-approved"></span>Approved</div>
+			</div>
+			<div class="rvadm-stat" style="background:#f0fdf4;border-color:#bbf7d0;border-top-color:#16a34a;">
+				<div class="rvadm-stat-num" style="color:#15803d;">
+					<?php echo intval( $checked_in_count ); ?>
+					<span class="rvadm-stat-meta" style="color:#16a34a;">/ <?php echo intval( $counts['approved'] ); ?> (<?php echo $counts['approved'] > 0 ? round( ( $checked_in_count / $counts['approved'] ) * 100 ) : 0; ?>%)</span>
+				</div>
+				<div class="rvadm-stat-label" style="color:#166534;"><span class="rvadm-dot" style="background:#16a34a;"></span>Checked In (Event Day)</div>
+			</div>
+			<div class="rvadm-stat" style="border-top-color:#dc2626;">
+				<div class="rvadm-stat-num"><?php echo intval( $counts['rejected'] ); ?></div>
+				<div class="rvadm-stat-label"><span class="rvadm-dot rvadm-dot-rejected"></span>Rejected</div>
 			</div>
 		</div>
 
@@ -2029,32 +2095,6 @@ function aws_sbg_render_reinvent_admin_page() {
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=aws-reinvent-registrations' ) ); ?>" class="rvadm-btn">Reset</a>
 				<?php endif; ?>
 			</form>
-		</div>
-
-		<div class="rvadm-stats">
-			<div class="rvadm-stat">
-				<div class="rvadm-stat-num"><?php echo intval( $counts['total'] ); ?></div>
-				<div class="rvadm-stat-label"><span class="rvadm-dot"></span>Total</div>
-			</div>
-			<div class="rvadm-stat">
-				<div class="rvadm-stat-num"><?php echo intval( $counts['pending'] ); ?></div>
-				<div class="rvadm-stat-label"><span class="rvadm-dot rvadm-dot-pending"></span>Pending</div>
-			</div>
-			<div class="rvadm-stat">
-				<div class="rvadm-stat-num"><?php echo intval( $counts['approved'] ); ?></div>
-				<div class="rvadm-stat-label"><span class="rvadm-dot rvadm-dot-approved"></span>Approved</div>
-			</div>
-			<div class="rvadm-stat" style="background:#f0fdf4;border-color:#bbf7d0;">
-				<div class="rvadm-stat-num" style="color:#15803d;">
-					<?php echo intval( $checked_in_count ); ?>
-					<span style="font-size:13px;color:#16a34a;font-weight:600;">/ <?php echo intval( $counts['approved'] ); ?> (<?php echo $counts['approved'] > 0 ? round( ( $checked_in_count / $counts['approved'] ) * 100 ) : 0; ?>%)</span>
-				</div>
-				<div class="rvadm-stat-label" style="color:#166534;"><span class="rvadm-dot" style="background:#16a34a;"></span>Checked In (Event Day)</div>
-			</div>
-			<div class="rvadm-stat">
-				<div class="rvadm-stat-num"><?php echo intval( $counts['rejected'] ); ?></div>
-				<div class="rvadm-stat-label"><span class="rvadm-dot rvadm-dot-rejected"></span>Rejected</div>
-			</div>
 		</div>
 
 		<div class="rvadm-table-wrap">
