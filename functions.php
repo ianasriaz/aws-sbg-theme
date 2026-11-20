@@ -110,6 +110,13 @@ function aws_sbg_template_include( $template ) {
 			return $guests_template;
 		}
 	}
+	if ( 'sponsor/event/awsreinvent2026' === $clean_path ) {
+		$sponsor_template = get_template_directory() . '/templates/pages/page-sponsor-deck.php';
+		if ( file_exists( $sponsor_template ) ) {
+			status_header( 200 );
+			return $sponsor_template;
+		}
+	}
 	
 	// Get template basename
 	$basename = basename( $template );
@@ -129,7 +136,7 @@ function aws_sbg_template_include( $template ) {
 add_action( 'template_redirect', function() {
 	$req_uri    = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 	$clean_path = trim( (string) parse_url( $req_uri, PHP_URL_PATH ), '/' );
-	if ( 'speaker-deck' === $clean_path || 'speak' === $clean_path || 'join' === $clean_path || 'community-partner' === $clean_path || 'aws-reinvent-guests' === $clean_path ) {
+	if ( 'speaker-deck' === $clean_path || 'speak' === $clean_path || 'join' === $clean_path || 'community-partner' === $clean_path || 'aws-reinvent-guests' === $clean_path || 'sponsor/event/awsreinvent2026' === $clean_path ) {
 		global $wp_query;
 		if ( isset( $wp_query ) && is_object( $wp_query ) ) {
 			$wp_query->is_404  = false;
