@@ -1,14 +1,14 @@
 <?php
 /**
  * Template Name: Sponsor Deck (AWS re:Invent 2026)
- * Description: Standalone, distraction-free sponsorship proposal deck for AWS re:Invent 2026 Watch & Build Party Islamabad.
+ * Description: Standalone, distraction-free sponsorship proposal deck for AWS re:Invent 2026 Watch & Build Party Islamabad. Unlisted, non-downloadable, no password required.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// 1. CLEAR 404 & SHIELD FROM SEARCH ENGINES (UNLISTED)
+// 1. CLEAR 404 & SHIELD FROM SEARCH ENGINES & WEB CRAWLERS
 global $wp_query;
 if ( isset( $wp_query ) && is_object( $wp_query ) ) {
 	$wp_query->is_404  = false;
@@ -27,7 +27,7 @@ $ver       = file_exists( $asset_dir . '/design-kit.js' ) ? (string) filemtime( 
 <html <?php language_attributes(); ?> style="background:#06040C; color-scheme:dark;">
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
 	<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
 	<title><?php esc_html_e( 'Sponsorship Proposal · AWS re:Invent 2026 Watch & Build Party Islamabad', 'aws-sbg' ); ?></title>
@@ -37,25 +37,55 @@ $ver       = file_exists( $asset_dir . '/design-kit.js' ) ? (string) filemtime( 
 	<!-- Design Kit Stylesheet -->
 	<link rel="stylesheet" id="aws-sbg-sponsor-deck-css" href="<?php echo esc_url( $asset_uri . '/design-kit.css?ver=' . $ver ); ?>" />
 
-	<style id="aws-sbg-sponsor-deck-layout">
+	<!-- Anti-download & Anti-print Guards (matching Speaker Deck) -->
+	<style id="aws-sbg-sponsor-deck-protections">
 		html, body {
 			margin: 0 !important;
 			padding: 0 !important;
 			background: #06040C !important;
 			color: #FFFFFF !important;
-			min-height: 100%;
-			width: 100%;
-			overflow-x: auto;
+			overflow: hidden !important;
+			height: 100% !important;
+			height: 100dvh !important;
+			width: 100% !important;
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			user-select: none;
 		}
+
+		@media print {
+			html, body, #root, * {
+				display: none !important;
+				visibility: hidden !important;
+				height: 0 !important;
+				width: 0 !important;
+				overflow: hidden !important;
+			}
+		}
+
 		#root {
-			min-height: 100vh;
-			width: 100%;
-			padding: 28px 16px 64px;
-			box-sizing: border-box;
+			height: 100% !important;
+			height: 100dvh !important;
+			width: 100% !important;
+			display: flex;
+			flex-direction: column;
+			overflow: hidden;
 		}
 	</style>
 
 	<script>
+		document.addEventListener('contextmenu', function(e) {
+			e.preventDefault();
+		});
+
+		window.addEventListener('keydown', function(e) {
+			if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 's' || e.key === 'P' || e.key === 'S')) {
+				e.preventDefault();
+				e.stopPropagation();
+				return false;
+			}
+		});
+
 		window.__AWS_VIEW__ = 'sponsor-deck';
 		window.REINVENT_KIT_ENV = {
 			view: 'sponsor-deck',
@@ -63,7 +93,7 @@ $ver       = file_exists( $asset_dir . '/design-kit.js' ) ? (string) filemtime( 
 		};
 	</script>
 </head>
-<body <?php body_class( 'aws-sbg-sponsor-deck-body' ); ?>>
+<body <?php body_class( 'aws-sbg-sponsor-deck-body' ); ?> oncontextmenu="return false;">
 <?php wp_body_open(); ?>
 	<div id="root" data-view="sponsor-deck">
 		<noscript>
